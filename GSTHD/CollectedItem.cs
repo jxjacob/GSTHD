@@ -15,6 +15,7 @@ namespace GSTHD
         private readonly DraggableAutocheckElementBehaviour<int> DragBehaviour;
 
         private string[] ImageNames;
+        private int ImageIndex = 0;
         private Label ItemCount;
         private Size CollectedItemSize;
         private Size CollectedItemCountPosition;
@@ -23,6 +24,8 @@ namespace GSTHD
         private readonly int CollectedItemDefault;
         private int CollectedItems;
         private readonly int Step;
+
+        private bool isBroadcastable;
 
         public CollectedItem(ObjectPointCollectedItem data, Settings settings)
         {
@@ -33,18 +36,20 @@ namespace GSTHD
             else
                 ImageNames = data.ImageCollection;
 
+            Name = data.Name;
+
             CollectedItemMin = data.CountMin;
             CollectedItemMax = data.CountMax.HasValue ? data.CountMax.Value : 100;
             CollectedItemDefault = data.DefaultValue;
             CollectedItems = System.Math.Min(System.Math.Max(CollectedItemMin, CollectedItemDefault), CollectedItemMax);
             Step = data.Step == 0 ? 1 : data.Step;
             CollectedItemSize = data.Size;
+            isBroadcastable = data.isBroadcastable;
 
             if (ImageNames.Length > 0)
             {
-                Image = Image.FromFile(@"Resources/" + ImageNames[0]);
-                Name = ImageNames[0];
-                SizeMode = PictureBoxSizeMode.StretchImage;
+                UpdateImage();
+                SizeMode = PictureBoxSizeMode.Zoom;
                 Size = CollectedItemSize;
             }
 
@@ -59,33 +64,39 @@ namespace GSTHD
 
             ItemCount = new Label
             {
-                BackColor = Color.Transparent,
+                BackColor = Color.Black,
                 BorderStyle = BorderStyle.None,
                 Text = CollectedItems.ToString(),
                 Font = new Font(data.LabelFontName, data.LabelFontSize, data.LabelFontStyle),
                 ForeColor = data.LabelColor,
-                AutoSize = false,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Height = 30,
-                Width = 40,
-                Location = new Point((CollectedItemSize.Width / 2) + CollectedItemCountPosition.Width - 19, (CollectedItemSize.Height / 2) + CollectedItemCountPosition.Height - 15),
+                AutoSize = true,
+                TextAlign = ContentAlignment.BottomLeft,
+                Height = 40,
+                Width = 50,
+                Location = new Point(0, (CollectedItemSize.Height) - CollectedItemCountPosition.Height*2),
             };
 
-            MouseDown += ProgressBehaviour.Mouse_ClickDown;
-            MouseUp += DragBehaviour.Mouse_ClickUp;
-            MouseDown += DragBehaviour.Mouse_ClickDown;
-            MouseMove += DragBehaviour.Mouse_Move_WithAutocheck;
-            MouseWheel += Mouse_Wheel;
-            ItemCount.MouseDown += ProgressBehaviour.Mouse_ClickDown; // must add these lines because MouseDown/Up on PictureBox won't fire when hovering above Label
-            ItemCount.MouseDown += DragBehaviour.Mouse_ClickDown;
-            ItemCount.MouseUp += DragBehaviour.Mouse_ClickUp;
-            ItemCount.MouseMove += DragBehaviour.Mouse_Move_WithAutocheck;
-            // ItemCount.MouseWheel += Click_MouseWheel; // must NOT add this line because both MouseWheels would fire when hovering above both PictureBox and Label
+            // this is the most scuffed way of only giving the ability to click to the items to form1 (main window) and not form2 (broadcast)
+            //if (Application.OpenForms[Application.OpenForms.Count - 1] is Form1)
+            if (true)
+            {
+                MouseDown += ProgressBehaviour.Mouse_ClickDown;
+                MouseUp += DragBehaviour.Mouse_ClickUp;
+                MouseDown += DragBehaviour.Mouse_ClickDown;
+                MouseMove += DragBehaviour.Mouse_Move_WithAutocheck;
+                MouseWheel += Mouse_Wheel;
+                MouseWheel += DragBehaviour.Mouse_Wheel;
+                ItemCount.MouseDown += ProgressBehaviour.Mouse_ClickDown; // must add these lines because MouseDown/Up on PictureBox won't fire when hovering above Label
+                ItemCount.MouseDown += DragBehaviour.Mouse_ClickDown;
+                ItemCount.MouseUp += DragBehaviour.Mouse_ClickUp;
+                ItemCount.MouseMove += DragBehaviour.Mouse_Move_WithAutocheck;
+                // ItemCount.MouseWheel += Click_MouseWheel; // must NOT add this line because both MouseWheels would fire when hovering above both PictureBox and Label
+            }
 
             Controls.Add(ItemCount);
         }
 
-        private void Mouse_Wheel(object sender, MouseEventArgs e)
+        public void Mouse_Wheel(object sender, MouseEventArgs e)
         {
             if (e.Delta != 0)
             {
@@ -97,9 +108,24 @@ namespace GSTHD
             }
         }
 
+        private void UpdateImage()
+        {
+            Image = Image.FromFile(@"Resources/" + ImageNames[System.Math.Max(System.Math.Min(CollectedItems, ImageNames.Length - 1), 0)]);
+            if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+            {
+                ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
+            }
+        }
+
         private void UpdateCount()
         {
             ItemCount.Text = CollectedItems.ToString();
+            if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+            {
+                ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).CollectedItems = CollectedItems;
+                ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateCount();
+            }
+            UpdateImage();
         }
 
         public int GetState()
@@ -117,12 +143,14 @@ namespace GSTHD
         {
             CollectedItems += Step;
             if (CollectedItems > CollectedItemMax) CollectedItems = CollectedItemMax;
+            if (CollectedItems < CollectedItemMin) CollectedItems = CollectedItemMin;
             UpdateCount();
         }
 
         public void DecrementState()
         {
             CollectedItems -= Step;
+            if (CollectedItems > CollectedItemMax) CollectedItems = CollectedItemMax;
             if (CollectedItems < CollectedItemMin) CollectedItems = CollectedItemMin;
             UpdateCount();
         }
@@ -135,8 +163,9 @@ namespace GSTHD
 
         public void StartDragDrop()
         {
-            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[0]);
+            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[System.Math.Min(System.Math.Max(1, CollectedItems), ImageNames.Length - 1)]);
             DoDragDrop(dropContent, DragDropEffects.Copy);
+
         }
 
         public void SaveChanges() { }

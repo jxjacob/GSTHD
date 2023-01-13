@@ -24,6 +24,9 @@ namespace GSTHD
         int GossipStoneSpacing;
         int PathGoalSpacing;
         int NbMaxRows;
+        bool isScrollable;
+        bool isBroadcastable;
+        PictureBoxSizeMode SizeMode;
         Label LabelSettings = new Label();
 
         public PanelWothBarren(ObjectPanelWotH data, Settings settings)
@@ -40,8 +43,13 @@ namespace GSTHD
             this.GossipStoneSpacing = data.GossipStoneSpacing;
             this.PathGoalSpacing = data.PathGoalSpacing;
             this.TabStop = false;
-            if(data.IsScrollable)
+            this.isScrollable = data.IsScrollable;
+            this.SizeMode = data.SizeMode;
+            this.isBroadcastable = data.isBroadcastable;
+            if (data.IsScrollable)
                 this.MouseWheel += Panel_MouseWheel;
+                
+                
         }
 
         public PanelWothBarren(ObjectPanelBarren data, Settings settings)
@@ -69,31 +77,28 @@ namespace GSTHD
             }
         }
 
+
         private void Panel_MouseWheel(object sender, MouseEventArgs e)
         {
             var panel = (Panel)sender;
-            if (e.Delta < 0)
+            if (e.Delta != 0)
             {
+                //really wish i didnt have to go through this foreach twice but thats just the order it has to be processed, unfortunately
                 foreach (var element in panel.Controls)
                 {
-                    if (element is Label)
-                        ((Label)element).Location = new Point(((Label)element).Location.X, ((Label)element).Location.Y - 15);
                     if (element is GossipStone)
-                        ((GossipStone)element).Location = new Point(((GossipStone)element).Location.X, ((GossipStone)element).Location.Y - 15);
-                    if (element is TextBox)
-                        ((TextBox)element).Location = new Point(((TextBox)element).Location.X, ((TextBox)element).Location.Y - 15);
+                        if (((GossipStone)element).hoveredOver) return;
                 }
-            }
-            if (e.Delta > 0)
-            {
+                var moveDirection = 0;
+                if (e.Delta < 0) moveDirection = -15 ; else moveDirection = +15;
                 foreach (var element in panel.Controls)
                 {
                     if (element is Label)
-                        ((Label)element).Location = new Point(((Label)element).Location.X, ((Label)element).Location.Y + 15);
+                        ((Label)element).Location = new Point(((Label)element).Location.X, ((Label)element).Location.Y + moveDirection);
                     if (element is GossipStone)
-                        ((GossipStone)element).Location = new Point(((GossipStone)element).Location.X, ((GossipStone)element).Location.Y + 15);
+                        ((GossipStone)element).Location = new Point(((GossipStone)element).Location.X, ((GossipStone)element).Location.Y + moveDirection);
                     if (element is TextBox)
-                        ((TextBox)element).Location = new Point(((TextBox)element).Location.X, ((TextBox)element).Location.Y + 15);
+                        ((TextBox)element).Location = new Point(((TextBox)element).Location.X, ((TextBox)element).Location.Y + moveDirection);
                 }
             }
             ((PanelWothBarren)panel).SetSuggestionContainer();
@@ -221,14 +226,14 @@ namespace GSTHD
                                 newWotH = new WotH(Settings, selectedPlace,
                                     GossipStoneCount, ListImage_WothItemsOption, GossipStoneSpacing, 
                                     PathGoalCount, ListImage_GoalsOption, PathGoalSpacing,
-                                    new Point(2, -LabelSettings.Height), LabelSettings, GossipStoneSize);
+                                    new Point(2, -LabelSettings.Height), LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable);
                             else
                             {
                                 var lastLocation = ListWotH.Last().LabelPlace.Location;
                                 newWotH = new WotH(Settings, selectedPlace,
                                     GossipStoneCount, ListImage_WothItemsOption, GossipStoneSpacing,
                                     PathGoalCount, ListImage_GoalsOption, PathGoalSpacing,
-                                    lastLocation, LabelSettings, GossipStoneSize);
+                                    lastLocation, LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable);
                             }
                             ListWotH.Add(newWotH);
                             this.Controls.Add(newWotH.LabelPlace);

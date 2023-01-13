@@ -24,7 +24,7 @@ namespace GSTHD
             {
                 this.Name = ListImageName[0];
                 this.Image = Image.FromFile(@"Resources/" + ListImageName[0]);
-                this.SizeMode = PictureBoxSizeMode.StretchImage;
+                this.SizeMode = (PictureBoxSizeMode)data.SizeMode;
                 this.Size = GuaranteddHintSize;
             }            
             this.Location = new Point(data.X, data.Y);

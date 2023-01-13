@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Dynamic;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -14,6 +16,11 @@ namespace GSTHD
         private string[] ImageNames;
         private int ImageIndex = 0;
 
+        bool isBroadcastable;
+        string DoubleBroadcastSide;
+        string DoubleBroadcastName;
+        bool isDraggable;
+
         public Item(ObjectPoint data, Settings settings)
         {
             Settings = settings;
@@ -24,12 +31,18 @@ namespace GSTHD
                 ImageNames = data.ImageCollection;
 
             Name = data.Name;
-            BackColor = Color.Transparent;
+            BackColor = data.BackColor;
+            this.isBroadcastable = data.isBroadcastable;
+
+            this.isDraggable = data.isDraggable;
+
+            if (data.DoubleBroadcastSide != null) this.DoubleBroadcastSide = data.DoubleBroadcastSide;
+            if (data.DoubleBroadcastName != null) this.DoubleBroadcastName = data.DoubleBroadcastName;
 
             if (ImageNames.Length > 0)
             {
                 UpdateImage();
-                SizeMode = PictureBoxSizeMode.StretchImage;
+                SizeMode = (PictureBoxSizeMode)data.SizeMode;
                 Size = data.Size;
             }
 
@@ -39,14 +52,23 @@ namespace GSTHD
             Location = new Point(data.X, data.Y);
             TabStop = false;
             AllowDrop = false;
-            MouseUp += DragBehaviour.Mouse_ClickUp;
-            MouseDown += ProgressBehaviour.Mouse_ClickDown;
-            MouseDown += DragBehaviour.Mouse_ClickDown;
-            MouseMove += DragBehaviour.Mouse_Move_WithAutocheck;
-            MouseWheel += Mouse_Wheel;
+            // this is the most scuffed way of only giving the ability to click to the items to form1 (main window) and not form2 (broadcast)
+            //if (Application.OpenForms[Application.OpenForms.Count - 1] is Form1)
+            if (true)
+            {
+                if (isDraggable)
+                {
+                    MouseUp += DragBehaviour.Mouse_ClickUp;
+                    MouseDown += DragBehaviour.Mouse_ClickDown;
+                    MouseMove += DragBehaviour.Mouse_Move_WithAutocheck;
+                    MouseWheel += DragBehaviour.Mouse_Wheel;
+                }
+                MouseDown += ProgressBehaviour.Mouse_ClickDown;
+                MouseWheel += Mouse_Wheel;
+            }
         }
 
-        private void Mouse_Wheel(object sender, MouseEventArgs e)
+        public void Mouse_Wheel(object sender, MouseEventArgs e)
         {
             if (e.Delta != 0)
             {
@@ -61,6 +83,39 @@ namespace GSTHD
         private void UpdateImage()
         {
             Image = Image.FromFile(@"Resources/" + ImageNames[ImageIndex]);
+            if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+            {
+                if (DoubleBroadcastName == null || DoubleBroadcastSide == null)
+                {
+                    ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
+                    ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
+                } else
+                {
+                    //TODO: make this block cleaner
+                    if (DoubleBroadcastSide == "left")
+                    {
+                        if (ImageIndex == 0)
+                        {
+                            ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).DecrementLeftState();
+                        } else
+                        {
+                            ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).IncrementLeftState();
+                        }
+                        
+                    } else
+                    {
+                        if (ImageIndex == 0)
+                        {
+                            ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).DecrementRightState();
+                        }
+                        else
+                        {
+                            ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).IncrementRightState();
+                        }
+                    }
+                }
+                
+            };
         }
 
         public int GetState()
@@ -94,7 +149,7 @@ namespace GSTHD
 
         public void StartDragDrop()
         {
-            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[1]);
+            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[System.Math.Max(ImageIndex, 1)]);
             DoDragDrop(dropContent, DragDropEffects.Copy);
         }
 

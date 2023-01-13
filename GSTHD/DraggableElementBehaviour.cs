@@ -22,6 +22,7 @@ namespace GSTHD
         protected bool LeftClickDown = false;
         protected bool RightClickDown = false;
         protected bool MiddleClickDown = false;
+        protected bool WheelDown = false;
 
         protected bool CanDragDrop = false;
         protected Point DragStartPoint;
@@ -114,6 +115,11 @@ namespace GSTHD
                 CancelChanges();
                 Element.StartDragDrop();
             }
+        }
+
+        public virtual void Mouse_Wheel(object sender, MouseEventArgs e)
+        {
+            SaveChanges();
         }
 
         protected bool DragOverThreshold()

@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // Les informations générales relatives à un assembly dépendent de
 // l'ensemble d'attributs suivant. Changez les valeurs de ces attributs pour modifier les informations
 // associées à un assembly.
-[assembly: AssemblyTitle("Gossip Stones Tracker HD")]
-[assembly: AssemblyDescription("Fork of Drekorig's Gossip Stones Tracker for the Ocarina of Time Randomizer")]
+[assembly: AssemblyTitle("GSTHD: DK64 Edition")]
+[assembly: AssemblyDescription("Fork of Hapax's Fork of Drekorig's Gossip Stones Tracker for the Ocarina of Time Randomizer, now for Donkey Kong 64 Randomizer")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Hapax")]
-[assembly: AssemblyProduct("GSTHD")]
-[assembly: AssemblyCopyright("Copyright © Hapax, Drekorig 2021")]
+[assembly: AssemblyCompany("JXJacob")]
+[assembly: AssemblyProduct("GSTHD_DK64")]
+[assembly: AssemblyCopyright("Copyright © JXJacob, Hapax, Drekorig 2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -31,4 +31,4 @@ using System.Runtime.InteropServices;
 //
 // Vous pouvez spécifier toutes les valeurs ou indiquer les numéros de build et de révision par défaut
 // en utilisant '*', comme indiqué ci-dessous :
-[assembly: AssemblyVersion("0.3.*")]
+[assembly: AssemblyVersion("0.1.*")]

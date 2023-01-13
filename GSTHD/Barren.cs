@@ -34,6 +34,7 @@ namespace GSTHD
                 Height = labelSettings.Height,
                 TextAlign = ContentAlignment.MiddleLeft,
                 AutoEllipsis = true,
+                UseMnemonic = false
             };
             LabelPlace.Location = new Point(0, lastLabelLocation.Y + LabelPlace.Height);
             LabelPlace.MouseDown += new MouseEventHandler(Mouse_ClickDown);

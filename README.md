@@ -1,9 +1,9 @@
-# Gossip Stones Tracker HD v0.3
-Fork of Drekorig (`Drekorig#2506`)'s [Gossip Stones Tracker](https://github.com/Draeko/ootr_gst/tree/ladder_version) for the [Ocarina of Time Randomizer](https://ootrandomizer.com)
+# Gossip Stones Tracker HD (DK64 Edition) v0.1
+Fork of Hapax (`Hapax#1729`)'s [fork](https://github.com/HapaxL/GSTHD) of Drekorig (`Drekorig#2506`)'s [Gossip Stones Tracker](https://github.com/Draeko/ootr_gst/tree/ladder_version) for the [Donkey Kong 64 Randomizer](https://dk64randomizer.com)
 
-Made by Hapax (`Hapax#1729`). **Work in progress.**
+Bodged together by JXJacob for his own selfish purposes. Changes compared to GSTHD will be listed at a later time (once it is out of pre-release (once i squash some more bugs relating to broadcast view))
 
-## [>>> Get the latest release <<<](https://github.com/HapaxL/GSTHD/releases/latest)
+## Original README to follow.
 
 I'm really sorry I haven't wrote any real tutorial yet to explain all the new (and old) stuff, I will write one soon!! In the meantime feel free to ask me about anything in here or (preferably) on Discord (`Hapax#1729`). Small tutorials for individual features are already partially available in the description of many of the releases (link above), be sure to check it out!
 ___

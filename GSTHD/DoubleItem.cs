@@ -5,94 +5,61 @@ using System.Windows.Forms;
 
 namespace GSTHD
 {
-    class DoubleItem : PictureBox
+    public class DoubleItem : PictureBox
     {
-        List<string> ListImageName;
+        private string[] ImageNames;
+        private int ImageIndex = 0;
+
         bool isMouseDown = false;
         bool isColoredLeft = false;
         bool isColoredRight = false;
         Size DoubleItemSize;
 
+        bool isBroadcastable;
+
         public DoubleItem(ObjectPoint data)
         {
-            if(data.ImageCollection != null)
-                ListImageName = data.ImageCollection.ToList();
+            if (data.ImageCollection == null)
+                ImageNames = new string[0];
+            else
+                ImageNames = data.ImageCollection;
 
             DoubleItemSize = data.Size;
+            this.Name = data.Name;
+            this.Size = DoubleItemSize;
 
-            if (ListImageName.Count > 0)
+            if (ImageNames.Length > 0)
             {
-                this.Name = ListImageName[0];
-                this.Image = Image.FromFile(@"Resources/" + ListImageName[0]);
+                this.Image = Image.FromFile(@"Resources/" + ImageNames[0]);
                 this.SizeMode = PictureBoxSizeMode.StretchImage;
-                this.Size = DoubleItemSize;
+                
             }
 
             this.BackColor = Color.Transparent;
+            this.isBroadcastable = data.isBroadcastable;
             this.Location = new Point(data.X, data.Y);
             this.TabStop = false;
             this.AllowDrop = false;
-            this.MouseUp += this.Click_MouseUp;
-            this.MouseDown += this.Click_MouseDown;
-            this.MouseMove += this.Click_MouseMove;
+
+            // this is the most scuffed way of only giving the ability to click to the items to form1 (main window) and not form2 (broadcast)
+            if (Application.OpenForms[Application.OpenForms.Count - 1] is Form1)
+            {
+                this.MouseUp += this.Click_MouseUp;
+                this.MouseDown += this.Click_MouseDown;
+                this.MouseMove += this.Click_MouseMove;
+            }
         }
 
         private void Click_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
-                if (!isColoredLeft && !isColoredRight)
-                {
-                    this.Image = Image.FromFile(@"Resources/" + ListImageName[1]);
-                    this.Name = ListImageName[1];
-                    isColoredLeft = true;
-                }
-                else if (isColoredLeft && !isColoredRight)
-                {
-                    this.Image = Image.FromFile(@"Resources/" + ListImageName[0]);
-                    this.Name = ListImageName[0];
-                    isColoredLeft = false;
-                }
-                else if (!isColoredLeft && isColoredRight)
-                {
-                    this.Image = Image.FromFile(@"Resources/" + ListImageName[3]);
-                    this.Name = ListImageName[3];
-                    isColoredLeft = true;
-                }
-                else if (isColoredLeft && isColoredRight)
-                {
-                    this.Image = Image.FromFile(@"Resources/" + ListImageName[2]);
-                    this.Name = ListImageName[2];
-                    isColoredLeft = false;
-                }
+                ToggleLeftState();
 
             }
             if (e.Button == MouseButtons.Right)
             {
-                if (!isColoredLeft && !isColoredRight)
-                {
-                    this.Image = Image.FromFile(@"Resources/" + ListImageName[2]);
-                    this.Name = ListImageName[2];
-                    isColoredRight = true;
-                }
-                else if (isColoredLeft && !isColoredRight)
-                {
-                    this.Image = Image.FromFile(@"Resources/" + ListImageName[3]);
-                    this.Name = ListImageName[3];
-                    isColoredRight = true;
-                }
-                else if (!isColoredLeft && isColoredRight)
-                {
-                    this.Image = Image.FromFile(@"Resources/" + ListImageName[0]);
-                    this.Name = ListImageName[0];
-                    isColoredRight = false;
-                }
-                else if (isColoredLeft && isColoredRight)
-                {
-                    this.Image = Image.FromFile(@"Resources/" + ListImageName[1]);
-                    this.Name = ListImageName[1];
-                    isColoredRight = false;
-                }
+                ToggleRightState();
             }
         }
 
@@ -109,16 +76,85 @@ namespace GSTHD
             if (e.Button == MouseButtons.Left && isMouseDown)
             {
                 // TODO change that bool to DragBehaviour.AutocheckDragDrop
-                var dropContent = new DragDropContent(false, ListImageName[4]);
+                var dropContent = new DragDropContent(false, ImageNames[4]);
                 this.DoDragDrop(dropContent, DragDropEffects.Copy);
                 isMouseDown = false;
             }
             if (e.Button == MouseButtons.Right && isMouseDown)
             {
-                var dropContent = new DragDropContent(false, ListImageName[5]);
+                var dropContent = new DragDropContent(false, ImageNames[5]);
                 this.DoDragDrop(dropContent, DragDropEffects.Copy);
                 isMouseDown = false;
             }
         }
+
+        private void UpdateImage()
+        {
+            Image = Image.FromFile(@"Resources/" + ImageNames[ImageIndex]);
+            if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+            {
+                ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
+                ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isColoredLeft = isColoredLeft;
+                ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isColoredRight = isColoredRight;
+                ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
+            };
+        }
+
+        public void IncrementLeftState()
+        {
+            if (!isColoredLeft)
+            {
+                isColoredLeft = true;
+                if (!isColoredRight) ImageIndex = 1; else ImageIndex = 3;
+            }
+            UpdateImage();
+        }
+        public void DecrementLeftState()
+        {
+            if (isColoredLeft)
+            {
+                isColoredLeft = false;
+                if (!isColoredRight) ImageIndex = 0; else ImageIndex = 2;
+            }
+            UpdateImage();
+        }
+        public void ToggleLeftState()
+        {
+            if (isColoredLeft) DecrementLeftState(); else IncrementLeftState();
+        }
+
+        public void IncrementRightState()
+        {
+            if (!isColoredRight)
+            {
+                isColoredRight = true;
+                if (!isColoredLeft) ImageIndex = 2; else ImageIndex = 3;
+            }
+            UpdateImage();
+        }
+        public void DecrementRightState()
+        {
+            if (isColoredRight)
+            {
+                isColoredRight = false;
+                if (!isColoredLeft) ImageIndex = 0; else ImageIndex = 1;
+            }
+            UpdateImage();
+        }
+        public void ToggleRightState()
+        {
+            if (isColoredRight) DecrementRightState(); else IncrementRightState();
+        }
+
+        public void ResetState()
+        {
+            ImageIndex = 0;
+            isColoredRight = false;
+            isColoredLeft = false;
+            UpdateImage();
+
+        }
+
+
     }
 }

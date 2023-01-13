@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 
 namespace GSTHD
 {
@@ -13,9 +15,12 @@ namespace GSTHD
         private struct MenuItems
         {
             // Layout
+            public ToolStripMenuItem OpenLayout;
+            public ToolStripMenuItem OpenPlaces;
             public ToolStripMenuItem Reset;
             // public ToolStripMenuItem LoadLayout;
             public ToolStripMenuItem ShowMenuBar;
+            public ToolStripMenuItem BroadcastView;
 
             // Options
             // Scroll Wheel
@@ -91,12 +96,28 @@ namespace GSTHD
 
             var layoutMenu = new ToolStripMenuItem("Layout");
             {
+                Items.OpenLayout = new ToolStripMenuItem("Open Layout", null, new EventHandler(menuBar_OpenLayout))
+                {
+                    ShortcutKeys = Keys.Control | Keys.O,
+                    ShowShortcutKeys = true,
+                };
+                layoutMenu.DropDownItems.Add(Items.OpenLayout);
+
+                Items.OpenPlaces = new ToolStripMenuItem("Open Places", null, new EventHandler(menuBar_OpenPlaces))
+                {
+                    ShortcutKeys = Keys.Control | Keys.Shift | Keys.O,
+                    ShowShortcutKeys = true,
+                };
+                layoutMenu.DropDownItems.Add(Items.OpenPlaces);
+
                 Items.Reset = new ToolStripMenuItem("Reset", null, new EventHandler(menuBar_Reset))
                 {
                     ShortcutKeys = Keys.Control | Keys.R,
                     ShowShortcutKeys = true,
                 };
                 layoutMenu.DropDownItems.Add(Items.Reset);
+
+                layoutMenu.DropDownItems.Add("-");
 
                 //Items.LoadLayout = new ToolStripMenuItem("Load Layout", null, new EventHandler(menuBar_LoadLayout));
                 //layoutMenu.DropDownItems.Add(Items.LoadLayout);
@@ -108,7 +129,16 @@ namespace GSTHD
                     CheckOnClick = true,
             };
                 layoutMenu.DropDownItems.Add(Items.ShowMenuBar);
-                
+
+
+                Items.BroadcastView = new ToolStripMenuItem("Broadcast View", null, new EventHandler(menuBar_Broadcast))
+                {
+                    ShortcutKeys = Keys.F2,
+                    ShowShortcutKeys = true,
+                    CheckOnClick = true,
+                };
+                layoutMenu.DropDownItems.Add(Items.BroadcastView);
+
             }
             MenuStrip.Items.Add(layoutMenu);
 
@@ -269,6 +299,41 @@ namespace GSTHD
             MenuStrip.Renderer = new ToolStripProfessionalRenderer(theme);
         }
 
+        public void menuBar_OpenLayout(object sender, EventArgs e)
+        {
+            // open file dialog for jsons
+            OpenFileDialog filedia = new OpenFileDialog();
+            filedia.Title = "Open GST Layout file";
+            filedia.InitialDirectory= Application.StartupPath;
+            filedia.Filter = "json files (*.json)|*.json|All files (*.*)|*.*";
+            filedia.Multiselect = false;
+            // put that filename into settings' ActiveLayout
+            if (filedia.ShowDialog() == DialogResult.OK)
+            {
+                Settings.ActiveLayout = filedia.SafeFileName.ToString().Replace(".json", "");
+                Settings.Write();
+                Form.Reset(sender);
+            }
+            
+        }
+
+        public void menuBar_OpenPlaces(object sender, EventArgs e)
+        {
+            // open file dialog for jsons
+            OpenFileDialog filedia = new OpenFileDialog();
+            filedia.Title = "Open GST Places file";
+            filedia.InitialDirectory = Application.StartupPath;
+            filedia.Filter = "json files (*.json)|*.json|All files (*.*)|*.*";
+            filedia.Multiselect = false;
+            // put that filename into settings' ActivePlaces
+            if (filedia.ShowDialog() == DialogResult.OK)
+            {
+                Settings.ActivePlaces = filedia.SafeFileName.ToString().Replace(".json", "");
+                Settings.Write();
+                Form.Reset(sender);
+            }
+        }
+
         public void menuBar_Reset(object sender, EventArgs e)
         {
             Form.Reset(sender);
@@ -290,6 +355,28 @@ namespace GSTHD
             Settings.ShowMenuBar = Enabled;
             Items.ShowMenuBar.Checked = Enabled;
             Settings.Write();
+        }
+
+        public void menuBar_Broadcast(object sender, EventArgs e)
+        {
+            if (Form.CurrentLayout.App_Settings.EnableBroadcast)
+            {
+                if (Items.BroadcastView.Checked)
+                {
+                    Form2 f2 = new Form2();
+                    f2.Show();
+                }
+                else if (Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+                {
+                    Application.OpenForms["GSTHD_DK64 Broadcast View"].Close();
+                }
+            } 
+            else
+            {
+                Items.BroadcastView.Checked = false;
+            }
+            
+            
         }
 
         public void menuBar_Show()
