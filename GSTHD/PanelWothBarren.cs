@@ -213,7 +213,7 @@ namespace GSTHD
 
         private void AddWotH(string text)
         {
-            var selectedPlace = text.ToUpper().Trim();
+            var selectedPlace = text.ToUpper().Trim().Replace(",", "");
 
             // add woth if duplicates are allowed or if there aren't any duplicates
             if (Settings.EnableDuplicateWoth || !ListWotH.Any(x => x.Name == selectedPlace))
@@ -247,7 +247,7 @@ namespace GSTHD
 
         private void AddBarren(string text)
         {
-            var selectedPlace = text.ToUpper().Trim();
+            var selectedPlace = text.ToUpper().Trim().Replace(",", "");
             var find = ListBarren.Where(x => x.Name == selectedPlace);
             if (find.Count() <= 0)
             {
@@ -337,53 +337,57 @@ namespace GSTHD
 
         public void SetWotH(string thestring)
         {
-            string[] sections = thestring.Split('~');
+            string[] sections = thestring.Split('\n');
             foreach (string section in sections)
             {
                 // break into name & colour         and           stones
-                string[] parts = section.Split('|');
+                string[] parts = section.Split('\t');
 
                 // name = firstpart[0]
                 // color = firstpart[1]
                 string[] firstPart = parts[0].Split(',');
 
-                
+                // secondparts are explained below
                 string[] secondPart = parts[1].Split(',');
                 AddWotH(firstPart[0]);
                 
                 // find the woth we just made
                 //Control foundWotH = this.Controls.Find(firstPart[0], true)[0];
-                WotH thisWotH = this.ListWotH.Where(x => x.Name == firstPart[0]).ToList()[0];
+                WotH thisWotH = this.ListWotH.Where(x => x.Name == firstPart[0].Trim()).ToList()[0];
 
                 thisWotH.SetColor(int.Parse(firstPart[1]));
 
                 GossipStone foundStone = null;
                 bool storedHoldsImage = false;
                 string storedHeldImageName = "";
-                for (int i = 0; i < secondPart.Length; i++)
+                if (secondPart.Length > 3)
                 {
-                    if (i % 4 == 0)
+                    for (int i = 0; i < secondPart.Length; i++)
                     {
-                        // 0th is the name
-                        foundStone = (GossipStone)(this.Controls.Find(secondPart[i], true)[0]);
-                    }
-                    else if (i % 4 == 1) 
-                    {
-                        // 1st is the bool
-                        storedHoldsImage = Boolean.Parse(secondPart[i]);
-                    }
-                    else if (i % 4 == 2)
-                    {
-                        // 2nd is the stored image
-                        storedHeldImageName = secondPart[i];
-                    }
-                    else if (i % 4 == 3)
-                    {
-                        // 3rd is the stateindex
-                        // also we have all 4 so go and set the state
-                        foundStone.SetState(new GossipStoneState() { HoldsImage = storedHoldsImage, HeldImageName = storedHeldImageName, ImageIndex = int.Parse(secondPart[i])});
+                        if (i % 4 == 0)
+                        {
+                            // 0th is the name
+                            foundStone = (GossipStone)(this.Controls.Find(secondPart[i], true)[0]);
+                        }
+                        else if (i % 4 == 1)
+                        {
+                            // 1st is the bool
+                            storedHoldsImage = Boolean.Parse(secondPart[i]);
+                        }
+                        else if (i % 4 == 2)
+                        {
+                            // 2nd is the stored image
+                            storedHeldImageName = secondPart[i];
+                        }
+                        else if (i % 4 == 3)
+                        {
+                            // 3rd is the stateindex
+                            // also we have all 4 so go and set the state
+                            foundStone.SetState(new GossipStoneState() { HoldsImage = storedHoldsImage, HeldImageName = storedHeldImageName, ImageIndex = int.Parse(secondPart[i]) });
+                        }
                     }
                 }
+                
 
             }
         }
@@ -401,7 +405,7 @@ namespace GSTHD
 
         public void SetBarren(string thestring)
         {
-            string[] sections = thestring.Split('~');
+            string[] sections = thestring.Split('\n');
             foreach (string section in sections)
             {
                 // name = firstpart[0]

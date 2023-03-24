@@ -29,7 +29,7 @@ namespace GSTHD
                     stoneString += x.Name + "," + ugh.ToString();
                 }
             }
-            return $"{WotHText},{ColourIndex}|{stoneString}";
+            return $"{WotHText},{ColourIndex}\t{stoneString}";
         }
     }
 

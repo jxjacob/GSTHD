@@ -204,7 +204,7 @@ namespace GSTHD
                         {
                             if (thestring.Length > 0)
                             {
-                                thestring += "~";
+                                thestring += "\n";
                             }
                             thestring += y.ToString();
                         }
@@ -216,7 +216,7 @@ namespace GSTHD
                         {
                             if (thestring.Length > 0)
                             {
-                                thestring += "~";
+                                thestring += "\n";
                             }
                             thestring += y.ToString();
                         }
