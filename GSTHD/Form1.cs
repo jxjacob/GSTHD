@@ -248,6 +248,8 @@ namespace GSTHD
             // put that filename into settings' ActivePlaces
             if (filedia.ShowDialog() == DialogResult.OK)
             {
+                // reset for safekeepings
+                Reload();
                 //all of the fucking things
                 JObject loadedjson = JObject.Parse(File.ReadAllText(filedia.FileName));
                 foreach (JProperty x in (JToken)loadedjson)
