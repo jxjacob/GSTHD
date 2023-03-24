@@ -280,6 +280,7 @@ namespace GSTHD
                             panelLayout.Controls.Add(new TextBox()
                             {
                                 BackColor = box.BackColor,
+                                Name = box.Name,
                                 Font = new Font(box.FontName, box.FontSize, box.FontStyle),
                                 ForeColor = box.FontColor,
                                 Size = new Size(box.Width, box.Height),
@@ -287,7 +288,7 @@ namespace GSTHD
                                 BorderStyle = box.BorderStyle,
                                 Padding = new Padding(5,10,5,5),
                                 Margin = new Padding(5,10,5,5)
-                            });
+                            });;
                         }
                     }
                 }
@@ -306,6 +307,7 @@ namespace GSTHD
                                     panelLayout.Controls.Add(new TextBox()
                                     {
                                         BackColor = item.BackColor,
+                                        Name = item.Name + j + i,
                                         Font = new Font(item.FontName, item.FontSize, item.FontStyle),
                                         ForeColor = item.FontColor,
                                         Size = new Size(item.Width, item.Height),
@@ -791,7 +793,7 @@ namespace GSTHD
                     foreach (var item in ListItems)
                     {
                         if (item.Visible)
-                            panelLayout.Controls.Add(new Item(item, settings));
+                            panelLayout.Controls.Add(new Item(item, settings, true));
                     }
                 }
 
@@ -819,7 +821,7 @@ namespace GSTHD
                                         isBroadcastable = item.isBroadcastable,
                                         isDraggable = item.isDraggable
                                     };
-                                    panelLayout.Controls.Add(new Item(gs, settings));
+                                    panelLayout.Controls.Add(new Item(gs, settings, true));
                                 }
                             }
                         }
@@ -853,7 +855,7 @@ namespace GSTHD
                     foreach (var item in ListCollectedItems)
                     {
                         if (item.Visible)
-                            panelLayout.Controls.Add(new CollectedItem(item, settings));
+                            panelLayout.Controls.Add(new CollectedItem(item, settings, true));
                     }
                 }
 
@@ -1002,6 +1004,7 @@ namespace GSTHD
 
     public class GenericTextBox
     {
+        public string Name { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
         public bool Visible { get; set; }
@@ -1151,6 +1154,7 @@ namespace GSTHD
 
         public PictureBoxSizeMode SizeMode { get; set; } = PictureBoxSizeMode.Zoom;
         public bool isBroadcastable { get; set; } = false;
+        public bool isWotH { get; set; } = true;
     }
 
     public class ObjectPanelBarren

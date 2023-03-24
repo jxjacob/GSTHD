@@ -74,10 +74,11 @@ namespace GSTHD
             LoadSettings();
             LoadLayout();
             SetMenuBar();
-            if (this.CurrentLayout.App_Settings.EnableBroadcast && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
-            {
+            if (this.CurrentLayout.App_Settings.EnableBroadcast && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null) {
                 ((Form2)Application.OpenForms["GSTHD_DK64 Broadcast View"]).Reload();
-            };
+            } else if (!this.CurrentLayout.App_Settings.EnableBroadcast && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null) {
+                ((Form2)Application.OpenForms["GSTHD_DK64 Broadcast View"]).Close();
+            }
         }
 
         private void LoadSettings()
@@ -145,6 +146,171 @@ namespace GSTHD
             ControlExtensions.ClearAndDispose(LayoutContent);
             Reload();
             Process.GetCurrentProcess().Refresh();
+        }
+
+        public void SaveState()
+        {
+            JObject thejson = new JObject();
+
+            foreach (Item x in this.Controls[0].Controls.OfType<Item>())
+            {
+                if (x.Name != "")
+                {
+                    int state = x.GetState();
+                    if (state != 0)
+                    {
+                        thejson.Add(x.Name, state.ToString());
+                    }
+                }
+            }
+            foreach (CollectedItem x in this.Controls[0].Controls.OfType<CollectedItem>())
+            {
+                if (x.Name != "")
+                {
+                    int state = x.GetState();
+                    if (state != x.CollectedItemDefault)
+                    {
+                        thejson.Add(x.Name, state.ToString());
+                    }
+                }
+            }
+            foreach (TextBox x in this.Controls[0].Controls.OfType<TextBox>())
+            {
+                if (x.Name != "" && x.Text != "") 
+                {
+                    thejson.Add(x.Name, x.Text);
+                }
+            }
+            foreach (GossipStone x in this.Controls[0].Controls.OfType<GossipStone>())
+            {
+                if (x.Name != "")
+                {
+                    GossipStoneState state = x.GetState();
+                    string conv = state.ToString();
+                    if (conv != "False,,0")
+                    {
+                        thejson.Add(x.Name, conv);
+                    }
+                }
+            }
+            foreach (PanelWothBarren x in this.Controls[0].Controls.OfType<PanelWothBarren>())
+            {
+                if (x.Name != "")
+                {
+                    if (x.ListBarren.Count > 0)
+                    {
+                        string thestring = "";
+                        foreach (BarrenState y in x.GetBarrens())
+                        {
+                            if (thestring.Length > 0)
+                            {
+                                thestring += "~";
+                            }
+                            thestring += y.ToString();
+                        }
+                        thejson.Add(x.Name, thestring);
+                    } else if (x.ListWotH.Count > 0)
+                    {
+                        string thestring = "";
+                        foreach (WotHState y in x.GetWotHs())
+                        {
+                            if (thestring.Length > 0)
+                            {
+                                thestring += "~";
+                            }
+                            thestring += y.ToString();
+                        }
+                        thejson.Add(x.Name, thestring);
+                    }
+                }
+            }
+
+
+
+            //open file to write to
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            saveFileDialog1.Filter = "json files (*.json)|*.json|All files (*.*)|*.*";
+            saveFileDialog1.Title = "Save state to JSON file";
+            saveFileDialog1.ShowDialog();
+
+            if (saveFileDialog1.FileName != "")
+            {
+                System.IO.File.WriteAllText(saveFileDialog1.FileName, thejson.ToString());
+            }
+        }
+
+        public void LoadState()
+        {
+            OpenFileDialog filedia = new OpenFileDialog();
+            filedia.Title = "Load state from JSON file";
+            filedia.Filter = "json files (*.json)|*.json|All files (*.*)|*.*";
+            filedia.Multiselect = false;
+            // put that filename into settings' ActivePlaces
+            if (filedia.ShowDialog() == DialogResult.OK)
+            {
+                //all of the fucking things
+                JObject loadedjson = JObject.Parse(File.ReadAllText(filedia.FileName));
+                foreach (JProperty x in (JToken)loadedjson)
+                {
+                    Control found = this.Controls.Find(x.Name, true)[0];
+                    if (found is Item)
+                    {
+                        int conv = (int)x.Value;
+                        ((Item)found).SetState(conv);
+                    } 
+                    else if (found is CollectedItem)
+                    {
+                        int conv = (int)x.Value;
+                        ((CollectedItem)found).SetState(conv);
+                    } 
+                    else if (found is TextBox)
+                    {
+                        string conv = (string)x.Value;
+                        ((TextBox)found).Text = conv;
+                    } 
+                    else if (found is GossipStone)
+                    {
+                        string conv = (string)x.Value;
+                        string[] words = conv.Split(',');
+                        GossipStoneState newstate = new GossipStoneState()
+                        {
+                            HoldsImage = Boolean.Parse(words[0]),
+                            HeldImageName = words[1],
+                            ImageIndex = int.Parse(words[2]),
+                        };
+                        ((GossipStone)found).SetState(newstate);
+                    }
+                    else if (found is PanelWothBarren) 
+                    {
+                        if (((PanelWothBarren)found).isWotH){
+                            ((PanelWothBarren)found).SetWotH((string)x.Value);
+                        } else
+                        {
+                            ((PanelWothBarren)found).SetBarren((string)x.Value);
+                        }
+
+
+                        
+                    }
+                }
+            }
+        }
+
+        public void ToggleMenuBroadcast()
+        {
+            MenuBar.menuBar_toggleBroadcast();
+        }
+
+        public void UpdateAll()
+        {
+            foreach (Item x in this.Controls[0].Controls.OfType<Item>())
+            {
+                x.UpdateImage();
+            }
+            foreach (CollectedItem x in this.Controls[0].Controls.OfType<CollectedItem>())
+            {
+                x.UpdateImage();
+            }
         }
     }
 }

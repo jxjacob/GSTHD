@@ -21,13 +21,13 @@ namespace GSTHD
         private Size CollectedItemCountPosition;
         private readonly int CollectedItemMin;
         private readonly int CollectedItemMax;
-        private readonly int CollectedItemDefault;
+        public readonly int CollectedItemDefault;
         private int CollectedItems;
         private readonly int Step;
 
         private bool isBroadcastable;
 
-        public CollectedItem(ObjectPointCollectedItem data, Settings settings)
+        public CollectedItem(ObjectPointCollectedItem data, Settings settings, bool isBroadcast = false)
         {
             Settings = settings;
 
@@ -76,9 +76,7 @@ namespace GSTHD
                 Location = new Point(0, (CollectedItemSize.Height) - CollectedItemCountPosition.Height*2),
             };
 
-            // this is the most scuffed way of only giving the ability to click to the items to form1 (main window) and not form2 (broadcast)
-            //if (Application.OpenForms[Application.OpenForms.Count - 1] is Form1)
-            if (true)
+            if (!isBroadcast)
             {
                 MouseDown += ProgressBehaviour.Mouse_ClickDown;
                 MouseUp += DragBehaviour.Mouse_ClickUp;
@@ -108,7 +106,7 @@ namespace GSTHD
             }
         }
 
-        private void UpdateImage()
+        public void UpdateImage()
         {
             Image = Image.FromFile(@"Resources/" + ImageNames[System.Math.Max(System.Math.Min(CollectedItems, ImageNames.Length - 1), 0)]);
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)

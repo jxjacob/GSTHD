@@ -8,6 +8,31 @@ using System.Windows.Forms;
 
 namespace GSTHD
 {
+    public struct WotHState
+    {
+        public string WotHText;
+        public int ColourIndex;
+        public List<GossipStone> Stones;
+
+
+        public override string ToString() {
+
+            string stoneString = "";
+            foreach (GossipStone x in Stones) { 
+                GossipStoneState ugh = x.GetState();
+                if (ugh.ToString() != "False,,0")
+                {
+                    if (stoneString.Length > 0)
+                    {
+                        stoneString += ",";
+                    }
+                    stoneString += x.Name + "," + ugh.ToString();
+                }
+            }
+            return $"{WotHText},{ColourIndex}|{stoneString}";
+        }
+    }
+
     class WotH
     {
         public Settings Settings;
@@ -93,6 +118,12 @@ namespace GSTHD
             UpdateColor();
         }
 
+        public void SetColor(int color)
+        {
+            ColorIndex = color;
+            UpdateColor();
+        }
+
         public void UpdateColor()
         {
             LabelPlace.ForeColor = Colors[ColorIndex];
@@ -109,6 +140,16 @@ namespace GSTHD
                 ColorIndex--;
             }
             UpdateColor();
+        }
+
+        public WotHState SaveState()
+        {
+            return new WotHState()
+            {
+                WotHText = Name,
+                ColourIndex = ColorIndex,
+                Stones = listGossipStone,
+            };
         }
     }
 }

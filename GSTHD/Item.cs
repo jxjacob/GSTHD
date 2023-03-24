@@ -21,7 +21,7 @@ namespace GSTHD
         string DoubleBroadcastName;
         bool isDraggable;
 
-        public Item(ObjectPoint data, Settings settings)
+        public Item(ObjectPoint data, Settings settings, bool isBroadcast = false)
         {
             Settings = settings;
 
@@ -52,9 +52,10 @@ namespace GSTHD
             Location = new Point(data.X, data.Y);
             TabStop = false;
             AllowDrop = false;
-            // this is the most scuffed way of only giving the ability to click to the items to form1 (main window) and not form2 (broadcast)
-            //if (Application.OpenForms[Application.OpenForms.Count - 1] is Form1)
-            if (true)
+
+            Control thething = this.Parent;
+            if (thething != null) { MessageBox.Show("Do you want to save changes to your text?", thething.Name); }
+            if (!isBroadcast)
             {
                 if (isDraggable)
                 {
@@ -80,7 +81,7 @@ namespace GSTHD
             }
         }
 
-        private void UpdateImage()
+        public void UpdateImage()
         {
             Image = Image.FromFile(@"Resources/" + ImageNames[ImageIndex]);
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)

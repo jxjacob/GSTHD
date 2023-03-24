@@ -50,10 +50,16 @@ namespace GSTHD
             */
         }
 
-        //private void Form2_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        //{
-        //    Form1_MenuBar
-        //}
+        private void Form2_FormClosing(object sender, FormClosingEventArgs e)
+        {
+        // call back to form1 and tell its menubar to toggle back
+        if (Application.OpenForms[0] is Form1)
+            {
+                Form1 mainwindow = Application.OpenForms[0] as Form1;
+                mainwindow.ToggleMenuBroadcast();
+            }
+        }
+
 
         private void LoadAll(object sender, EventArgs e)
         {
@@ -68,6 +74,7 @@ namespace GSTHD
             LoadLayout();
 
             this.KeyPreview = true;
+            this.FormClosing += new FormClosingEventHandler(Form2_FormClosing);
             //this.KeyDown += changeCollectedSkulls;
         }
 

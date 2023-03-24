@@ -11,6 +11,8 @@ namespace GSTHD
         public bool HoldsImage;
         public string HeldImageName;
         public int ImageIndex;
+
+        public override string ToString() => $"{HoldsImage},{HeldImageName},{ImageIndex}";
     }
 
     public class GossipStone : PictureBox, ProgressibleElement<GossipStoneState>, DraggableElement<GossipStoneState>
@@ -179,6 +181,7 @@ namespace GSTHD
             HoldsImage = state.HoldsImage;
             HeldImageName = state.HeldImageName;
             ImageIndex = state.ImageIndex;
+            UpdateImage();
         }
 
         public void IncrementState()

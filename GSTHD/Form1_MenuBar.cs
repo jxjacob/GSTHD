@@ -18,6 +18,8 @@ namespace GSTHD
             public ToolStripMenuItem OpenLayout;
             public ToolStripMenuItem OpenPlaces;
             public ToolStripMenuItem Reset;
+            public ToolStripMenuItem SaveState;
+            public ToolStripMenuItem LoadState;
             // public ToolStripMenuItem LoadLayout;
             public ToolStripMenuItem ShowMenuBar;
             public ToolStripMenuItem BroadcastView;
@@ -116,6 +118,24 @@ namespace GSTHD
                     ShowShortcutKeys = true,
                 };
                 layoutMenu.DropDownItems.Add(Items.Reset);
+
+                layoutMenu.DropDownItems.Add("-");
+
+                Items.SaveState = new ToolStripMenuItem("Save Tracker State", null, new EventHandler(menuBar_SaveState))
+                {
+                    //ShortcutKeys = Keys.Control | Keys.Shift | Keys.S,
+                    //ShowShortcutKeys = true,
+                };
+
+                layoutMenu.DropDownItems.Add(Items.SaveState);
+
+                Items.LoadState = new ToolStripMenuItem("Load Tracker State", null, new EventHandler(menuBar_LoadState))
+                {
+                    //ShortcutKeys = Keys.Control | Keys.Shift | Keys.O,
+                    //ShowShortcutKeys = true,
+                };
+
+                layoutMenu.DropDownItems.Add(Items.LoadState);
 
                 layoutMenu.DropDownItems.Add("-");
 
@@ -334,6 +354,16 @@ namespace GSTHD
             }
         }
 
+        public void menuBar_SaveState(object sender, EventArgs e)
+        {
+            Form.SaveState();
+        }
+
+        public void menuBar_LoadState(object sender, EventArgs e)
+        {
+            Form.LoadState();
+        }
+
         public void menuBar_Reset(object sender, EventArgs e)
         {
             Form.Reset(sender);
@@ -365,10 +395,12 @@ namespace GSTHD
                 {
                     Form2 f2 = new Form2();
                     f2.Show();
+                    Form.UpdateAll();
                 }
                 else if (Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
                     Application.OpenForms["GSTHD_DK64 Broadcast View"].Close();
+                    Items.BroadcastView.Checked = false;
                 }
             } 
             else
@@ -377,6 +409,13 @@ namespace GSTHD
             }
             
             
+        }
+
+        public void menuBar_toggleBroadcast()
+        {
+            if (Items.BroadcastView.Checked) {
+               Items.BroadcastView.Checked = false;
+             } else { Items.BroadcastView.Checked = true;}
         }
 
         public void menuBar_Show()

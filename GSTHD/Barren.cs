@@ -8,6 +8,14 @@ using System.Windows.Forms;
 
 namespace GSTHD
 {
+    public struct BarrenState
+    {
+        public string BarrenName;
+        public int ColourIndex;
+
+        public override string ToString() => $"{BarrenName},{ColourIndex}";
+    }
+
     class Barren
     {
         public Settings Settings;
@@ -53,6 +61,12 @@ namespace GSTHD
             UpdateColor();
         }
 
+        public void SetColor(int color)
+        {
+            ColorIndex = color;
+            UpdateColor();
+        }
+
         public void UpdateColor()
         {
             LabelPlace.ForeColor = Colors[Settings.EnableBarrenColors ? ColorIndex : 0];
@@ -72,6 +86,15 @@ namespace GSTHD
                 ColorIndex--;
             }
             UpdateColor();
+        }
+
+        public BarrenState SaveState()
+        {
+            return new BarrenState()
+            {
+               BarrenName = Name,
+               ColourIndex = ColorIndex,
+            };
         }
     }
 }
