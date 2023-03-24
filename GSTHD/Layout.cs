@@ -53,7 +53,7 @@ namespace GSTHD
         {
             if (settings.ActiveLayout != string.Empty)
             {
-                JObject json_layout = JObject.Parse(File.ReadAllText(@"Layouts/" + settings.ActiveLayout + ".json"));
+                JObject json_layout = JObject.Parse(File.ReadAllText(@"" + settings.ActiveLayout));
                 foreach (var category in json_layout)
                 {
                     if (category.Key.ToString() == "AppSize")
@@ -525,7 +525,7 @@ namespace GSTHD
         {
             if (settings.ActiveLayout != string.Empty)
             {
-                JObject json_layout = JObject.Parse(File.ReadAllText(@"Layouts/" + settings.ActiveLayout + "_broadcast.json"));
+                JObject json_layout = JObject.Parse(File.ReadAllText(@"" + settings.ActiveLayout.Replace(".json", "") + "_broadcast.json"));
                 foreach (var category in json_layout)
                 {
                     if (category.Key.ToString() == "AppSize")

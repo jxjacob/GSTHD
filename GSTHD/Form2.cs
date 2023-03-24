@@ -84,12 +84,14 @@ namespace GSTHD
             LoadLayout();
         }
 
-        private void LoadSettings()
+        public void LoadSettings()
         {
+            Settings = Settings.Read();
+
             ListPlaces.Clear();
             ListPlaces.Add("");
             ListPlacesWithTag.Clear();
-            JObject json_places = JObject.Parse(File.ReadAllText(@"oot_places.json"));
+            JObject json_places = JObject.Parse(File.ReadAllText(@"" + Settings.ActivePlaces));
             foreach (var property in json_places)
             {
                 ListPlaces.Add(property.Key.ToString());
@@ -97,7 +99,7 @@ namespace GSTHD
             }
 
             ListSometimesHintsSuggestions.Clear();
-            JObject json_hints = JObject.Parse(File.ReadAllText(@"sometimes_hints.json"));
+            JObject json_hints = JObject.Parse(File.ReadAllText(@"" + Settings.ActiveSometimesHints));
             foreach (var categorie in json_hints)
             {
                 foreach (var hint in categorie.Value)
@@ -106,7 +108,7 @@ namespace GSTHD
                 }
             }
 
-            Settings = Settings.Read();
+
         }
 
 

@@ -330,7 +330,13 @@ namespace GSTHD
             // put that filename into settings' ActiveLayout
             if (filedia.ShowDialog() == DialogResult.OK)
             {
-                Settings.ActiveLayout = filedia.SafeFileName.ToString().Replace(".json", "");
+                if (filedia.FileName.Contains(filedia.InitialDirectory))
+                {
+                    Settings.ActiveLayout = filedia.FileName.Substring((filedia.InitialDirectory.Length + 1));
+                } else
+                {
+                    Settings.ActiveLayout = filedia.FileName.ToString();
+                }
                 Settings.Write();
                 Form.Reset(sender);
             }
@@ -348,9 +354,16 @@ namespace GSTHD
             // put that filename into settings' ActivePlaces
             if (filedia.ShowDialog() == DialogResult.OK)
             {
-                Settings.ActivePlaces = filedia.SafeFileName.ToString().Replace(".json", "");
+                if (filedia.FileName.Contains(filedia.InitialDirectory))
+                {
+                    Settings.ActivePlaces = filedia.FileName.Substring((filedia.InitialDirectory.Length + 1));
+                }
+                else
+                {
+                    Settings.ActivePlaces = filedia.FileName.ToString();
+                }
                 Settings.Write();
-                Form.Reset(sender);
+                Form.LoadSettings();
             }
         }
 
