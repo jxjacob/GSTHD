@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("JXJacob")]
 [assembly: AssemblyProduct("GSTHD_DK64")]
-[assembly: AssemblyCopyright("Copyright © JXJacob, Hapax, Drekorig 2022")]
+[assembly: AssemblyCopyright("Copyright © JXJacob, Hapax, Drekorig 2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -31,4 +31,4 @@ using System.Runtime.InteropServices;
 //
 // Vous pouvez spécifier toutes les valeurs ou indiquer les numéros de build et de révision par défaut
 // en utilisant '*', comme indiqué ci-dessous :
-[assembly: AssemblyVersion("0.1.*")]
+[assembly: AssemblyVersion("0.2.*")]
