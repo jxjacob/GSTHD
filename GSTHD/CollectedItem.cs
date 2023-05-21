@@ -44,7 +44,7 @@ namespace GSTHD
             CollectedItems = System.Math.Min(System.Math.Max(CollectedItemMin, CollectedItemDefault), CollectedItemMax);
             Step = data.Step == 0 ? 1 : data.Step;
             CollectedItemSize = data.Size;
-            isBroadcastable = data.isBroadcastable;
+            isBroadcastable = data.isBroadcastable && !isBroadcast;
 
             if (ImageNames.Length > 0)
             {

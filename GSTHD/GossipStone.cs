@@ -32,10 +32,10 @@ namespace GSTHD
 
         Size GossipStoneSize;
 
-        public GossipStone(ObjectPoint data, Settings settings)
-            : this(settings, data.Name, data.X, data.Y, data.ImageCollection, data.Size, data.isScrollable, data.SizeMode, data.isBroadcastable) { }
+        public GossipStone(ObjectPoint data, Settings settings, bool isOnBroadcast = false)
+            : this(settings, data.Name, data.X, data.Y, data.ImageCollection, data.Size, data.isScrollable, data.SizeMode, data.isBroadcastable, isOnBroadcast) { }
 
-        public GossipStone(Settings settings, string name, int x, int y, string[] imageCollection, Size imageSize, bool isScrollable, PictureBoxSizeMode SizeMode, bool isBroadcastable)
+        public GossipStone(Settings settings, string name, int x, int y, string[] imageCollection, Size imageSize, bool isScrollable, PictureBoxSizeMode SizeMode, bool isBroadcastable, bool isOnBroadcast = false)
         {
             Settings = settings;
 
@@ -65,16 +65,19 @@ namespace GSTHD
             this.isBroadcastable = isBroadcastable;
 
 
+            if (!isOnBroadcast)
+            {
+                this.MouseUp += DragBehaviour.Mouse_ClickUp;
+                this.MouseDown += ProgressBehaviour.Mouse_ClickDown;
+                this.MouseDown += DragBehaviour.Mouse_ClickDown;
+                this.MouseMove += Mouse_Move;
+                this.DragEnter += Mouse_DragEnter;
+                this.DragDrop += Mouse_DragDrop;
+                this.MouseWheel += Mouse_Wheel;
+                this.MouseEnter += Panel_MouseEnter;
+                this.MouseLeave += Panel_MouseLeave;
+            }
 
-            this.MouseUp += DragBehaviour.Mouse_ClickUp;
-            this.MouseDown += ProgressBehaviour.Mouse_ClickDown;
-            this.MouseDown += DragBehaviour.Mouse_ClickDown;
-            this.MouseMove += Mouse_Move;
-            this.DragEnter += Mouse_DragEnter;
-            this.DragDrop += Mouse_DragDrop;
-            this.MouseWheel += Mouse_Wheel;
-            this.MouseEnter += Panel_MouseEnter;
-            this.MouseLeave += Panel_MouseLeave;
         }
 
         // both of these functions are for when the stone is in a WOTH panel, so that it can be scrolled without the whole WOTH panle scrolling as well
@@ -98,10 +101,6 @@ namespace GSTHD
                 if (ImageIndex < 0) ImageIndex = 0;
                 else if (ImageIndex >= ImageNames.Length) ImageIndex = ImageNames.Length - 1;
                 UpdateImage();
-                if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
-                {
-                    ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).Mouse_Wheel(sender, e);
-                };
             }
         }
 
@@ -150,6 +149,7 @@ namespace GSTHD
                 Image = Image.FromFile(@"Resources/" + ImageNames[ImageIndex]);
                 if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
+                    ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).HoldsImage = false;
                     ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
                     ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
                 }
@@ -189,10 +189,6 @@ namespace GSTHD
             RemoveImage = true;
             if (ImageIndex < ImageNames.Length - 1) ImageIndex += 1;
             UpdateImage();
-            if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
-            {
-                ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).IncrementState();
-            };
         }
 
         public void DecrementState()
@@ -200,15 +196,15 @@ namespace GSTHD
             RemoveImage = true;
             if (ImageIndex > 0) ImageIndex -= 1;
             UpdateImage();
-            if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
-            {
-                ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).DecrementState();
-            };
         }
 
         public void ResetState()
         {
             RemoveImage = true;
+            if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+            {
+                ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).RemoveImage = true;
+            }
             ImageIndex = 0;
             UpdateImage();
         }

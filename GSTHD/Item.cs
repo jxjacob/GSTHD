@@ -32,7 +32,7 @@ namespace GSTHD
 
             Name = data.Name;
             BackColor = data.BackColor;
-            this.isBroadcastable = data.isBroadcastable;
+            this.isBroadcastable = data.isBroadcastable && !isBroadcast;
 
             this.isDraggable = data.isDraggable;
 

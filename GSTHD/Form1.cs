@@ -193,6 +193,30 @@ namespace GSTHD
                     }
                 }
             }
+            foreach (Medallion x in this.Controls[0].Controls.OfType<Medallion>())
+            {
+                if (x.Name != "")
+                {
+                    MedallionState state = x.GetState();
+                    string conv = state.ToString();
+                    if (conv != "0,0")
+                    {
+                        thejson.Add(x.Name, conv);
+                    }
+                }
+            }
+            foreach (Song x in this.Controls[0].Controls.OfType<Song>())
+            {
+                if (x.Name != "")
+                {
+                    SongState state = x.GetWholeState();
+                    string conv = state.ToString();
+                    if (conv != "0,False,,0")
+                    {
+                        thejson.Add(x.Name, conv);
+                    }
+                }
+            }
             foreach (PanelWothBarren x in this.Controls[0].Controls.OfType<PanelWothBarren>())
             {
                 if (x.Name != "")
@@ -281,6 +305,33 @@ namespace GSTHD
                             ImageIndex = int.Parse(words[2]),
                         };
                         ((GossipStone)found).SetState(newstate);
+                    }
+                    else if (found is Medallion)
+                    {
+                        string conv = (string)x.Value;
+                        string[] words = conv.Split(',');
+                        MedallionState newstate = new MedallionState()
+                        {
+                            DungeonIndex = int.Parse(words[0]),
+                            ImageIndex = int.Parse(words[1]),
+                        };
+                        ((Medallion)found).SetState(newstate);
+                    }
+                    else if (found is Song)
+                    {
+                        string conv = (string)x.Value;
+                        string[] words = conv.Split(',');
+                        SongState newstate = new SongState()
+                        {
+                            ImageIndex = int.Parse(words[0]),
+                            MarkerState = new SongMarkerState()
+                            {
+                                HoldsImage = Boolean.Parse(words[1]),
+                                HeldImageName = words[2],
+                                ImageIndex = int.Parse(words[3]),
+                            },
+                        };
+                        ((Song)found).SetWholeState(newstate);
                     }
                     else if (found is PanelWothBarren) 
                     {

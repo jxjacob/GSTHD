@@ -834,7 +834,7 @@ namespace GSTHD
                     {
                         if (song.Visible)
                         {
-                            var s = new Song(song, settings);
+                            var s = new Song(song, settings, true);
                             panelLayout.Controls.Add(s);
                             ListUpdatables.Add(s);
                         }
@@ -865,7 +865,7 @@ namespace GSTHD
                     {
                         if (medallion.Visible)
                         {
-                            var element = new Medallion(medallion, settings);
+                            var element = new Medallion(medallion, settings, true);
                             panelLayout.Controls.Add(element);
                             panelLayout.Controls.Add(element.SelectedDungeon);
                             ListUpdatables.Add(element);
@@ -889,7 +889,7 @@ namespace GSTHD
                     foreach (var item in ListGossipStones)
                     {
                         if (item.Visible)
-                            panelLayout.Controls.Add(new GossipStone(item, settings));
+                            panelLayout.Controls.Add(new GossipStone(item, settings, true));
                     }
                 }
 
@@ -915,7 +915,7 @@ namespace GSTHD
                                         Visible = item.Visible,
                                         SizeMode= item.SizeMode
                                     };
-                                    panelLayout.Controls.Add(new GossipStone(gs, settings));
+                                    panelLayout.Controls.Add(new GossipStone(gs, settings, true));
                                 }
                             }
                         }
@@ -1051,6 +1051,7 @@ namespace GSTHD
         public string[] TinyImageCollection { get; set; }
         public string ActiveSongImage { get; set; }
         public string ActiveTinySongImage { get; set; }
+        public bool isBroadcastable { get; set; } = false;
     }
 
     public class MedallionLabel
@@ -1072,6 +1073,7 @@ namespace GSTHD
         public bool Visible { get; set; }
         public string[] ImageCollection { get; set; }
         public MedallionLabel Label { get; set; }
+        public bool isBroadcastable { get; set; } = false;
     }
 
     public class ObjectPointGrid
