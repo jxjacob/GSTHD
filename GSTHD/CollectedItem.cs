@@ -27,6 +27,12 @@ namespace GSTHD
 
         private bool isBroadcastable;
 
+        public string AutoName = null;
+        public int AutoBitmask;
+        public int AutoOffset = 0;
+
+        delegate void SetStateCallback(int state);
+
         public CollectedItem(ObjectPointCollectedItem data, Settings settings, bool isBroadcast = false)
         {
             Settings = settings;
@@ -45,6 +51,10 @@ namespace GSTHD
             Step = data.Step == 0 ? 1 : data.Step;
             CollectedItemSize = data.Size;
             isBroadcastable = data.isBroadcastable && !isBroadcast;
+
+            this.AutoName = data.AutoName;
+            this.AutoBitmask = data.AutoBitmask;
+            this.AutoOffset = data.AutoOffset;
 
             if (ImageNames.Length > 0)
             {
@@ -133,8 +143,15 @@ namespace GSTHD
 
         public void SetState(int state)
         {
-            CollectedItems = state;
-            UpdateCount();
+            if (this.InvokeRequired)
+            {
+                SetStateCallback d = new SetStateCallback(SetState);
+                this.Invoke(d, new object[] {state});
+            } else
+            {
+                CollectedItems = state;
+                UpdateCount();
+            }
         }
 
         public void IncrementState()

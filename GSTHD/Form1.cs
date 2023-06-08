@@ -21,6 +21,7 @@ namespace GSTHD
         Form1_MenuBar MenuBar;
         public Layout CurrentLayout;
         Panel LayoutContent;
+        public Autotracker TheAutotracker;
 
         PictureBox pbox_collectedSkulls;
 
@@ -64,6 +65,7 @@ namespace GSTHD
 
             LoadLayout();
             SetMenuBar();
+            //setAutoTracker();
 
             this.KeyPreview = true;
             //this.KeyDown += changeCollectedSkulls;
@@ -71,6 +73,10 @@ namespace GSTHD
 
         private void Reload()
         {
+            if (TheAutotracker != null)
+            {
+                StopAutotracker();
+            }
             LoadSettings();
             LoadLayout();
             SetMenuBar();
@@ -146,6 +152,17 @@ namespace GSTHD
             ControlExtensions.ClearAndDispose(LayoutContent);
             Reload();
             Process.GetCurrentProcess().Refresh();
+        }
+
+        public void SetAutotracker(Process emulator, uint offset)
+        {
+            TheAutotracker = new Autotracker(emulator, offset, this);
+        }
+
+        private void StopAutotracker()
+        {
+            TheAutotracker.NukeTimer();
+            TheAutotracker = null;
         }
 
         public void SaveState()

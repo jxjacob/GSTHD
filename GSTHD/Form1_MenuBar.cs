@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
@@ -45,6 +46,11 @@ namespace GSTHD
 
             // Barren
             public ToolStripMenuItem EnableBarrenColors;
+
+            // Memory Engine
+            public ToolStripMenuItem SelectEmulator;
+            public ToolStripMenuItem ConnectToEmulator;
+            public ToolStripMenuItem VerifyConnection;
         }
 
         private readonly Dictionary<Settings.DragButtonOption, string> DragButtonNames = new Dictionary<Settings.DragButtonOption, string>
@@ -66,6 +72,12 @@ namespace GSTHD
             { Settings.SongMarkerBehaviourOption.Full, "Full Drag && Drop, Click to Check" },
         };
 
+        private readonly Dictionary<Settings.SelectEmulatorOption, string> SelectEmulatorNames = new Dictionary<Settings.SelectEmulatorOption, string>
+        {
+            { Settings.SelectEmulatorOption.Project64, "Project64 3.0.1" },
+            { Settings.SelectEmulatorOption.Bizhawk, "Bizhawk (NOT WORKING)" },
+        };
+
         Form1 Form;
         Settings Settings;
         MenuStrip MenuStrip;
@@ -73,6 +85,7 @@ namespace GSTHD
         Dictionary<Settings.DragButtonOption, ToolStripMenuItem> DragButtonOptions;
         Dictionary<Settings.DragButtonOption, ToolStripMenuItem> AutocheckDragButtonOptions;
         Dictionary<Settings.SongMarkerBehaviourOption, ToolStripMenuItem> SongMarkerBehaviourOptions;
+        Dictionary<Settings.SelectEmulatorOption, ToolStripMenuItem> SelectEmulatorOptions;
         Dictionary<KnownColor, ToolStripMenuItem> LastWothColorOptions;
         Size SavedSize;
 
@@ -272,6 +285,37 @@ namespace GSTHD
                 optionMenu.DropDownItems.Add(barrenSubMenu);
             }
             MenuStrip.Items.Add(optionMenu);
+
+
+            //TODO: make it so that this menu doesnt appear if the layout doesnt actually support autotracking
+            var MemoryMenu = new ToolStripMenuItem("Memory Engine");
+            {
+                SelectEmulatorOptions = new Dictionary<Settings.SelectEmulatorOption, ToolStripMenuItem>();
+
+                int i = 0;
+                foreach (var button in SelectEmulatorNames)
+                {
+                    SelectEmulatorOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetSelectEmulator)));
+                    i++;
+                }
+
+                Items.SelectEmulator = new ToolStripMenuItem("Select Emulator", null, SelectEmulatorOptions.Values.ToArray());
+                MemoryMenu.DropDownItems.Add(Items.SelectEmulator);
+
+                Items.ConnectToEmulator = new ToolStripMenuItem("Connect to Emulator", null, new EventHandler(menuBar_ConnectToEmulator))
+                {
+                    
+                };
+                MemoryMenu.DropDownItems.Add(Items.ConnectToEmulator);
+
+                Items.VerifyConnection = new ToolStripMenuItem("Verify Connect (DEBUG)", null, new EventHandler(menuBar_ConnectToEmulator))
+                {
+
+                };
+                MemoryMenu.DropDownItems.Add(Items.VerifyConnection);
+            }
+            MenuStrip.Items.Add(MemoryMenu);
+
         }
 
         public void ReadSettings()
@@ -486,6 +530,19 @@ namespace GSTHD
             Settings.Write();
         }
 
+        private void menuBar_SetSelectEmulator(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            SelectEmulatorOptions[Settings.SelectEmulator].Checked = false;
+            choice.Checked = true;
+
+            var option = SelectEmulatorOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.SelectEmulator = option.Key;
+            Settings.Write();
+        }
+
         //private void menuBar_ToggleAutocheckSongs(object sender, EventArgs e)
         //{
         //    Items.Autocheck.Checked = !Items.Autocheck.Checked;
@@ -556,6 +613,36 @@ namespace GSTHD
             Settings.LastWothColor = option.Key;
             Settings.Write();
             Form.UpdateLayoutFromSettings();
+        }
+
+        public void menuBar_ConnectToEmulator(object sender, EventArgs e)
+        {
+            // connect to emulator as speficied through the other setting
+            var result = AttachToEmulators.attachToProject64();
+            //Debug.WriteLine("diddy moves? " + Memory.ReadInt32(theprogram, 0xDFE40000 + 0x759260));
+            if (result != null)
+            {
+                if (result.Item1 != null)
+                {
+                    Form.SetAutotracker(result.Item1, result.Item2);
+                    MessageBox.Show("Connection to PJ64 sucessful");
+                }
+            }
+            //uint offset = 0xDFE40000;
+            //Debug.WriteLine("diddy moves: "+ Memory.ReadInt8(theprogram, offset + 0x7FC9AD));
+            //Debug.WriteLine("diddy slam: " + Memory.ReadInt8(theprogram, offset + 0x7FC9AC));
+            //for (uint i = 0; i < 128; i++)
+            //{
+            //    Debug.WriteLine("checking at " + i + ":" + Memory.ReadInt8(theprogram, offset + 0x7FC9A0 + i));
+            //}
+
+        }
+
+        public void menuBar_VerifyConnection(object sender, EventArgs e)
+        {
+            // spit out so much info to make sure shit does infact connect
+            // will be removed eventually
+
         }
 
         private class Form1_MenuBar_ColorTable_LightTheme : ProfessionalColorTable

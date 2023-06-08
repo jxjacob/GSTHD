@@ -21,6 +21,12 @@ namespace GSTHD
         string DoubleBroadcastName;
         bool isDraggable;
 
+        public string AutoName = null;
+        public int AutoBitmask;
+        public int AutoOffset = 0;
+
+        delegate void SetStateCallback(int state);
+
         public Item(ObjectPoint data, Settings settings, bool isBroadcast = false)
         {
             Settings = settings;
@@ -35,6 +41,10 @@ namespace GSTHD
             this.isBroadcastable = data.isBroadcastable && !isBroadcast;
 
             this.isDraggable = data.isDraggable;
+
+            this.AutoName = data.AutoName;
+            this.AutoBitmask = data.AutoBitmask;
+            this.AutoOffset = data.AutoOffset;
 
             if (data.DoubleBroadcastSide != null) this.DoubleBroadcastSide = data.DoubleBroadcastSide;
             if (data.DoubleBroadcastName != null) this.DoubleBroadcastName = data.DoubleBroadcastName;
@@ -126,8 +136,16 @@ namespace GSTHD
 
         public void SetState(int state)
         {
-            ImageIndex = state;
-            UpdateImage();
+            if (this.InvokeRequired)
+            {
+                SetStateCallback d = new SetStateCallback(SetState);
+                this.Invoke(d, new object[] { state });
+            }
+            else
+            {
+                ImageIndex = state;
+                UpdateImage();
+            }
         }
 
         public void IncrementState()
