@@ -16,8 +16,9 @@ namespace GSTHD
         Size DoubleItemSize;
 
         bool isBroadcastable;
+        public string AutoName = null;
 
-        public DoubleItem(ObjectPoint data)
+        public DoubleItem(ObjectPoint data, bool isBroadcast = false)
         {
             if (data.ImageCollection == null)
                 ImageNames = new string[0];
@@ -31,18 +32,19 @@ namespace GSTHD
             if (ImageNames.Length > 0)
             {
                 this.Image = Image.FromFile(@"Resources/" + ImageNames[0]);
-                this.SizeMode = PictureBoxSizeMode.StretchImage;
+                this.SizeMode = PictureBoxSizeMode.Zoom;
                 
             }
 
             this.BackColor = Color.Transparent;
             this.isBroadcastable = data.isBroadcastable;
+            this.AutoName = data.AutoName;
             this.Location = new Point(data.X, data.Y);
             this.TabStop = false;
             this.AllowDrop = false;
 
             // this is the most scuffed way of only giving the ability to click to the items to form1 (main window) and not form2 (broadcast)
-            if (Application.OpenForms[Application.OpenForms.Count - 1] is Form1)
+            if (!isBroadcast)
             {
                 this.MouseUp += this.Click_MouseUp;
                 this.MouseDown += this.Click_MouseDown;
@@ -144,6 +146,20 @@ namespace GSTHD
         public void ToggleRightState()
         {
             if (isColoredRight) DecrementRightState(); else IncrementRightState();
+        }
+
+        public int GetState()
+        {
+            int run = 0;
+            if (isColoredLeft) { run = run ^ 1; }
+            if (isColoredRight) { run = run ^ 2; }
+            return run;
+        }
+
+        public void SetState(int state)
+        {
+            if ((state & 1) == 1) { IncrementLeftState(); }
+            if ((state & 2) == 2) { IncrementRightState(); }
         }
 
         public void ResetState()

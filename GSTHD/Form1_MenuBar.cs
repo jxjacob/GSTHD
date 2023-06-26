@@ -75,7 +75,8 @@ namespace GSTHD
         private readonly Dictionary<Settings.SelectEmulatorOption, string> SelectEmulatorNames = new Dictionary<Settings.SelectEmulatorOption, string>
         {
             { Settings.SelectEmulatorOption.Project64, "Project64 3.0.1" },
-            { Settings.SelectEmulatorOption.Bizhawk, "Bizhawk (NOT WORKING)" },
+            { Settings.SelectEmulatorOption.Bizhawk, "Bizhawk-DK64" },
+            { Settings.SelectEmulatorOption.RMG, "Rosalie's Mupen GUI" },
         };
 
         Form1 Form;
@@ -286,9 +287,7 @@ namespace GSTHD
             }
             MenuStrip.Items.Add(optionMenu);
 
-
-            //TODO: make it so that this menu doesnt appear if the layout doesnt actually support autotracking
-            var MemoryMenu = new ToolStripMenuItem("Memory Engine");
+            var MemoryMenu = new ToolStripMenuItem("Autotracker");
             {
                 SelectEmulatorOptions = new Dictionary<Settings.SelectEmulatorOption, ToolStripMenuItem>();
 
@@ -308,11 +307,11 @@ namespace GSTHD
                 };
                 MemoryMenu.DropDownItems.Add(Items.ConnectToEmulator);
 
-                Items.VerifyConnection = new ToolStripMenuItem("Verify Connect (DEBUG)", null, new EventHandler(menuBar_ConnectToEmulator))
-                {
+                //Items.VerifyConnection = new ToolStripMenuItem("Verify Connect (DEBUG)", null, new EventHandler(menuBar_ConnectToEmulator))
+                //{
 
-                };
-                MemoryMenu.DropDownItems.Add(Items.VerifyConnection);
+                //};
+                //MemoryMenu.DropDownItems.Add(Items.VerifyConnection);
             }
             MenuStrip.Items.Add(MemoryMenu);
 
@@ -342,6 +341,8 @@ namespace GSTHD
             LastWothColorOptions[Settings.LastWothColor].Checked = true;
 
             Items.EnableBarrenColors.Checked = Settings.EnableBarrenColors;
+
+            SelectEmulatorOptions[Settings.SelectEmulator].Checked = true;
         }
 
         public void SetRenderer()
@@ -572,11 +573,6 @@ namespace GSTHD
             Form.UpdateLayoutFromSettings();
         }
 
-        //private void menuBar_LoadLayout(object sender, EventArgs e)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
         private void menuBar_ToggleEnableDuplicateWotH(object sender, EventArgs e)
         {
             // Items.EnableLastWoth.Enabled = !Items.EnableLastWoth.Enabled;
@@ -617,24 +613,66 @@ namespace GSTHD
 
         public void menuBar_ConnectToEmulator(object sender, EventArgs e)
         {
-            // connect to emulator as speficied through the other setting
-            var result = AttachToEmulators.attachToProject64();
-            //Debug.WriteLine("diddy moves? " + Memory.ReadInt32(theprogram, 0xDFE40000 + 0x759260));
-            if (result != null)
+            if (Form.CurrentLayout.App_Settings.AutotrackingGame != "")
             {
-                if (result.Item1 != null)
+                // connect to emulator as speficied through the other setting
+                switch (Settings.SelectEmulator.ToString())
                 {
-                    Form.SetAutotracker(result.Item1, result.Item2);
-                    MessageBox.Show("Connection to PJ64 sucessful");
+                    case "Project64":
+                        var resultPJ = AttachToEmulators.attachToProject64(Form);
+                        if (resultPJ != null)
+                        {
+                            if (resultPJ.Item1 != null)
+                            {
+                                Form.SetAutotracker(resultPJ.Item1, resultPJ.Item2);
+                                MessageBox.Show("Connection to PJ64 sucessful");
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("Could not conenct to PJ64", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        break;
+                    case "Bizhawk":
+                        var resultBH = AttachToEmulators.attachToBizhawk(Form);
+                        if (resultBH != null)
+                        {
+                            if (resultBH.Item1 != null)
+                            {
+                                Form.SetAutotracker(resultBH.Item1, resultBH.Item2);
+                                MessageBox.Show("Connection to Bizhawk-DK64 sucessful");
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("Could not conenct to Bizhawk-DK64", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        break;
+                    case "RMG":
+                        var resultRMG = AttachToEmulators.attachToRMG(Form);
+                        if (resultRMG != null)
+                        {
+                            if (resultRMG.Item1 != null)
+                            {
+                                Form.SetAutotracker(resultRMG.Item1, resultRMG.Item2);
+                                MessageBox.Show("Connection to RMG sucessful");
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("Could not conenct to RMG", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        break;
+                    default:
+                        MessageBox.Show("No supported emulator selected.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        break;
                 }
+            } else
+            {
+                MessageBox.Show("Current layout does not support autotracking.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            //uint offset = 0xDFE40000;
-            //Debug.WriteLine("diddy moves: "+ Memory.ReadInt8(theprogram, offset + 0x7FC9AD));
-            //Debug.WriteLine("diddy slam: " + Memory.ReadInt8(theprogram, offset + 0x7FC9AC));
-            //for (uint i = 0; i < 128; i++)
-            //{
-            //    Debug.WriteLine("checking at " + i + ":" + Memory.ReadInt8(theprogram, offset + 0x7FC9A0 + i));
-            //}
+            
+            
 
         }
 

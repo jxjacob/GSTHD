@@ -182,6 +182,7 @@ namespace GSTHD
             HeldImageName = state.HeldImageName;
             ImageIndex = state.ImageIndex;
             UpdateImage();
+            DragBehaviour.SaveChanges();
         }
 
         public void IncrementState()

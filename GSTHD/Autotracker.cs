@@ -20,6 +20,8 @@ namespace GSTHD
         public int numBytes;
         public int currentValue = 0;
         public uint targetValue;
+        public int bitmask = 0;
+        public int offset;
         public string type;
         public string group;
     }
@@ -30,11 +32,13 @@ namespace GSTHD
         public int currentValue;
         public int count = 0;
         public int countMax;
+        public bool isDouble = false;
     }
     public class Autotracker
     {
         private Process emulator;
         private uint offset;
+        private ulong offset64;
 
         private List<TrackedAddress> trackedAddresses = new List<TrackedAddress>();
         private List<TrackedGroup> trackedGroups = new List<TrackedGroup>();
@@ -50,11 +54,32 @@ namespace GSTHD
         private System.Threading.Timer timer;
         private Form1 form;
 
+        private int timeout;
+        private bool is64 = false;
+
+        //32-bit version
         public Autotracker(Process theProgram, uint foundOffset, Form1 theForm)
         {
             emulator = theProgram;
             offset = foundOffset;
             form = theForm;
+
+            if (form.CurrentLayout.App_Settings.AutotrackingGame != null)
+            {
+                SetGameStateTargets(form.CurrentLayout.App_Settings.AutotrackingGame);
+
+                Debug.WriteLine("Beginning timer with " + trackedAddresses.Count + " addresses and " + trackedGroups.Count + " groups");
+                timer = new System.Threading.Timer(MainTracker, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+            }
+        }
+
+        //64-bit version
+        public Autotracker(Process theProgram, ulong foundOffset, Form1 theForm)
+        {
+            emulator = theProgram;
+            offset64 = foundOffset;
+            form = theForm;
+            is64 = true;
 
             if (form.CurrentLayout.App_Settings.AutotrackingGame != null)
             {
@@ -82,7 +107,28 @@ namespace GSTHD
                             //int dt = GoRead(ta.address, ta.numBytes);
                             //Debug.WriteLine(ta.name + ": " + dt);
                             //Debug.WriteLine(" ");
-                            result.runningvalue += GoRead(ta.address, ta.numBytes);
+                            if (ta.bitmask!= 0)
+                            {
+                                if ((GoRead(ta.address, ta.numBytes) & ta.bitmask) == ta.bitmask)
+                                {
+                                    if (result.isDouble) { 
+                                        if (ta.type == "doubleitem_l")
+                                        {
+                                            result.runningvalue = result.runningvalue ^ 1;
+                                        } else
+                                        {
+                                            result.runningvalue = result.runningvalue ^ 2;
+                                        }
+                                    } else
+                                    {
+                                        result.runningvalue++;
+                                    }                                    
+                                }
+                            } else
+                            {
+                                result.runningvalue += GoRead(ta.address, ta.numBytes);
+                            }
+
                             result.count++;
                             if (result.count == result.countMax)
                             {
@@ -104,72 +150,50 @@ namespace GSTHD
 
         public int GoRead(uint addr, int numOfBits)
         {
-            //Debug.WriteLine("reading " + numOfBits + " bits at address " + addr);
-            // address fixing (endian bullshit)
-            if (numOfBits == 8)
+            if (!is64)
             {
-                switch (addr % 4)
+                switch (numOfBits)
                 {
-                    case 0:
-                        addr += 3;
-                        break;
-                    case 1:
-                        addr += 1;
-                        break;
-                    case 2:
-                        addr -= 1;
-                        break;
-                    case 3:
-                        addr -= 3;
-                        break;
-                }
-            } else if (numOfBits == 16)
-            {
-                // there is definitely a better way of implementing this with a smaller modulo but idc
-                switch (addr % 16) {
-                    case 2:
-                    case 3:
-                    case 6:
-                    case 7:
-                    case 10:
-                    case 11:
-                    case 14:
-                    case 15:
-                        addr -= 2;
-                        break;
-                    case 0:
-                    case 1:
-                    case 4:
-                    case 5:
                     case 8:
-                    case 9:
-                    case 12:
-                    case 13:
-                        addr += 2;
-                        break;
+                        return Memory.ReadInt8(emulator, offset + Memory.Int8AddrFix(addr));
+                    case 16:
+                        return Memory.ReadInt16(emulator, offset + Memory.Int16AddrFix(addr));
+                    case 32:
+                        return Memory.ReadInt32(emulator, offset + addr);
+                    default:
+                        Debug.WriteLine("could not define how many bits to read");
+                        return 0;
+                }
+            } else
+            {
+                switch (numOfBits)
+                {
+                    case 8:
+                        return Memory.ReadInt8(emulator, offset64 + Memory.Int8AddrFix(addr));
+                    case 16:
+                        return Memory.ReadInt16(emulator, offset64 + Memory.Int16AddrFix(addr));
+                    case 32:
+                        return Memory.ReadInt32(emulator, offset64 + addr);
+                    default:
+                        Debug.WriteLine("could not define how many bits to read");
+                        return 0;
                 }
             }
-
-
-            switch (numOfBits)
-            {
-                case 8:
-                    return Memory.ReadInt8(emulator, offset + addr);
-                case 16:
-                    return Memory.ReadInt16(emulator, offset + addr);
-                case 32:
-                    return Memory.ReadInt32(emulator, offset + addr);
-                default:
-                    Debug.WriteLine("could not define how many bits to read");
-                    return 0;
-            }
+            
         }
 
         private void UTSingle(TrackedAddress ta, int theRead)
         {
             if (ta.currentValue != theRead)
             {
-                Debug.WriteLine(ta.name + ": " + theRead);
+                //if (ta.bitmask != 0)
+                //{
+                //    Debug.WriteLine(ta.name + ": " + ((theRead & ta.bitmask) == ta.bitmask));
+                //} else
+                //{
+                //    Debug.WriteLine(ta.name + ": " + theRead);
+                //}
+                
 
                 // i can't fucking stand this method
                 foreach (Control thing in form.Controls[0].Controls)
@@ -178,14 +202,16 @@ namespace GSTHD
                     {
                         if (((Item)thing).AutoName == ta.name)
                         {
-                            UpdateTrackerItem((Item)thing, theRead);
+                            UpdateTrackerItem((Item)thing, ta, theRead);
+                            break;
                         }
 
                     } else if (ta.type == "collectable" && thing is CollectedItem)
                     {
                         if (((CollectedItem)thing).AutoName == ta.name)
                         {
-                            UpdateTrackerCollectable((CollectedItem)thing, theRead);
+                            UpdateTrackerCollectable((CollectedItem)thing, ta, theRead);
+                            break;
                         }
 
                     }
@@ -198,7 +224,7 @@ namespace GSTHD
         {
             if (tg.currentValue != tg.runningvalue)
             {
-                Debug.WriteLine(tg.name + ": " + tg.runningvalue);
+                //Debug.WriteLine(tg.name + ": " + tg.runningvalue);
 
                 // i can't fucking stand this method
                 foreach (Control thing in form.Controls[0].Controls)
@@ -208,47 +234,62 @@ namespace GSTHD
                     {
                         if (((CollectedItem)thing).AutoName == tg.name)
                         {
-                            UpdateTrackerCollectable((CollectedItem)thing, tg.runningvalue);
+                            UpdateTrackerCollectable((CollectedItem)thing, new TrackedAddress(), tg.runningvalue);
+                            break;
                         }
 
+                    }
+                    if (thing is DoubleItem)
+                    {
+                        if (((DoubleItem)thing).AutoName == tg.name)
+                        {
+                            UpdateTrackerDoubleItem((DoubleItem)thing, tg.runningvalue);
+                            break;
+                        }
                     }
                 }
                 tg.currentValue = tg.runningvalue;
             }
         }
 
-        private void UpdateTrackerItem(Item theItem, int theRead)
+        private void UpdateTrackerItem(Item theItem, TrackedAddress ta, int theRead)
         {
-            if (theItem.AutoBitmask != 0)
+            if (ta.bitmask != 0)
             {
-                var theumuh = theRead & theItem.AutoBitmask;
-                if (theumuh != 0)
+                var theumuh = theRead & ta.bitmask;
+                if (theumuh == ta.bitmask)
                 {
-                    theItem.SetState(1 + theItem.AutoOffset);
-                    //break;
+                    theItem.SetState(1 + ta.offset);
+                } else if (theumuh == 0)
+                {
+                    theItem.SetState(0 + ta.offset);
                 }
             }
             else
             {
-                theItem.SetState(theRead + theItem.AutoOffset);
+                theItem.SetState(theRead + ta.offset);
             }
         }
 
-        private void UpdateTrackerCollectable(CollectedItem theItem, int theRead)
+        private void UpdateTrackerCollectable(CollectedItem theItem, TrackedAddress ta, int theRead)
         {
-            if (theItem.AutoBitmask != 0)
+            if (ta.bitmask != 0)
             {
-                var theumuh = theRead & theItem.AutoBitmask;
+                var theumuh = theRead & ta.bitmask;
                 if (theumuh != 0)
                 {
-                    theItem.SetState(1 + theItem.AutoOffset);
-                    //break;
+                    theItem.SetState(1 + ta.offset);
                 }
             }
             else
             {
-                theItem.SetState(theRead + theItem.AutoOffset);
+                theItem.SetState(theRead + ta.offset);
             }
+        }
+
+        private void UpdateTrackerDoubleItem(DoubleItem theItem, int theRead)
+        {
+            theItem.SetState(theRead);
         }
 
         public bool VerifyGameState()
@@ -268,10 +309,16 @@ namespace GSTHD
         {
             if (GoRead(desiredGameAddr, desiredGameBytes) == desiredGameValue)
             {
+                timeout = 0;
                 return true;
             }
-            Debug.WriteLine("incorrect game. stopping timer.");
-            StopTimer();
+            timeout++;
+            if (timeout > 10)
+            {
+                StopTimer();
+                MessageBox.Show("Lost connection to " + emulator.ProcessName + ". Please reconnect.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Debug.WriteLine("incorrect game. stopping timer.");
+            }
             return false;
         }
 
@@ -326,20 +373,38 @@ namespace GSTHD
                     {
                         temp.targetValue = 0;
                     }
-                    temp.type = parts[4];
-                    temp.group = parts[5];
+                    if (parts[4] != "")
+                    {
+                        temp.bitmask = int.Parse(parts[4]);
+                    }
+                    else
+                    {
+                        temp.bitmask = 0;
+                    }
+                    if (parts[5] != "")
+                    {
+                        temp.offset = int.Parse(parts[5]);
+                    }
+                    else
+                    {
+                        temp.offset = 0;
+                    }
+                    temp.type = parts[6];
+                    temp.group = parts[7];
                     if (temp.group != "")
                     {
                         if (!foundGroups.Contains(temp.group))
                         {
+                            bool isD = (temp.type == "doubleitem_l" || temp.type == "doubleitem_r") ;
                             foundGroups.Add(temp.group);
-                            trackedGroups.Add(new TrackedGroup() { name = temp.group, countMax = 1 });
+                            trackedGroups.Add(new TrackedGroup() { name = temp.group, countMax = 1, isDouble = isD });
                         } else
                         {
                             TrackedGroup result = trackedGroups.Find(x => x.name.Equals(temp.group));
                             result.countMax++;
                         }
                     }
+                    //Debug.WriteLine(temp.name + " :: " + temp.bitmask);
                     trackedAddresses.Add(temp);
                 }
             }

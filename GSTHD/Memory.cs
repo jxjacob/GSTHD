@@ -1,62 +1,44 @@
 using System;
+using System.Activities.Expressions;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+
+
 
 namespace GSTHD
 {
     public static class Memory
     {
-        // Public Function ReadProcessMemory(ByVal hProcess As IntPtr, ByVal lpBaseAddress As UIntPtr, <[In](), Out()> ByVal buffer As Byte(), ByVal size As UInt32, ByRef lpNumberOfBytesRead As IntPtr) As Int32
+        const int PROCESS_QUERY_INFORMATION = 0x0400;
+        const int MEM_COMMIT = 0x00001000;
+        const int PAGE_READWRITE = 0x04;
+        const int PROCESS_WM_READ = 0x0010;
+
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
+
         [DllImport("kernel32", SetLastError = true)]
         public static extern int ReadProcessMemory(IntPtr hProcess, UIntPtr lpBaseAddress, Byte[] buffer, UInt32 size, IntPtr lpNumberOfBytesRead);
-        //    End Function
 
-        //    <DllImport("kernel32.dll")> _
-        //    Public Function WriteProcessMemory(ByVal hProcess As IntPtr, ByVal lpBaseAddress As UIntPtr, <[In] (), Out() > ByVal buffer As Byte(), ByVal size As UInt32, ByRef lpNumberOfBytesWritten As IntPtr) As Int32
-        //    End Function
+        [DllImport("psapi.dll", SetLastError = true)]
+        public static extern bool EnumProcessModules(IntPtr hProcess, [Out] IntPtr lphModule, UInt32 cb, [MarshalAs(UnmanagedType.U4)] out UInt32 lpcbNeeded);
 
-        //    'Public Function WriteInt16(ByVal P As Process, ByVal memAdr As Int32, ByVal value As Integer) As Boolean
-        //    '   Return WriteBytes(P, memAdr, BitConverter.GetBytes(value), 2)
-        //    'End Function
+        // functions to read memory at certain lengths
 
-        //    Public Function WriteInt16(ByVal P As Process, ByVal memAdr As UInteger, ByVal value As Int16) As Boolean
-        //        Return WriteBytes(P, memAdr, BitConverter.GetBytes(value), 2)
-        //    End Function
 
-        //    Public Function WriteInt32(ByVal P As Process, ByVal memAdr As UInteger, ByVal value As Integer) As Boolean
-        //        Return WriteBytes(P, memAdr, BitConverter.GetBytes(value), 4)
-        //    End Function
-
-        //    Public Function ReadInt8(ByVal P As Process, ByVal memAdr As UInteger) As Integer
-        //        Return ReadBytes(P, memAdr, 1)(0)
-        //    End Function
+        //32-bit functions
         public static int ReadInt8(Process P, uint memAdr)
         {
             return ReadBytes(P, memAdr, 1)[0];
         }
-
-        //    Public Function ReadInt16(ByVal P As Process, ByVal memAdr As UInteger) As Integer
-        //        Return BitConverter.ToInt16(ReadBytes(P, memAdr, 2), 0)
-        //    End Function
         public static int ReadInt16(Process P, uint memAdr)
         {
             return BitConverter.ToInt16(ReadBytes(P, memAdr, 2), 0);
         }
-
-        //    Public Function ReadInt32(ByVal P As Process, ByVal memAdr As UInteger) As Integer
-        //        Return BitConverter.ToInt32(ReadBytes(P, memAdr, 4), 0)
-        //    End Function
         public static int ReadInt32(Process P, uint memAdr)
         {
             return BitConverter.ToInt32(ReadBytes(P, memAdr, 4), 0);
         }
-
-        //    Public Function ReadUInt32(ByVal P As Process, ByVal memAdr As UInteger) As UInteger
-        //        Dim ptrBytesRead As Byte
-        //        Dim buffer As Byte() = New Byte(3) { }
-        //ReadProcessMemory(P.Handle, New UIntPtr(memAdr), buffer, 4, ptrBytesRead)
-        //        Return BitConverter.ToUInt32(buffer, 0)
-        //    End Function
         public static UInt32 ReadUInt32(Process P, uint memAdr)
         {
             IntPtr ptrBytesRead = new IntPtr(0);
@@ -64,20 +46,6 @@ namespace GSTHD
             ReadProcessMemory(P.Handle, (UIntPtr)memAdr, buffer, 4, ptrBytesRead);
             return BitConverter.ToUInt32(ReadBytes(P, memAdr, 4), 0);
         }
-
-        //    'Private Function ReadByte(ByVal P As Process, ByVal memAdr As Integer, ByVal bytesToRead As UInteger) As Byte()
-        //    'Dim ptrBytesRead As Byte
-        //    'Dim buffer(0) As Byte
-        //    'ReadProcessMemory(P.Handle, New IntPtr(memAdr), buffer, bytesToRead, ptrBytesRead)
-        //    'Return buffer
-        //    'End Function
-
-        //    Private Function ReadBytes(ByVal P As Process, ByVal memAdr As UInteger, ByVal bytesToRead As UInteger) As Byte()
-        //        Dim ptrBytesRead As Byte
-        //        Dim buffer As Byte() = New Byte(bytesToRead - 1) { }
-        //ReadProcessMemory(P.Handle, New UIntPtr(memAdr), buffer, bytesToRead, ptrBytesRead)
-        //        Return buffer
-        //    End Function
         private static byte[] ReadBytes(Process P, uint memAdr, uint bytesToRead)
         {
             IntPtr ptrBytesRead = new IntPtr(0);
@@ -86,19 +54,103 @@ namespace GSTHD
             return buffer;
         }
 
-        //    Private Function WriteBytes(ByVal P As Process, ByVal memAdr As UInteger, ByVal bytes As Byte(), ByVal length As UInteger) As Boolean
-        //        Dim bytesWritten As IntPtr
-        //        Dim result As Integer = WriteProcessMemory(P.Handle, New UIntPtr(memAdr), bytes, length, bytesWritten)
-        //        Return result<> 0
-        //    End Function
+        //64-bit functions
+        public static int ReadInt8(Process P, ulong memAdr)
+        {
+            return ReadBytes(P, memAdr, 1)[0];
+        }
+
+        public static int ReadInt16(Process P, ulong memAdr)
+        {
+            return BitConverter.ToInt16(ReadBytes(P, memAdr, 2), 0);
+        }
+
+        public static int ReadInt32(Process P, ulong memAdr)
+        {
+            return BitConverter.ToInt32(ReadBytes(P, memAdr, 4), 0);
+        }
+
+        public static ulong ReadInt64(Process P, ulong memAdr)
+        {
+            return BitConverter.ToUInt64(ReadBytes(P, memAdr, 8), 0);
+        }
+
+        private static byte[] ReadBytes(Process P, ulong memAdr, uint bytesToRead)
+        {
+            IntPtr processHandle = OpenProcess(PROCESS_WM_READ, false, P.Id);
+            IntPtr ptrBytesRead = new IntPtr(0);
+            byte[] buffer = new byte[bytesToRead];
+            ReadProcessMemory(processHandle, new UIntPtr(memAdr), buffer, bytesToRead, ptrBytesRead);
+            return buffer;
+        }
+
+        // general functions that needed a home somewhere lol
+
+        public static uint Int8AddrFix(uint addr)
+        {
+            switch (addr % 4)
+            {
+                case 0:
+                    return addr + 3;
+                case 1:
+                    return addr + 1;
+                case 2:
+                    return addr - 1;
+                case 3:
+                    return addr - 3;
+                default:
+                    return addr;
+            }
+        }
 
 
+        public static uint Int16AddrFix(uint addr)
+        {
+            switch (addr % 4)
+            {
+                case 2:
+                case 3:
+                    return addr - 2;
+                case 0:
+                case 1:
+                    return addr + 2;
+                default:
+                    return addr;
+            }
+        }
 
+        public static ulong Int8AddrFix(ulong addr)
+        {
+            switch (addr % 4)
+            {
+                case 0:
+                    return addr + 3;
+                case 1:
+                    return addr + 1;
+                case 2:
+                    return addr - 1;
+                case 3:
+                    return addr - 3;
+                default:
+                    return addr;
+            }
+        }
+
+
+        public static ulong Int16AddrFix(ulong addr)
+        {
+            switch (addr % 4)
+            {
+                case 2:
+                case 3:
+                    return addr - 2;
+                case 0:
+                case 1:
+                    return addr + 2;
+                default:
+                    return addr;
+            }
+        }
 
     }
-
 }
-
-//Module Memory
-
-//End Module

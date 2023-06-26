@@ -1,4 +1,7 @@
 using System;
+using System.Activities.Expressions;
+using System.Activities.Statements;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -8,56 +11,81 @@ namespace GSTHD
 {
     public static class AttachToEmulators
     {
-        //Contains all the functions to attack to each emulator
-
-        //    Public Function attachToProject64(Optional doOffsetScan As Boolean = False) As Process
-        public static Tuple<Process, uint> attachToProject64(bool doOffsetScan = false)
+        public static Tuple<uint, int, uint> getGameVerificationInfo(string gameFile)
         {
-            //Dim target As Process = Nothing
-            Process target = null;
+            string pathto = Application.StartupPath + "/Autotrackers/" + gameFile;
 
-            //            ' Try to attach to the first instance of project64
-            //            Try
-            //                target = Process.GetProcessesByName("project64")(0)
-            //            Catch ex As Exception
-            //                Return Nothing
-            //            End Try
+            string[] lines = System.IO.File.ReadAllLines(pathto);
+            foreach (string line in lines)
+            {
+                string[] parts = line.Split(',');
+                if (parts[0] == "game_verification")
+                {
+                    // Address, Bytes, Value
+                    return Tuple.Create((uint)Convert.ToInt32(parts[1], 16), int.Parse(parts[2]), (uint)Convert.ToInt32(parts[3], 16));
+                }
+            }
+            MessageBox.Show("Could not attach to emulator. Could not find \"game_verification\" entry within " + gameFile, "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return null;
+        }
+
+        public static Tuple<Process, uint> attachToProject64(Form1 baseForm, bool doOffsetScan = false)
+        {
+            Process target = null;
             try
             {
                 target = Process.GetProcessesByName("project64")[0];
-            } catch(Exception e)
+            }
+            catch (Exception)
             {
                 return null;
             }
 
 
-            //            If doOffsetScan Then
-            //                ' So some people's pj64 has a different offset, this will help determine it
-            //                For i = &HDFD00000 To &HE01FFFFF Step 16
-            //                    If Memory.ReadInt32(target, i + &H11A5EC) = 1514490948 Then
-            //                        .rtbAddLine(Hex(i))
-            //                    End If
-            //                Next
-            //                .rtbAddLine("Done")
-            //                Return target
-            //            End If
-
 
             uint romAddrStart = 0;
+            var gameInfo = getGameVerificationInfo(baseForm.CurrentLayout.App_Settings.AutotrackingGame);
             if (doOffsetScan)
             {
                 Debug.WriteLine("going in");
-                // account for different pj64 offsets(?)
+                // bruteforce different pj64 offsets
                 for (uint potOff = 0xDFD00000; potOff < 0xE01FFFFF; potOff += 16)
                 {
-                    // 1146048075
-                    // 0x5A454C44 is ZELD at 0x8011A5EC
-                    // 0x454C4441 is ELDA
-                    if (Memory.ReadInt32(target, potOff + 0x759260) == 0x444F4E4B)
+
+                    // checks the emu for the verification bits
+                    if (gameInfo.Item2 == 8)
                     {
-                        Debug.WriteLine(potOff.ToString("X"));
-                        romAddrStart = potOff;
-                        break;
+                        uint addr = Memory.Int8AddrFix(gameInfo.Item1);
+                        if (Memory.ReadInt8(target, potOff + addr) == gameInfo.Item3)
+                        {
+                            Debug.WriteLine(potOff.ToString("X"));
+                            romAddrStart = potOff;
+                            break;
+                        }
+                    }
+                    else if (gameInfo.Item2 == 16)
+                    {
+                        uint addr = Memory.Int16AddrFix(gameInfo.Item1);
+                        if (Memory.ReadInt16(target, potOff + addr) == gameInfo.Item3)
+                        {
+                            Debug.WriteLine(potOff.ToString("X"));
+                            romAddrStart = potOff;
+                            break;
+                        }
+                    }
+                    else if (gameInfo.Item2 == 32)
+                    {
+                        if (Memory.ReadInt32(target, potOff + gameInfo.Item1) == gameInfo.Item3)
+                        {
+                            Debug.WriteLine(potOff.ToString("X"));
+                            romAddrStart = potOff;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Incorrect bytes set for verification.\tMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return null;
                     }
                 }
                 Debug.WriteLine("Done");
@@ -83,18 +111,36 @@ namespace GSTHD
 
                 }
 
-                int dk64check = 0;
-
+                int gamecheck = 0;
                 try
                 {
-                    dk64check = Memory.ReadInt32(target, romAddrStart + 0x759260);
+                    if (gameInfo.Item2 == 8)
+                    {
+                        uint addr = Memory.Int8AddrFix(gameInfo.Item1);
+                        gamecheck = Memory.ReadInt8(target, romAddrStart + addr);
+                    }
+                    else if (gameInfo.Item2 == 16)
+                    {
+                        uint addr = Memory.Int16AddrFix(gameInfo.Item1);
+                        gamecheck = Memory.ReadInt16(target, romAddrStart + addr);
+                    }
+                    else if (gameInfo.Item2 == 32)
+                    {
+                        gamecheck = Memory.ReadInt32(target, romAddrStart + gameInfo.Item1);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Incorrect bytes set for verification.\tMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return null;
+                    }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                     Debug.WriteLine("yeah bud shits fucked");
+                    MessageBox.Show(e.Message, "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
-                if (dk64check == 0x444F4E4B)
+                if (gamecheck == gameInfo.Item3)
                 {
                     Debug.WriteLine("verifyably pj64");
                     return Tuple.Create(target, romAddrStart);
@@ -105,40 +151,201 @@ namespace GSTHD
         }
 
 
-        
+        public static Tuple<Process, uint> attachToBizhawk(Form1 baseForm)
+        {
+            Process target = null;
+            try
+            {
+                target = Process.GetProcessesByName("emuhawk")[0];
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            Debug.WriteLine("found hawk");
 
-        //            ' I have found 3 different addresses when connecting to project 64
-        //            For i = 0 To 3
-        //                Select Case i
-        //                    Case 0
-        //                        .romAddrStart = &HDFE40000UI
-        //                    Case 1
-        //                        .romAddrStart = &HDFE70000UI
-        //                    Case 2
-        //                        .romAddrStart = &HDFFB0000UI
-        //                    Case Else
-        //                        Return Nothing
-        //                End Select
+            uint romAddrStart = 0;
+            var gameInfo = getGameVerificationInfo(baseForm.CurrentLayout.App_Settings.AutotrackingGame);
 
-        //                ' Try to read what should be the first part of the ZELDAZ check
-        //                Dim ootCheck As Integer = 0
 
-        //                Try
-        //                    ootCheck = Memory.ReadInt32(target, .romAddrStart + &H11A5EC)
-        //                Catch ex As Exception
-        //                    MessageBox.Show("quickRead Problem: " & vbCrLf & ex.Message & vbCrLf & (.romAddrStart + &H11A5EC).ToString, "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-        //                End Try
+            Int64 addressDLL = 0;
+            foreach (ProcessModule mo in target.Modules)
+            {
+                if (mo.ModuleName.ToLower() == "mupen64plus.dll")
+                {
+                    addressDLL = mo.BaseAddress.ToInt64();
+                    break;
+                }
+            }
 
-        //                ' If it matches, set emulator variable and leave the FOR LOOP
-        //                If ootCheck = 1514490948 Then
-        //                    .emulator = "project64"
-        //                    Exit For
-        //                End If
-        //            Next
+            if (addressDLL == 0)
+            {
+                return null;
+            }
+            Debug.WriteLine("found dll");
 
-        //            ' Return the process
-        //            Return target
-        //        End With
-        //    End Function
+            //Dim attemptOffset As Int64 = 0
+            //for (int i = 0; i < 2; i++){
+            //    switch (i)
+            //    {
+            //        case 0:
+            //            romAddrStart = 0x658E0;
+            //            break;
+            //        case 1:
+            //            romAddrStart = 0x658D0;
+            //            break;
+            //        default:
+            //            return null;
+            //    }
+
+            //i'm too lazy to find common addresses, so i'm just gonna do a light bruteforce
+            for (uint potOff = 0x5A000; potOff < 0x5658DF; potOff += 16)
+            {
+                romAddrStart = potOff;
+
+
+
+                int gamecheck = 0;
+                try
+                {
+                    if (gameInfo.Item2 == 8)
+                    {
+                        uint addr = Memory.Int8AddrFix(gameInfo.Item1);
+                        gamecheck = Memory.ReadInt8(target, romAddrStart + addr);
+                    }
+                    else if (gameInfo.Item2 == 16)
+                    {
+                        uint addr = Memory.Int16AddrFix(gameInfo.Item1);
+                        gamecheck = Memory.ReadInt16(target, romAddrStart + addr);
+                    }
+                    else if (gameInfo.Item2 == 32)
+                    {
+                        gamecheck = Memory.ReadInt32(target, (uint)(addressDLL + romAddrStart + gameInfo.Item1));
+                    }
+                    else
+                    {
+                        MessageBox.Show("Incorrect bytes set for verification.\tMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return null;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine("yeah bud shits fucked");
+                    MessageBox.Show(e.Message, "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+                
+                if (gamecheck == gameInfo.Item3)
+                {
+                    
+                    Debug.WriteLine("verifyably bizhawk");
+                    return Tuple.Create(target, (uint)(addressDLL + romAddrStart));
+                }
+
+            }
+
+
+
+
+
+            return null;
+        }
+
+
+        public static Tuple<Process, ulong> attachToRMG(Form1 baseForm)
+        {
+            Process target = null;
+            try
+            {
+                target = Process.GetProcessesByName("rmg")[0];
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            Debug.WriteLine("trans rights");
+
+            var gameInfo = getGameVerificationInfo(baseForm.CurrentLayout.App_Settings.AutotrackingGame);
+
+
+            ulong addressDLL = 0;
+            foreach (ProcessModule mo in target.Modules)
+            {
+                if (mo.ModuleName.ToLower() == "mupen64plus.dll")
+                {
+                    addressDLL = (ulong)mo.BaseAddress.ToInt64();
+                    break;
+                }
+            }
+
+            if (addressDLL == 0)
+            {
+                return null;
+            }
+            Debug.WriteLine("found dll at 0x" + addressDLL.ToString("X"));
+
+            for (uint potOff = 0x29C15D8; potOff < 0x2FC15D8; potOff += 16)
+            {
+                ulong romAddrStart = addressDLL + potOff;
+
+
+                // read the address to find the address of the starting point in the rom
+                ulong readAddress = Memory.ReadInt64(target, (romAddrStart));
+                //if (readAddress != 0 && readAddress != 0x101010101010101 && readAddress != 0xffffffffffffffff)
+                //{
+                //    Debug.WriteLine("read 1: " + readAddress.ToString("X"));
+                //}
+
+                
+                //if (wherethefuck != 0 && wherethefuck != 0x101010101010101 && wherethefuck != 0xffffffffffffffff)
+                //{
+                //    Debug.WriteLine("thefuck: " + wherethefuck.ToString("X"));
+                //    Debug.WriteLine("thefuck SHIFTED: " + (wherethefuck & 0xffffffff).ToString("X"));
+                //}
+                if (gameInfo.Item2 == 8)
+                {
+                    var addr = Memory.Int8AddrFix(readAddress + 0x80000000 + gameInfo.Item1);
+                    var wherethefuck = Memory.ReadInt64(target, addr);
+                    //honestly might not work lmao
+                    if ((wherethefuck & 0xff) == gameInfo.Item3)
+                    {
+                        return Tuple.Create(target, (readAddress + 0x80000000));
+
+                    }
+                }
+                else if (gameInfo.Item2 == 16)
+                {
+                    var addr = Memory.Int16AddrFix(readAddress + 0x80000000 + gameInfo.Item1);
+                    var wherethefuck = Memory.ReadInt64(target, addr);
+                    //honestly might not work lmao
+                    if ((wherethefuck & 0xffff) == gameInfo.Item3)
+                    {
+                        return Tuple.Create(target, (readAddress + 0x80000000));
+
+                    }
+                }
+                else if (gameInfo.Item2 == 32)
+                {
+                    // use this previously read address to find the game verification data
+                    var wherethefuck = Memory.ReadInt64(target, (readAddress + 0x80000000 + gameInfo.Item1));
+                    if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
+                    {
+                        return Tuple.Create(target, (readAddress + 0x80000000));
+
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Incorrect bytes set for verification.\tMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
+                }
+
+
+
+
+            }
+
+            return null;
+        }
     }
 }

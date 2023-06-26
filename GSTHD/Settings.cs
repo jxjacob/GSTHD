@@ -38,6 +38,7 @@ namespace GSTHD
         {
             Project64,
             Bizhawk,
+            RMG
         }
 
         private const SongMarkerBehaviourOption DefaultSongMarkerBehaviour = SongMarkerBehaviourOption.DropAndCheck;

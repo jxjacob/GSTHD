@@ -196,6 +196,7 @@ namespace GSTHD
             UpdateImage();
             DungeonIndex = state.DungeonIndex;
             SelectedDungeon.Text = DungeonNames[DungeonIndex];
+            DragBehaviour.SaveChanges();
             SetSelectedDungeonLocation();
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {

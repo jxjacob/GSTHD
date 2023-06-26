@@ -353,8 +353,6 @@ namespace GSTHD
                                         isBroadcastable = item.isBroadcastable,
                                         isDraggable = item.isDraggable,
                                         AutoName = item.AutoName,
-                                        AutoBitmask = item.AutoBitmask,
-                                        AutoOffset = item.AutoOffset
                                     };
                                     panelLayout.Controls.Add(new Item(gs, settings));
                                 }
@@ -824,8 +822,6 @@ namespace GSTHD
                                         isBroadcastable = item.isBroadcastable,
                                         isDraggable = item.isDraggable,
                                         AutoName = item.AutoName,
-                                        AutoBitmask = item.AutoBitmask,
-                                        AutoOffset = item.AutoOffset
                                     };
                                     panelLayout.Controls.Add(new Item(gs, settings, true));
                                 }
@@ -852,7 +848,7 @@ namespace GSTHD
                     foreach (var doubleItem in ListDoubleItems)
                     {
                         if (doubleItem.Visible)
-                            panelLayout.Controls.Add(new DoubleItem(doubleItem));
+                            panelLayout.Controls.Add(new DoubleItem(doubleItem, true));
                     }
                 }
 
@@ -1041,8 +1037,6 @@ namespace GSTHD
         public string DoubleBroadcastName { get; set; } = null;
         public string DoubleBroadcastSide { get; set; } = null;
         public string AutoName { get; set; } = null;
-        public int AutoBitmask { get; set; }
-        public int AutoOffset { get; set; } = 0;
         public Color BackColor { get; set; } = Color.Transparent;
         public PictureBoxSizeMode SizeMode { get; set; } = PictureBoxSizeMode.Zoom;
     }
@@ -1109,8 +1103,6 @@ namespace GSTHD
         public PictureBoxSizeMode SizeMode { get; set; } = PictureBoxSizeMode.Zoom;
         public bool isBroadcastable { get; set; } = false;
         public string AutoName { get; set; } = null;
-        public int AutoBitmask { get; set; }
-        public int AutoOffset { get; set; } = 0;
         public bool isDraggable { get; set; } = true;
         public BorderStyle BorderStyle { get; set; } = BorderStyle.FixedSingle;
     }
@@ -1230,8 +1222,6 @@ namespace GSTHD
         public string LabelFontName { get; set; }
         public int LabelFontSize { get; set; }
         public string AutoName { get; set; } = null;
-        public int AutoBitmask { get; set; }
-        public int AutoOffset { get; set; } = 0;
         public FontStyle LabelFontStyle { get; set; }
         public Color LabelColor { get; set; }
         public bool isBroadcastable { get; set; } = false;

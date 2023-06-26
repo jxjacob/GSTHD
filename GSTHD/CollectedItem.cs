@@ -28,8 +28,6 @@ namespace GSTHD
         private bool isBroadcastable;
 
         public string AutoName = null;
-        public int AutoBitmask;
-        public int AutoOffset = 0;
 
         delegate void SetStateCallback(int state);
 
@@ -53,8 +51,6 @@ namespace GSTHD
             isBroadcastable = data.isBroadcastable && !isBroadcast;
 
             this.AutoName = data.AutoName;
-            this.AutoBitmask = data.AutoBitmask;
-            this.AutoOffset = data.AutoOffset;
 
             if (ImageNames.Length > 0)
             {
@@ -151,6 +147,7 @@ namespace GSTHD
             {
                 CollectedItems = state;
                 UpdateCount();
+                DragBehaviour.SaveChanges();
             }
         }
 

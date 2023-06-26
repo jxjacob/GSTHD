@@ -22,8 +22,6 @@ namespace GSTHD
         bool isDraggable;
 
         public string AutoName = null;
-        public int AutoBitmask;
-        public int AutoOffset = 0;
 
         delegate void SetStateCallback(int state);
 
@@ -43,8 +41,6 @@ namespace GSTHD
             this.isDraggable = data.isDraggable;
 
             this.AutoName = data.AutoName;
-            this.AutoBitmask = data.AutoBitmask;
-            this.AutoOffset = data.AutoOffset;
 
             if (data.DoubleBroadcastSide != null) this.DoubleBroadcastSide = data.DoubleBroadcastSide;
             if (data.DoubleBroadcastName != null) this.DoubleBroadcastName = data.DoubleBroadcastName;
@@ -144,7 +140,9 @@ namespace GSTHD
             else
             {
                 ImageIndex = state;
+                VerifyState();
                 UpdateImage();
+                DragBehaviour.SaveChanges();
             }
         }
 
@@ -164,6 +162,12 @@ namespace GSTHD
         {
             ImageIndex = 0;
             UpdateImage();
+        }
+
+        private void VerifyState()
+        {
+            if (ImageIndex > ImageNames.Length - 1) ImageIndex = (ImageNames.Length - 1);
+            if (ImageIndex < 0) ImageIndex = 0;
         }
 
         public void StartDragDrop()

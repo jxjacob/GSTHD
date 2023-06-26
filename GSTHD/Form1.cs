@@ -159,6 +159,11 @@ namespace GSTHD
             TheAutotracker = new Autotracker(emulator, offset, this);
         }
 
+        public void SetAutotracker(Process emulator, ulong offset)
+        {
+            TheAutotracker = new Autotracker(emulator, offset, this);
+        }
+
         private void StopAutotracker()
         {
             TheAutotracker.NukeTimer();
@@ -186,6 +191,17 @@ namespace GSTHD
                 {
                     int state = x.GetState();
                     if (state != x.CollectedItemDefault)
+                    {
+                        thejson.Add(x.Name, state.ToString());
+                    }
+                }
+            }
+            foreach (DoubleItem x in this.Controls[0].Controls.OfType<DoubleItem>())
+            {
+                if (x.Name != "")
+                {
+                    int state = x.GetState();
+                    if (state != 0)
                     {
                         thejson.Add(x.Name, state.ToString());
                     }
@@ -300,7 +316,11 @@ namespace GSTHD
                     {
                         int conv = (int)x.Value;
                         ((Item)found).SetState(conv);
-                    } 
+                    } else if (found is DoubleItem)
+                    {
+                        int conv = (int)x.Value;
+                        ((DoubleItem)found).SetState(conv);
+                    }
                     else if (found is CollectedItem)
                     {
                         int conv = (int)x.Value;
