@@ -1,12 +1,16 @@
 # Gossip Stones Tracker HD (DK64 Edition) v0.1
 Fork of Hapax (`Hapax#1729`)'s [fork](https://github.com/HapaxL/GSTHD) of Drekorig (`Drekorig#2506`)'s [Gossip Stones Tracker](https://github.com/Draeko/ootr_gst/tree/ladder_version) for the [Donkey Kong 64 Randomizer](https://dk64randomizer.com)
 
-Bodged together by JXJacob for his own selfish purposes. Changes compared to GSTHD will be listed at a later time (once it is out of pre-release (once i squash some more bugs relating to broadcast view))
+Bodged together by JXJacob for his own selfish purposes. Compared to the main branch, this fork contains the following code changes:
+- Support for saving/loading the tracker state so a run can be resumed at a later point.
+- Support for broadcast views. This allows streamers to use a complex layout for their own notes while providing a more compact/basic layout to be synced with it and displayed for their viewers. More information about setting up this feature can be found [here](https://github.com/jxjacob/GSTHD/wiki/Broadcast-View---Setup)
+- Support for autotracking (with select N64 emulators). More information about setting up this feature can be found [here](https://github.com/jxjacob/GSTHD/wiki/Autotracking-setup-(From-existing-database)) and [here](https://github.com/jxjacob/GSTHD/wiki/Autotracking-setup-(Adding-a-new-game))
+- Support for Item Grids to be placed in a layout.
+- Other backend bugfixes to improve system stability 😉
+
+___
 
 ## Original README to follow.
-
-I'm really sorry I haven't wrote any real tutorial yet to explain all the new (and old) stuff, I will write one soon!! In the meantime feel free to ask me about anything in here or (preferably) on Discord (`Hapax#1729`). Small tutorials for individual features are already partially available in the description of many of the releases (link above), be sure to check it out!
-___
 
 ### What's new
 #### Control scheme changes
