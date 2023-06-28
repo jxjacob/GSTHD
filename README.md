@@ -1,4 +1,4 @@
-# Gossip Stones Tracker HD (DK64 Edition) v0.1
+# Gossip Stones Tracker HD (DK64 Edition)
 Fork of Hapax (`Hapax#1729`)'s [fork](https://github.com/HapaxL/GSTHD) of Drekorig (`Drekorig#2506`)'s [Gossip Stones Tracker](https://github.com/Draeko/ootr_gst/tree/ladder_version) for the [Donkey Kong 64 Randomizer](https://dk64randomizer.com)
 
 Bodged together by JXJacob for his own selfish purposes. Compared to the main branch, this fork contains the following code changes:
