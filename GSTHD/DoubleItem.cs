@@ -90,7 +90,7 @@ namespace GSTHD
             }
         }
 
-        private void UpdateImage()
+        public void UpdateImage()
         {
             Image = Image.FromFile(@"Resources/" + ImageNames[ImageIndex]);
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)

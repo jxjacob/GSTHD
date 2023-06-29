@@ -259,6 +259,7 @@ namespace GSTHD
         string ActiveImageName;
         public bool isBroadcastable;
         private bool isOnBroadcast;
+        public string AutoName = null;
 
         private int ImageIndex = 0;
 
@@ -282,6 +283,7 @@ namespace GSTHD
             SongSize = data.Size;
             isBroadcastable = data.isBroadcastable && !isBroadcast;
             isOnBroadcast = isBroadcast;
+            AutoName = data.AutoName;
             
             BackColor = Color.Transparent;
             Location = new Point(data.X, data.Y);
@@ -384,7 +386,7 @@ namespace GSTHD
             
         }
 
-        private void UpdateImage()
+        public void UpdateImage()
         {
             Image = Image.FromFile(@"Resources/" + ImageNames[ImageIndex]);
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)

@@ -186,15 +186,8 @@ namespace GSTHD
         {
             if (ta.currentValue != theRead)
             {
-                //if (ta.bitmask != 0)
-                //{
-                //    Debug.WriteLine(ta.name + ": " + ((theRead & ta.bitmask) == ta.bitmask));
-                //} else
-                //{
-                //    Debug.WriteLine(ta.name + ": " + theRead);
-                //}
-                
 
+               
                 // i can't fucking stand this method
                 foreach (Control thing in form.Controls[0].Controls)
                 {
@@ -206,11 +199,36 @@ namespace GSTHD
                             break;
                         }
 
-                    } else if (ta.type == "collectable" && thing is CollectedItem)
+                    } else if (ta.type == "item" && thing is Medallion)
+                    {
+                        if (((Medallion)thing).AutoName == ta.name)
+                        {
+                            UpdateTrackerMedallion((Medallion)thing, ta, theRead);
+                            break;
+                        }
+
+                    } else if (ta.type == "item" && thing is Song)
+                    {
+                        if (((Song)thing).AutoName == ta.name)
+                        {
+                            UpdateTrackerSong((Song)thing, ta, theRead);
+                            break;
+                        }
+
+                    }
+                    else if (ta.type == "collectable" && thing is CollectedItem)
                     {
                         if (((CollectedItem)thing).AutoName == ta.name)
                         {
                             UpdateTrackerCollectable((CollectedItem)thing, ta, theRead);
+                            break;
+                        }
+
+                    } else if (ta.type == "collectable" && thing is Item)
+                    {
+                        if (((Item)thing).AutoName == ta.name)
+                        {
+                            UpdateTrackerItem((Item)thing, ta, theRead);
                             break;
                         }
 
@@ -238,14 +256,21 @@ namespace GSTHD
                             break;
                         }
 
-                    }
-                    if (thing is DoubleItem)
+                    } else if (thing is DoubleItem)
                     {
                         if (((DoubleItem)thing).AutoName == tg.name)
                         {
                             UpdateTrackerDoubleItem((DoubleItem)thing, tg.runningvalue);
                             break;
                         }
+                    } else if (thing is Item)
+                    {
+                        if (((Item)thing).AutoName == tg.name)
+                        {
+                            UpdateTrackerItem((Item)thing, tg.runningvalue);
+                            break;
+                        }
+
                     }
                 }
                 tg.currentValue = tg.runningvalue;
@@ -271,6 +296,11 @@ namespace GSTHD
             }
         }
 
+        private void UpdateTrackerItem(Item theItem, int theRead)
+        {
+            theItem.SetState(theRead);
+        }
+
         private void UpdateTrackerCollectable(CollectedItem theItem, TrackedAddress ta, int theRead)
         {
             if (ta.bitmask != 0)
@@ -290,6 +320,46 @@ namespace GSTHD
         private void UpdateTrackerDoubleItem(DoubleItem theItem, int theRead)
         {
             theItem.SetState(theRead);
+        }
+
+        private void UpdateTrackerMedallion(Medallion theItem, TrackedAddress ta, int theRead)
+        {
+            if (ta.bitmask != 0)
+            {
+                var theumuh = theRead & ta.bitmask;
+                if (theumuh == ta.bitmask)
+                {
+                    theItem.SetImageState(1 + ta.offset);
+                }
+                else if (theumuh == 0)
+                {
+                    theItem.SetImageState(0 + ta.offset);
+                }
+            }
+            else
+            {
+                theItem.SetImageState(theRead + ta.offset);
+            }
+        }
+
+        private void UpdateTrackerSong(Song theItem, TrackedAddress ta, int theRead)
+        {
+            if (ta.bitmask != 0)
+            {
+                var theumuh = theRead & ta.bitmask;
+                if (theumuh == ta.bitmask)
+                {
+                    theItem.SetState(1 + ta.offset);
+                }
+                else if (theumuh == 0)
+                {
+                    theItem.SetState(0 + ta.offset);
+                }
+            }
+            else
+            {
+                theItem.SetState(theRead + ta.offset);
+            }
         }
 
         public bool VerifyGameState()

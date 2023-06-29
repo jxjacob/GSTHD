@@ -121,7 +121,7 @@ namespace GSTHD
             }
         }
 
-        private void UpdateCount()
+        public void UpdateCount()
         {
             ItemCount.Text = CollectedItems.ToString();
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)

@@ -613,7 +613,7 @@ namespace GSTHD
 
         public void menuBar_ConnectToEmulator(object sender, EventArgs e)
         {
-            if (Form.CurrentLayout.App_Settings.AutotrackingGame != "")
+            if (Form.CurrentLayout.App_Settings.AutotrackingGame != null)
             {
                 // connect to emulator as speficied through the other setting
                 switch (Settings.SelectEmulator.ToString())
@@ -625,7 +625,7 @@ namespace GSTHD
                             if (resultPJ.Item1 != null)
                             {
                                 Form.SetAutotracker(resultPJ.Item1, resultPJ.Item2);
-                                MessageBox.Show("Connection to PJ64 sucessful");
+                                MessageBox.Show("Connection to PJ64 sucessful\nTracking will begin once you enter the main game mode (not the title screen or main menu)");
                             }
                         }
                         else
@@ -640,7 +640,7 @@ namespace GSTHD
                             if (resultBH.Item1 != null)
                             {
                                 Form.SetAutotracker(resultBH.Item1, resultBH.Item2);
-                                MessageBox.Show("Connection to Bizhawk-DK64 sucessful");
+                                MessageBox.Show("Connection to Bizhawk-DK64 sucessful\nTracking will begin once you enter the main game mode (not the title screen or main menu)");
                             }
                         }
                         else
@@ -655,7 +655,7 @@ namespace GSTHD
                             if (resultRMG.Item1 != null)
                             {
                                 Form.SetAutotracker(resultRMG.Item1, resultRMG.Item2);
-                                MessageBox.Show("Connection to RMG sucessful");
+                                MessageBox.Show("Connection to RMG sucessful\nTracking will begin once you enter the main game mode (not the title screen or main menu)");
                             }
                         }
                         else

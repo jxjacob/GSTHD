@@ -84,7 +84,7 @@ namespace GSTHD
                     }
                     else
                     {
-                        MessageBox.Show("Incorrect bytes set for verification.\tMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Incorrect bytes set for verification.\nMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return null;
                     }
                 }
@@ -130,7 +130,7 @@ namespace GSTHD
                     }
                     else
                     {
-                        MessageBox.Show("Incorrect bytes set for verification.\tMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Incorrect bytes set for verification.\nMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return null;
                     }
                 }
@@ -224,7 +224,7 @@ namespace GSTHD
                     }
                     else
                     {
-                        MessageBox.Show("Incorrect bytes set for verification.\tMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Incorrect bytes set for verification.\nMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return null;
                     }
                 }
@@ -291,22 +291,11 @@ namespace GSTHD
 
                 // read the address to find the address of the starting point in the rom
                 ulong readAddress = Memory.ReadInt64(target, (romAddrStart));
-                //if (readAddress != 0 && readAddress != 0x101010101010101 && readAddress != 0xffffffffffffffff)
-                //{
-                //    Debug.WriteLine("read 1: " + readAddress.ToString("X"));
-                //}
 
-                
-                //if (wherethefuck != 0 && wherethefuck != 0x101010101010101 && wherethefuck != 0xffffffffffffffff)
-                //{
-                //    Debug.WriteLine("thefuck: " + wherethefuck.ToString("X"));
-                //    Debug.WriteLine("thefuck SHIFTED: " + (wherethefuck & 0xffffffff).ToString("X"));
-                //}
                 if (gameInfo.Item2 == 8)
                 {
                     var addr = Memory.Int8AddrFix(readAddress + 0x80000000 + gameInfo.Item1);
-                    var wherethefuck = Memory.ReadInt64(target, addr);
-                    //honestly might not work lmao
+                    var wherethefuck = Memory.ReadInt8(target, addr);
                     if ((wherethefuck & 0xff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress + 0x80000000));
@@ -316,8 +305,7 @@ namespace GSTHD
                 else if (gameInfo.Item2 == 16)
                 {
                     var addr = Memory.Int16AddrFix(readAddress + 0x80000000 + gameInfo.Item1);
-                    var wherethefuck = Memory.ReadInt64(target, addr);
-                    //honestly might not work lmao
+                    var wherethefuck = Memory.ReadInt16(target, addr);
                     if ((wherethefuck & 0xffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress + 0x80000000));
@@ -327,7 +315,7 @@ namespace GSTHD
                 else if (gameInfo.Item2 == 32)
                 {
                     // use this previously read address to find the game verification data
-                    var wherethefuck = Memory.ReadInt64(target, (readAddress + 0x80000000 + gameInfo.Item1));
+                    var wherethefuck = Memory.ReadInt32(target, (readAddress + 0x80000000 + gameInfo.Item1));
                     if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress + 0x80000000));
@@ -336,7 +324,7 @@ namespace GSTHD
                 }
                 else
                 {
-                    MessageBox.Show("Incorrect bytes set for verification.\tMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Incorrect bytes set for verification.\nMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return null;
                 }
 

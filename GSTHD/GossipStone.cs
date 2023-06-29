@@ -132,7 +132,7 @@ namespace GSTHD
             }
         }
 
-        private void UpdateImage()
+        public void UpdateImage()
         {
             if (HoldsImage)
             {

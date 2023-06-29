@@ -1055,6 +1055,7 @@ namespace GSTHD
         public string ActiveSongImage { get; set; }
         public string ActiveTinySongImage { get; set; }
         public bool isBroadcastable { get; set; } = false;
+        public string AutoName { get; set; } = null;
     }
 
     public class MedallionLabel
@@ -1077,6 +1078,7 @@ namespace GSTHD
         public string[] ImageCollection { get; set; }
         public MedallionLabel Label { get; set; }
         public bool isBroadcastable { get; set; } = false;
+        public string AutoName { get; set; } = null;
     }
 
     public class ObjectPointGrid
