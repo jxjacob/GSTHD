@@ -351,7 +351,8 @@ namespace GSTHD
                                         Visible = item.Visible,
                                         SizeMode = item.SizeMode,
                                         isBroadcastable = item.isBroadcastable,
-                                        isDraggable = item.isDraggable
+                                        isDraggable = item.isDraggable,
+                                        AutoName = item.AutoName,
                                     };
                                     panelLayout.Controls.Add(new Item(gs, settings));
                                 }
@@ -819,7 +820,8 @@ namespace GSTHD
                                         Visible = item.Visible,
                                         SizeMode = item.SizeMode,
                                         isBroadcastable = item.isBroadcastable,
-                                        isDraggable = item.isDraggable
+                                        isDraggable = item.isDraggable,
+                                        AutoName = item.AutoName,
                                     };
                                     panelLayout.Controls.Add(new Item(gs, settings, true));
                                 }
@@ -846,7 +848,7 @@ namespace GSTHD
                     foreach (var doubleItem in ListDoubleItems)
                     {
                         if (doubleItem.Visible)
-                            panelLayout.Controls.Add(new DoubleItem(doubleItem));
+                            panelLayout.Controls.Add(new DoubleItem(doubleItem, true));
                     }
                 }
 
@@ -1034,6 +1036,7 @@ namespace GSTHD
         public bool isDraggable { get; set; } = true;
         public string DoubleBroadcastName { get; set; } = null;
         public string DoubleBroadcastSide { get; set; } = null;
+        public string AutoName { get; set; } = null;
         public Color BackColor { get; set; } = Color.Transparent;
         public PictureBoxSizeMode SizeMode { get; set; } = PictureBoxSizeMode.Zoom;
     }
@@ -1052,6 +1055,7 @@ namespace GSTHD
         public string ActiveSongImage { get; set; }
         public string ActiveTinySongImage { get; set; }
         public bool isBroadcastable { get; set; } = false;
+        public string AutoName { get; set; } = null;
     }
 
     public class MedallionLabel
@@ -1074,6 +1078,7 @@ namespace GSTHD
         public string[] ImageCollection { get; set; }
         public MedallionLabel Label { get; set; }
         public bool isBroadcastable { get; set; } = false;
+        public string AutoName { get; set; } = null;
     }
 
     public class ObjectPointGrid
@@ -1099,6 +1104,7 @@ namespace GSTHD
         public int Height { get; set; }
         public PictureBoxSizeMode SizeMode { get; set; } = PictureBoxSizeMode.Zoom;
         public bool isBroadcastable { get; set; } = false;
+        public string AutoName { get; set; } = null;
         public bool isDraggable { get; set; } = true;
         public BorderStyle BorderStyle { get; set; } = BorderStyle.FixedSingle;
     }
@@ -1217,6 +1223,7 @@ namespace GSTHD
         public string[] ImageCollection { get; set; }
         public string LabelFontName { get; set; }
         public int LabelFontSize { get; set; }
+        public string AutoName { get; set; } = null;
         public FontStyle LabelFontStyle { get; set; }
         public Color LabelColor { get; set; }
         public bool isBroadcastable { get; set; } = false;
@@ -1237,5 +1244,6 @@ namespace GSTHD
         public int? DefaultWothColorIndex { get; set; }
         public MedallionLabel DefaultDungeonNames { get; set; } = null;
         public bool EnableBroadcast { get; set; } = false;
+        public string AutotrackingGame { get; set; } = null;
     }
 }

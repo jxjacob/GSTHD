@@ -14,6 +14,7 @@
     <Deterministic>true</Deterministic>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <TargetFrameworkProfile />
+    <DisableOutOfProcTaskHost>true</DisableOutOfProcTaskHost>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -28,7 +29,6 @@
     <ApplicationVersion>0.3.2.1</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <DisableOutOfProcTaskHost>true</DisableOutOfProcTaskHost>
   </PropertyGroup>
   <PropertyGroup>
     <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
@@ -37,7 +37,7 @@
     <Deterministic>false</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -45,9 +45,11 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -82,8 +84,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AttachToEmulator.cs" />
     <Compile Include="Barren.cs" />
     <Compile Include="Chronometer.cs" />
+    <Compile Include="Autotracker.cs" />
     <Compile Include="CollectedItem.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -110,12 +114,12 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-	  <Compile Include="Form2.cs">
-		  <SubType>Form</SubType>
-	  </Compile>
-	  <Compile Include="Form2.Designer.cs">
-		  <DependentUpon>Form2.cs</DependentUpon>
-	  </Compile>
+    <Compile Include="Form2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form2.Designer.cs">
+      <DependentUpon>Form2.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1_MenuBar.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -136,6 +140,7 @@
     </Compile>
     <Compile Include="Layout.cs" />
     <Compile Include="Math.cs" />
+    <Compile Include="Memory.cs" />
     <Compile Include="Medallion.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -194,9 +199,9 @@
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
-	  <EmbeddedResource Include="Form2.resx">
-		  <DependentUpon>Form2.cs</DependentUpon>
-	  </EmbeddedResource>
+    <EmbeddedResource Include="Form2.resx">
+      <DependentUpon>Form2.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

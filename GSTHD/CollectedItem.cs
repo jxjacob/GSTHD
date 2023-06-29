@@ -27,6 +27,10 @@ namespace GSTHD
 
         private bool isBroadcastable;
 
+        public string AutoName = null;
+
+        delegate void SetStateCallback(int state);
+
         public CollectedItem(ObjectPointCollectedItem data, Settings settings, bool isBroadcast = false)
         {
             Settings = settings;
@@ -45,6 +49,8 @@ namespace GSTHD
             Step = data.Step == 0 ? 1 : data.Step;
             CollectedItemSize = data.Size;
             isBroadcastable = data.isBroadcastable && !isBroadcast;
+
+            this.AutoName = data.AutoName;
 
             if (ImageNames.Length > 0)
             {
@@ -115,7 +121,7 @@ namespace GSTHD
             }
         }
 
-        private void UpdateCount()
+        public void UpdateCount()
         {
             ItemCount.Text = CollectedItems.ToString();
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
@@ -133,8 +139,16 @@ namespace GSTHD
 
         public void SetState(int state)
         {
-            CollectedItems = state;
-            UpdateCount();
+            if (this.InvokeRequired)
+            {
+                SetStateCallback d = new SetStateCallback(SetState);
+                this.Invoke(d, new object[] {state});
+            } else
+            {
+                CollectedItems = state;
+                UpdateCount();
+                DragBehaviour.SaveChanges();
+            }
         }
 
         public void IncrementState()

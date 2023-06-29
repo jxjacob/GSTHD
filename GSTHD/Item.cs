@@ -21,6 +21,10 @@ namespace GSTHD
         string DoubleBroadcastName;
         bool isDraggable;
 
+        public string AutoName = null;
+
+        delegate void SetStateCallback(int state);
+
         public Item(ObjectPoint data, Settings settings, bool isBroadcast = false)
         {
             Settings = settings;
@@ -35,6 +39,8 @@ namespace GSTHD
             this.isBroadcastable = data.isBroadcastable && !isBroadcast;
 
             this.isDraggable = data.isDraggable;
+
+            this.AutoName = data.AutoName;
 
             if (data.DoubleBroadcastSide != null) this.DoubleBroadcastSide = data.DoubleBroadcastSide;
             if (data.DoubleBroadcastName != null) this.DoubleBroadcastName = data.DoubleBroadcastName;
@@ -126,8 +132,18 @@ namespace GSTHD
 
         public void SetState(int state)
         {
-            ImageIndex = state;
-            UpdateImage();
+            if (this.InvokeRequired)
+            {
+                SetStateCallback d = new SetStateCallback(SetState);
+                this.Invoke(d, new object[] { state });
+            }
+            else
+            {
+                ImageIndex = state;
+                VerifyState();
+                UpdateImage();
+                DragBehaviour.SaveChanges();
+            }
         }
 
         public void IncrementState()
@@ -146,6 +162,12 @@ namespace GSTHD
         {
             ImageIndex = 0;
             UpdateImage();
+        }
+
+        private void VerifyState()
+        {
+            if (ImageIndex > ImageNames.Length - 1) ImageIndex = (ImageNames.Length - 1);
+            if (ImageIndex < 0) ImageIndex = 0;
         }
 
         public void StartDragDrop()

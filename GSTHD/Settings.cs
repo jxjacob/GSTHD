@@ -33,6 +33,14 @@ namespace GSTHD
             LeftAndRight,
         }
 
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum SelectEmulatorOption
+        {
+            Project64,
+            Bizhawk,
+            RMG
+        }
+
         private const SongMarkerBehaviourOption DefaultSongMarkerBehaviour = SongMarkerBehaviourOption.DropAndCheck;
 
         public bool ShowMenuBar { get; set; } = true;
@@ -43,6 +51,7 @@ namespace GSTHD
         public bool WraparoundDungeonNames { get; set; } = true;
         public DragButtonOption DragButton { get; set; } = DragButtonOption.Middle;
         public DragButtonOption AutocheckDragButton { get; set; } = DragButtonOption.None;
+        public SelectEmulatorOption SelectEmulator { get; set; } = SelectEmulatorOption.Project64;
         public int MinDragThreshold { get; set; } = 6;
         public bool MoveLocationToSong { get; set; } = false;
         // public bool AutoCheckSongs { get; set; } = false;

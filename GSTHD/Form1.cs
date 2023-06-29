@@ -21,6 +21,7 @@ namespace GSTHD
         Form1_MenuBar MenuBar;
         public Layout CurrentLayout;
         Panel LayoutContent;
+        public Autotracker TheAutotracker;
 
         PictureBox pbox_collectedSkulls;
 
@@ -64,21 +65,34 @@ namespace GSTHD
 
             LoadLayout();
             SetMenuBar();
+            //setAutoTracker();
 
             this.KeyPreview = true;
             //this.KeyDown += changeCollectedSkulls;
         }
 
-        private void Reload()
+        private void Reload(bool changeLayout = false)
         {
+            if (TheAutotracker != null)
+            {
+                StopAutotracker();
+            }
             LoadSettings();
+            if (!changeLayout)
+            {
+                if (this.CurrentLayout.App_Settings.EnableBroadcast && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+                {
+                    ((Form2)Application.OpenForms["GSTHD_DK64 Broadcast View"]).Reload();
+                }
+            } else
+            {
+                if (Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+                {
+                    ((Form2)Application.OpenForms["GSTHD_DK64 Broadcast View"]).Close();
+                }
+            }
             LoadLayout();
             SetMenuBar();
-            if (this.CurrentLayout.App_Settings.EnableBroadcast && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null) {
-                ((Form2)Application.OpenForms["GSTHD_DK64 Broadcast View"]).Reload();
-            } else if (!this.CurrentLayout.App_Settings.EnableBroadcast && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null) {
-                ((Form2)Application.OpenForms["GSTHD_DK64 Broadcast View"]).Close();
-            }
         }
 
         public void LoadSettings()
@@ -144,8 +158,39 @@ namespace GSTHD
         public void Reset(object sender)
         {
             ControlExtensions.ClearAndDispose(LayoutContent);
-            Reload();
+            try
+            {
+                if (((ToolStripItem)sender).Text == "Open Layout")
+                {
+                    Reload(true);
+                } else
+                {
+                    Reload();
+                }
+                    
+            } catch (Exception ex)
+            {
+                Reload();
+            }
+
+            
             Process.GetCurrentProcess().Refresh();
+        }
+
+        public void SetAutotracker(Process emulator, uint offset)
+        {
+            TheAutotracker = new Autotracker(emulator, offset, this);
+        }
+
+        public void SetAutotracker(Process emulator, ulong offset)
+        {
+            TheAutotracker = new Autotracker(emulator, offset, this);
+        }
+
+        private void StopAutotracker()
+        {
+            TheAutotracker.NukeTimer();
+            TheAutotracker = null;
         }
 
         public void SaveState()
@@ -169,6 +214,17 @@ namespace GSTHD
                 {
                     int state = x.GetState();
                     if (state != x.CollectedItemDefault)
+                    {
+                        thejson.Add(x.Name, state.ToString());
+                    }
+                }
+            }
+            foreach (DoubleItem x in this.Controls[0].Controls.OfType<DoubleItem>())
+            {
+                if (x.Name != "")
+                {
+                    int state = x.GetState();
+                    if (state != 0)
                     {
                         thejson.Add(x.Name, state.ToString());
                     }
@@ -283,7 +339,11 @@ namespace GSTHD
                     {
                         int conv = (int)x.Value;
                         ((Item)found).SetState(conv);
-                    } 
+                    } else if (found is DoubleItem)
+                    {
+                        int conv = (int)x.Value;
+                        ((DoubleItem)found).SetState(conv);
+                    }
                     else if (found is CollectedItem)
                     {
                         int conv = (int)x.Value;
@@ -363,6 +423,29 @@ namespace GSTHD
             foreach (CollectedItem x in this.Controls[0].Controls.OfType<CollectedItem>())
             {
                 x.UpdateImage();
+                x.UpdateCount();
+            }
+            foreach (DoubleItem x in this.Controls[0].Controls.OfType<DoubleItem>())
+            {
+                x.UpdateImage();
+            }
+            foreach (GossipStone x in this.Controls[0].Controls.OfType<GossipStone>())
+            {
+                // this is not the correct way of doing this but lol. lmao, even
+                var lazy = x.GetState();
+                x.SetState(lazy);
+            }
+            foreach (Medallion x in this.Controls[0].Controls.OfType<Medallion>())
+            {
+                // this is not the correct way of doing this but lol. lmao, even
+                var lazy = x.GetState();
+                x.SetState(lazy);
+            }
+            foreach (Song x in this.Controls[0].Controls.OfType<Song>())
+            {
+                // this is not the correct way of doing this but lol. lmao, even
+                var lazy = x.GetState();
+                x.SetState(lazy);
             }
         }
     }

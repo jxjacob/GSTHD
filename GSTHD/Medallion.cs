@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Net.Security;
 using System.Windows.Forms;
 
 namespace GSTHD
@@ -30,6 +31,7 @@ namespace GSTHD
         public Label SelectedDungeon;
 
         private bool isBroadcastable;
+        public string AutoName = null;
 
         public Medallion(ObjectPointMedallion data, Settings settings, bool isBroadcast = false)
         {
@@ -63,6 +65,7 @@ namespace GSTHD
             DungeonIndex = DefaultDungeonIndex;
             Wraparound = data.Label.Wraparound.Value;
             isBroadcastable = data.isBroadcastable && !isBroadcast;
+            AutoName = data.AutoName;
 
             Name = data.Name;
             BackColor = Color.Transparent;
@@ -171,7 +174,7 @@ namespace GSTHD
             }
         }
 
-        private void UpdateImage()
+        public void UpdateImage()
         {
             Image = Image.FromFile(@"Resources/" + ImageNames[ImageIndex]);
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
@@ -196,12 +199,19 @@ namespace GSTHD
             UpdateImage();
             DungeonIndex = state.DungeonIndex;
             SelectedDungeon.Text = DungeonNames[DungeonIndex];
+            DragBehaviour.SaveChanges();
             SetSelectedDungeonLocation();
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {
                 ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).SelectedDungeon.Text = DungeonNames[DungeonIndex];
                 ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).SetSelectedDungeonLocation();
             }
+        }
+
+        public void SetImageState(int state)
+        {
+            ImageIndex = System.Math.Min(ImageNames.Length, state);
+            UpdateImage();
         }
 
         public void IncrementState()
