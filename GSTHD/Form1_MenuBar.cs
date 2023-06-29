@@ -630,7 +630,7 @@ namespace GSTHD
                         }
                         else
                         {
-                            MessageBox.Show("Could not conenct to PJ64", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Could not connect to PJ64", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                         break;
                     case "Bizhawk":
@@ -645,7 +645,7 @@ namespace GSTHD
                         }
                         else
                         {
-                            MessageBox.Show("Could not conenct to Bizhawk-DK64", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Could not connect to Bizhawk-DK64", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                         break;
                     case "RMG":
@@ -660,7 +660,7 @@ namespace GSTHD
                         }
                         else
                         {
-                            MessageBox.Show("Could not conenct to RMG", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Could not connect to RMG", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                         break;
                     default:

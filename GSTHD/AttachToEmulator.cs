@@ -154,6 +154,7 @@ namespace GSTHD
         public static Tuple<Process, uint> attachToBizhawk(Form1 baseForm)
         {
             Process target = null;
+            Debug.WriteLine("start hawk");
             try
             {
                 target = Process.GetProcessesByName("emuhawk")[0];
@@ -180,9 +181,14 @@ namespace GSTHD
 
             if (addressDLL == 0)
             {
-                return null;
+                // fuck it we ball
+                addressDLL = 2024407040;
+                Debug.WriteLine("guessing its at " + addressDLL);
+            } else
+            {
+                Debug.WriteLine("found dll at " + addressDLL);
             }
-            Debug.WriteLine("found dll");
+            
 
             //Dim attemptOffset As Int64 = 0
             //for (int i = 0; i < 2; i++){
