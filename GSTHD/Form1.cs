@@ -55,7 +55,7 @@ namespace GSTHD
         private void LoadAll(object sender, EventArgs e)
         {
             var assembly = Assembly.GetEntryAssembly().GetName();
-            this.Text = $"{Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyTitleAttribute>().Title} v{assembly.Version.Major}.{assembly.Version.Minor}";
+            this.Text = $"{Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyTitleAttribute>().Title} v{assembly.Version.Major}.{assembly.Version.Minor}.{assembly.Version.Build}";
             this.AcceptButton = null;
             this.MaximizeBox = false;
 
