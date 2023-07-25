@@ -36,8 +36,9 @@ namespace GSTHD
             {
                 target = Process.GetProcessesByName("project64")[0];
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                MessageBox.Show(e.Message + "\nCould not find process \"project64\" on your machine.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
 
@@ -92,24 +93,29 @@ namespace GSTHD
                 return Tuple.Create(target, romAddrStart);
             }
 
-            for (int i = 0; i < 4; i++)
-            {
-                switch (i)
-                {
-                    case 0:
-                        romAddrStart = 0xDFE40000;
-                        break;
-                    case 1:
-                        romAddrStart = 0xDFE70000;
-                        break;
-                    case 2:
-                        romAddrStart = 0xDFFB0000;
-                        break;
-                    default:
-                        Debug.WriteLine("wasnt those 3 addresses");
-                        return null;
+            //for (int i = 0; i < 4; i++)
+            //{
+            //    switch (i)
+            //    {
 
-                }
+            for (uint potOff = 0xDFD00000; potOff < 0xE01FFFFF; potOff += 16)
+            {
+
+                    //case 0:
+                    //    romAddrStart = 0xDFE40000;
+                    //    break;
+                    //case 1:
+                    //    romAddrStart = 0xDFE70000;
+                    //    break;
+                    //case 2:
+                    //    romAddrStart = 0xDFFB0000;
+                    //    break;
+                    //default:
+                    //    MessageBox.Show("Could not find the correct PJ64 offset\nPlease find JXJacob and alert him about this immediately so he can implement a fix to an issue he predicted would eventually happen.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //    return null;
+
+                //}
+                romAddrStart= potOff;
 
                 int gamecheck = 0;
                 try
@@ -138,8 +144,10 @@ namespace GSTHD
                 {
                     Debug.WriteLine("yeah bud shits fucked");
                     MessageBox.Show(e.Message, "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
                 }
-
+                //MessageBox.Show(gamecheck.ToString("X"), "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //return null;
                 if (gamecheck == gameInfo.Item3)
                 {
                     Debug.WriteLine("verifyably pj64");
@@ -147,6 +155,7 @@ namespace GSTHD
                 }
 
             }
+            //MessageBox.Show("Could not find the correct PJ64 offset\nJXJacob hasn't figured out how to solve this one so you might be out of luck.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
         }
 
@@ -159,8 +168,9 @@ namespace GSTHD
             {
                 target = Process.GetProcessesByName("emuhawk")[0];
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                MessageBox.Show(e.Message + "\nCould not find process \"emuhawk\" on your machine.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
             Debug.WriteLine("found hawk");
@@ -238,6 +248,7 @@ namespace GSTHD
                 {
                     Debug.WriteLine("yeah bud shits fucked");
                     MessageBox.Show(e.Message, "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
                 }
 
                 
@@ -253,7 +264,7 @@ namespace GSTHD
 
 
 
-
+            //MessageBox.Show("Could not find the correct Bizhawk-DK64 offset\nJXJacob hasn't figured out how to solve this one so you might be out of luck.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
         }
 
@@ -265,8 +276,9 @@ namespace GSTHD
             {
                 target = Process.GetProcessesByName("rmg")[0];
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                MessageBox.Show(e.Message + "\nCould not find process \"rmg\" on your machine.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
             Debug.WriteLine("trans rights");
@@ -286,6 +298,7 @@ namespace GSTHD
 
             if (addressDLL == 0)
             {
+                MessageBox.Show("Could not find mupen64plus loaded within RMG.\nPlease reinstall RMG or reset it to its default settings.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
             Debug.WriteLine("found dll at 0x" + addressDLL.ToString("X"));
@@ -339,6 +352,7 @@ namespace GSTHD
 
             }
 
+            //MessageBox.Show("Could not find the correct RMG offset\nJXJacob hasn't figured out how to solve this one so you might be out of luck.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
         }
     }

@@ -20,6 +20,9 @@ namespace GSTHD
             : base(element, settings)
         {
             Element = element;
+            Settings = settings;
+
+            LastState = Element.GetState();
         }
 
         public void Mouse_Move_WithAutocheck(object sender, MouseEventArgs e)

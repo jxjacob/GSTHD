@@ -630,7 +630,7 @@ namespace GSTHD
                         }
                         else
                         {
-                            MessageBox.Show("Could not connect to PJ64", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Could not connect to PJ64\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                         break;
                     case "Bizhawk":
@@ -645,7 +645,7 @@ namespace GSTHD
                         }
                         else
                         {
-                            MessageBox.Show("Could not connect to Bizhawk-DK64", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Could not connect to Bizhawk-DK64\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                         break;
                     case "RMG":
@@ -660,7 +660,7 @@ namespace GSTHD
                         }
                         else
                         {
-                            MessageBox.Show("Could not connect to RMG", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Could not connect to RMG\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                         break;
                     default:
