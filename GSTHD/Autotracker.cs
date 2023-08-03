@@ -492,7 +492,7 @@ namespace GSTHD
 
         public void NukeTimer()
         {
-            timer.Dispose();
+            if (timer != null) timer.Dispose();
         }
     }
 }

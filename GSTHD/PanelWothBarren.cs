@@ -28,6 +28,7 @@ namespace GSTHD
         int NbMaxRows;
         bool isScrollable;
         bool isBroadcastable;
+        bool PathCycling = false;
         public bool isWotH;
         PictureBoxSizeMode SizeMode;
         Label LabelSettings = new Label();
@@ -48,6 +49,7 @@ namespace GSTHD
             this.TabStop = false;
             this.isScrollable = data.IsScrollable;
             this.SizeMode = data.SizeMode;
+            this.PathCycling= data.PathCycling;
             this.isBroadcastable = data.isBroadcastable;
             this.isWotH = data.isWotH;
             if (data.IsScrollable)
@@ -223,14 +225,14 @@ namespace GSTHD
                     newWotH = new WotH(Settings, selectedPlace,
                         GossipStoneCount, ListImage_WothItemsOption, GossipStoneSpacing,
                         PathGoalCount, ListImage_GoalsOption, PathGoalSpacing,
-                        new Point(2, -LabelSettings.Height), LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable);
+                        new Point(2, -LabelSettings.Height), LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling);
                 else
                 {
                     var lastLocation = ListWotH.Last().LabelPlace.Location;
                     newWotH = new WotH(Settings, selectedPlace,
                         GossipStoneCount, ListImage_WothItemsOption, GossipStoneSpacing,
                         PathGoalCount, ListImage_GoalsOption, PathGoalSpacing,
-                        lastLocation, LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable);
+                        lastLocation, LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling);
                 }
                 ListWotH.Add(newWotH);
                 this.Controls.Add(newWotH.LabelPlace);
@@ -359,7 +361,7 @@ namespace GSTHD
 
                 GossipStone foundStone = null;
                 bool storedHoldsImage = false;
-                string storedHeldImageName = "";
+                List<string> storedHeldImageName = null;
                 if (secondPart.Length > 3)
                 {
                     for (int i = 0; i < secondPart.Length; i++)
@@ -377,13 +379,13 @@ namespace GSTHD
                         else if (i % 4 == 2)
                         {
                             // 2nd is the stored image
-                            storedHeldImageName = secondPart[i];
+                            storedHeldImageName = new List<string> { secondPart[i] };
                         }
                         else if (i % 4 == 3)
                         {
                             // 3rd is the stateindex
                             // also we have all 4 so go and set the state
-                            foundStone.SetState(new GossipStoneState() { HoldsImage = storedHoldsImage, HeldImageName = storedHeldImageName, ImageIndex = int.Parse(secondPart[i]) });
+                            foundStone.SetState(new GossipStoneState() { HoldsImage = storedHoldsImage, HeldImages = storedHeldImageName, ImageIndex = int.Parse(secondPart[i]) });
                         }
                     }
                 }

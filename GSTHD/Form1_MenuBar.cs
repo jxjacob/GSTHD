@@ -47,10 +47,14 @@ namespace GSTHD
             // Barren
             public ToolStripMenuItem EnableBarrenColors;
 
+            // Gossip Stone Stuff
+            public ToolStripMenuItem OverrideHeldImage;
+            public ToolStripMenuItem CycleLength;
+            public ToolStripMenuItem ForceGossipCycles;
+
             // Memory Engine
             public ToolStripMenuItem SelectEmulator;
             public ToolStripMenuItem ConnectToEmulator;
-            public ToolStripMenuItem VerifyConnection;
         }
 
         private readonly Dictionary<Settings.DragButtonOption, string> DragButtonNames = new Dictionary<Settings.DragButtonOption, string>
@@ -88,6 +92,7 @@ namespace GSTHD
         Dictionary<Settings.SongMarkerBehaviourOption, ToolStripMenuItem> SongMarkerBehaviourOptions;
         Dictionary<Settings.SelectEmulatorOption, ToolStripMenuItem> SelectEmulatorOptions;
         Dictionary<KnownColor, ToolStripMenuItem> LastWothColorOptions;
+        Dictionary<double, ToolStripMenuItem> GossipeCycleLengthOptions;
         Size SavedSize;
 
         public Form1_MenuBar(Form1 form, Settings settings)
@@ -284,6 +289,32 @@ namespace GSTHD
                     barrenSubMenu.DropDownItems.Add(Items.EnableBarrenColors);
                 }
                 optionMenu.DropDownItems.Add(barrenSubMenu);
+
+                ToolStripMenuItem gossipSubMenu = new ToolStripMenuItem("Gossip Stones");
+                {
+                    Items.OverrideHeldImage = new ToolStripMenuItem("Allow Override of Held Image", null, new EventHandler(menuBar_ToggleOverrideHeldImage))
+                    {
+                        CheckOnClick = true,
+                    };
+                    gossipSubMenu.DropDownItems.Add(Items.OverrideHeldImage);
+
+                    GossipeCycleLengthOptions = new Dictionary<double, ToolStripMenuItem>();
+                    
+                    for (double i = 0.25; i <= 2.0; i+=0.25)
+                    {
+                        GossipeCycleLengthOptions.Add(i, new ToolStripMenuItem(i.ToString()+" sec", null, new EventHandler(menuBar_SetGossipCycleLength)));
+                    }
+
+                    Items.CycleLength = new ToolStripMenuItem("Cycle Delay", null, GossipeCycleLengthOptions.Values.ToArray());
+                    gossipSubMenu.DropDownItems.Add(Items.CycleLength);
+
+                    Items.ForceGossipCycles = new ToolStripMenuItem("Force All Stones to Cycle", null, new EventHandler(menuBar_ToggleForceGossipCycles))
+                    {
+                        CheckOnClick = true,
+                    };
+                    gossipSubMenu.DropDownItems.Add(Items.ForceGossipCycles);
+                }
+                optionMenu.DropDownItems.Add(gossipSubMenu);
             }
             MenuStrip.Items.Add(optionMenu);
 
@@ -306,12 +337,6 @@ namespace GSTHD
                     
                 };
                 MemoryMenu.DropDownItems.Add(Items.ConnectToEmulator);
-
-                //Items.VerifyConnection = new ToolStripMenuItem("Verify Connect (DEBUG)", null, new EventHandler(menuBar_ConnectToEmulator))
-                //{
-
-                //};
-                //MemoryMenu.DropDownItems.Add(Items.VerifyConnection);
             }
             MenuStrip.Items.Add(MemoryMenu);
 
@@ -341,6 +366,16 @@ namespace GSTHD
             LastWothColorOptions[Settings.LastWothColor].Checked = true;
 
             Items.EnableBarrenColors.Checked = Settings.EnableBarrenColors;
+
+            Items.OverrideHeldImage.Checked = Settings.OverrideHeldImage;
+            Items.ForceGossipCycles.Checked = Settings.ForceGossipCycles;
+            try
+            {
+            GossipeCycleLengthOptions[Settings.GossipCycleTime].Checked = true;
+            } catch (Exception ex)
+            {
+
+            }
 
             SelectEmulatorOptions[Settings.SelectEmulator].Checked = true;
         }
@@ -457,7 +492,7 @@ namespace GSTHD
                 }
                 else if (Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
-                    Application.OpenForms["GSTHD_DK64 Broadcast View"].Close();
+                    Application.OpenForms["GSTHD_DK64 Broadcast View"].ClearAndDispose();
                     Items.BroadcastView.Checked = false;
                 }
             } 
@@ -593,6 +628,40 @@ namespace GSTHD
         {
             // Items.EnableBarrenColors.Enabled = !Items.EnableBarrenColors.Enabled;
             Settings.EnableBarrenColors = Items.EnableBarrenColors.Checked;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
+        private void menuBar_ToggleForceGossipCycles(object sender, EventArgs e)
+        {
+            Settings.ForceGossipCycles = Items.ForceGossipCycles.Checked;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
+        private void menuBar_ToggleOverrideHeldImage(object sender, EventArgs e)
+        {
+            Settings.OverrideHeldImage = Items.OverrideHeldImage.Checked;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
+        private void menuBar_SetGossipCycleLength(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            try
+            {
+                GossipeCycleLengthOptions[Settings.GossipCycleTime].Checked = false;
+            } catch (Exception ex)
+            {
+
+            }
+            choice.Checked = true;
+
+            var option = GossipeCycleLengthOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.GossipCycleTime = option.Key;
             Settings.Write();
             Form.UpdateLayoutFromSettings();
         }

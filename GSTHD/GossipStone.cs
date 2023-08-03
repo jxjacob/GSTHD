@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.Remoting;
 using System.Windows.Forms;
 
 namespace GSTHD
@@ -9,13 +10,32 @@ namespace GSTHD
     public struct GossipStoneState
     {
         public bool HoldsImage;
-        public string HeldImageName;
+        public List<string> HeldImages;
         public int ImageIndex;
 
-        public override string ToString() => $"{HoldsImage},{HeldImageName},{ImageIndex}";
+        //TODO: fix this to account for the list of held images im going to need to eventually make
+        //TODO: account for this new type of stone in the save/load state functions
+        public override string ToString() {
+            // for thing in heldimage
+            string exported = "";
+            if (HoldsImage)
+            {
+                foreach (string image in HeldImages)
+                {
+                    if (exported.Length > 0)
+                    {
+                        exported += "|";
+                    }
+                    exported += image;
+                }
+            }
+            // put in the name and then |
+            // write that new string to the line below
+            return $"{HoldsImage},{exported},{ImageIndex}"; 
+        }
     }
 
-    public class GossipStone : PictureBox, ProgressibleElement<GossipStoneState>, DraggableElement<GossipStoneState>
+    public class GossipStone : PictureBox, ProgressibleElement<GossipStoneState>, DraggableElement<GossipStoneState>, UpdatableFromSettings
     {
         private readonly Settings Settings;
         private readonly ProgressibleElementBehaviour<GossipStoneState> ProgressBehaviour;
@@ -23,7 +43,9 @@ namespace GSTHD
 
         private string[] ImageNames;
         private bool HoldsImage;
-        private string HeldImageName;
+        private List<string> HeldImages = new List<string>();
+        private int CycleIndex = 0;
+        private bool canCycle = false;
         private int ImageIndex = 0;
         private bool RemoveImage;
         private bool isScrollable;
@@ -32,10 +54,12 @@ namespace GSTHD
 
         Size GossipStoneSize;
 
-        public GossipStone(ObjectPoint data, Settings settings, bool isOnBroadcast = false)
-            : this(settings, data.Name, data.X, data.Y, data.ImageCollection, data.Size, data.isScrollable, data.SizeMode, data.isBroadcastable, isOnBroadcast) { }
+        private System.Threading.Timer CyclingTimer;
 
-        public GossipStone(Settings settings, string name, int x, int y, string[] imageCollection, Size imageSize, bool isScrollable, PictureBoxSizeMode SizeMode, bool isBroadcastable, bool isOnBroadcast = false)
+        public GossipStone(ObjectPoint data, Settings settings, bool isOnBroadcast = false)
+            : this(settings, data.Name, data.X, data.Y, data.ImageCollection, data.Size, data.isScrollable, data.SizeMode, data.isBroadcastable, data.CanCycle, isOnBroadcast) { }
+
+        public GossipStone(Settings settings, string name, int x, int y, string[] imageCollection, Size imageSize, bool isScrollable, PictureBoxSizeMode SizeMode, bool isBroadcastable, bool CanCycle = false, bool isOnBroadcast = false)
         {
             Settings = settings;
 
@@ -62,6 +86,7 @@ namespace GSTHD
             this.TabStop = false;
             this.AllowDrop = true;
             this.isScrollable = isScrollable;
+            this.canCycle = CanCycle;
             this.isBroadcastable = isBroadcastable;
 
 
@@ -84,23 +109,37 @@ namespace GSTHD
         private void Panel_MouseEnter(object sender, EventArgs e)
         {
             this.hoveredOver = true;
+            if (HeldImages.Count > 1 && CyclingTimer != null)
+            {
+                CyclingTimer.Change(-1, -1);
+            }
         }
 
         private void Panel_MouseLeave(object sender, EventArgs e)
         {
             this.hoveredOver = false;
+            if (HeldImages.Count > 1)
+            {
+                CyclingTimer.Change(TimeSpan.FromSeconds(Settings.GossipCycleTime), TimeSpan.FromSeconds(Settings.GossipCycleTime));
+            }
         }
 
         private void Mouse_Wheel(object sender, MouseEventArgs e)
         {
             if (e.Delta != 0 && this.isScrollable == true)
             {
-                RemoveImage = true;
                 var scrolls = e.Delta / SystemInformation.MouseWheelScrollDelta;
-                ImageIndex += Settings.InvertScrollWheel ? scrolls : -scrolls;
-                if (ImageIndex < 0) ImageIndex = 0;
-                else if (ImageIndex >= ImageNames.Length) ImageIndex = ImageNames.Length - 1;
-                UpdateImage();
+                int whichway = Settings.InvertScrollWheel ? scrolls : -scrolls;
+                if (whichway > 0)
+                {
+                    IncrementState();
+                } else if (whichway < 0)
+                {
+                    DecrementState();
+                }
+                //if (ImageIndex < 0) ImageIndex = 0;
+                //else if (ImageIndex >= ImageNames.Length) ImageIndex = ImageNames.Length - 1;
+                //UpdateImage();
             }
         }
 
@@ -113,10 +152,39 @@ namespace GSTHD
         {
             ImageIndex = 0;
             HoldsImage = true;
+            RemoveImage = false;
             var dropContent = (DragDropContent)e.Data.GetData(typeof(DragDropContent));
-            HeldImageName = dropContent.ImageName;
+            if (canCycle || Settings.ForceGossipCycles)
+            {
+                if (!HeldImages.Contains(dropContent.ImageName))
+                {
+                    HeldImages.Add(dropContent.ImageName);
+                }
+                if (HeldImages.Count > 1 && CyclingTimer == null)
+                {
+                    CyclingTimer = new System.Threading.Timer(IncrementCycle, null, TimeSpan.FromSeconds(Settings.GossipCycleTime), TimeSpan.FromSeconds(Settings.GossipCycleTime));
+                }
+            }
+            else
+            {
+                HeldImages.Clear();
+                HeldImages.Add(dropContent.ImageName);
+            }
             UpdateImage();
             DragBehaviour.SaveChanges();
+            if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+            {
+                var remotewindow = ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]);
+                remotewindow.HoldsImage = HoldsImage;
+                remotewindow.HeldImages = HeldImages;
+                remotewindow.CycleIndex = 0;
+                remotewindow.UpdateImage();
+                if (HeldImages.Count > 1 && remotewindow.CyclingTimer == null)
+                {
+                    remotewindow.CyclingTimer = new System.Threading.Timer(remotewindow.IncrementCycle, null, TimeSpan.FromSeconds(Settings.GossipCycleTime), TimeSpan.FromSeconds(Settings.GossipCycleTime));
+                }
+            
+            }
         }
 
         public void Mouse_ClickUp(object sender, MouseEventArgs e)
@@ -136,12 +204,18 @@ namespace GSTHD
         {
             if (HoldsImage)
             {
-                Image = Image.FromFile(@"Resources/" + HeldImageName);
+                if (Image != null) Image.Dispose();
+                Image = Image.FromFile(@"Resources/" + HeldImages[CycleIndex]);
                 if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
-                    ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).HeldImageName = HeldImageName;
-                    ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).HoldsImage = true;
-                    ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
+                    var remotewindow = ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]);
+                    remotewindow.HeldImages = HeldImages;
+                    remotewindow.HoldsImage = true;
+                    remotewindow.UpdateImage();
+                }
+                if (HeldImages.Count > 1 && CyclingTimer == null)
+                {
+                    CyclingTimer = new System.Threading.Timer(IncrementCycle, null, TimeSpan.FromSeconds(Settings.GossipCycleTime), TimeSpan.FromSeconds(Settings.GossipCycleTime));
                 }
             }
             else
@@ -149,9 +223,10 @@ namespace GSTHD
                 Image = Image.FromFile(@"Resources/" + ImageNames[ImageIndex]);
                 if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
-                    ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).HoldsImage = false;
-                    ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
-                    ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
+                    var remotewindow = ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]);
+                    remotewindow.HoldsImage = false;
+                    remotewindow.ImageIndex = ImageIndex;
+                    remotewindow.UpdateImage();
                 }
             }
         }
@@ -161,7 +236,7 @@ namespace GSTHD
             return new GossipStoneState()
             {
                 HoldsImage = HoldsImage,
-                HeldImageName = HeldImageName,
+                HeldImages = HeldImages,
                 ImageIndex = ImageIndex,
             };
         }
@@ -171,7 +246,7 @@ namespace GSTHD
             return new GossipStoneState()
             {
                 HoldsImage = HoldsImage,
-                HeldImageName = HeldImageName,
+                HeldImages = HeldImages,
                 ImageIndex = ImageIndex,
             };
         }
@@ -179,7 +254,7 @@ namespace GSTHD
         public void SetState(GossipStoneState state)
         {
             HoldsImage = state.HoldsImage;
-            HeldImageName = state.HeldImageName;
+            HeldImages = state.HeldImages;
             ImageIndex = state.ImageIndex;
             UpdateImage();
             DragBehaviour.SaveChanges();
@@ -187,36 +262,105 @@ namespace GSTHD
 
         public void IncrementState()
         {
-            RemoveImage = true;
-            if (ImageIndex < ImageNames.Length - 1) ImageIndex += 1;
-            UpdateImage();
+            if ((Settings.OverrideHeldImage && HoldsImage) || !HoldsImage)
+            {
+                RemoveImage = true;
+                HoldsImage = false;
+                HeldImages.Clear();
+                if (ImageIndex < ImageNames.Length - 1) ImageIndex += 1;
+                UpdateImage();
+            }
         }
 
         public void DecrementState()
         {
-            RemoveImage = true;
-            if (ImageIndex > 0) ImageIndex -= 1;
+            if ((Settings.OverrideHeldImage && HoldsImage) || !HoldsImage)
+            {
+                RemoveImage = true;
+                HoldsImage = false;
+                HeldImages.Clear();
+                if (ImageIndex > 0) ImageIndex -= 1;
+                UpdateImage();
+            }
+        }
+
+        public void IncrementCycle(object state)
+        {
+            CycleIndex++;
+            if (CycleIndex == HeldImages.Count)
+            {
+                CycleIndex=0;
+            }
             UpdateImage();
         }
 
         public void ResetState()
         {
-            RemoveImage = true;
-            if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+            // when hovering over an image, using middle click will delete that entry in the list
+            if (HeldImages.Count > 1 && hoveredOver)
             {
-                ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).RemoveImage = true;
+                var temp = HeldImages[CycleIndex];
+                HeldImages.Remove(HeldImages[CycleIndex]);
+                if (CycleIndex >= HeldImages.Count)
+                {
+                    CycleIndex = 0;
+                }
+                if (HeldImages.Count <= 1)
+                {
+                    if (CyclingTimer != null) CyclingTimer.Dispose();
+                    CyclingTimer = null;
+                    CycleIndex = 0;
+                }
+                if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+                {
+                    var remotewindow = ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]);
+                    remotewindow.CycleIndex = 0;
+                    remotewindow.HeldImages = HeldImages;
+                    if (HeldImages.Count <= 1)
+                    {
+                        if (remotewindow.CyclingTimer != null) remotewindow.CyclingTimer.Dispose();
+                        remotewindow.CyclingTimer = null;
+                        remotewindow.CycleIndex = 0;
+                    }
+                }
+            } else
+            {
+                RemoveImage = true;
+                HeldImages.Clear();
+                HoldsImage = false;
+                if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+                {
+                    var remotewindow = ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]);
+                    remotewindow.RemoveImage = true;
+                    remotewindow.HeldImages.Clear();
+                    remotewindow.HoldsImage = false;
+                }
+                ImageIndex = 0;
             }
-            ImageIndex = 0;
             UpdateImage();
         }
 
         public void StartDragDrop()
         {
-            HoldsImage = false;
+            if (HeldImages.Count > 1)
+            {
+                //TODO: finish this thought lmao
+            } else
+            {
+                HoldsImage = false;
+            }
             UpdateImage();
-            var dropContent = new DragDropContent(false, HeldImageName);
+            var dropContent = new DragDropContent(false, HeldImages[CycleIndex]);
             DoDragDrop(dropContent, DragDropEffects.Copy);
             SaveChanges();
+        }
+
+        public void UpdateFromSettings()
+        {
+            if (HeldImages.Count > 1)
+            {
+                CyclingTimer.Change(TimeSpan.FromSeconds(Settings.GossipCycleTime), TimeSpan.FromSeconds(Settings.GossipCycleTime));
+            }
         }
 
         public void SaveChanges()
@@ -224,6 +368,7 @@ namespace GSTHD
             if (RemoveImage)
             {
                 HoldsImage = false;
+                HeldImages.Clear();
                 RemoveImage = false;
                 UpdateImage();
             }

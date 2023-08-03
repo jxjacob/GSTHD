@@ -15,6 +15,7 @@ namespace GSTHD
 
         private string[] ImageNames;
         private int ImageIndex = 0;
+        private string DragImage = null;
 
         bool isBroadcastable;
         string DoubleBroadcastSide;
@@ -41,6 +42,8 @@ namespace GSTHD
             this.isDraggable = data.isDraggable;
 
             this.AutoName = data.AutoName;
+
+            this.DragImage = data.DragImage;
 
             if (data.DoubleBroadcastSide != null) this.DoubleBroadcastSide = data.DoubleBroadcastSide;
             if (data.DoubleBroadcastName != null) this.DoubleBroadcastName = data.DoubleBroadcastName;
@@ -89,6 +92,7 @@ namespace GSTHD
 
         public void UpdateImage()
         {
+            if (Image != null) Image.Dispose();
             Image = Image.FromFile(@"Resources/" + ImageNames[ImageIndex]);
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {
@@ -172,8 +176,16 @@ namespace GSTHD
 
         public void StartDragDrop()
         {
-            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[System.Math.Max(ImageIndex, 1)]);
-            DoDragDrop(dropContent, DragDropEffects.Copy);
+            if (DragImage != null)
+            {
+                var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, DragImage);
+                DoDragDrop(dropContent, DragDropEffects.Copy);
+            }
+            else
+            {
+                var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[System.Math.Max(ImageIndex, 1)]);
+                DoDragDrop(dropContent, DragDropEffects.Copy);
+            }
         }
 
         public void SaveChanges() { }

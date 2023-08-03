@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
+using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.IO;
 using System.Text;
@@ -76,6 +77,9 @@ namespace GSTHD
         public bool EnableDuplicateWoth { get; set; } = true;
         public bool EnableLastWoth { get; set; } = false;
         public bool EnableBarrenColors { get; set; } = true;
+        public bool ForceGossipCycles { get; set; } = false;
+        public bool OverrideHeldImage { get; set; } = false;
+        public double GossipCycleTime { get; set; } = 1;
         public KnownColor LastWothColor { get; set; } = KnownColor.BlueViolet;
 
         public MedallionLabel DefaultDungeonNames { get; set; } = new MedallionLabel()

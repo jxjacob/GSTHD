@@ -88,7 +88,7 @@ namespace GSTHD
             {
                 if (Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
-                    ((Form2)Application.OpenForms["GSTHD_DK64 Broadcast View"]).Close();
+                    ((Form2)Application.OpenForms["GSTHD_DK64 Broadcast View"]).ClearAndDispose();
                 }
             }
             LoadLayout();
@@ -130,6 +130,7 @@ namespace GSTHD
         private void LoadLayout()
         {
             Controls.Clear();
+            if (LayoutContent != null) LayoutContent.Dispose();
             LayoutContent = new Panel();
             CurrentLayout = new Layout();
             CurrentLayout.LoadLayout(LayoutContent, Settings, ListSometimesHintsSuggestions, ListPlacesWithTag, this);
@@ -317,6 +318,7 @@ namespace GSTHD
             {
                 System.IO.File.WriteAllText(saveFileDialog1.FileName, thejson.ToString());
             }
+            saveFileDialog1.Dispose();
         }
 
         public void LoadState()
@@ -358,10 +360,12 @@ namespace GSTHD
                     {
                         string conv = (string)x.Value;
                         string[] words = conv.Split(',');
+                        string[] hi = words[1].Split('|');
+
                         GossipStoneState newstate = new GossipStoneState()
                         {
                             HoldsImage = Boolean.Parse(words[0]),
-                            HeldImageName = words[1],
+                            HeldImages = hi.ToList(),
                             ImageIndex = int.Parse(words[2]),
                         };
                         ((GossipStone)found).SetState(newstate);
@@ -407,6 +411,7 @@ namespace GSTHD
                     }
                 }
             }
+            filedia.Dispose();
         }
 
         public void ToggleMenuBroadcast()

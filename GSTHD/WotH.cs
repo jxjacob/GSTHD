@@ -49,7 +49,7 @@ namespace GSTHD
             string selectedPlace,
             int gossipStoneCount, string[] wothItemImageList, int gossipStoneSpacing,
             int pathGoalCount, string[] pathGoalImageList, int pathGoalSpacing,
-            Point lastLabelLocation, Label labelSettings, Size gossipStoneSize, bool isScrollable, PictureBoxSizeMode SizeMode, bool isBroadcastable)
+            Point lastLabelLocation, Label labelSettings, Size gossipStoneSize, bool isScrollable, PictureBoxSizeMode SizeMode, bool isBroadcastable, bool PathCycling)
         {
             Settings = settings;
             Name = selectedPlace;
@@ -95,7 +95,7 @@ namespace GSTHD
             {
                 for (int i = 0; i < pathGoalCount; i++)
                 {
-                    GossipStone newGossipStone = new GossipStone(Settings, Name + "_GoalGossipStone" + i, 0, 0, pathGoalImageList, gossipStoneSize, isScrollable, SizeMode, isBroadcastable);
+                    GossipStone newGossipStone = new GossipStone(Settings, Name + "_GoalGossipStone" + i, 0, 0, pathGoalImageList, gossipStoneSize, isScrollable, SizeMode, isBroadcastable, PathCycling);
                     newGossipStone.Location =
                         new Point((newGossipStone.Width + pathGoalSpacing) * i, LabelPlace.Location.Y);
                     listGossipStone.Add(newGossipStone);
@@ -116,6 +116,10 @@ namespace GSTHD
             MinIndex = Settings.EnableLastWoth ? 0 : 1;
             Colors[0] = Color.FromKnownColor(Settings.LastWothColor);
             UpdateColor();
+            foreach (var stone in listGossipStone)
+            {
+                stone.UpdateFromSettings();
+            }
         }
 
         public void SetColor(int color)

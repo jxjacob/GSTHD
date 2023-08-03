@@ -422,7 +422,11 @@ namespace GSTHD
                     foreach (var item in ListGossipStones)
                     {
                         if (item.Visible)
-                            panelLayout.Controls.Add(new GossipStone(item, settings));
+                        {
+                            var g = new GossipStone(item, settings);
+                            panelLayout.Controls.Add(g);
+                            ListUpdatables.Add(g);
+                        }
                     }
                 }
 
@@ -449,7 +453,9 @@ namespace GSTHD
                                         SizeMode = item.SizeMode,
                                         isBroadcastable = item.isBroadcastable
                                     };
-                                    panelLayout.Controls.Add(new GossipStone(gs, settings));
+                                    var g = new GossipStone(gs, settings);
+                                    panelLayout.Controls.Add(g);
+                                    ListUpdatables.Add(g);
                                 }
                             }
                         }
@@ -891,7 +897,12 @@ namespace GSTHD
                     foreach (var item in ListGossipStones)
                     {
                         if (item.Visible)
-                            panelLayout.Controls.Add(new GossipStone(item, settings, true));
+                        {
+                            var g = new GossipStone(item, settings, true);
+                            panelLayout.Controls.Add(g);
+                            ListUpdatables.Add(g);
+                        }
+                        
                     }
                 }
 
@@ -917,7 +928,9 @@ namespace GSTHD
                                         Visible = item.Visible,
                                         SizeMode= item.SizeMode
                                     };
-                                    panelLayout.Controls.Add(new GossipStone(gs, settings, true));
+                                    var g = new GossipStone(gs, settings, true);
+                                    panelLayout.Controls.Add(g);
+                                    ListUpdatables.Add(g);
                                 }
                             }
                         }
@@ -1037,6 +1050,8 @@ namespace GSTHD
         public string DoubleBroadcastName { get; set; } = null;
         public string DoubleBroadcastSide { get; set; } = null;
         public string AutoName { get; set; } = null;
+        public bool CanCycle { get; set; } = false;
+        public string DragImage { get; set; } = null;
         public Color BackColor { get; set; } = Color.Transparent;
         public PictureBoxSizeMode SizeMode { get; set; } = PictureBoxSizeMode.Zoom;
     }
@@ -1106,6 +1121,7 @@ namespace GSTHD
         public bool isBroadcastable { get; set; } = false;
         public string AutoName { get; set; } = null;
         public bool isDraggable { get; set; } = true;
+        public bool CanCycle { get; set; } = false;
         public BorderStyle BorderStyle { get; set; } = BorderStyle.FixedSingle;
     }
 
@@ -1159,6 +1175,7 @@ namespace GSTHD
         public int? PathGoalCount { get; set; }
         public string[] PathGoalImageCollection { get; set; }
         public int PathGoalSpacing { get; set; }
+        public bool PathCycling { get; set; } = false;
 
         public PictureBoxSizeMode SizeMode { get; set; } = PictureBoxSizeMode.Zoom;
         public bool isBroadcastable { get; set; } = false;
