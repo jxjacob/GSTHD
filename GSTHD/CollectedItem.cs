@@ -28,6 +28,7 @@ namespace GSTHD
         private bool isBroadcastable;
 
         public string AutoName = null;
+        public string AutoSubName = null;
 
         delegate void SetStateCallback(int state);
 
@@ -51,6 +52,7 @@ namespace GSTHD
             isBroadcastable = data.isBroadcastable && !isBroadcast;
 
             this.AutoName = data.AutoName;
+            this.AutoSubName = data.AutoSubName;
 
             if (ImageNames.Length > 0)
             {

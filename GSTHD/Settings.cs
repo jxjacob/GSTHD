@@ -80,6 +80,7 @@ namespace GSTHD
         public bool ForceGossipCycles { get; set; } = false;
         public bool OverrideHeldImage { get; set; } = false;
         public double GossipCycleTime { get; set; } = 1;
+        public bool SubtractItems { get; set; } = true;
         public KnownColor LastWothColor { get; set; } = KnownColor.BlueViolet;
 
         public MedallionLabel DefaultDungeonNames { get; set; } = new MedallionLabel()

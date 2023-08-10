@@ -43,8 +43,7 @@ namespace GSTHD
             this.TabStop = false;
             this.AllowDrop = false;
 
-            // this is the most scuffed way of only giving the ability to click to the items to form1 (main window) and not form2 (broadcast)
-            if (!isBroadcast)
+           if (!isBroadcast)
             {
                 this.MouseUp += this.Click_MouseUp;
                 this.MouseDown += this.Click_MouseDown;

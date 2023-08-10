@@ -10,6 +10,7 @@ using System.Windows.Forms.VisualStyles;
 using System.Net;
 using System.Xml.Linq;
 using System.Runtime.InteropServices;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
 namespace GSTHD
 {
@@ -34,7 +35,7 @@ namespace GSTHD
         public int countMax;
         public bool isDouble = false;
     }
-    public class Autotracker
+    public class Autotracker : UpdatableFromSettings
     {
         private Process emulator;
         private uint offset;
@@ -58,11 +59,12 @@ namespace GSTHD
         private bool is64 = false;
 
         //32-bit version
-        public Autotracker(Process theProgram, uint foundOffset, Form1 theForm)
+        public Autotracker(Process theProgram, uint foundOffset, ref Form1 theForm)
         {
             emulator = theProgram;
             offset = foundOffset;
             form = theForm;
+            form.CurrentLayout.ListUpdatables.Add(this);
 
             if (form.CurrentLayout.App_Settings.AutotrackingGame != null)
             {
@@ -79,6 +81,7 @@ namespace GSTHD
             emulator = theProgram;
             offset64 = foundOffset;
             form = theForm;
+            form.CurrentLayout.ListUpdatables.Add(this);
             is64 = true;
 
             if (form.CurrentLayout.App_Settings.AutotrackingGame != null)
@@ -238,21 +241,27 @@ namespace GSTHD
             }
         }
 
-        private void UTGrouped(TrackedGroup tg)
+        private void UTGrouped(TrackedGroup tg, bool forceUpdate = false)
         {
-            if (tg.currentValue != tg.runningvalue)
+            if (tg.currentValue != tg.runningvalue || forceUpdate)
             {
                 //Debug.WriteLine(tg.name + ": " + tg.runningvalue);
 
+                int subbing = 0;
                 // i can't fucking stand this method
                 foreach (Control thing in form.Controls[0].Controls)
                 {
-                    // cant think of a use case for a merged group but for single items so um uh
                     if (thing is CollectedItem)
                     {
                         if (((CollectedItem)thing).AutoName == tg.name)
                         {
                             UpdateTrackerCollectable((CollectedItem)thing, new TrackedAddress(), tg.runningvalue);
+                            // hate
+                            if (((CollectedItem)thing).AutoSubName != null && form.Settings.SubtractItems)
+                            {
+                                subbing = GetSubtractValue(((CollectedItem)thing).AutoSubName);
+                                
+                            }
                             break;
                         }
 
@@ -273,7 +282,7 @@ namespace GSTHD
 
                     }
                 }
-                tg.currentValue = tg.runningvalue;
+                tg.currentValue = tg.runningvalue - subbing;
             }
         }
 
@@ -308,12 +317,16 @@ namespace GSTHD
                 var theumuh = theRead & ta.bitmask;
                 if (theumuh != 0)
                 {
-                    theItem.SetState(1 + ta.offset);
+                    int goingIn = 1 + ta.offset;
+                    if (theItem.AutoSubName != null && form.Settings.SubtractItems) goingIn -= GetSubtractValue(theItem.AutoSubName);
+                    theItem.SetState(goingIn);
                 }
             }
             else
             {
-                theItem.SetState(theRead + ta.offset);
+                int goingIn = theRead + ta.offset;
+                if (theItem.AutoSubName != null && form.Settings.SubtractItems) goingIn -= GetSubtractValue(theItem.AutoSubName);
+                theItem.SetState(goingIn);
             }
         }
 
@@ -385,7 +398,7 @@ namespace GSTHD
             timeout++;
             if (timeout > 10)
             {
-                StopTimer();
+                NukeTimer();
                 MessageBox.Show("Lost connection to " + emulator.ProcessName + ". Please reconnect.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Debug.WriteLine("incorrect game. stopping timer.");
             }
@@ -480,6 +493,18 @@ namespace GSTHD
             }
         }
 
+        private int GetSubtractValue(string name)
+        {
+            if (name == null) return 0;
+            var subAddress = trackedAddresses.Find(x => x.name == name);
+            var subGroup = trackedGroups.Find(x => x.name == name);
+            //if (subAddress != null) Debug.WriteLine(subAddress.name + " " + subAddress.currentValue);
+            //if (subGroup != null) Debug.WriteLine(subGroup.name + " " + subGroup.runningvalue);
+            if (subAddress != null) return subAddress.currentValue;
+            else if (subGroup != null) return subGroup.runningvalue;
+            else return 0;
+        }
+
         public void StopTimer()
         {
             timer.Change(-1, -1);
@@ -493,6 +518,18 @@ namespace GSTHD
         public void NukeTimer()
         {
             if (timer != null) timer.Dispose();
+            timer = null;
+        }
+
+        public void UpdateFromSettings()
+        {
+            if (timer != null)
+            {
+                foreach (var tg in trackedGroups)
+                {
+                    UTGrouped(tg, true);
+                }
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,10 @@ namespace GSTHD
             while (ctrl.Controls.Count != 0)
             {
                 ClearAndDispose(ctrl.Controls[0]);
+            }
+            if (ctrl is GossipStone)
+            {
+                ((GossipStone)ctrl).NukeTimer();
             }
             ctrl.Controls.Clear();
             ctrl.Dispose();

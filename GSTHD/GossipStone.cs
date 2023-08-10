@@ -13,8 +13,7 @@ namespace GSTHD
         public List<string> HeldImages;
         public int ImageIndex;
 
-        //TODO: fix this to account for the list of held images im going to need to eventually make
-        //TODO: account for this new type of stone in the save/load state functions
+
         public override string ToString() {
             // for thing in heldimage
             string exported = "";
@@ -55,6 +54,8 @@ namespace GSTHD
         Size GossipStoneSize;
 
         private System.Threading.Timer CyclingTimer;
+
+        delegate void UpdateImageCallbacK();
 
         public GossipStone(ObjectPoint data, Settings settings, bool isOnBroadcast = false)
             : this(settings, data.Name, data.X, data.Y, data.ImageCollection, data.Size, data.isScrollable, data.SizeMode, data.isBroadcastable, data.CanCycle, isOnBroadcast) { }
@@ -220,6 +221,7 @@ namespace GSTHD
             }
             else
             {
+                if (Image != null) Image.Dispose();
                 Image = Image.FromFile(@"Resources/" + ImageNames[ImageIndex]);
                 if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
@@ -291,7 +293,13 @@ namespace GSTHD
             {
                 CycleIndex=0;
             }
-            UpdateImage();
+            try
+            {
+                Invoke(new UpdateImageCallbacK(UpdateImage));
+            } catch (Exception e)
+            {
+
+            }
         }
 
         public void ResetState()
@@ -353,6 +361,12 @@ namespace GSTHD
             var dropContent = new DragDropContent(false, HeldImages[CycleIndex]);
             DoDragDrop(dropContent, DragDropEffects.Copy);
             SaveChanges();
+        }
+
+        public void NukeTimer()
+        {
+            if (CyclingTimer != null) CyclingTimer.Dispose();
+            CyclingTimer = null;
         }
 
         public void UpdateFromSettings()

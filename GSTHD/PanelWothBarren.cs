@@ -379,7 +379,8 @@ namespace GSTHD
                         else if (i % 4 == 2)
                         {
                             // 2nd is the stored image
-                            storedHeldImageName = new List<string> { secondPart[i] };
+                            string[] images = (secondPart[i]).Split('|');
+                            storedHeldImageName = images.ToList();
                         }
                         else if (i % 4 == 3)
                         {

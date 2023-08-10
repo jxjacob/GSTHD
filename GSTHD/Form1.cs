@@ -25,7 +25,7 @@ namespace GSTHD
 
         PictureBox pbox_collectedSkulls;
 
-        Settings Settings;
+        public Settings Settings;
         
         public Form1()
         {
@@ -77,7 +77,9 @@ namespace GSTHD
             {
                 StopAutotracker();
             }
-            LoadSettings();
+            //trying to figure out why this was here. is it cuz in the older version you couldnt just open a new layout and had to edit the json to get it to swap?
+            // otherwise, why would you need to reload all the settings
+            //LoadSettings();
             if (!changeLayout)
             {
                 if (this.CurrentLayout.App_Settings.EnableBroadcast && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
@@ -174,8 +176,8 @@ namespace GSTHD
                 Reload();
             }
 
-            
             Process.GetCurrentProcess().Refresh();
+            GC.Collect();
         }
 
         public void SetAutotracker(Process emulator, uint offset)
@@ -190,6 +192,7 @@ namespace GSTHD
 
         private void StopAutotracker()
         {
+            if (TheAutotracker != null) CurrentLayout.ListUpdatables.Remove(TheAutotracker);
             TheAutotracker.NukeTimer();
             TheAutotracker = null;
         }

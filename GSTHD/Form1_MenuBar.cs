@@ -52,9 +52,11 @@ namespace GSTHD
             public ToolStripMenuItem CycleLength;
             public ToolStripMenuItem ForceGossipCycles;
 
+
             // Memory Engine
             public ToolStripMenuItem SelectEmulator;
             public ToolStripMenuItem ConnectToEmulator;
+            public ToolStripMenuItem SubtractItem;
         }
 
         private readonly Dictionary<Settings.DragButtonOption, string> DragButtonNames = new Dictionary<Settings.DragButtonOption, string>
@@ -332,6 +334,12 @@ namespace GSTHD
                 Items.SelectEmulator = new ToolStripMenuItem("Select Emulator", null, SelectEmulatorOptions.Values.ToArray());
                 MemoryMenu.DropDownItems.Add(Items.SelectEmulator);
 
+                Items.SubtractItem = new ToolStripMenuItem("Subtract from Collectables", null, new EventHandler(menuBar_ToggleSubtractItem))
+                {
+                    CheckOnClick = true,
+                };
+                MemoryMenu.DropDownItems.Add(Items.SubtractItem);
+
                 Items.ConnectToEmulator = new ToolStripMenuItem("Connect to Emulator", null, new EventHandler(menuBar_ConnectToEmulator))
                 {
                     
@@ -378,6 +386,7 @@ namespace GSTHD
             }
 
             SelectEmulatorOptions[Settings.SelectEmulator].Checked = true;
+            Items.SubtractItem.Checked = Settings.SubtractItems;
         }
 
         public void SetRenderer()
@@ -642,6 +651,13 @@ namespace GSTHD
         private void menuBar_ToggleOverrideHeldImage(object sender, EventArgs e)
         {
             Settings.OverrideHeldImage = Items.OverrideHeldImage.Checked;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
+        private void menuBar_ToggleSubtractItem(object sender, EventArgs e)
+        {
+            Settings.SubtractItems = Items.SubtractItem.Checked;
             Settings.Write();
             Form.UpdateLayoutFromSettings();
         }

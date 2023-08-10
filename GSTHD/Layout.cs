@@ -1241,6 +1241,7 @@ namespace GSTHD
         public string LabelFontName { get; set; }
         public int LabelFontSize { get; set; }
         public string AutoName { get; set; } = null;
+        public string AutoSubName { get; set; } = null;
         public FontStyle LabelFontStyle { get; set; }
         public Color LabelColor { get; set; }
         public bool isBroadcastable { get; set; } = false;

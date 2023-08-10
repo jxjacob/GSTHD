@@ -16,7 +16,14 @@ namespace GSTHD
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            //dembunging
+            //try
+            //{
+                Application.Run(new Form1());
+            //} catch (Exception ex)
+            //{
+            //    MessageBox.Show(ex.Source + ":\n" + ex.Message, "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //}
         }
     }
 }
