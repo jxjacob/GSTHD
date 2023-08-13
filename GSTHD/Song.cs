@@ -133,6 +133,7 @@ namespace GSTHD
             if (HoldsImage)
             {
                 if (Image != null) Image.Dispose();
+                Image = null;
                 Image = Image.FromFile(@"Resources/" + HeldImageName);
                 if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
@@ -144,6 +145,7 @@ namespace GSTHD
             else
             {
                 if (Image != null) Image.Dispose();
+                Image = null;
                 Image = Image.FromFile(@"Resources/" + ImageNames[ImageIndex]);
                 if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
@@ -391,6 +393,7 @@ namespace GSTHD
         public void UpdateImage()
         {
             if (Image != null) Image.Dispose();
+            Image = null;
             Image = Image.FromFile(@"Resources/" + ImageNames[ImageIndex]);
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {

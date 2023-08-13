@@ -1043,7 +1043,7 @@ namespace GSTHD
         public bool Visible { get; set; }
         public string[] ImageCollection { get; set; }
         public string[] TinyImageCollection { get; set; }
-
+        public int DefaultIndex { get; set; } = 0;
         public bool isScrollable{ get; set; } = true;
         public bool isBroadcastable { get; set; } = false;
         public bool isDraggable { get; set; } = true;

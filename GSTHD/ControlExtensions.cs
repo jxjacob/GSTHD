@@ -16,12 +16,23 @@ namespace GSTHD
             {
                 ClearAndDispose(ctrl.Controls[0]);
             }
-            if (ctrl is GossipStone)
+            if (ctrl is GossipStone gs)
             {
-                ((GossipStone)ctrl).NukeTimer();
+                gs.NukeTimer();
+            }
+            if (ctrl is PanelWothBarren pw)
+            {
+                foreach (WotH item in pw.ListWotH)
+                {
+                    foreach (Control stone in item.listGossipStone)
+                    {
+                        ClearAndDispose(stone);
+                    }
+                }
             }
             ctrl.Controls.Clear();
             ctrl.Dispose();
         }
+
     }
 }

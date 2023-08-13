@@ -247,21 +247,18 @@ namespace GSTHD
             {
                 //Debug.WriteLine(tg.name + ": " + tg.runningvalue);
 
-                int subbing = 0;
                 // i can't fucking stand this method
                 foreach (Control thing in form.Controls[0].Controls)
                 {
-                    if (thing is CollectedItem)
+                    if (thing is CollectedItem ci)
                     {
-                        if (((CollectedItem)thing).AutoName == tg.name)
+                        if (ci.AutoName == tg.name)
                         {
-                            UpdateTrackerCollectable((CollectedItem)thing, new TrackedAddress(), tg.runningvalue);
-                            // hate
-                            if (((CollectedItem)thing).AutoSubName != null && form.Settings.SubtractItems)
-                            {
-                                subbing = GetSubtractValue(((CollectedItem)thing).AutoSubName);
-                                
-                            }
+                            if (ci.AutoSubName == null || (ci.AutoSubName != null && !form.Settings.SubtractItems)) UpdateTrackerCollectable(ci, new TrackedAddress(), tg.runningvalue);
+                            break;
+                        } else if (ci.AutoSubName == tg.name && form.Settings.SubtractItems)
+                        {
+                            UpdateTrackerCollectableSub(ci, new TrackedAddress(), tg.runningvalue);
                             break;
                         }
 
@@ -282,7 +279,7 @@ namespace GSTHD
 
                     }
                 }
-                tg.currentValue = tg.runningvalue - subbing;
+                tg.currentValue = tg.runningvalue;
             }
         }
 
@@ -317,15 +314,36 @@ namespace GSTHD
                 var theumuh = theRead & ta.bitmask;
                 if (theumuh != 0)
                 {
+                    // have a funny feeling that this is supposed to be umuh and not 1
                     int goingIn = 1 + ta.offset;
-                    if (theItem.AutoSubName != null && form.Settings.SubtractItems) goingIn -= GetSubtractValue(theItem.AutoSubName);
                     theItem.SetState(goingIn);
                 }
             }
             else
             {
                 int goingIn = theRead + ta.offset;
-                if (theItem.AutoSubName != null && form.Settings.SubtractItems) goingIn -= GetSubtractValue(theItem.AutoSubName);
+                theItem.SetState(goingIn);
+            }
+        }
+
+        private void UpdateTrackerCollectableSub(CollectedItem theItem, TrackedAddress ta, int theSub)
+        {
+            int theRead = GetSubtractValue(theItem.AutoName);
+            if (ta.bitmask != 0)
+            {
+                var theumuh = theRead & ta.bitmask;
+                if (theumuh != 0)
+                {
+                    // have a funny feeling that this is supposed to be umuh and not 1
+                    int goingIn = 1 + ta.offset;
+                    goingIn -= theSub;
+                    theItem.SetState(goingIn);
+                }
+            }
+            else
+            {
+                int goingIn = theRead + ta.offset;
+                goingIn -= theSub;
                 theItem.SetState(goingIn);
             }
         }
@@ -498,8 +516,6 @@ namespace GSTHD
             if (name == null) return 0;
             var subAddress = trackedAddresses.Find(x => x.name == name);
             var subGroup = trackedGroups.Find(x => x.name == name);
-            //if (subAddress != null) Debug.WriteLine(subAddress.name + " " + subAddress.currentValue);
-            //if (subGroup != null) Debug.WriteLine(subGroup.name + " " + subGroup.runningvalue);
             if (subAddress != null) return subAddress.currentValue;
             else if (subGroup != null) return subGroup.runningvalue;
             else return 0;
