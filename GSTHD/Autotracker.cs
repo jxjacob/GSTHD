@@ -254,7 +254,7 @@ namespace GSTHD
                     {
                         if (ci.AutoName == tg.name)
                         {
-                            if (ci.AutoSubName == null || (ci.AutoSubName != null && !form.Settings.SubtractItems)) UpdateTrackerCollectable(ci, new TrackedAddress(), tg.runningvalue);
+                            UpdateTrackerCollectable(ci, new TrackedAddress(), tg.runningvalue);
                             break;
                         } else if (ci.AutoSubName == tg.name && form.Settings.SubtractItems)
                         {
@@ -335,15 +335,13 @@ namespace GSTHD
                 if (theumuh != 0)
                 {
                     // have a funny feeling that this is supposed to be umuh and not 1
-                    int goingIn = 1 + ta.offset;
-                    goingIn -= theSub;
+                    int goingIn = 1 + ta.offset - theSub;
                     theItem.SetState(goingIn);
                 }
             }
             else
             {
-                int goingIn = theRead + ta.offset;
-                goingIn -= theSub;
+                int goingIn = theRead + ta.offset - theSub;
                 theItem.SetState(goingIn);
             }
         }
@@ -517,7 +515,7 @@ namespace GSTHD
             var subAddress = trackedAddresses.Find(x => x.name == name);
             var subGroup = trackedGroups.Find(x => x.name == name);
             if (subAddress != null) return subAddress.currentValue;
-            else if (subGroup != null) return subGroup.runningvalue;
+            else if (subGroup != null) return subGroup.currentValue;
             else return 0;
         }
 
