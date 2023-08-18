@@ -254,11 +254,17 @@ namespace GSTHD
                     {
                         if (ci.AutoName == tg.name)
                         {
-                            UpdateTrackerCollectable(ci, new TrackedAddress(), tg.runningvalue);
+                            if (ci.AutoSubName != null && form.Settings.SubtractItems)
+                            {
+                                UpdateTrackerCollectable(ci, new TrackedAddress(), tg.runningvalue - GetSubtractValue(ci.AutoSubName));
+                            } else
+                            {
+                                UpdateTrackerCollectable(ci, new TrackedAddress(), tg.runningvalue);
+                            }
                             break;
                         } else if (ci.AutoSubName == tg.name && form.Settings.SubtractItems)
                         {
-                            UpdateTrackerCollectableSub(ci, new TrackedAddress(), tg.runningvalue);
+                            UpdateTrackerCollectable(ci, new TrackedAddress(), GetSubtractValue(ci.AutoName) - tg.runningvalue);
                             break;
                         }
 

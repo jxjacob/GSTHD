@@ -353,6 +353,7 @@ namespace GSTHD
                                         isBroadcastable = item.isBroadcastable,
                                         isDraggable = item.isDraggable,
                                         AutoName = item.AutoName,
+                                        BackColor = item.BackColor
                                     };
                                     panelLayout.Controls.Add(new Item(gs, settings));
                                 }
