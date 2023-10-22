@@ -11,6 +11,8 @@ using System.Net;
 using System.Xml.Linq;
 using System.Runtime.InteropServices;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
+using System.Net.NetworkInformation;
+using System.Timers;
 
 namespace GSTHD
 {
@@ -25,6 +27,7 @@ namespace GSTHD
         public int offset;
         public string type;
         public string group;
+        public Control targetControl;
     }
     public class TrackedGroup
     {
@@ -34,10 +37,12 @@ namespace GSTHD
         public int count = 0;
         public int countMax;
         public bool isDouble = false;
+        public Control targetControl;
     }
     public class Autotracker : UpdatableFromSettings
     {
         private Process emulator;
+        private IntPtr emuHandle;
         private uint offset;
         private ulong offset64;
 
@@ -52,7 +57,7 @@ namespace GSTHD
         private int desiredGameStateBytes;
         private uint desiredGameStateValue;
 
-        private System.Threading.Timer timer;
+        private System.Timers.Timer timer;
         private Form1 form;
 
         private int timeout;
@@ -62,6 +67,7 @@ namespace GSTHD
         public Autotracker(Process theProgram, uint foundOffset, ref Form1 theForm)
         {
             emulator = theProgram;
+            emuHandle = emulator.Handle;
             offset = foundOffset;
             form = theForm;
             form.CurrentLayout.ListUpdatables.Add(this);
@@ -71,7 +77,11 @@ namespace GSTHD
                 SetGameStateTargets(form.CurrentLayout.App_Settings.AutotrackingGame);
 
                 Debug.WriteLine("Beginning timer with " + trackedAddresses.Count + " addresses and " + trackedGroups.Count + " groups");
-                timer = new System.Threading.Timer(MainTracker, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+                //timer = new System.Threading.Timer(MainTracker, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+                timer = new System.Timers.Timer(1000);
+                timer.Elapsed += MainTracker;
+                timer.AutoReset = true;
+                timer.Enabled = true;
             }
         }
 
@@ -79,6 +89,7 @@ namespace GSTHD
         public Autotracker(Process theProgram, ulong foundOffset, Form1 theForm)
         {
             emulator = theProgram;
+            emuHandle = emulator.Handle;
             offset64 = foundOffset;
             form = theForm;
             form.CurrentLayout.ListUpdatables.Add(this);
@@ -87,13 +98,138 @@ namespace GSTHD
             if (form.CurrentLayout.App_Settings.AutotrackingGame != null)
             {
                 SetGameStateTargets(form.CurrentLayout.App_Settings.AutotrackingGame);
-
+                CalibrateTracks();
                 Debug.WriteLine("Beginning timer with " + trackedAddresses.Count + " addresses and " + trackedGroups.Count + " groups");
-                timer = new System.Threading.Timer(MainTracker, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+                //timer = new System.Threading.Timer(MainTracker, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+                timer = new System.Timers.Timer(1000);
+                timer.Elapsed += MainTracker;
+                timer.AutoReset = true;
+                timer.Enabled = true;
             }
         }
 
-        private void MainTracker(object state)
+        private void CalibrateTracks()
+        {
+            // go through each address or group and store the controls that they are going to update so i can skip that godawful foreach controls for every single damn update
+            // also removes addresses without a counterpart on the layout
+
+            var tac = new List<TrackedAddress>();
+
+            foreach (TrackedAddress ta in trackedAddresses)
+            {
+                if (ta.group != "")
+                {
+                    TrackedGroup result = trackedGroups.Find(x => x.name.Equals(ta.group));
+                    if (result.targetControl != null)
+                    {
+                        //Debug.WriteLine("group " + result.name + " already has a targetcontrol, skipping");
+                        continue;
+                    }
+                    foreach (Control thing in form.Controls[0].Controls)
+                    {
+                        if (thing is CollectedItem ci)
+                        {
+                            if (ci.AutoName == result.name)
+                            {
+                                result.targetControl = thing;
+                                break;
+                            }
+                            else if (ci.AutoSubName == result.name && form.Settings.SubtractItems)
+                            {
+                                result.targetControl = thing;
+                                break;
+                            }
+
+                        }
+                        else if (thing is DoubleItem di)
+                        {
+                            if (di.AutoName == result.name)
+                            {
+                                result.targetControl = thing;
+                                break;
+                            }
+                        }
+                        else if (thing is Item it)
+                        {
+                            if (it.AutoName == result.name)
+                            {
+                                result.targetControl = thing;
+                                break;
+                            }
+
+                        }
+                    }
+                    if (result.targetControl == null)
+                    {
+                        Debug.WriteLine("group " + result.name + " doesnt have a thing on the tracker");
+                        tac.Add(ta);
+                    }
+                } else
+                {
+                    foreach (Control thing in form.Controls[0].Controls)
+                    {
+                        if (ta.type == "item" && thing is Item it)
+                        {
+                            if (it.AutoName == ta.name)
+                            {
+                                ta.targetControl = thing;
+                                break;
+                            }
+
+                        }
+                        else if (ta.type == "item" && thing is Medallion md)
+                        {
+                            if (md.AutoName == ta.name)
+                            {
+                                ta.targetControl = thing;
+                                break;
+                            }
+
+                        }
+                        else if (ta.type == "item" && thing is Song sg)
+                        {
+                            if (sg.AutoName == ta.name)
+                            {
+                                ta.targetControl = thing;
+                                break;
+                            }
+
+                        }
+                        else if (ta.type == "collectable" && thing is CollectedItem ci)
+                        {
+                            if (ci.AutoName == ta.name)
+                            {
+                                ta.targetControl = thing;
+                                break;
+                            }
+
+                        }
+                        else if (ta.type == "collectable" && thing is Item it2)
+                        {
+                            if (it2.AutoName == ta.name)
+                            {
+                                ta.targetControl = thing;
+                                break;
+                            }
+
+                        }
+                    }
+                    if (ta.targetControl == null)
+                    {
+                        Debug.WriteLine("item " + ta.name + " doesnt have a thing on the tracker");
+                        tac.Add(ta);
+                    }
+                }
+
+            }
+
+            foreach( var thing in tac)
+            {
+                trackedAddresses.Remove(thing);
+            }
+        }
+
+        private void MainTracker(object state, ElapsedEventArgs e)
         {
             FlushGroups();
             foreach (var ta in trackedAddresses)
@@ -117,10 +253,10 @@ namespace GSTHD
                                     if (result.isDouble) { 
                                         if (ta.type == "doubleitem_l")
                                         {
-                                            result.runningvalue = result.runningvalue ^ 1;
+                                            result.runningvalue ^= 1;
                                         } else
                                         {
-                                            result.runningvalue = result.runningvalue ^ 2;
+                                            result.runningvalue ^= 2;
                                         }
                                     } else
                                     {
@@ -158,11 +294,11 @@ namespace GSTHD
                 switch (numOfBits)
                 {
                     case 8:
-                        return Memory.ReadInt8(emulator, offset + Memory.Int8AddrFix(addr));
+                        return Memory.ReadInt8(emuHandle, offset + Memory.Int8AddrFix(addr));
                     case 16:
-                        return Memory.ReadInt16(emulator, offset + Memory.Int16AddrFix(addr));
+                        return Memory.ReadInt16(emuHandle, offset + Memory.Int16AddrFix(addr));
                     case 32:
-                        return Memory.ReadInt32(emulator, offset + addr);
+                        return Memory.ReadInt32(emuHandle, offset + addr);
                     default:
                         Debug.WriteLine("could not define how many bits to read");
                         return 0;
@@ -172,11 +308,11 @@ namespace GSTHD
                 switch (numOfBits)
                 {
                     case 8:
-                        return Memory.ReadInt8(emulator, offset64 + Memory.Int8AddrFix(addr));
+                        return Memory.ReadInt8(emuHandle, offset64 + Memory.Int8AddrFix(addr));
                     case 16:
-                        return Memory.ReadInt16(emulator, offset64 + Memory.Int16AddrFix(addr));
+                        return Memory.ReadInt16(emuHandle, offset64 + Memory.Int16AddrFix(addr));
                     case 32:
-                        return Memory.ReadInt32(emulator, offset64 + addr);
+                        return Memory.ReadInt32(emuHandle, offset64 + addr);
                     default:
                         Debug.WriteLine("could not define how many bits to read");
                         return 0;
@@ -189,54 +325,69 @@ namespace GSTHD
         {
             if (ta.currentValue != theRead)
             {
-
-               
-                // i can't fucking stand this method
-                foreach (Control thing in form.Controls[0].Controls)
+                if (ta.targetControl is Item it)
                 {
-                    if (ta.type == "item" && thing is Item)
-                    {
-                        if (((Item)thing).AutoName == ta.name)
-                        {
-                            UpdateTrackerItem((Item)thing, ta, theRead);
-                            break;
-                        }
-
-                    } else if (ta.type == "item" && thing is Medallion)
-                    {
-                        if (((Medallion)thing).AutoName == ta.name)
-                        {
-                            UpdateTrackerMedallion((Medallion)thing, ta, theRead);
-                            break;
-                        }
-
-                    } else if (ta.type == "item" && thing is Song)
-                    {
-                        if (((Song)thing).AutoName == ta.name)
-                        {
-                            UpdateTrackerSong((Song)thing, ta, theRead);
-                            break;
-                        }
-
-                    }
-                    else if (ta.type == "collectable" && thing is CollectedItem)
-                    {
-                        if (((CollectedItem)thing).AutoName == ta.name)
-                        {
-                            UpdateTrackerCollectable((CollectedItem)thing, ta, theRead);
-                            break;
-                        }
-
-                    } else if (ta.type == "collectable" && thing is Item)
-                    {
-                        if (((Item)thing).AutoName == ta.name)
-                        {
-                            UpdateTrackerItem((Item)thing, ta, theRead);
-                            break;
-                        }
-
-                    }
+                    UpdateTrackerItem(it, ta, theRead);
+                } 
+                else if (ta.targetControl is Medallion md)
+                {
+                    UpdateTrackerMedallion(md, ta, theRead);
                 }
+                else if(ta.targetControl is Song sg)
+                {
+                    UpdateTrackerSong(sg, ta, theRead);
+                }
+                else if(ta.targetControl is CollectedItem ci)
+                {
+                    UpdateTrackerCollectable(ci, ta, theRead);
+                }
+
+                // i can't fucking stand this method
+                //foreach (Control thing in form.Controls[0].Controls)
+                //{
+                //    if (ta.type == "item" && thing is Item)
+                //    {
+                //        if (((Item)thing).AutoName == ta.name)
+                //        {
+                //            UpdateTrackerItem((Item)thing, ta, theRead);
+                //            break;
+                //        }
+
+                //    } else if (ta.type == "item" && thing is Medallion)
+                //    {
+                //        if (((Medallion)thing).AutoName == ta.name)
+                //        {
+                //            UpdateTrackerMedallion((Medallion)thing, ta, theRead);
+                //            break;
+                //        }
+
+                //    } else if (ta.type == "item" && thing is Song)
+                //    {
+                //        if (((Song)thing).AutoName == ta.name)
+                //        {
+                //            UpdateTrackerSong((Song)thing, ta, theRead);
+                //            break;
+                //        }
+
+                //    }
+                //    else if (ta.type == "collectable" && thing is CollectedItem)
+                //    {
+                //        if (((CollectedItem)thing).AutoName == ta.name)
+                //        {
+                //            UpdateTrackerCollectable((CollectedItem)thing, ta, theRead);
+                //            break;
+                //        }
+
+                //    } else if (ta.type == "collectable" && thing is Item)
+                //    {
+                //        if (((Item)thing).AutoName == ta.name)
+                //        {
+                //            UpdateTrackerItem((Item)thing, ta, theRead);
+                //            break;
+                //        }
+
+                //    }
+                //}
                 ta.currentValue = theRead;
             }
         }
@@ -247,44 +398,32 @@ namespace GSTHD
             {
                 //Debug.WriteLine(tg.name + ": " + tg.runningvalue);
 
-                // i can't fucking stand this method
-                foreach (Control thing in form.Controls[0].Controls)
+                if (tg.targetControl is CollectedItem ci)
                 {
-                    if (thing is CollectedItem ci)
+                    // i could abosutely opimize this bit but i dont think i care lmao
+                    if (ci.AutoName == tg.name)
                     {
-                        if (ci.AutoName == tg.name)
+                        if (ci.AutoSubName != null && form.Settings.SubtractItems)
                         {
-                            if (ci.AutoSubName != null && form.Settings.SubtractItems)
-                            {
-                                UpdateTrackerCollectable(ci, new TrackedAddress(), tg.runningvalue - GetSubtractValue(ci.AutoSubName));
-                            } else
-                            {
-                                UpdateTrackerCollectable(ci, new TrackedAddress(), tg.runningvalue);
-                            }
-                            break;
-                        } else if (ci.AutoSubName == tg.name && form.Settings.SubtractItems)
-                        {
-                            UpdateTrackerCollectable(ci, new TrackedAddress(), GetSubtractValue(ci.AutoName) - tg.runningvalue);
-                            break;
+                            UpdateTrackerCollectable(ci, new TrackedAddress(), tg.runningvalue - GetSubtractValue(ci.AutoSubName));
                         }
-
-                    } else if (thing is DoubleItem)
-                    {
-                        if (((DoubleItem)thing).AutoName == tg.name)
+                        else
                         {
-                            UpdateTrackerDoubleItem((DoubleItem)thing, tg.runningvalue);
-                            break;
+                            UpdateTrackerCollectable(ci, new TrackedAddress(), tg.runningvalue);
                         }
-                    } else if (thing is Item)
-                    {
-                        if (((Item)thing).AutoName == tg.name)
-                        {
-                            UpdateTrackerItem((Item)thing, tg.runningvalue);
-                            break;
-                        }
-
                     }
+                    else if (ci.AutoSubName == tg.name && form.Settings.SubtractItems)
+                    {
+                        UpdateTrackerCollectable(ci, new TrackedAddress(), GetSubtractValue(ci.AutoName) - tg.runningvalue);
+                    }
+                } else if (tg.targetControl is DoubleItem di)
+                {
+                    UpdateTrackerDoubleItem(di, tg.runningvalue);
+                } else if (tg.targetControl is Item it)
+                {
+                    UpdateTrackerItem(it, tg.runningvalue);
                 }
+
                 tg.currentValue = tg.runningvalue;
             }
         }
@@ -527,17 +666,23 @@ namespace GSTHD
 
         public void StopTimer()
         {
-            timer.Change(-1, -1);
+            timer.Stop();
         }
 
         private void StartTimer()
         {
-            timer.Change(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+            timer.Start();
         }
 
         public void NukeTimer()
         {
-            if (timer != null) timer.Dispose();
+            if (timer != null)
+            {
+                timer.Elapsed -= MainTracker;
+                timer.Stop();
+                timer.Close();
+                timer = null;
+            }
             timer = null;
         }
 

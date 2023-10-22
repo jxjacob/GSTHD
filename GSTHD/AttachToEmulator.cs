@@ -57,7 +57,7 @@ namespace GSTHD
                     if (gameInfo.Item2 == 8)
                     {
                         uint addr = Memory.Int8AddrFix(gameInfo.Item1);
-                        if (Memory.ReadInt8(target, potOff + addr) == gameInfo.Item3)
+                        if (Memory.ReadInt8(target.Handle, potOff + addr) == gameInfo.Item3)
                         {
                             Debug.WriteLine(potOff.ToString("X"));
                             romAddrStart = potOff;
@@ -67,7 +67,7 @@ namespace GSTHD
                     else if (gameInfo.Item2 == 16)
                     {
                         uint addr = Memory.Int16AddrFix(gameInfo.Item1);
-                        if (Memory.ReadInt16(target, potOff + addr) == gameInfo.Item3)
+                        if (Memory.ReadInt16(target.Handle, potOff + addr) == gameInfo.Item3)
                         {
                             Debug.WriteLine(potOff.ToString("X"));
                             romAddrStart = potOff;
@@ -76,7 +76,7 @@ namespace GSTHD
                     }
                     else if (gameInfo.Item2 == 32)
                     {
-                        if (Memory.ReadInt32(target, potOff + gameInfo.Item1) == gameInfo.Item3)
+                        if (Memory.ReadInt32(target.Handle, potOff + gameInfo.Item1) == gameInfo.Item3)
                         {
                             Debug.WriteLine(potOff.ToString("X"));
                             romAddrStart = potOff;
@@ -92,11 +92,6 @@ namespace GSTHD
                 Debug.WriteLine("Done");
                 return Tuple.Create(target, romAddrStart);
             }
-
-            //for (int i = 0; i < 4; i++)
-            //{
-            //    switch (i)
-            //    {
 
             for (uint potOff = 0xDFD00000; potOff < 0xE01FFFFF; potOff += 16)
             {
@@ -123,16 +118,16 @@ namespace GSTHD
                     if (gameInfo.Item2 == 8)
                     {
                         uint addr = Memory.Int8AddrFix(gameInfo.Item1);
-                        gamecheck = Memory.ReadInt8(target, romAddrStart + addr);
+                        gamecheck = Memory.ReadInt8(target.Handle, romAddrStart + addr);
                     }
                     else if (gameInfo.Item2 == 16)
                     {
                         uint addr = Memory.Int16AddrFix(gameInfo.Item1);
-                        gamecheck = Memory.ReadInt16(target, romAddrStart + addr);
+                        gamecheck = Memory.ReadInt16(target.Handle, romAddrStart + addr);
                     }
                     else if (gameInfo.Item2 == 32)
                     {
-                        gamecheck = Memory.ReadInt32(target, romAddrStart + gameInfo.Item1);
+                        gamecheck = Memory.ReadInt32(target.Handle, romAddrStart + gameInfo.Item1);
                     }
                     else
                     {
@@ -227,16 +222,16 @@ namespace GSTHD
                     if (gameInfo.Item2 == 8)
                     {
                         uint addr = Memory.Int8AddrFix(gameInfo.Item1);
-                        gamecheck = Memory.ReadInt8(target, romAddrStart + addr);
+                        gamecheck = Memory.ReadInt8(target.Handle, romAddrStart + addr);
                     }
                     else if (gameInfo.Item2 == 16)
                     {
                         uint addr = Memory.Int16AddrFix(gameInfo.Item1);
-                        gamecheck = Memory.ReadInt16(target, romAddrStart + addr);
+                        gamecheck = Memory.ReadInt16(target.Handle, romAddrStart + addr);
                     }
                     else if (gameInfo.Item2 == 32)
                     {
-                        gamecheck = Memory.ReadInt32(target, (uint)(addressDLL + romAddrStart + gameInfo.Item1));
+                        gamecheck = Memory.ReadInt32(target.Handle, (uint)(addressDLL + romAddrStart + gameInfo.Item1));
                     }
                     else
                     {
@@ -309,12 +304,12 @@ namespace GSTHD
 
 
                 // read the address to find the address of the starting point in the rom
-                ulong readAddress = Memory.ReadInt64(target, (romAddrStart));
+                ulong readAddress = Memory.ReadInt64(target.Handle, (romAddrStart));
 
                 if (gameInfo.Item2 == 8)
                 {
                     var addr = Memory.Int8AddrFix(readAddress + 0x80000000 + gameInfo.Item1);
-                    var wherethefuck = Memory.ReadInt8(target, addr);
+                    var wherethefuck = Memory.ReadInt8(target.Handle, addr);
                     if ((wherethefuck & 0xff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress + 0x80000000));
@@ -324,7 +319,7 @@ namespace GSTHD
                 else if (gameInfo.Item2 == 16)
                 {
                     var addr = Memory.Int16AddrFix(readAddress + 0x80000000 + gameInfo.Item1);
-                    var wherethefuck = Memory.ReadInt16(target, addr);
+                    var wherethefuck = Memory.ReadInt16(target.Handle, addr);
                     if ((wherethefuck & 0xffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress + 0x80000000));
@@ -334,7 +329,7 @@ namespace GSTHD
                 else if (gameInfo.Item2 == 32)
                 {
                     // use this previously read address to find the game verification data
-                    var wherethefuck = Memory.ReadInt32(target, (readAddress + 0x80000000 + gameInfo.Item1));
+                    var wherethefuck = Memory.ReadInt32(target.Handle, (readAddress + 0x80000000 + gameInfo.Item1));
                     if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress + 0x80000000));

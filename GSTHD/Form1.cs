@@ -8,6 +8,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Timers;
 using System.Windows.Forms;
 
 namespace GSTHD
@@ -22,8 +23,10 @@ namespace GSTHD
         public Layout CurrentLayout;
         Panel LayoutContent;
         public Autotracker TheAutotracker;
+        public System.Timers.Timer StoneCyclingTimer;
+        private int cyclecount = 0;
 
-        PictureBox pbox_collectedSkulls;
+        public List<GossipStone> currentlyCycling = new List<GossipStone>();
 
         public Settings Settings;
         
@@ -66,6 +69,8 @@ namespace GSTHD
             LoadLayout();
             SetMenuBar();
             //setAutoTracker();
+            if (Settings.DeleteOldAutosaves) CleanUpOldAutos();
+
 
             this.KeyPreview = true;
             //this.KeyDown += changeCollectedSkulls;
@@ -73,10 +78,6 @@ namespace GSTHD
 
         private void Reload(bool changeLayout = false)
         {
-            if (TheAutotracker != null)
-            {
-                StopAutotracker();
-            }
             //trying to figure out why this was here. is it cuz in the older version you couldnt just open a new layout and had to edit the json to get it to swap?
             // otherwise, why would you need to reload all the settings
             //LoadSettings();
@@ -104,6 +105,7 @@ namespace GSTHD
             ListPlaces.Clear();
             ListPlaces.Add("");
             ListPlacesWithTag.Clear();
+            currentlyCycling.Clear();
             JObject json_places = JObject.Parse(File.ReadAllText(@"" + Settings.ActivePlaces));
             foreach (var property in json_places)
             {
@@ -129,9 +131,52 @@ namespace GSTHD
             MenuBar.SetRenderer();
         }
 
+        private void CleanUpOldAutos()
+        {
+            // list everything in dir
+            // if more than 25, get the oldest ones then nukeem
+            Debug.WriteLine("------begin");
+            if (Directory.Exists("Autosaves"))
+            {
+                var files = Directory.GetFiles("Autosaves").OrderBy(f => new FileInfo(f).CreationTime);
+                int todelete = files.Count() - 25;
+                if (todelete > 0)
+                {
+                    foreach (string file in files)
+                    {
+                        //Debug.WriteLine(file + " gets deleted");
+                        FileInfo fi = new FileInfo(file);
+                        fi.Delete();
+                        todelete--;
+                        if (todelete == 0) break;
+                    }
+                    //files.OrderBy(x => ((FileInfo)x).CreationTime;
+                    //foreach (string file in files)
+                    //{
+                    //    FileInfo fi = new FileInfo(file);
+                    //    if (fi.LastAccessTime < DateTime.Now.AddMonths(-3))
+                    //        fi.Delete();
+                    //}
+                }
+            }
+            
+        }
+
         private void LoadLayout()
         {
             Controls.Clear();
+            if (StoneCyclingTimer != null)
+            {
+                StoneCyclingTimer.Elapsed -= IncrementStones;
+                StoneCyclingTimer.Stop();
+                StoneCyclingTimer.Close();
+                StoneCyclingTimer = null;
+            }
+            //StoneCyclingTimer = new System.Threading.Timer(IncrementStones, null, TimeSpan.FromSeconds(Settings.GossipCycleTime), TimeSpan.FromSeconds(Settings.GossipCycleTime));
+            StoneCyclingTimer = new System.Timers.Timer(Settings.GossipCycleTime*1000);
+            StoneCyclingTimer.Elapsed += IncrementStones;
+            StoneCyclingTimer.AutoReset = true;
+            StoneCyclingTimer.Enabled = true;
             if (LayoutContent != null) LayoutContent.Dispose();
             LayoutContent = new Panel();
             CurrentLayout = new Layout();
@@ -146,6 +191,12 @@ namespace GSTHD
         public void UpdateLayoutFromSettings()
         {
             CurrentLayout.UpdateFromSettings();
+            //StoneCyclingTimer.Change(TimeSpan.FromSeconds(Settings.GossipCycleTime), TimeSpan.FromSeconds(Settings.GossipCycleTime));
+            StoneCyclingTimer.Close();
+            StoneCyclingTimer = new System.Timers.Timer(Settings.GossipCycleTime * 1000);
+            StoneCyclingTimer.Elapsed += IncrementStones;
+            StoneCyclingTimer.AutoReset = true;
+            StoneCyclingTimer.Enabled = true;
         }
 
         private void changeCollectedSkulls(object sender, KeyEventArgs k)
@@ -161,23 +212,42 @@ namespace GSTHD
         public void Reset(object sender)
         {
             ControlExtensions.ClearAndDispose(LayoutContent);
+            currentlyCycling.Clear();
+            StopAutotracker();
+            if (StoneCyclingTimer != null)
+            {
+                StoneCyclingTimer.Elapsed -= IncrementStones;
+                StoneCyclingTimer.Stop();
+                StoneCyclingTimer.Close();
+                StoneCyclingTimer = null;
+            }
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
             try
             {
-                if (((ToolStripItem)sender).Text == "Open Layout")
+                if (sender == null) { Reload(); }
+                else
                 {
-                    Reload(true);
-                } else
-                {
-                    Reload();
+                    if (((ToolStripItem)sender).Text == "Open Layout")
+                    {
+                        Reload(true);
+                    }
+                    else
+                    {
+                        Reload();
+                    }
                 }
                     
-            } catch (Exception ex)
+            } catch (Exception)
             {
                 Reload();
             }
 
-            Process.GetCurrentProcess().Refresh();
             GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            Process.GetCurrentProcess().Refresh();
         }
 
         public void SetAutotracker(Process emulator, uint offset)
@@ -192,12 +262,53 @@ namespace GSTHD
 
         private void StopAutotracker()
         {
-            if (TheAutotracker != null) CurrentLayout.ListUpdatables.Remove(TheAutotracker);
-            TheAutotracker.NukeTimer();
+            if (TheAutotracker != null)
+            {
+                CurrentLayout.ListUpdatables.Remove(TheAutotracker);
+                TheAutotracker.NukeTimer();
+            }
             TheAutotracker = null;
         }
 
-        public void SaveState()
+        public void AddCycling(GossipStone gs) 
+        { 
+            currentlyCycling.Add(gs);
+        }
+
+        public void RemoveCycling(GossipStone gs) 
+        {
+            currentlyCycling.Remove(gs);
+        }
+
+        private void IncrementStones(object state, ElapsedEventArgs e)
+        {
+            // for stone in ubdatables
+            // stone.incrementcycle
+            try
+            {
+                foreach (var obj in currentlyCycling)
+                {
+                    if (obj is GossipStone gs)
+                    {
+                        if (gs.HeldImages.Count > 1) gs.IncrementCycle();
+                    }
+                }
+            } catch (InvalidOperationException) {
+            }
+            
+            cyclecount++;
+            //Debug.WriteLine(currentlyCycling.Count);
+            // collect every 5 minutesish
+            if (cyclecount > 300 / Settings.GossipCycleTime)
+            {
+                GC.Collect();
+                cyclecount = 0;
+                // jank autosave
+                if (Settings.EnableAutosave) SaveState(true);
+            }
+        }
+
+        public void SaveState(bool force = false)
         {
             JObject thejson = new JObject();
 
@@ -206,7 +317,7 @@ namespace GSTHD
                 if (x.Name != "")
                 {
                     int state = x.GetState();
-                    if (state != 0)
+                    if (state != x.DefaultIndex)
                     {
                         thejson.Add(x.Name, state.ToString());
                     }
@@ -310,18 +421,29 @@ namespace GSTHD
             }
 
 
-
-            //open file to write to
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-            saveFileDialog1.Filter = "json files (*.json)|*.json|All files (*.*)|*.*";
-            saveFileDialog1.Title = "Save state to JSON file";
-            saveFileDialog1.ShowDialog();
-
-            if (saveFileDialog1.FileName != "")
+            if (force)
             {
-                System.IO.File.WriteAllText(saveFileDialog1.FileName, thejson.ToString());
+                if (thejson.HasValues)
+                {
+                    if (!Directory.Exists("Autosaves")) Directory.CreateDirectory("Autosaves");
+                    File.WriteAllText(@"Autosaves/auto" + DateTime.Now.ToString("MM-dd-yyyy") + ".json", thejson.ToString());
+
+                }
             }
-            saveFileDialog1.Dispose();
+            else
+            {
+                //open file to write to
+                SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+                saveFileDialog1.Filter = "json files (*.json)|*.json|All files (*.*)|*.*";
+                saveFileDialog1.Title = "Save state to JSON file";
+                saveFileDialog1.ShowDialog();
+
+                if (saveFileDialog1.FileName != "")
+                {
+                    File.WriteAllText(saveFileDialog1.FileName, thejson.ToString());
+                }
+                saveFileDialog1.Dispose();
+            }
         }
 
         public void LoadState()
@@ -334,12 +456,21 @@ namespace GSTHD
             if (filedia.ShowDialog() == DialogResult.OK)
             {
                 // reset for safekeepings
-                Reload();
+                Reset(null);
                 //all of the fucking things
                 JObject loadedjson = JObject.Parse(File.ReadAllText(filedia.FileName));
+                int missingItems = 0;
                 foreach (JProperty x in (JToken)loadedjson)
                 {
-                    Control found = this.Controls.Find(x.Name, true)[0];
+                    Control found = null;
+                    try
+                    {
+                        found = this.Controls.Find(x.Name, true)[0];
+                    } catch (IndexOutOfRangeException)
+                    {
+                        missingItems++;
+                        Debug.WriteLine(x.Name + " not found in layout. Skipping");
+                    }
                     if (found is Item)
                     {
                         int conv = (int)x.Value;
@@ -412,6 +543,10 @@ namespace GSTHD
 
                         
                     }
+                }
+                if (missingItems > 0)
+                {
+                    MessageBox.Show("Warning: " + missingItems.ToString() + " items in the state file could not be found in your layout. Skipping.");
                 }
             }
             filedia.Dispose();

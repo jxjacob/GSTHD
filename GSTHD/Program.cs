@@ -16,13 +16,17 @@ namespace GSTHD
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new Form1());
             //dembunging
+            //Form1 F1 = new Form1();
             //try
             //{
-                Application.Run(new Form1());
-            //} catch (Exception ex)
+            //    Application.Run(F1);
+            //} catch (OutOfMemoryException)
             //{
-            //    MessageBox.Show(ex.Source + ":\n" + ex.Message, "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    F1.SaveState(true);
+            //    MessageBox.Show("GSTHD has run into a fatal memory issue and will now close.\nYour tracker state has been saved to the GSTHD directory can be reloaded later.\nWe apologize for the inconvenience.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    Application.Exit();
             //}
         }
     }

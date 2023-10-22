@@ -28,60 +28,60 @@ namespace GSTHD
 
 
         //32-bit functions
-        public static int ReadInt8(Process P, uint memAdr)
+        public static int ReadInt8(IntPtr P, uint memAdr)
         {
             return ReadBytes(P, memAdr, 1)[0];
         }
-        public static int ReadInt16(Process P, uint memAdr)
+        public static int ReadInt16(IntPtr P, uint memAdr)
         {
             return BitConverter.ToInt16(ReadBytes(P, memAdr, 2), 0);
         }
-        public static int ReadInt32(Process P, uint memAdr)
+        public static int ReadInt32(IntPtr P, uint memAdr)
         {
             return BitConverter.ToInt32(ReadBytes(P, memAdr, 4), 0);
         }
-        public static UInt32 ReadUInt32(Process P, uint memAdr)
+        public static UInt32 ReadUInt32(IntPtr P, uint memAdr)
         {
             IntPtr ptrBytesRead = new IntPtr(0);
             byte[] buffer = new byte[3];
-            ReadProcessMemory(P.Handle, (UIntPtr)memAdr, buffer, 4, ptrBytesRead);
+            ReadProcessMemory(P, (UIntPtr)memAdr, buffer, 4, ptrBytesRead);
             return BitConverter.ToUInt32(ReadBytes(P, memAdr, 4), 0);
         }
-        private static byte[] ReadBytes(Process P, uint memAdr, uint bytesToRead)
+        private static byte[] ReadBytes(IntPtr P, uint memAdr, uint bytesToRead)
         {
             IntPtr ptrBytesRead = new IntPtr(0);
             byte[] buffer = new byte[bytesToRead];
-            ReadProcessMemory(P.Handle, new UIntPtr(memAdr), buffer, bytesToRead, ptrBytesRead);
+            ReadProcessMemory(P, new UIntPtr(memAdr), buffer, bytesToRead, ptrBytesRead);
             return buffer;
         }
 
         //64-bit functions
-        public static int ReadInt8(Process P, ulong memAdr)
+        public static int ReadInt8(IntPtr P, ulong memAdr)
         {
             return ReadBytes(P, memAdr, 1)[0];
         }
 
-        public static int ReadInt16(Process P, ulong memAdr)
+        public static int ReadInt16(IntPtr P, ulong memAdr)
         {
             return BitConverter.ToInt16(ReadBytes(P, memAdr, 2), 0);
         }
 
-        public static int ReadInt32(Process P, ulong memAdr)
+        public static int ReadInt32(IntPtr P, ulong memAdr)
         {
             return BitConverter.ToInt32(ReadBytes(P, memAdr, 4), 0);
         }
 
-        public static ulong ReadInt64(Process P, ulong memAdr)
+        public static ulong ReadInt64(IntPtr P, ulong memAdr)
         {
             return BitConverter.ToUInt64(ReadBytes(P, memAdr, 8), 0);
         }
 
-        private static byte[] ReadBytes(Process P, ulong memAdr, uint bytesToRead)
+        private static byte[] ReadBytes(IntPtr P, ulong memAdr, uint bytesToRead)
         {
-            IntPtr processHandle = OpenProcess(PROCESS_WM_READ, false, P.Id);
+            //IntPtr processHandle = OpenProcess(PROCESS_WM_READ, false, P.ToInt32());
             IntPtr ptrBytesRead = new IntPtr(0);
             byte[] buffer = new byte[bytesToRead];
-            ReadProcessMemory(processHandle, new UIntPtr(memAdr), buffer, bytesToRead, ptrBytesRead);
+            ReadProcessMemory(P, new UIntPtr(memAdr), buffer, bytesToRead, ptrBytesRead);
             return buffer;
         }
 

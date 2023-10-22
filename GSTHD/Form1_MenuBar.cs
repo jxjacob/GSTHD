@@ -52,6 +52,9 @@ namespace GSTHD
             public ToolStripMenuItem CycleLength;
             public ToolStripMenuItem ForceGossipCycles;
 
+            //Autosaving
+            public ToolStripMenuItem EnableAutosaves;
+            public ToolStripMenuItem DeleteOldAutosaves;
 
             // Memory Engine
             public ToolStripMenuItem SelectEmulator;
@@ -317,6 +320,24 @@ namespace GSTHD
                     gossipSubMenu.DropDownItems.Add(Items.ForceGossipCycles);
                 }
                 optionMenu.DropDownItems.Add(gossipSubMenu);
+                //-------------
+                ToolStripMenuItem AutosaveSubMenu = new ToolStripMenuItem("Autosaves");
+                {
+                    Items.EnableAutosaves = new ToolStripMenuItem("Enable Autosaving", null, new EventHandler(menuBar_ToggleEnableAutosaves))
+                    {
+                        CheckOnClick = true,
+                    };
+                    AutosaveSubMenu.DropDownItems.Add(Items.EnableAutosaves);
+
+
+                    Items.DeleteOldAutosaves = new ToolStripMenuItem("Automatically Delete Old Autosaves", null, new EventHandler(menuBar_ToggleDeleteOldAutosaves))
+                    {
+                        CheckOnClick = true,
+                    };
+                    AutosaveSubMenu.DropDownItems.Add(Items.DeleteOldAutosaves);
+                }
+                optionMenu.DropDownItems.Add(AutosaveSubMenu);
+                //-------------------
             }
             MenuStrip.Items.Add(optionMenu);
 
@@ -377,10 +398,13 @@ namespace GSTHD
 
             Items.OverrideHeldImage.Checked = Settings.OverrideHeldImage;
             Items.ForceGossipCycles.Checked = Settings.ForceGossipCycles;
+
+            Items.EnableAutosaves.Checked = Settings.EnableAutosave;
+            Items.DeleteOldAutosaves.Checked = Settings.DeleteOldAutosaves;
             try
             {
             GossipeCycleLengthOptions[Settings.GossipCycleTime].Checked = true;
-            } catch (Exception ex)
+            } catch (Exception)
             {
 
             }
@@ -662,6 +686,20 @@ namespace GSTHD
             Form.UpdateLayoutFromSettings();
         }
 
+        private void menuBar_ToggleEnableAutosaves(object sender, EventArgs e)
+        {
+            Settings.EnableAutosave = Items.EnableAutosaves.Checked;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
+        private void menuBar_ToggleDeleteOldAutosaves(object sender, EventArgs e)
+        {
+            Settings.DeleteOldAutosaves = Items.DeleteOldAutosaves.Checked;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
         private void menuBar_SetGossipCycleLength(object sender, EventArgs e)
         {
             var choice = (ToolStripMenuItem)sender;
@@ -669,7 +707,7 @@ namespace GSTHD
             try
             {
                 GossipeCycleLengthOptions[Settings.GossipCycleTime].Checked = false;
-            } catch (Exception ex)
+            } catch (Exception)
             {
 
             }
@@ -758,13 +796,6 @@ namespace GSTHD
             }
             
             
-
-        }
-
-        public void menuBar_VerifyConnection(object sender, EventArgs e)
-        {
-            // spit out so much info to make sure shit does infact connect
-            // will be removed eventually
 
         }
 

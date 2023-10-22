@@ -80,6 +80,8 @@ namespace GSTHD
         public bool ForceGossipCycles { get; set; } = false;
         public bool OverrideHeldImage { get; set; } = false;
         public double GossipCycleTime { get; set; } = 1;
+        public bool EnableAutosave { get; set; } = true;
+        public bool DeleteOldAutosaves { get; set; } = true;
         public bool SubtractItems { get; set; } = true;
         public KnownColor LastWothColor { get; set; } = KnownColor.BlueViolet;
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -109,6 +110,11 @@ namespace GSTHD
             }
             ColorIndex = Settings.DefaultWothColorIndex + 1;
             UpdateFromSettings();
+        }
+
+        ~WotH()
+        {
+            Debug.WriteLine("woth " + this.Name + " being killed");
         }
 
         public void UpdateFromSettings()

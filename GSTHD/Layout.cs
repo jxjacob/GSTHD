@@ -51,9 +51,34 @@ namespace GSTHD
 
         public void LoadLayout(Panel panelLayout, Settings settings, SortedSet<string> listSometimesHintsSuggestions, Dictionary<string, string> listPlacesWithTag, Form1 form)
         {
+            ListUpdatables.Clear();
             if (settings.ActiveLayout != string.Empty)
             {
-                JObject json_layout = JObject.Parse(File.ReadAllText(@"" + settings.ActiveLayout));
+                JObject json_layout;
+                try
+                {
+                    json_layout = JObject.Parse(File.ReadAllText(@"" + settings.ActiveLayout));
+                    if (!json_layout.ContainsKey("AppSize"))
+                    {
+                        MessageBox.Show("Layout file " + settings.ActiveLayout.ToString() + " does not appear to contain any GSTHD layout data.\nReverting to dk64.json.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        // set settings to dk64.json
+                        settings.ActiveLayout = "layouts\\dk64.json";
+                        settings.Write();
+                        // force reload
+                        form.Reset(null);
+                        return;
+                    }
+                } catch (JsonReaderException)
+                {
+                    MessageBox.Show("File " + settings.ActiveLayout.ToString() + " does not appear to be a proper json file.\nReverting to dk64.json.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // set settings to dk64.json
+                    settings.ActiveLayout = "layouts\\dk64.json";
+                    settings.Write();
+                    // force reload
+                    form.Reset(null);
+                    return;
+                }
+                
                 foreach (var category in json_layout)
                 {
                     if (category.Key.ToString() == "AppSize")
@@ -531,6 +556,7 @@ namespace GSTHD
 
         public void LoadBroadcastLayout(Panel panelLayout, Settings settings, SortedSet<string> listSometimesHintsSuggestions, Dictionary<string, string> listPlacesWithTag, Form2 form)
         {
+            ListUpdatables.Clear();
             if (settings.ActiveLayout != string.Empty)
             {
                 JObject json_layout = JObject.Parse(File.ReadAllText(@"" + settings.ActiveLayout.Replace(".json", "") + "_broadcast.json"));

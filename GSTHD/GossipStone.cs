@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Activities;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.Remoting;
+using System.Runtime.Remoting.Messaging;
 using System.Windows.Forms;
 
 namespace GSTHD
@@ -37,12 +40,13 @@ namespace GSTHD
     public class GossipStone : PictureBox, ProgressibleElement<GossipStoneState>, DraggableElement<GossipStoneState>, UpdatableFromSettings
     {
         private readonly Settings Settings;
+        private Form1 f1;
         private readonly ProgressibleElementBehaviour<GossipStoneState> ProgressBehaviour;
         private readonly DraggableElementBehaviour<GossipStoneState> DragBehaviour;
 
         private string[] ImageNames;
         private bool HoldsImage;
-        private List<string> HeldImages = new List<string>();
+        public List<string> HeldImages = new List<string>();
         private int CycleIndex = 0;
         private bool canCycle = false;
         private int ImageIndex = 0;
@@ -51,11 +55,12 @@ namespace GSTHD
         bool isBroadcastable;
         public bool hoveredOver;
 
+        private bool isCyling = false;
+
         Size GossipStoneSize;
 
-        private System.Threading.Timer CyclingTimer;
 
-        delegate void UpdateImageCallbacK();
+        delegate void IncrementCallbacK();
 
         public GossipStone(ObjectPoint data, Settings settings, bool isOnBroadcast = false)
             : this(settings, data.Name, data.X, data.Y, data.ImageCollection, data.Size, data.isScrollable, data.SizeMode, data.isBroadcastable, data.CanCycle, isOnBroadcast) { }
@@ -89,6 +94,7 @@ namespace GSTHD
             this.isScrollable = isScrollable;
             this.canCycle = CanCycle;
             this.isBroadcastable = isBroadcastable;
+            
 
 
             if (!isOnBroadcast)
@@ -106,23 +112,35 @@ namespace GSTHD
 
         }
 
+        public void tryToKill()
+        {
+            if (isCyling && HeldImages.Count > 1)
+            {
+                f1.RemoveCycling(this);
+            }
+        }
+
+        private Form1 FindF1(Control c)
+        {
+            if (c == null) return null;
+            if (c is Form1 f1)
+            {
+                return f1;
+            } else
+            {
+                return FindF1(c.Parent);
+            }
+        }
+
         // both of these functions are for when the stone is in a WOTH panel, so that it can be scrolled without the whole WOTH panle scrolling as well
         private void Panel_MouseEnter(object sender, EventArgs e)
         {
             this.hoveredOver = true;
-            if (HeldImages.Count > 1 && CyclingTimer != null)
-            {
-                CyclingTimer.Change(-1, -1);
-            }
         }
 
         private void Panel_MouseLeave(object sender, EventArgs e)
         {
             this.hoveredOver = false;
-            if (HeldImages.Count > 1)
-            {
-                CyclingTimer.Change(TimeSpan.FromSeconds(Settings.GossipCycleTime), TimeSpan.FromSeconds(Settings.GossipCycleTime));
-            }
         }
 
         private void Mouse_Wheel(object sender, MouseEventArgs e)
@@ -161,10 +179,6 @@ namespace GSTHD
                 {
                     HeldImages.Add(dropContent.ImageName);
                 }
-                if (HeldImages.Count > 1 && CyclingTimer == null)
-                {
-                    CyclingTimer = new System.Threading.Timer(IncrementCycle, null, TimeSpan.FromSeconds(Settings.GossipCycleTime), TimeSpan.FromSeconds(Settings.GossipCycleTime));
-                }
             }
             else
             {
@@ -180,10 +194,6 @@ namespace GSTHD
                 remotewindow.HeldImages = HeldImages;
                 remotewindow.CycleIndex = 0;
                 remotewindow.UpdateImage();
-                if (HeldImages.Count > 1 && remotewindow.CyclingTimer == null)
-                {
-                    remotewindow.CyclingTimer = new System.Threading.Timer(remotewindow.IncrementCycle, null, TimeSpan.FromSeconds(Settings.GossipCycleTime), TimeSpan.FromSeconds(Settings.GossipCycleTime));
-                }
             
             }
         }
@@ -203,21 +213,29 @@ namespace GSTHD
 
         public void UpdateImage()
         {
+            if (f1 == null)
+            {
+                this.f1 = FindF1(this.Parent);
+            }
             if (HoldsImage)
             {
                 if (Image != null) Image.Dispose();
                 Image = null;
-                Image = Image.FromFile(@"Resources/" + HeldImages[CycleIndex]);
+                try
+                {
+                    Image = Image.FromFile(@"Resources/" + HeldImages[CycleIndex]);
+                } catch (ArgumentOutOfRangeException)
+                {
+                    CycleIndex = 0;
+                    Image = Image.FromFile(@"Resources/" + HeldImages[CycleIndex]);
+                }
                 if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
                     var remotewindow = ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]);
                     remotewindow.HeldImages = HeldImages;
                     remotewindow.HoldsImage = true;
+                    remotewindow.CycleIndex = CycleIndex;
                     remotewindow.UpdateImage();
-                }
-                if (HeldImages.Count > 1 && CyclingTimer == null)
-                {
-                    CyclingTimer = new System.Threading.Timer(IncrementCycle, null, TimeSpan.FromSeconds(Settings.GossipCycleTime), TimeSpan.FromSeconds(Settings.GossipCycleTime));
                 }
             }
             else
@@ -232,6 +250,20 @@ namespace GSTHD
                     remotewindow.ImageIndex = ImageIndex;
                     remotewindow.UpdateImage();
                 }
+            }
+            if (f1 != null)
+            {
+                // if wasnt cycling but now should be, add to cycling
+                if (!isCyling && HeldImages.Count > 1)
+                {
+                    isCyling = true;
+                    f1.AddCycling(this);
+                } else if (isCyling && HeldImages.Count < 2)
+                {
+                    isCyling = false;
+                    f1.RemoveCycling(this);
+                }
+                // if was cycling but now shouldnt be, remove from cycling
             }
         }
 
@@ -288,20 +320,33 @@ namespace GSTHD
             }
         }
 
-        public void IncrementCycle(object state)
+        public void IncrementCycle()
         {
-            CycleIndex++;
-            if (CycleIndex == HeldImages.Count)
-            {
-                CycleIndex=0;
-            }
-            try
-            {
-                Invoke(new UpdateImageCallbacK(UpdateImage));
-            } catch (Exception e)
-            {
 
+            if (InvokeRequired)
+            {
+                    //TheQueuedThing = IncrementCycle;
+                    try
+                    {
+                        Invoke(new IncrementCallbacK(IncrementCycle));
+                    } catch (ObjectDisposedException) { 
+                        //blank
+                    }   
+                
+            } else
+            {
+                if (!hoveredOver && HeldImages.Count > 1)
+                {
+                    CycleIndex++;
+                    if (CycleIndex == HeldImages.Count)
+                    {
+                        CycleIndex = 0;
+                    }
+                    UpdateImage();
+
+                }
             }
+            
         }
 
         public void ResetState()
@@ -315,23 +360,11 @@ namespace GSTHD
                 {
                     CycleIndex = 0;
                 }
-                if (HeldImages.Count <= 1)
-                {
-                    if (CyclingTimer != null) CyclingTimer.Dispose();
-                    CyclingTimer = null;
-                    CycleIndex = 0;
-                }
                 if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
                     var remotewindow = ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]);
                     remotewindow.CycleIndex = 0;
                     remotewindow.HeldImages = HeldImages;
-                    if (HeldImages.Count <= 1)
-                    {
-                        if (remotewindow.CyclingTimer != null) remotewindow.CyclingTimer.Dispose();
-                        remotewindow.CyclingTimer = null;
-                        remotewindow.CycleIndex = 0;
-                    }
                 }
             } else
             {
@@ -352,31 +385,17 @@ namespace GSTHD
 
         public void StartDragDrop()
         {
-            if (HeldImages.Count > 1)
-            {
-                //TODO: finish this thought lmao
-            } else
-            {
-                HoldsImage = false;
-            }
-            UpdateImage();
             var dropContent = new DragDropContent(false, HeldImages[CycleIndex]);
             DoDragDrop(dropContent, DragDropEffects.Copy);
+            HeldImages.Remove(dropContent.ImageName);
+            if (HeldImages.Count == 0) HoldsImage = false;
+            UpdateImage();
             SaveChanges();
-        }
-
-        public void NukeTimer()
-        {
-            if (CyclingTimer != null) CyclingTimer.Dispose();
-            CyclingTimer = null;
         }
 
         public void UpdateFromSettings()
         {
-            if (HeldImages.Count > 1)
-            {
-                CyclingTimer.Change(TimeSpan.FromSeconds(Settings.GossipCycleTime), TimeSpan.FromSeconds(Settings.GossipCycleTime));
-            }
+            //pass
         }
 
         public void SaveChanges()

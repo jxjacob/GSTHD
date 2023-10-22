@@ -16,10 +16,6 @@ namespace GSTHD
             {
                 ClearAndDispose(ctrl.Controls[0]);
             }
-            if (ctrl is GossipStone gs)
-            {
-                gs.NukeTimer();
-            }
             if (ctrl is PanelWothBarren pw)
             {
                 foreach (WotH item in pw.ListWotH)

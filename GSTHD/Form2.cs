@@ -21,8 +21,6 @@ namespace GSTHD
         Layout CurrentLayout;
         public Panel LayoutContent;
 
-        PictureBox pbox_collectedSkulls;
-
         Settings Settings;
         
         public Form2()
@@ -80,7 +78,7 @@ namespace GSTHD
 
         public void Reload()
         {
-            LoadSettings();
+            //LoadSettings();
             LoadLayout();
         }
 
@@ -115,6 +113,7 @@ namespace GSTHD
         private void LoadLayout()
         {
             Controls.Clear();
+            if (LayoutContent != null) LayoutContent.Dispose();
             LayoutContent = new Panel();
             CurrentLayout = new Layout();
             CurrentLayout.LoadBroadcastLayout(LayoutContent, Settings, ListSometimesHintsSuggestions, ListPlacesWithTag, this);

@@ -15,7 +15,6 @@ namespace GSTHD
         private readonly DraggableAutocheckElementBehaviour<int> DragBehaviour;
 
         private string[] ImageNames;
-        private int ImageIndex = 0;
         private Label ItemCount;
         private Size CollectedItemSize;
         private Size CollectedItemCountPosition;
@@ -145,8 +144,8 @@ namespace GSTHD
         {
             if (this.InvokeRequired)
             {
-                SetStateCallback d = new SetStateCallback(SetState);
-                this.Invoke(d, new object[] {state});
+                this.Invoke(new SetStateCallback(SetState), new object[] {state});
+                return;
             } else
             {
                 CollectedItems = state;

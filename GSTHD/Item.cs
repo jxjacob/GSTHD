@@ -15,7 +15,7 @@ namespace GSTHD
 
         private string[] ImageNames;
         private int ImageIndex = 0;
-        private int DefaultIndex = 0;
+        public int DefaultIndex = 0;
         private string DragImage = null;
 
         bool isBroadcastable;
@@ -143,8 +143,8 @@ namespace GSTHD
         {
             if (this.InvokeRequired)
             {
-                SetStateCallback d = new SetStateCallback(SetState);
-                this.Invoke(d, new object[] { state });
+                Invoke(new SetStateCallback(SetState), new object[] { state });
+                return;
             }
             else
             {
