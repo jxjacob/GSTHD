@@ -38,6 +38,8 @@ namespace GSTHD
 
         public Song Song;
 
+        delegate void SetStateCallback(SongMarkerState state);
+
         public SongMarker(Song song, Settings settings, string[] imageCollection, bool isBroadcast = false)
         {
             Song = song;
@@ -201,11 +203,19 @@ namespace GSTHD
 
         public void SetState(SongMarkerState state)
         {
-            HoldsImage = state.HoldsImage;
-            HeldImageName = state.HeldImageName;
-            ImageIndex = state.ImageIndex;
-            UpdateImage();
-            DragBehaviour.SaveChanges();
+            if (this.InvokeRequired)
+            {
+                Invoke(new SetStateCallback(SetState), new SongMarkerState[] { state });
+                return;
+            } else
+            {
+                HoldsImage = state.HoldsImage;
+                HeldImageName = state.HeldImageName;
+                ImageIndex = state.ImageIndex;
+                UpdateImage();
+                DragBehaviour.SaveChanges();
+            }
+            
         }
 
         public void IncrementState()
@@ -270,6 +280,8 @@ namespace GSTHD
         public SongMarker SongMarker;
 
         Size SongSize;
+
+        delegate void SetStateCallback(int state);
 
         public Song(ObjectPointSong data, Settings settings, bool isBroadcast = false)
         {
@@ -436,9 +448,17 @@ namespace GSTHD
 
         public void SetState(int state)
         {
-            ImageIndex = state;
-            UpdateImage();
-            DragBehaviour.SaveChanges();
+            if (this.InvokeRequired)
+            {
+                Invoke(new SetStateCallback(SetState), new object[] { state });
+                return;
+            } else
+            {
+                ImageIndex = state;
+                UpdateImage();
+                DragBehaviour.SaveChanges();
+            }
+            
         }
 
         public SongState GetWholeState()

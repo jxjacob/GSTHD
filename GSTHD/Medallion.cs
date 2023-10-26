@@ -33,6 +33,8 @@ namespace GSTHD
         private bool isBroadcastable;
         public string AutoName = null;
 
+        delegate void SetStateCallback(MedallionState state);
+
         public Medallion(ObjectPointMedallion data, Settings settings, bool isBroadcast = false)
         {
             Settings = settings;
@@ -201,17 +203,25 @@ namespace GSTHD
 
         public void SetState(MedallionState state)
         {
-            ImageIndex = state.ImageIndex;
-            DungeonIndex = state.DungeonIndex;
-            SelectedDungeon.Text = DungeonNames[DungeonIndex];
-            UpdateImage();
-            SetSelectedDungeonLocation();
-            DragBehaviour.SaveChanges();
-            if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+            if (this.InvokeRequired)
             {
-                ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).SelectedDungeon.Text = DungeonNames[DungeonIndex];
-                ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).SetSelectedDungeonLocation();
+                Invoke(new SetStateCallback(SetState), new MedallionState[] { state });
+                return;
+            } else
+            {
+                ImageIndex = state.ImageIndex;
+                DungeonIndex = state.DungeonIndex;
+                SelectedDungeon.Text = DungeonNames[DungeonIndex];
+                UpdateImage();
+                SetSelectedDungeonLocation();
+                DragBehaviour.SaveChanges();
+                if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+                {
+                    ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).SelectedDungeon.Text = DungeonNames[DungeonIndex];
+                    ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).SetSelectedDungeonLocation();
+                }
             }
+            
         }
 
         public void SetImageState(int state)

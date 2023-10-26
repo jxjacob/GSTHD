@@ -1,7 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using System.IO;
 
 namespace GSTHD
 {
@@ -17,6 +21,8 @@ namespace GSTHD
 
         bool isBroadcastable;
         public string AutoName = null;
+
+        delegate void SetStateCallback(int state);
 
         public DoubleItem(ObjectPoint data, bool isBroadcast = false)
         {
@@ -42,12 +48,22 @@ namespace GSTHD
             this.Location = new Point(data.X, data.Y);
             this.TabStop = false;
             this.AllowDrop = false;
+            this.WaitOnLoad = false;
+            this.LoadCompleted += this.DoubleItem_LoadCompleted;
 
            if (!isBroadcast)
             {
                 this.MouseUp += this.Click_MouseUp;
                 this.MouseDown += this.Click_MouseDown;
                 this.MouseMove += this.Click_MouseMove;
+            }
+        }
+
+        private void DoubleItem_LoadCompleted(Object sender, AsyncCompletedEventArgs e)
+        {
+            if (e.Error != null)
+            {
+                File.WriteAllText(@"red_X_" + DateTime.Now.ToString("MM-dd-yyyy-HH:mm:ss") + ".txt", e.Error.Message.ToString());
             }
         }
 
@@ -159,8 +175,15 @@ namespace GSTHD
 
         public void SetState(int state)
         {
-            if ((state & 1) == 1) { IncrementLeftState(); }
-            if ((state & 2) == 2) { IncrementRightState(); }
+            if (this.InvokeRequired)
+            {
+                Invoke(new SetStateCallback(SetState), new object[] { state });
+                return;
+            } else
+            {
+                if ((state & 1) == 1) { IncrementLeftState(); }
+                if ((state & 2) == 2) { IncrementRightState(); }
+            }
         }
 
         public void ResetState()
