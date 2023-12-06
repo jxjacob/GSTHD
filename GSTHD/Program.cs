@@ -24,6 +24,7 @@ namespace GSTHD
                 MessageBox.Show("GSTHD has run into a fatal error and will now close. Please send this crash to JXJacob so he can help fix this issue.\n\n" + ex.Message, "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
             }
+
             //dembunging
             //Form1 F1 = new Form1();
             //try

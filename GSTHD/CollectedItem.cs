@@ -21,10 +21,11 @@ namespace GSTHD
         private readonly int CollectedItemMin;
         private readonly int CollectedItemMax;
         public readonly int CollectedItemDefault;
-        private int CollectedItems;
+        public int CollectedItems;
         private readonly int Step;
 
         private bool isBroadcastable;
+        private bool hasSlash;
 
         public string AutoName = null;
         public string AutoSubName = null;
@@ -49,6 +50,7 @@ namespace GSTHD
             Step = data.Step == 0 ? 1 : data.Step;
             CollectedItemSize = data.Size;
             isBroadcastable = data.isBroadcastable && !isBroadcast;
+            hasSlash = data.hasSlash;
 
             this.AutoName = data.AutoName;
             this.AutoSubName = data.AutoSubName;
@@ -65,13 +67,19 @@ namespace GSTHD
 
             Location = new Point(data.X, data.Y);
             CollectedItemCountPosition = data.CountPosition.IsEmpty ? new Size(0, -7) : data.CountPosition;
-            BackColor = Color.Transparent;
+            if (hasSlash)
+            {
+                BackColor = data.BackColor;
+            } else
+            {
+                BackColor = Color.Transparent;
+            }
             TabStop = false;
 
 
             ItemCount = new Label
             {
-                BackColor = Color.Black,
+                BackColor = data.BackColor,
                 BorderStyle = BorderStyle.None,
                 Text = CollectedItems.ToString(),
                 Font = new Font(data.LabelFontName, data.LabelFontSize, data.LabelFontStyle),
@@ -83,14 +91,19 @@ namespace GSTHD
                 Location = new Point(0, (CollectedItemSize.Height) - CollectedItemCountPosition.Height*2),
             };
 
+            if (hasSlash)
+            {
+                ItemCount.Text += " /";
+            }
+
             if (!isBroadcast)
             {
                 MouseDown += ProgressBehaviour.Mouse_ClickDown;
                 MouseUp += DragBehaviour.Mouse_ClickUp;
                 MouseDown += DragBehaviour.Mouse_ClickDown;
                 MouseMove += DragBehaviour.Mouse_Move_WithAutocheck;
-                MouseWheel += Mouse_Wheel;
-                MouseWheel += DragBehaviour.Mouse_Wheel;
+                if (!hasSlash) MouseWheel += Mouse_Wheel;
+                if (!hasSlash) MouseWheel += DragBehaviour.Mouse_Wheel;
                 ItemCount.MouseDown += ProgressBehaviour.Mouse_ClickDown; // must add these lines because MouseDown/Up on PictureBox won't fire when hovering above Label
                 ItemCount.MouseDown += DragBehaviour.Mouse_ClickDown;
                 ItemCount.MouseUp += DragBehaviour.Mouse_ClickUp;
@@ -118,15 +131,12 @@ namespace GSTHD
             if (Image != null) Image.Dispose();
             Image = null;
             Image = Image.FromFile(@"Resources/" + ImageNames[System.Math.Max(System.Math.Min(CollectedItems, ImageNames.Length - 1), 0)]);
-            if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
-            {
-                ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
-            }
         }
 
         public void UpdateCount()
         {
             ItemCount.Text = CollectedItems.ToString();
+            if (hasSlash) ItemCount.Text += " /";
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {
                 ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).CollectedItems = CollectedItems;

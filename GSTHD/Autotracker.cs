@@ -545,7 +545,7 @@ namespace GSTHD
                     return true;
                 }
             }
-            Debug.WriteLine("not in adventure mode: " + GoRead(desiredGameAddr, desiredGameBytes) + " is not " + desiredGameValue);
+            Debug.WriteLine("not in adventure mode: " + GoRead(desiredGameAddr, desiredGameBytes) + " is not " + desiredGameStateValue);
             return false;
         }
 

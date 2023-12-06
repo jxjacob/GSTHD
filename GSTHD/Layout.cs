@@ -35,6 +35,7 @@ namespace GSTHD
         public List<AutoFillTextBox> ListChronometers = new List<AutoFillTextBox>();
         public List<ObjectPanelWotH> ListPanelWotH = new List<ObjectPanelWotH>();
         public List<ObjectPanelBarren> ListPanelBarren = new List<ObjectPanelBarren>();
+        public List<ObjectPanelQuantity> ListPanelQuantity = new List<ObjectPanelQuantity>();
         public List<ObjectPointGoMode> ListGoMode = new List<ObjectPointGoMode>();
 
         public List<UpdatableFromSettings> ListUpdatables = new List<UpdatableFromSettings>();
@@ -214,6 +215,14 @@ namespace GSTHD
                         }
                     }
 
+                    if (category.Key.ToString() == "PanelQuantity")
+                    {
+                        foreach (var element in category.Value)
+                        {
+                            ListPanelQuantity.Add(JsonConvert.DeserializeObject<ObjectPanelQuantity>(element.ToString()));
+                        }
+                    }
+
                     if (category.Key.ToString() == "GoMode")
                     {
                         foreach (var element in category.Value)
@@ -313,7 +322,7 @@ namespace GSTHD
                                 BorderStyle = box.BorderStyle,
                                 Padding = new Padding(5,10,5,5),
                                 Margin = new Padding(5,10,5,5)
-                            });;
+                            });
                         }
                     }
                 }
@@ -530,6 +539,22 @@ namespace GSTHD
                         {
                             var panel = new PanelWothBarren(item, settings);
                             panel.PanelBarren(listPlacesWithTag, item);
+                            panelLayout.Controls.Add(panel);
+                            panelLayout.Controls.Add(panel.textBoxCustom.SuggestionContainer);
+                            ListUpdatables.Add(panel);
+                            panel.SetSuggestionContainer();
+                        }
+                    }
+                }
+
+                if (ListPanelQuantity.Count > 0)
+                {
+                    foreach (var item in ListPanelQuantity)
+                    {
+                        if (item.Visible)
+                        {
+                            var panel = new PanelWothBarren(item, settings);
+                            panel.PanelQuantity(listPlacesWithTag, item);
                             panelLayout.Controls.Add(panel);
                             panelLayout.Controls.Add(panel.textBoxCustom.SuggestionContainer);
                             ListUpdatables.Add(panel);
@@ -1241,6 +1266,48 @@ namespace GSTHD
         public bool isBroadcastable { get; set; } = false;
     }
 
+    public class ObjectPanelQuantity
+    {
+        public string Name { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public bool Visible { get; set; }
+        public Color BackColor { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public int NbMaxRows { get; set; }
+        public bool IsScrollable { get; set; }
+
+        public string TextBoxName { get; set; }
+        public Color TextBoxBackColor { get; set; }
+        public string TextBoxFontName { get; set; }
+        public int TextBoxFontSize { get; set; }
+        public FontStyle TextBoxFontStyle { get; set; }
+        public int TextBoxWidth { get; set; }
+        public int TextBoxHeight { get; set; }
+        public string TextBoxText { get; set; }
+
+        public Color LabelColor { get; set; }
+        public Color LabelBackColor { get; set; }
+        public string LabelFontName { get; set; }
+        public int LabelFontSize { get; set; }
+        public FontStyle LabelFontStyle { get; set; }
+        public int LabelWidth { get; set; }
+        public int LabelHeight { get; set; }
+
+        public int CounterFontSize { get; set; }
+        public int CounterSpacing { get; set; }
+        public Size CounterSize { get; set; }
+        public string CounterImage { get; set; }
+
+        public Size SubTextBoxSize { get; set; }
+        public int SubTextBoxFontSize { get; set; }
+        public Color SubTextBoxBackColor { get; set; }
+        public Color SubTextBoxFontColor { get; set; }
+
+        public bool isBroadcastable { get; set; } = false;
+    }
+
     public class ObjectPointGoMode
     {
         public string Name { get; set; }
@@ -1272,6 +1339,8 @@ namespace GSTHD
         public FontStyle LabelFontStyle { get; set; }
         public Color LabelColor { get; set; }
         public bool isBroadcastable { get; set; } = false;
+        public bool hasSlash { get; set; } = false;
+        public Color BackColor { get; set; } = Color.Black;
     }
 
     public class AppSettings

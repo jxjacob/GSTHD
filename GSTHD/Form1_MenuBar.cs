@@ -768,7 +768,7 @@ namespace GSTHD
                         }
                         else
                         {
-                            MessageBox.Show("Could not connect to Bizhawk-DK64\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Could not connect to Bizhawk-DK64\nMake sure the game you want to track is loaded in the emulator before connecting.\nIf you are experiencing persistent issues, try switching to the _32 version of GSTHD.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                         break;
                     case "RMG":

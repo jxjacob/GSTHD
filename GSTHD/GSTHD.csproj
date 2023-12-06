@@ -193,6 +193,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Quantity.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SometimesHint.cs">
       <SubType>Component</SubType>

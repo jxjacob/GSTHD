@@ -404,7 +404,8 @@ namespace GSTHD
                             thestring += y.ToString();
                         }
                         thejson.Add(x.Name, thestring);
-                    } else if (x.ListWotH.Count > 0)
+                    }
+                    else if (x.ListWotH.Count > 0)
                     {
                         string thestring = "";
                         foreach (WotHState y in x.GetWotHs())
@@ -416,9 +417,22 @@ namespace GSTHD
                             thestring += y.ToString();
                         }
                         thejson.Add(x.Name, thestring);
+                    } else if (x.ListQuantity.Count > 0)
+                    {
+                        string thestring = "";
+                        foreach (QuantityState y in x.GetQuantities())
+                        {
+                            if (thestring.Length > 0)
+                            {
+                                thestring += "\n";
+                            }
+                            thestring += y.ToString();
+                        }
+                        thejson.Add(x.Name, thestring);
                     }
                 }
             }
+
 
 
             if (force)
@@ -533,15 +547,17 @@ namespace GSTHD
                     }
                     else if (found is PanelWothBarren) 
                     {
-                        if (((PanelWothBarren)found).isWotH){
+                        if (((PanelWothBarren)found).isWotH == 0){
                             ((PanelWothBarren)found).SetWotH((string)x.Value);
-                        } else
-                        {
+                        } else if (((PanelWothBarren)found).isWotH == 1){
                             ((PanelWothBarren)found).SetBarren((string)x.Value);
+                        } else if (((PanelWothBarren)found).isWotH == 2)
+                        {
+                            ((PanelWothBarren)found).SetQuantities((string)x.Value);
                         }
 
 
-                        
+
                     }
                 }
                 if (missingItems > 0)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -16,20 +17,29 @@ namespace GSTHD
 
         public List<WotH> ListWotH = new List<WotH>();
         public List<Barren> ListBarren = new List<Barren>();
+        public List<Quantity> ListQuantity = new List<Quantity>();
 
         public TextBoxCustom textBoxCustom;
         private int GossipStoneCount;
         private string[] ListImage_WothItemsOption;
         private int PathGoalCount;
         private string[] ListImage_GoalsOption;
-        Size GossipStoneSize;
+        private int CounterFontSize;
+        private int CounterSpacing;
+        private string CounterImage;
+        private Size subBoxSize;
+        private int subFontSize;
+        private Color subBackColor;
+        private Color subFontColor;
+        private Size GossipStoneSize;
         int GossipStoneSpacing;
         int PathGoalSpacing;
         int NbMaxRows;
         bool isScrollable;
         bool isBroadcastable;
         bool PathCycling = false;
-        public bool isWotH;
+        // 0 = WotH, 1 = Barren, 2 = Quasntitiy
+        public int isWotH;
         PictureBoxSizeMode SizeMode;
         Label LabelSettings = new Label();
 
@@ -49,13 +59,13 @@ namespace GSTHD
             this.TabStop = false;
             this.isScrollable = data.IsScrollable;
             this.SizeMode = data.SizeMode;
-            this.PathCycling= data.PathCycling;
+            this.PathCycling = data.PathCycling;
             this.isBroadcastable = data.isBroadcastable;
-            this.isWotH = data.isWotH;
+            this.isWotH = 0;
             if (data.IsScrollable)
                 this.MouseWheel += Panel_MouseWheel;
-                
-                
+
+
         }
 
         public PanelWothBarren(ObjectPanelBarren data, Settings settings)
@@ -67,6 +77,29 @@ namespace GSTHD
             this.Name = data.Name;
             this.Size = new Size(data.Width, data.Height);
             this.TabStop = false;
+            this.isWotH = 1;
+            if (data.IsScrollable)
+                this.MouseWheel += Panel_MouseWheel;
+        }
+
+        public PanelWothBarren(ObjectPanelQuantity data, Settings settings)
+        {
+            Settings = settings;
+
+            this.BackColor = data.BackColor;
+            this.Location = new Point(data.X, data.Y);
+            this.Name = data.Name;
+            this.Size = new Size(data.Width, data.Height);
+            this.TabStop = false;
+            this.CounterFontSize = data.CounterFontSize;
+            this.CounterSpacing = data.CounterSpacing;
+            this.GossipStoneSize = data.CounterSize;
+            this.CounterImage = data.CounterImage;
+            this.subBoxSize = data.SubTextBoxSize;
+            this.subFontSize = data.SubTextBoxFontSize;
+            this.subBackColor = data.SubTextBoxBackColor;
+            this.subFontColor = data.SubTextBoxFontColor;
+            this.isWotH = 2;
             if (data.IsScrollable)
                 this.MouseWheel += Panel_MouseWheel;
         }
@@ -78,6 +111,10 @@ namespace GSTHD
                 woth.UpdateFromSettings();
             }
             foreach (var barren in ListBarren)
+            {
+                barren.UpdateFromSettings();
+            }
+            foreach (var barren in ListQuantity)
             {
                 barren.UpdateFromSettings();
             }
@@ -96,7 +133,7 @@ namespace GSTHD
                         if (((GossipStone)element).hoveredOver) return;
                 }
                 var moveDirection = 0;
-                if (e.Delta < 0) moveDirection = -15 ; else moveDirection = +15;
+                if (e.Delta < 0) moveDirection = -15; else moveDirection = +15;
                 foreach (var element in panel.Controls)
                 {
                     if (element is Label)
@@ -105,6 +142,8 @@ namespace GSTHD
                         ((GossipStone)element).Location = new Point(((GossipStone)element).Location.X, ((GossipStone)element).Location.Y + moveDirection);
                     if (element is TextBox)
                         ((TextBox)element).Location = new Point(((TextBox)element).Location.X, ((TextBox)element).Location.Y + moveDirection);
+                    if (element is CollectedItem)
+                        ((CollectedItem)element).Location = new Point(((CollectedItem)element).Location.X, ((CollectedItem)element).Location.Y + moveDirection);
                 }
             }
             ((PanelWothBarren)panel).SetSuggestionContainer();
@@ -168,6 +207,35 @@ namespace GSTHD
             this.Controls.Add(textBoxCustom.TextBoxField);
         }
 
+        public void PanelQuantity(Dictionary<string, string> PlacesWithTag, ObjectPanelQuantity data)
+        {
+            Debug.WriteLine("really????");
+            NbMaxRows = data.NbMaxRows;
+
+            LabelSettings = new Label
+            {
+                ForeColor = data.LabelColor,
+                BackColor = data.LabelBackColor,
+                Font = new Font(data.LabelFontName, data.LabelFontSize, data.LabelFontStyle),
+                Width = data.LabelWidth,
+                Height = data.LabelHeight
+            };
+
+            textBoxCustom = new TextBoxCustom
+                (
+                    PlacesWithTag,
+                    new Point(0, 0),
+                    data.TextBoxBackColor,
+                    new Font(data.TextBoxFontName, data.TextBoxFontSize, data.TextBoxFontStyle),
+                    data.TextBoxName,
+                    new Size(data.TextBoxWidth, data.TextBoxHeight),
+                    data.TextBoxText
+                );
+            textBoxCustom.TextBoxField.KeyDown += textBoxCustom_KeyDown_Quantity;
+            textBoxCustom.TextBoxField.MouseClick += textBoxCustom_MouseClick;
+            this.Controls.Add(textBoxCustom.TextBoxField);
+        }
+
         public void SetSuggestionContainer()
         {
             textBoxCustom.SetSuggestionsContainerLocation(this.Location);
@@ -189,6 +257,21 @@ namespace GSTHD
                 if (ListBarren.Count < NbMaxRows)
                 {
                     AddBarren(textbox.Text);
+                }
+                textbox.Text = string.Empty;
+            }
+        }
+
+        private void textBoxCustom_KeyDown_Quantity(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+                var textbox = (TextBox)sender;
+                if (ListQuantity.Count < NbMaxRows)
+                {
+                    AddQuantity(textbox.Text);
                 }
                 textbox.Text = string.Empty;
             }
@@ -225,7 +308,7 @@ namespace GSTHD
                     newWotH = new WotH(Settings, selectedPlace,
                         GossipStoneCount, ListImage_WothItemsOption, GossipStoneSpacing,
                         PathGoalCount, ListImage_GoalsOption, PathGoalSpacing,
-                        new Point(2, -LabelSettings.Height), LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling);
+                        new Point(0, -LabelSettings.Height), LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling);
                 else
                 {
                     var lastLocation = ListWotH.Last().LabelPlace.Location;
@@ -268,6 +351,39 @@ namespace GSTHD
             }
         }
 
+
+        private void AddQuantity(string text)
+        {
+            var selectedPlace = text.ToUpper().Trim().Replace(",", "");
+
+            var find = ListQuantity.Where(x => x.Name == selectedPlace);
+            Quantity newQuan = null;
+            if (ListQuantity.Count <= 0)
+            {
+                newQuan = new Quantity(Settings, selectedPlace,
+                    CounterFontSize, CounterSpacing, CounterImage,
+                    subBoxSize, subFontSize, subBackColor, subFontColor,
+                    new Point(2, -LabelSettings.Height), LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling);
+            }
+            else
+            {
+                var lastLocation = ListQuantity.Last().LabelPlace.Location;
+                newQuan = new Quantity(Settings, selectedPlace,
+                    CounterFontSize, CounterSpacing, CounterImage,
+                    subBoxSize, subFontSize, subBackColor, subFontColor,
+                    lastLocation, LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling);
+            }
+            ListQuantity.Add(newQuan);
+            this.Controls.Add(newQuan.LabelPlace);
+            newQuan.LabelPlace.MouseClick += LabelPlace_MouseClick_Quantity;
+
+            this.Controls.Add(newQuan.counterCI);
+            this.Controls.Add(newQuan.textBox);
+
+            textBoxCustom.newLocation(new Point(0, newQuan.LabelPlace.Location.Y + newQuan.LabelPlace.Height), this.Location);
+
+        }
+
         private void LabelPlace_MouseClick_Barren(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Middle)
@@ -275,6 +391,16 @@ namespace GSTHD
                 var label = (Label)sender;
                 var barren = this.ListBarren.Where(x => x.LabelPlace.Name == label.Name).ToList()[0];
                 this.RemoveBarren(barren);
+            }
+        }
+
+        private void LabelPlace_MouseClick_Quantity(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Middle)
+            {
+                var label = (Label)sender;
+                var barren = this.ListQuantity.Where(x => x.LabelPlace.Name == label.Name).ToList()[0];
+                this.RemoveQuantity(barren);
             }
         }
 
@@ -328,6 +454,25 @@ namespace GSTHD
             textBoxCustom.newLocation(new Point(2, ListBarren.Count * barren.LabelPlace.Height), this.Location);
         }
 
+        public void RemoveQuantity(Quantity quantity)
+        {
+            ListQuantity.Remove(quantity);
+
+            this.Controls.Remove(quantity.LabelPlace);
+            this.Controls.Remove(quantity.counterCI);
+            this.Controls.Remove(quantity.textBox);
+
+            for (int i = 0; i < ListQuantity.Count; i++)
+            {
+                var wothLabel = ListQuantity[i].LabelPlace;
+                var newY = i * wothLabel.Height;
+                wothLabel.Location = new Point(2, newY);
+                ListQuantity[i].counterCI.Location = new Point(ListQuantity[i].counterCI.Location.X, newY);
+                ListQuantity[i].textBox.Location = new Point(ListQuantity[i].textBox.Location.X, newY);
+            }
+            textBoxCustom.newLocation(new Point(0, ListQuantity.Count * quantity.LabelPlace.Height), this.Location);
+        }
+
         public List<WotHState> GetWotHs()
         {
             List<WotHState> thelist = new List<WotHState>();
@@ -353,7 +498,7 @@ namespace GSTHD
                 // secondparts are explained below
                 string[] secondPart = parts[1].Split(',');
                 AddWotH(firstPart[0]);
-                
+
                 // find the woth we just made
                 //Control foundWotH = this.Controls.Find(firstPart[0], true)[0];
                 WotH thisWotH = this.ListWotH.Where(x => x.Name == firstPart[0].Trim()).ToList()[0];
@@ -391,7 +536,7 @@ namespace GSTHD
                         }
                     }
                 }
-                
+
 
             }
         }
@@ -423,7 +568,41 @@ namespace GSTHD
 
                 thisBarren.SetColor(int.Parse(firstPart[1]));
 
-                
+
+
+            }
+        }
+
+        public List<QuantityState> GetQuantities()
+        {
+            List<QuantityState> thelist = new List<QuantityState>();
+            foreach (Quantity x in ListQuantity)
+            {
+                thelist.Add(x.SaveState());
+            }
+            return thelist;
+        }
+
+        public void SetQuantities(string thestring)
+        {
+            string[] sections = thestring.Split('\n');
+            foreach (string section in sections)
+            {
+                // name = firstpart[0]
+                // color = firstpart[1]
+                string[] firstPart = section.Split(',');
+
+                AddQuantity(firstPart[0]);
+
+                // find the woth we just made
+                Quantity thisQuan = this.ListQuantity.Where(x => x.Name == firstPart[0]).ToList()[0];
+
+                thisQuan.SetColor(int.Parse(firstPart[1]));
+                thisQuan.counterCI.SetState(int.Parse(firstPart[2]));
+                thisQuan.textBox.Text = firstPart[3];
+
+
+
 
             }
         }
