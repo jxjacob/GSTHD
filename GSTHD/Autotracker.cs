@@ -28,6 +28,7 @@ namespace GSTHD
         public string type;
         public string group;
         public Control targetControl;
+        public int dk64_id;
     }
     public class TrackedGroup
     {
@@ -57,11 +58,17 @@ namespace GSTHD
         private int desiredGameStateBytes;
         private uint desiredGameStateValue;
 
+        private uint currentMapAddr;
+        private int currentMapBytes;
+        private int currentMapValue;
+        private SpoilerPanel spoilerPanel;
+
         private System.Timers.Timer timer;
         private Form1 form;
 
         private int timeout;
         private bool is64 = false;
+        private bool LZTracking = false;
 
         //32-bit version
         public Autotracker(Process theProgram, uint foundOffset, ref Form1 theForm)
@@ -227,11 +234,25 @@ namespace GSTHD
             {
                 trackedAddresses.Remove(thing);
             }
+
+            // if the currentmapaddr is set at all, look for a spoilerhint panel
+            if (currentMapAddr != 0)
+            {
+                foreach (Control thing in form.Controls[0].Controls)
+                {
+                    if (thing is SpoilerPanel panel)
+                    {
+                        LZTracking = true;
+                        spoilerPanel = panel;
+                    }
+                }
+            }
         }
 
         private void MainTracker(object state, ElapsedEventArgs e)
         {
             FlushGroups();
+            if (LZTracking) currentMapValue = GoRead(currentMapAddr, currentMapBytes);
             foreach (var ta in trackedAddresses)
             {
                 if (VerifyGameState())
@@ -271,7 +292,7 @@ namespace GSTHD
                             result.count++;
                             if (result.count == result.countMax)
                             {
-                                UTGrouped(result);
+                                UTGrouped(result, false, ta.dk64_id);
                             }
                         }
                     } else
@@ -284,6 +305,14 @@ namespace GSTHD
                     break;
                 }
 
+            }
+        }
+
+        public void AttemptSpoilerUpdate(int dk_id)
+        {
+            if (LZTracking && dk_id != -1)
+            {
+                spoilerPanel.AddFromAT(currentMapValue, dk_id);
             }
         }
 
@@ -342,57 +371,12 @@ namespace GSTHD
                     UpdateTrackerCollectable(ci, ta, theRead);
                 }
 
-                // i can't fucking stand this method
-                //foreach (Control thing in form.Controls[0].Controls)
-                //{
-                //    if (ta.type == "item" && thing is Item)
-                //    {
-                //        if (((Item)thing).AutoName == ta.name)
-                //        {
-                //            UpdateTrackerItem((Item)thing, ta, theRead);
-                //            break;
-                //        }
-
-                //    } else if (ta.type == "item" && thing is Medallion)
-                //    {
-                //        if (((Medallion)thing).AutoName == ta.name)
-                //        {
-                //            UpdateTrackerMedallion((Medallion)thing, ta, theRead);
-                //            break;
-                //        }
-
-                //    } else if (ta.type == "item" && thing is Song)
-                //    {
-                //        if (((Song)thing).AutoName == ta.name)
-                //        {
-                //            UpdateTrackerSong((Song)thing, ta, theRead);
-                //            break;
-                //        }
-
-                //    }
-                //    else if (ta.type == "collectable" && thing is CollectedItem)
-                //    {
-                //        if (((CollectedItem)thing).AutoName == ta.name)
-                //        {
-                //            UpdateTrackerCollectable((CollectedItem)thing, ta, theRead);
-                //            break;
-                //        }
-
-                //    } else if (ta.type == "collectable" && thing is Item)
-                //    {
-                //        if (((Item)thing).AutoName == ta.name)
-                //        {
-                //            UpdateTrackerItem((Item)thing, ta, theRead);
-                //            break;
-                //        }
-
-                //    }
-                //}
+                
                 ta.currentValue = theRead;
             }
         }
 
-        private void UTGrouped(TrackedGroup tg, bool forceUpdate = false)
+        private void UTGrouped(TrackedGroup tg, bool forceUpdate = false, int dk_id=-1)
         {
             if (tg.currentValue != tg.runningvalue || forceUpdate)
             {
@@ -436,6 +420,7 @@ namespace GSTHD
                 if (theumuh == ta.bitmask)
                 {
                     theItem.SetState(1 + ta.offset);
+                    AttemptSpoilerUpdate(ta.dk64_id);
                 } else if (theumuh == 0)
                 {
                     theItem.SetState(0 + ta.offset);
@@ -444,6 +429,7 @@ namespace GSTHD
             else
             {
                 theItem.SetState(theRead + ta.offset);
+                AttemptSpoilerUpdate(ta.dk64_id);
             }
         }
 
@@ -462,12 +448,14 @@ namespace GSTHD
                     // have a funny feeling that this is supposed to be umuh and not 1
                     int goingIn = 1 + ta.offset;
                     theItem.SetState(goingIn);
+                    AttemptSpoilerUpdate(ta.dk64_id);
                 }
             }
             else
             {
                 int goingIn = theRead + ta.offset;
                 theItem.SetState(goingIn);
+                AttemptSpoilerUpdate(ta.dk64_id);
             }
         }
 
@@ -482,12 +470,14 @@ namespace GSTHD
                     // have a funny feeling that this is supposed to be umuh and not 1
                     int goingIn = 1 + ta.offset - theSub;
                     theItem.SetState(goingIn);
+                    AttemptSpoilerUpdate(ta.dk64_id);
                 }
             }
             else
             {
                 int goingIn = theRead + ta.offset - theSub;
                 theItem.SetState(goingIn);
+                AttemptSpoilerUpdate(ta.dk64_id);
             }
         }
 
@@ -504,6 +494,7 @@ namespace GSTHD
                 if (theumuh == ta.bitmask)
                 {
                     theItem.SetImageState(1 + ta.offset);
+                    AttemptSpoilerUpdate(ta.dk64_id);
                 }
                 else if (theumuh == 0)
                 {
@@ -513,6 +504,7 @@ namespace GSTHD
             else
             {
                 theItem.SetImageState(theRead + ta.offset);
+                AttemptSpoilerUpdate(ta.dk64_id);
             }
         }
 
@@ -524,6 +516,7 @@ namespace GSTHD
                 if (theumuh == ta.bitmask)
                 {
                     theItem.SetState(1 + ta.offset);
+                    AttemptSpoilerUpdate(ta.dk64_id);
                 }
                 else if (theumuh == 0)
                 {
@@ -533,6 +526,7 @@ namespace GSTHD
             else
             {
                 theItem.SetState(theRead + ta.offset);
+                AttemptSpoilerUpdate(ta.dk64_id);
             }
         }
 
@@ -585,6 +579,7 @@ namespace GSTHD
             foreach (string line in lines)
             {
                 string[] parts = line.Split(',');
+                // ignore the header row lol
                 if (parts[0] == "name") { continue; }
 
                 if (parts[0] == "game_state")
@@ -600,7 +595,16 @@ namespace GSTHD
                     desiredGameBytes = int.Parse(parts[2]);
                     desiredGameValue = (uint)Convert.ToInt32(parts[3], 16);
                     continue;
+                } 
+                else if (parts[0] == "game_current_map")
+                {
+                    currentMapAddr = (uint)Convert.ToInt32(parts[1], 16);
+                    currentMapBytes = int.Parse(parts[2]);
+                    continue;
                 }
+
+                // if a system variable is made that isnt one fo the 3 above, its wrong and gets ignored
+                if (parts[6] == "system") continue;
 
                 // dont add to thing if theres no address set (for me slowly adding things)
                 if (parts[1] != "")
@@ -649,6 +653,13 @@ namespace GSTHD
                         }
                     }
                     //Debug.WriteLine(temp.name + " :: " + temp.bitmask);
+                    if (parts[8] != "")
+                    {
+                        temp.dk64_id = int.Parse(parts[8]);
+                    } else
+                    {
+                        temp.dk64_id = -1;
+                    }
                     trackedAddresses.Add(temp);
                 }
             }

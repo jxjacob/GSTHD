@@ -42,6 +42,13 @@ namespace GSTHD
             RMG
         }
 
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum SpoilerOrderOption
+        {
+            Numerical,
+            Chronological
+        }
+
         private const SongMarkerBehaviourOption DefaultSongMarkerBehaviour = SongMarkerBehaviourOption.DropAndCheck;
 
         public bool ShowMenuBar { get; set; } = true;
@@ -53,6 +60,7 @@ namespace GSTHD
         public DragButtonOption DragButton { get; set; } = DragButtonOption.Middle;
         public DragButtonOption AutocheckDragButton { get; set; } = DragButtonOption.None;
         public SelectEmulatorOption SelectEmulator { get; set; } = SelectEmulatorOption.Project64;
+        public SpoilerOrderOption SpoilerOrder { get; set; } = SpoilerOrderOption.Numerical;
         public int MinDragThreshold { get; set; } = 6;
         public bool MoveLocationToSong { get; set; } = false;
         // public bool AutoCheckSongs { get; set; } = false;
@@ -84,6 +92,9 @@ namespace GSTHD
         public bool DeleteOldAutosaves { get; set; } = true;
         public bool SubtractItems { get; set; } = true;
         public KnownColor LastWothColor { get; set; } = KnownColor.BlueViolet;
+        public KnownColor SpoilerPointColour { get; set; } = KnownColor.White;
+        public KnownColor SpoilerWOTHColour { get; set; } = KnownColor.ForestGreen;
+        public KnownColor SpoilerEmptyColour { get; set; } = KnownColor.Teal;
 
         public MedallionLabel DefaultDungeonNames { get; set; } = new MedallionLabel()
         {

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
+using static GSTHD.Settings;
 
 namespace GSTHD
 {
@@ -18,6 +19,7 @@ namespace GSTHD
             // Layout
             public ToolStripMenuItem OpenLayout;
             public ToolStripMenuItem OpenPlaces;
+            public ToolStripMenuItem OpenSpoilerHint;
             public ToolStripMenuItem Reset;
             public ToolStripMenuItem SaveState;
             public ToolStripMenuItem LoadState;
@@ -46,6 +48,12 @@ namespace GSTHD
 
             // Barren
             public ToolStripMenuItem EnableBarrenColors;
+
+            // Spoiler Hints
+            public ToolStripMenuItem SpoilerLevelOrder;
+            public ToolStripMenuItem SpoilerPointColor;
+            public ToolStripMenuItem SpoilerWothColor;
+            public ToolStripMenuItem SpoilerEmptyColor;
 
             // Gossip Stone Stuff
             public ToolStripMenuItem OverrideHeldImage;
@@ -88,6 +96,12 @@ namespace GSTHD
             { Settings.SelectEmulatorOption.RMG, "Rosalie's Mupen GUI" },
         };
 
+        private readonly Dictionary<Settings.SpoilerOrderOption, string> SpoilerOrderNames = new Dictionary<Settings.SpoilerOrderOption, string>
+        {
+            { Settings.SpoilerOrderOption.Numerical, "Numerical (1-7)" },
+            { Settings.SpoilerOrderOption.Chronological, "Chronological (Japes-Castle)" },
+        };
+
         Form1 Form;
         Settings Settings;
         MenuStrip MenuStrip;
@@ -96,7 +110,11 @@ namespace GSTHD
         Dictionary<Settings.DragButtonOption, ToolStripMenuItem> AutocheckDragButtonOptions;
         Dictionary<Settings.SongMarkerBehaviourOption, ToolStripMenuItem> SongMarkerBehaviourOptions;
         Dictionary<Settings.SelectEmulatorOption, ToolStripMenuItem> SelectEmulatorOptions;
+        Dictionary<Settings.SpoilerOrderOption, ToolStripMenuItem> SpoilerOrderOptions;
         Dictionary<KnownColor, ToolStripMenuItem> LastWothColorOptions;
+        Dictionary<KnownColor, ToolStripMenuItem> SpoilerPointColorOptions;
+        Dictionary<KnownColor, ToolStripMenuItem> SpoilerWothColorOptions;
+        Dictionary<KnownColor, ToolStripMenuItem> SpoilerEmptyColorOptions;
         Dictionary<double, ToolStripMenuItem> GossipeCycleLengthOptions;
         Size SavedSize;
 
@@ -135,6 +153,11 @@ namespace GSTHD
                     ShowShortcutKeys = true,
                 };
                 layoutMenu.DropDownItems.Add(Items.OpenPlaces);
+
+                Items.OpenSpoilerHint = new ToolStripMenuItem("Open Spoiler Log", null, new EventHandler(menuBar_OpenSpoilerHint))
+                {
+                };
+                layoutMenu.DropDownItems.Add(Items.OpenSpoilerHint);
 
                 Items.Reset = new ToolStripMenuItem("Reset", null, new EventHandler(menuBar_Reset))
                 {
@@ -263,6 +286,9 @@ namespace GSTHD
 
 
                     LastWothColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
+                    SpoilerPointColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
+                    SpoilerWothColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
+                    SpoilerEmptyColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
 
                     var firstColorId = 28;
                     var lastColorId = 167;
@@ -271,6 +297,9 @@ namespace GSTHD
                     {
                         var color = (KnownColor)i;
                         LastWothColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetLastWothColor)));
+                        SpoilerPointColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerPointColor)));
+                        SpoilerWothColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerWothColor)));
+                        SpoilerEmptyColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerEmptyColor)));
                         i++;
                     }
 
@@ -294,7 +323,7 @@ namespace GSTHD
                     barrenSubMenu.DropDownItems.Add(Items.EnableBarrenColors);
                 }
                 optionMenu.DropDownItems.Add(barrenSubMenu);
-
+                //-------------------
                 ToolStripMenuItem gossipSubMenu = new ToolStripMenuItem("Gossip Stones");
                 {
                     Items.OverrideHeldImage = new ToolStripMenuItem("Allow Override of Held Image", null, new EventHandler(menuBar_ToggleOverrideHeldImage))
@@ -321,6 +350,32 @@ namespace GSTHD
                 }
                 optionMenu.DropDownItems.Add(gossipSubMenu);
                 //-------------
+                ToolStripMenuItem spoilerSubMenu = new ToolStripMenuItem("DK64 Spoiler Hints");
+                {
+
+                    // level order
+                    SpoilerOrderOptions = new Dictionary<Settings.SpoilerOrderOption, ToolStripMenuItem>();
+                    int i = 0;
+                    foreach (var button in SpoilerOrderNames)
+                    {
+                        SpoilerOrderOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetSpoilerLevelOrder)));
+                        i++;
+                    }
+                    Items.SpoilerLevelOrder = new ToolStripMenuItem("Level Order", null, SpoilerOrderOptions.Values.ToArray());
+                    spoilerSubMenu.DropDownItems.Add(Items.SpoilerLevelOrder);
+                    // point colour
+                    Items.SpoilerPointColor = new ToolStripMenuItem("Point Number Color", null, SpoilerPointColorOptions.Values.ToArray());
+                    spoilerSubMenu.DropDownItems.Add(Items.SpoilerPointColor);
+                    // empty colour
+                    Items.SpoilerEmptyColor = new ToolStripMenuItem("\"0 Points Left\" Color", null, SpoilerEmptyColorOptions.Values.ToArray());
+                    spoilerSubMenu.DropDownItems.Add(Items.SpoilerEmptyColor);
+                    // woth number colour
+                    Items.SpoilerWothColor = new ToolStripMenuItem("WotH Number Color", null, SpoilerWothColorOptions.Values.ToArray());
+                    spoilerSubMenu.DropDownItems.Add(Items.SpoilerWothColor);
+
+                }
+                optionMenu.DropDownItems.Add(spoilerSubMenu);
+                //--------------------------------
                 ToolStripMenuItem AutosaveSubMenu = new ToolStripMenuItem("Autosaves");
                 {
                     Items.EnableAutosaves = new ToolStripMenuItem("Enable Autosaving", null, new EventHandler(menuBar_ToggleEnableAutosaves))
@@ -409,6 +464,11 @@ namespace GSTHD
 
             }
 
+            SpoilerOrderOptions[Settings.SpoilerOrder].Checked = true;
+            SpoilerPointColorOptions[Settings.SpoilerPointColour].Checked = true;
+            SpoilerWothColorOptions[Settings.SpoilerWOTHColour].Checked = true;
+            SpoilerEmptyColorOptions[Settings.SpoilerEmptyColour].Checked = true;
+
             SelectEmulatorOptions[Settings.SelectEmulator].Checked = true;
             Items.SubtractItem.Checked = Settings.SubtractItems;
         }
@@ -477,6 +537,29 @@ namespace GSTHD
                 }
                 Settings.Write();
                 Form.LoadSettings();
+            }
+        }
+
+        public void menuBar_OpenSpoilerHint(object sender, EventArgs e)
+        {
+            // open file dialog for jsons
+            OpenFileDialog filedia = new OpenFileDialog();
+            filedia.Title = "Open GDK64 Spoiler log";
+            filedia.InitialDirectory = Application.StartupPath;
+            filedia.Filter = "json files (*.json)|*.json|All files (*.*)|*.*";
+            filedia.Multiselect = false;
+            // put that filename into settings' ActivePlaces
+            if (filedia.ShowDialog() == DialogResult.OK)
+            {
+                foreach (Control thing in Form.Controls[0].Controls)
+                {
+                    if (thing is SpoilerPanel panel)
+                    {
+                        panel.ImportFromJson(filedia.FileName);
+                        return;
+                    }
+                }
+                MessageBox.Show("Could not find Spoiler Hint object on the current layout.\nMake sure the layout you are using supports Spoiler Hints before opening a spoiler log.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -612,6 +695,20 @@ namespace GSTHD
             Settings.Write();
         }
 
+        private void menuBar_SetSpoilerLevelOrder(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            SpoilerOrderOptions[Settings.SpoilerOrder].Checked = false;
+            choice.Checked = true;
+
+            var option = SpoilerOrderOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.SpoilerOrder = option.Key;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
         //private void menuBar_ToggleAutocheckSongs(object sender, EventArgs e)
         //{
         //    Items.Autocheck.Checked = !Items.Autocheck.Checked;
@@ -734,6 +831,47 @@ namespace GSTHD
             Form.UpdateLayoutFromSettings();
         }
 
+        private void menuBar_SetSpoilerPointColor(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            SpoilerPointColorOptions[Settings.SpoilerPointColour].Checked = false;
+            choice.Checked = true;
+
+            var option = SpoilerPointColorOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.SpoilerPointColour = option.Key;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
+        private void menuBar_SetSpoilerWothColor(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            SpoilerWothColorOptions[Settings.SpoilerWOTHColour].Checked = false;
+            choice.Checked = true;
+
+            var option = SpoilerWothColorOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.SpoilerWOTHColour = option.Key;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
+        private void menuBar_SetSpoilerEmptyColor(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            SpoilerEmptyColorOptions[Settings.SpoilerEmptyColour].Checked = false;
+            choice.Checked = true;
+
+            var option = SpoilerEmptyColorOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.SpoilerEmptyColour = option.Key;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
         public void menuBar_ConnectToEmulator(object sender, EventArgs e)
         {
             if (Form.CurrentLayout.App_Settings.AutotrackingGame != null)
@@ -768,7 +906,7 @@ namespace GSTHD
                         }
                         else
                         {
-                            MessageBox.Show("Could not connect to Bizhawk-DK64\nMake sure the game you want to track is loaded in the emulator before connecting.\nIf you are experiencing persistent issues, try switching to the _32 version of GSTHD.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Could not connect to Bizhawk-DK64\nMake sure the game you want to track is loaded in the emulator before connecting.\nIf you are experiencing persistent issues, try switching to the _32 exe of GSTHD instead.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                         break;
                     case "RMG":

@@ -135,7 +135,7 @@ namespace GSTHD
         {
             // list everything in dir
             // if more than 25, get the oldest ones then nukeem
-            Debug.WriteLine("------begin");
+            //Debug.WriteLine("------begin");
             if (Directory.Exists("Autosaves"))
             {
                 var files = Directory.GetFiles("Autosaves").OrderBy(f => new FileInfo(f).CreationTime);

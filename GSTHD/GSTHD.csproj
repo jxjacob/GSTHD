@@ -130,6 +130,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="ControlExtensions.cs" />
+    <Compile Include="dk64_id.cs" />
     <Compile Include="DragDropContent.cs" />
     <Compile Include="DraggableAutocheckElementBehaviour.cs" />
     <Compile Include="DraggableElementBehaviour.cs" />
@@ -199,6 +200,12 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Song.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="SpoilerHintCell.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="SpoilerHintPanel.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="TextBoxCustom.cs">

@@ -29,9 +29,9 @@ namespace GSTHD
             return null;
         }
 
-        public static Tuple<Process, uint> attachToProject64(Form1 baseForm, bool doOffsetScan = false)
+        public static Tuple<Process, uint> attachToProject64(Form1 baseForm)
         {
-            Process target = null;
+            Process target;
             try
             {
                 target = Process.GetProcessesByName("project64")[0];
@@ -42,92 +42,26 @@ namespace GSTHD
                 return null;
             }
 
-
-
-            uint romAddrStart = 0;
             var gameInfo = getGameVerificationInfo(baseForm.CurrentLayout.App_Settings.AutotrackingGame);
-            if (doOffsetScan)
-            {
-                Debug.WriteLine("going in");
-                // bruteforce different pj64 offsets
-                for (uint potOff = 0xDFD00000; potOff < 0xE01FFFFF; potOff += 16)
-                {
-
-                    // checks the emu for the verification bits
-                    if (gameInfo.Item2 == 8)
-                    {
-                        uint addr = Memory.Int8AddrFix(gameInfo.Item1);
-                        if (Memory.ReadInt8(target.Handle, potOff + addr) == gameInfo.Item3)
-                        {
-                            Debug.WriteLine(potOff.ToString("X"));
-                            romAddrStart = potOff;
-                            break;
-                        }
-                    }
-                    else if (gameInfo.Item2 == 16)
-                    {
-                        uint addr = Memory.Int16AddrFix(gameInfo.Item1);
-                        if (Memory.ReadInt16(target.Handle, potOff + addr) == gameInfo.Item3)
-                        {
-                            Debug.WriteLine(potOff.ToString("X"));
-                            romAddrStart = potOff;
-                            break;
-                        }
-                    }
-                    else if (gameInfo.Item2 == 32)
-                    {
-                        if (Memory.ReadInt32(target.Handle, potOff + gameInfo.Item1) == gameInfo.Item3)
-                        {
-                            Debug.WriteLine(potOff.ToString("X"));
-                            romAddrStart = potOff;
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("Incorrect bytes set for verification.\nMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return null;
-                    }
-                }
-                Debug.WriteLine("Done");
-                return Tuple.Create(target, romAddrStart);
-            }
 
             for (uint potOff = 0xDFD00000; potOff < 0xE01FFFFF; potOff += 16)
             {
-
-                    //case 0:
-                    //    romAddrStart = 0xDFE40000;
-                    //    break;
-                    //case 1:
-                    //    romAddrStart = 0xDFE70000;
-                    //    break;
-                    //case 2:
-                    //    romAddrStart = 0xDFFB0000;
-                    //    break;
-                    //default:
-                    //    MessageBox.Show("Could not find the correct PJ64 offset\nPlease find JXJacob and alert him about this immediately so he can implement a fix to an issue he predicted would eventually happen.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    //    return null;
-
-                //}
-                romAddrStart= potOff;
-
-                int gamecheck = 0;
+                int gamecheck;
                 try
                 {
                     if (gameInfo.Item2 == 8)
                     {
                         uint addr = Memory.Int8AddrFix(gameInfo.Item1);
-                        gamecheck = Memory.ReadInt8(target.Handle, romAddrStart + addr);
+                        gamecheck = Memory.ReadInt8(target.Handle, potOff + addr);
                     }
                     else if (gameInfo.Item2 == 16)
                     {
                         uint addr = Memory.Int16AddrFix(gameInfo.Item1);
-                        gamecheck = Memory.ReadInt16(target.Handle, romAddrStart + addr);
+                        gamecheck = Memory.ReadInt16(target.Handle, potOff + addr);
                     }
                     else if (gameInfo.Item2 == 32)
                     {
-                        gamecheck = Memory.ReadInt32(target.Handle, romAddrStart + gameInfo.Item1);
+                        gamecheck = Memory.ReadInt32(target.Handle, potOff + gameInfo.Item1);
                     }
                     else
                     {
@@ -146,7 +80,7 @@ namespace GSTHD
                 if (gamecheck == gameInfo.Item3)
                 {
                     Debug.WriteLine("verifyably pj64");
-                    return Tuple.Create(target, romAddrStart);
+                    return Tuple.Create(target, potOff);
                 }
 
             }

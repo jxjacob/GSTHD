@@ -36,6 +36,7 @@ namespace GSTHD
         public List<ObjectPanelWotH> ListPanelWotH = new List<ObjectPanelWotH>();
         public List<ObjectPanelBarren> ListPanelBarren = new List<ObjectPanelBarren>();
         public List<ObjectPanelQuantity> ListPanelQuantity = new List<ObjectPanelQuantity>();
+        public List<ObjectPanelSpoiler> ListPanelSpoiler = new List<ObjectPanelSpoiler>();
         public List<ObjectPointGoMode> ListGoMode = new List<ObjectPointGoMode>();
 
         public List<UpdatableFromSettings> ListUpdatables = new List<UpdatableFromSettings>();
@@ -220,6 +221,14 @@ namespace GSTHD
                         foreach (var element in category.Value)
                         {
                             ListPanelQuantity.Add(JsonConvert.DeserializeObject<ObjectPanelQuantity>(element.ToString()));
+                        }
+                    }
+
+                    if (category.Key.ToString() == "PanelSpoiler")
+                    {
+                        foreach (var element in category.Value)
+                        {
+                            ListPanelSpoiler.Add(JsonConvert.DeserializeObject<ObjectPanelSpoiler>(element.ToString()));
                         }
                     }
 
@@ -563,6 +572,19 @@ namespace GSTHD
                     }
                 }
 
+                if (ListPanelSpoiler.Count > 0)
+                {
+                    foreach (var item in ListPanelSpoiler)
+                    {
+                        if (item.Visible)
+                        {
+                            var panel = new SpoilerPanel(item, settings);
+                            panelLayout.Controls.Add(panel);
+                            ListUpdatables.Add(panel);
+                        }
+                    }
+                }
+
                 if (ListGoMode.Count > 0)
                 {
                     foreach (var item in ListGoMode)
@@ -717,6 +739,14 @@ namespace GSTHD
                         foreach (var element in category.Value)
                         {
                             ListPanelBarren.Add(JsonConvert.DeserializeObject<ObjectPanelBarren>(element.ToString()));
+                        }
+                    }
+
+                    if (category.Key.ToString() == "PanelSpoiler")
+                    {
+                        foreach (var element in category.Value)
+                        {
+                            ListPanelSpoiler.Add(JsonConvert.DeserializeObject<ObjectPanelSpoiler>(element.ToString()));
                         }
                     }
 
@@ -1039,6 +1069,19 @@ namespace GSTHD
                     }
                 }
 
+                if (ListPanelSpoiler.Count > 0)
+                {
+                    foreach (var item in ListPanelSpoiler)
+                    {
+                        if (item.Visible)
+                        {
+                            var panel = new SpoilerPanel(item, settings, true);
+                            panelLayout.Controls.Add(panel);
+                            ListUpdatables.Add(panel);
+                        }
+                    }
+                }
+
                 if (ListGoMode.Count > 0)
                 {
                     foreach (var item in ListGoMode)
@@ -1306,6 +1349,31 @@ namespace GSTHD
         public Color SubTextBoxFontColor { get; set; }
 
         public bool isBroadcastable { get; set; } = false;
+    }
+
+    public class ObjectPanelSpoiler
+    {
+        public string Name { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public bool Visible { get; set; }
+        public Color BackColor { get; set; }
+        public Color DefaultColor { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public int Rows { get; set; }
+        public int Columns { get; set; }
+        public int RowPadding { get; set; }
+        public int ColPadding { get; set; }
+        public bool WriteByRow { get; set; } = true;
+        public bool isMinimal { get; set; }
+        public int DataRowHeight { get; set; }
+        public int WorldNumWidth { get; set; }
+        public int WorldNumHeight { get; set; }
+        public int PoitionWidth { get; set; }
+        public int PotionHeight { get; set; }
+        public bool isBroadcastable { get; set; } = false;
+        // point font size
     }
 
     public class ObjectPointGoMode

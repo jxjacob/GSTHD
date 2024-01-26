@@ -38,7 +38,7 @@ namespace GSTHD
         bool isScrollable;
         bool isBroadcastable;
         bool PathCycling = false;
-        // 0 = WotH, 1 = Barren, 2 = Quasntitiy
+        // 0 = WotH, 1 = Barren, 2 = Quantity
         public int isWotH;
         PictureBoxSizeMode SizeMode;
         Label LabelSettings = new Label();
@@ -209,7 +209,6 @@ namespace GSTHD
 
         public void PanelQuantity(Dictionary<string, string> PlacesWithTag, ObjectPanelQuantity data)
         {
-            Debug.WriteLine("really????");
             NbMaxRows = data.NbMaxRows;
 
             LabelSettings = new Label
