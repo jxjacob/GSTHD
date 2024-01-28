@@ -25,7 +25,7 @@ namespace GSTHD
         public Autotracker TheAutotracker;
         public System.Timers.Timer StoneCyclingTimer;
         private int cyclecount = 0;
-
+        
         public List<GossipStone> currentlyCycling = new List<GossipStone>();
 
         public Settings Settings;

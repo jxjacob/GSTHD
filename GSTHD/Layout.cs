@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Activities.Expressions;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -240,6 +241,16 @@ namespace GSTHD
                         }
                     }
                 }
+
+                Debug.WriteLine(App_Settings.BroadcastFile);
+                if (App_Settings.BroadcastFile != String.Empty)
+                {
+                    settings.ActiveLayoutBroadcastFile = App_Settings.BroadcastFile;
+                } else
+                {
+                    settings.ActiveLayoutBroadcastFile = null;
+                }
+                settings.Write();
 
                 panelLayout.Size = new Size(App_Settings.Width, App_Settings.Height);
                 if (App_Settings.BackgroundColor.HasValue)
@@ -606,7 +617,15 @@ namespace GSTHD
             ListUpdatables.Clear();
             if (settings.ActiveLayout != string.Empty)
             {
-                JObject json_layout = JObject.Parse(File.ReadAllText(@"" + settings.ActiveLayout.Replace(".json", "") + "_broadcast.json"));
+                Debug.WriteLine("???" + settings.ActiveLayoutBroadcastFile);
+                if (settings.ActiveLayoutBroadcastFile == string.Empty || settings.ActiveLayoutBroadcastFile == null)
+                {
+                    MessageBox.Show("Layout file " + settings.ActiveLayout.ToString() + " does not specify a BroadcastFile and cannot open the broadcast view.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Application.OpenForms["GSTHD_DK64 Broadcast View"].Close();
+                    return;
+                }
+                Debug.WriteLine(settings.ActiveLayout);
+                JObject json_layout = JObject.Parse(File.ReadAllText($"{Path.GetFileName(Path.GetDirectoryName(settings.ActiveLayout))}\\{settings.ActiveLayoutBroadcastFile}"));
                 foreach (var category in json_layout)
                 {
                     if (category.Key.ToString() == "AppSize")
@@ -1427,6 +1446,7 @@ namespace GSTHD
         public int? DefaultWothColorIndex { get; set; }
         public MedallionLabel DefaultDungeonNames { get; set; } = null;
         public bool EnableBroadcast { get; set; } = false;
+        public string BroadcastFile { get; set; } = null;
         public string AutotrackingGame { get; set; } = null;
     }
 }

@@ -53,6 +53,7 @@ namespace GSTHD
 
         public bool ShowMenuBar { get; set; } = true;
         public string ActiveLayout { get; set; } = string.Empty;
+        public string ActiveLayoutBroadcastFile {  get; set; } = string.Empty;
         public string ActivePlaces { get; set; } = string.Empty;
         public string ActiveSometimesHints { get; set; } = string.Empty;
         public bool InvertScrollWheel { get; set; } = false;
