@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -25,7 +26,8 @@ namespace GSTHD
         private readonly int Step;
 
         private bool isBroadcastable;
-        private bool hasSlash;
+        public bool hasSlash;
+        public bool hoveredOver;
 
         public string AutoName = null;
         public string AutoSubName = null;
@@ -67,13 +69,8 @@ namespace GSTHD
 
             Location = new Point(data.X, data.Y);
             CollectedItemCountPosition = data.CountPosition.IsEmpty ? new Size(0, -7) : data.CountPosition;
-            if (hasSlash)
-            {
-                BackColor = data.BackColor;
-            } else
-            {
-                BackColor = Color.Transparent;
-            }
+            
+            BackColor = data.BackGroundColor;
             TabStop = false;
 
 
@@ -102,12 +99,16 @@ namespace GSTHD
                 MouseUp += DragBehaviour.Mouse_ClickUp;
                 MouseDown += DragBehaviour.Mouse_ClickDown;
                 MouseMove += DragBehaviour.Mouse_Move_WithAutocheck;
-                if (!hasSlash) MouseWheel += Mouse_Wheel;
-                if (!hasSlash) MouseWheel += DragBehaviour.Mouse_Wheel;
+                MouseWheel += Mouse_Wheel;
+                MouseWheel += DragBehaviour.Mouse_Wheel;
+                this.MouseEnter += Panel_MouseEnter;
+                this.MouseLeave += Panel_MouseLeave;
                 ItemCount.MouseDown += ProgressBehaviour.Mouse_ClickDown; // must add these lines because MouseDown/Up on PictureBox won't fire when hovering above Label
                 ItemCount.MouseDown += DragBehaviour.Mouse_ClickDown;
                 ItemCount.MouseUp += DragBehaviour.Mouse_ClickUp;
                 ItemCount.MouseMove += DragBehaviour.Mouse_Move_WithAutocheck;
+                ItemCount.MouseEnter += Panel_MouseEnter;
+                ItemCount.MouseLeave += Panel_MouseLeave;
                 // ItemCount.MouseWheel += Click_MouseWheel; // must NOT add this line because both MouseWheels would fire when hovering above both PictureBox and Label
             }
 
@@ -184,6 +185,22 @@ namespace GSTHD
         {
             CollectedItems = CollectedItemDefault;
             UpdateCount();
+        }
+
+        public void SetColor(Color color)
+        {
+            ItemCount.ForeColor = color;
+        }
+
+        // both of these functions are for when the stone is in a WOTH panel, so that it can be scrolled without the whole WOTH panle scrolling as well
+        private void Panel_MouseEnter(object sender, EventArgs e)
+        {
+            this.hoveredOver = true;
+        }
+
+        private void Panel_MouseLeave(object sender, EventArgs e)
+        {
+            this.hoveredOver = false;
         }
 
         public void StartDragDrop()

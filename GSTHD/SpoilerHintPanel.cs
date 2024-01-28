@@ -54,6 +54,7 @@ namespace GSTHD
         public bool pointsMode;
 
         public int lastKnownMap = -1;
+        public int howManySlams = 0;
 
         public bool MinimalMode = false;
         public bool spoilerLoaded = false;
@@ -237,7 +238,7 @@ namespace GSTHD
 
             // TODO: REMOVE
             //Debug.WriteLine(String.Join(" , ", startingItems.ToArray()));
-            //Debug.WriteLine(String.Join(" , ", levelOrder.ToArray()));
+            Debug.WriteLine(String.Join(" , ", levelOrder.ToArray()));
             //Debug.WriteLine(String.Join(" , ", kroolOrder.ToArray()));
             //Debug.WriteLine(String.Join(" , ", helmOrder.ToArray()));
 
@@ -272,28 +273,42 @@ namespace GSTHD
                 }
                 else
                 {
+                    //TODO: account for seeds that dont give level order
                     int placement = 0;
+                    int theNum = 0;
                     if (Settings.SpoilerOrder == Settings.SpoilerOrderOption.Numerical)
                     {
-                        placement = levelOrder[int.Parse(level.Key)];
+                        // this is the worst code ive ever written
+                        foreach (int l in levelOrder)
+                        {
+                            if (l == int.Parse(level.Key))
+                            {
+                                break;
+                            }
+                            placement++;
+                        }
+                        theNum = placement;
                     }
                     else
                     {
                         placement = int.Parse(level.Key);
+                        theNum = levelOrder[int.Parse(level.Key)];
                     }
                     int newX = (placement / numRows) * (cellWidth) + ((placement / numRows) * rowPadding);
                     int newY = (placement % numRows) * (cellHeight) + ((placement % numRows) * colPadding);
-                    //Debug.WriteLine($"x: {newX} -- y: {newY}");
+                    Debug.WriteLine($"p: {placement} l: {(string)parseddata["level_name"]} x: {newX} -- y: {newY}");
 
 
                     var newpotions = ParsePotions(parseddata["vial_colors"]);
 
+
+                    
                     SpoilerCell tempcell = new SpoilerCell(Settings, cellWidth, cellHeight,
                         newX, newY,
                         (int)parseddata["points"], (int)parseddata["woth_count"], newpotions,
                         topRowHeight, WorldNumWidth, WorldNumHeight, PotionWidth, PotionHeight,
                         Name + "_" + unspace((string)parseddata["level_name"]), (string)parseddata["level_name"],
-                        int.Parse(level.Key), levelOrder[int.Parse(level.Key)],
+                        int.Parse(level.Key), theNum,
                         cellBackColor, MinimalMode, isBroadcastable);
                     cells.Add(tempcell);
 
@@ -323,7 +338,15 @@ namespace GSTHD
                 int placement = 0;
                 if (Settings.SpoilerOrder == Settings.SpoilerOrderOption.Numerical)
                 {
-                    placement = levelOrder[cell.levelID];
+                    // this is the worst code ive ever written
+                    foreach (int l in levelOrder)
+                    {
+                        if (l == cell.levelID)
+                        {
+                            break;
+                        }
+                        placement++;
+                    }
                 }
                 else
                 {
@@ -335,10 +358,21 @@ namespace GSTHD
             }
         }
 
-        public void AddFromAT(int currentMap, int dk_id)
+        public void AddFromAT(int currentMap, int dk_id, int howMany)
         {
-            if (spoilerLoaded && !startingItems.Contains(dk_id) && spoilerLoaded)
+            if (spoilerLoaded && !startingItems.Contains(dk_id) && dk_id >=0)
             {
+                // i hate slams
+                if (dk_id == 36 && howMany > howManySlams)
+                {
+                    howMany -= howManySlams;
+                    howManySlams += howMany;
+                } else
+                {
+                    howMany = 1;
+                }
+
+
                 //Debug.WriteLine($"map: {currentMap} -- item: {dk_id}");
                 bool isStarting = false;
                 try
@@ -361,8 +395,17 @@ namespace GSTHD
                 if (pointsMode) addedpoints = pointspread[dkitem.itemType];
                 //Debug.WriteLine($"{addedpoints}");
 
-                if (lastKnownMap >= 0) cells[lastKnownMap].AddNewItem(dkitem, addedpoints, isStarting);
+                if (lastKnownMap >= 0) cells[lastKnownMap].AddNewItem(dkitem, addedpoints, isStarting, howMany);
+            } else
+            {
+                Debug.WriteLine($"ID: {dk_id} is a starting key/kong/camera and has been ignored.");
             }
+        }
+
+        public void RemoveSlams(int count)
+        {
+            // TODO: accoutn for manually removing slams from a cell, warranting an update to the panel's count
+            howManySlams -= count;
         }
 
         public void UpdateFromSettings()

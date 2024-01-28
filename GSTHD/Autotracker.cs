@@ -28,7 +28,7 @@ namespace GSTHD
         public string type;
         public string group;
         public Control targetControl;
-        public int dk64_id;
+        public int dk64_id = -1;
     }
     public class TrackedGroup
     {
@@ -249,10 +249,23 @@ namespace GSTHD
             }
         }
 
+        private void UpdateCurrentMap()
+        {
+
+            //currentMapValue = GoRead(currentMapAddr, currentMapBytes);
+            int temp = GoRead(currentMapAddr, currentMapBytes);
+            if (spoilerPanel.DK64Maps.ContainsKey(temp))
+            {
+                currentMapValue = temp;
+
+            }
+
+        }
+
         private void MainTracker(object state, ElapsedEventArgs e)
         {
             FlushGroups();
-            if (LZTracking) currentMapValue = GoRead(currentMapAddr, currentMapBytes);
+            if (LZTracking) UpdateCurrentMap();
             foreach (var ta in trackedAddresses)
             {
                 if (VerifyGameState())
@@ -292,7 +305,7 @@ namespace GSTHD
                             result.count++;
                             if (result.count == result.countMax)
                             {
-                                UTGrouped(result, false, ta.dk64_id);
+                                UTGrouped(result, false);
                             }
                         }
                     } else
@@ -308,11 +321,11 @@ namespace GSTHD
             }
         }
 
-        public void AttemptSpoilerUpdate(int dk_id)
+        public void AttemptSpoilerUpdate(int dk_id, int readValue=1)
         {
             if (LZTracking && dk_id != -1)
             {
-                spoilerPanel.AddFromAT(currentMapValue, dk_id);
+                spoilerPanel.AddFromAT(currentMapValue, dk_id, readValue);
             }
         }
 
@@ -376,7 +389,7 @@ namespace GSTHD
             }
         }
 
-        private void UTGrouped(TrackedGroup tg, bool forceUpdate = false, int dk_id=-1)
+        private void UTGrouped(TrackedGroup tg, bool forceUpdate = false)
         {
             if (tg.currentValue != tg.runningvalue || forceUpdate)
             {
@@ -419,8 +432,13 @@ namespace GSTHD
                 var theumuh = theRead & ta.bitmask;
                 if (theumuh == ta.bitmask)
                 {
-                    theItem.SetState(1 + ta.offset);
-                    AttemptSpoilerUpdate(ta.dk64_id);
+                    //Debug.WriteLine($"move {ta.name} - umuh {theumuh} - cv {ta.currentValue}");
+                    if (theumuh != (ta.currentValue & ta.bitmask))
+                    {
+                        Debug.WriteLine("umuh and cv mismatch, should be a real item");
+                        theItem.SetState(1 + ta.offset);
+                        AttemptSpoilerUpdate(ta.dk64_id);
+                    }
                 } else if (theumuh == 0)
                 {
                     theItem.SetState(0 + ta.offset);
@@ -429,7 +447,7 @@ namespace GSTHD
             else
             {
                 theItem.SetState(theRead + ta.offset);
-                AttemptSpoilerUpdate(ta.dk64_id);
+                AttemptSpoilerUpdate(ta.dk64_id, theRead);
             }
         }
 

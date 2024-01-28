@@ -129,8 +129,10 @@ namespace GSTHD
                 //really wish i didnt have to go through this foreach twice but thats just the order it has to be processed, unfortunately
                 foreach (var element in panel.Controls)
                 {
-                    if (element is GossipStone)
-                        if (((GossipStone)element).hoveredOver) return;
+                    if (element is GossipStone gs)
+                        if (gs.hoveredOver) return;
+                    if (element is CollectedItem ci)
+                        if (ci.hoveredOver) return;
                 }
                 var moveDirection = 0;
                 if (e.Delta < 0) moveDirection = -15; else moveDirection = +15;
@@ -376,8 +378,8 @@ namespace GSTHD
             this.Controls.Add(newQuan.LabelPlace);
             newQuan.LabelPlace.MouseClick += LabelPlace_MouseClick_Quantity;
 
-            this.Controls.Add(newQuan.counterCI);
-            this.Controls.Add(newQuan.textBox);
+            this.Controls.Add(newQuan.leftCounterCI);
+            this.Controls.Add(newQuan.rightCounterCI);
 
             textBoxCustom.newLocation(new Point(0, newQuan.LabelPlace.Location.Y + newQuan.LabelPlace.Height), this.Location);
 
@@ -458,16 +460,16 @@ namespace GSTHD
             ListQuantity.Remove(quantity);
 
             this.Controls.Remove(quantity.LabelPlace);
-            this.Controls.Remove(quantity.counterCI);
-            this.Controls.Remove(quantity.textBox);
+            this.Controls.Remove(quantity.leftCounterCI);
+            this.Controls.Remove(quantity.rightCounterCI);
 
             for (int i = 0; i < ListQuantity.Count; i++)
             {
                 var wothLabel = ListQuantity[i].LabelPlace;
                 var newY = i * wothLabel.Height;
                 wothLabel.Location = new Point(2, newY);
-                ListQuantity[i].counterCI.Location = new Point(ListQuantity[i].counterCI.Location.X, newY);
-                ListQuantity[i].textBox.Location = new Point(ListQuantity[i].textBox.Location.X, newY);
+                ListQuantity[i].leftCounterCI.Location = new Point(ListQuantity[i].leftCounterCI.Location.X, newY);
+                ListQuantity[i].rightCounterCI.Location = new Point(ListQuantity[i].rightCounterCI.Location.X, newY);
             }
             textBoxCustom.newLocation(new Point(0, ListQuantity.Count * quantity.LabelPlace.Height), this.Location);
         }
@@ -597,8 +599,8 @@ namespace GSTHD
                 Quantity thisQuan = this.ListQuantity.Where(x => x.Name == firstPart[0]).ToList()[0];
 
                 thisQuan.SetColor(int.Parse(firstPart[1]));
-                thisQuan.counterCI.SetState(int.Parse(firstPart[2]));
-                thisQuan.textBox.Text = firstPart[3];
+                thisQuan.leftCounterCI.SetState(int.Parse(firstPart[2]));
+                thisQuan.rightCounterCI.SetState(int.Parse(firstPart[3]));
 
 
 

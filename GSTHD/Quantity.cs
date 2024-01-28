@@ -14,13 +14,13 @@ namespace GSTHD
     {
         public string WotHText;
         public int ColourIndex;
-        public int CICount;
-        public string BoxText;
+        public int CILCount;
+        public int CIRCount;
 
 
         public override string ToString()
         {
-            return $"{WotHText},{ColourIndex},{CICount},{BoxText}";
+            return $"{WotHText},{ColourIndex},{CILCount},{CIRCount}";
         }
     }
 
@@ -29,8 +29,9 @@ namespace GSTHD
         public Settings Settings;
 
         public LabelExtended LabelPlace;
-        public CollectedItem counterCI;
-        public TextBox textBox;
+        public CollectedItem leftCounterCI;
+        public CollectedItem rightCounterCI;
+        //public TextBox textBox;
         public string Name;
 
         private Color[] Colors;
@@ -79,30 +80,20 @@ namespace GSTHD
             tempOPCI.LabelColor = Color.White;
             tempOPCI.hasSlash = true;
             tempOPCI.BackColor = subBackColor;
+            tempOPCI.BackGroundColor = subBackColor;
 
-            Debug.WriteLine("making an CI");
-            CollectedItem newCI = new CollectedItem(tempOPCI, Settings, isBroadcastable);
-            newCI.Location =
-                new Point(gossipStoneStartX + (newCI.Width + counterSpacing)*0, LabelPlace.Location.Y);
-            Debug.WriteLine(newCI.Location);
-            counterCI = newCI;
+            Debug.WriteLine("making left CI");
+            leftCounterCI = new CollectedItem(tempOPCI, Settings, isBroadcastable);
+            leftCounterCI.Location =
+                new Point(gossipStoneStartX + (leftCounterCI.Width + counterSpacing)*0, LabelPlace.Location.Y);
+            Debug.WriteLine(leftCounterCI.Location);
 
-            Debug.WriteLine("rmaking a label");
-            TextBox newTextBox = new TextBox()
-            {
-                BackColor = subBackColor,
-                Name = selectedPlace + "_box",
-                Font = labelSettings.Font,
-                ForeColor = subFontColor,
-                Size = subBoxSize,
-                BorderStyle = BorderStyle.FixedSingle,
-                Padding = new Padding(5, 10, 5, 5),
-                Margin = new Padding(5, 10, 5, 5)
-            };
-            newTextBox.Location =
-                new Point(gossipStoneStartX + (newCI.Width + counterSpacing), LabelPlace.Location.Y);
-            Debug.WriteLine(newTextBox.Location);
-            textBox = newTextBox;
+            Debug.WriteLine("rmaking right CI");
+            tempOPCI.hasSlash = false;
+            rightCounterCI = new CollectedItem(tempOPCI, Settings, isBroadcastable);
+            rightCounterCI.Location =
+                new Point(gossipStoneStartX + (leftCounterCI.Width + counterSpacing), LabelPlace.Location.Y);
+            Debug.WriteLine(rightCounterCI.Location);
 
 
             Colors = new Color[Settings.DefaultWothColors.Length + 1];
@@ -135,6 +126,8 @@ namespace GSTHD
         public void UpdateColor()
         {
             LabelPlace.ForeColor = Colors[ColorIndex];
+            leftCounterCI.SetColor(Colors[ColorIndex]);
+            rightCounterCI.SetColor(Colors[ColorIndex]);
         }
 
         private void Mouse_ClickDown(object sender, MouseEventArgs e)
@@ -156,8 +149,8 @@ namespace GSTHD
             {
                 WotHText = Name,
                 ColourIndex = ColorIndex,
-                CICount = counterCI.CollectedItems,
-                BoxText = textBox.Text
+                CILCount = leftCounterCI.CollectedItems,
+                CIRCount = rightCounterCI.CollectedItems
             };
         }
     }

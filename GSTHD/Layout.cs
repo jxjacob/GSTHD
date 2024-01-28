@@ -1409,6 +1409,7 @@ namespace GSTHD
         public bool isBroadcastable { get; set; } = false;
         public bool hasSlash { get; set; } = false;
         public Color BackColor { get; set; } = Color.Black;
+        public Color BackGroundColor { get; set; } = Color.Transparent;
     }
 
     public class AppSettings

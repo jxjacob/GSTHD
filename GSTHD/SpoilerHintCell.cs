@@ -179,7 +179,7 @@ namespace GSTHD
             };
             Controls.Add(levelImage);
 
-            Debug.WriteLine(levelOrder + " " + Name + " " + Location + " " + totalPoints + " " + totalWOTHS + " -- " + string.Join(", ", potionsList.ToArray()));
+            //Debug.WriteLine(levelOrder + " " + Name + " " + Location + " " + totalPoints + " " + totalWOTHS + " -- " + string.Join(", ", potionsList.ToArray()));
         }
 
 
@@ -249,18 +249,22 @@ namespace GSTHD
             // display all potions left, then display all aquired moves afterwards
         }
 
-        public void AddNewItem(DK64_Item dk_id, int pointValue, bool isStarting)
+        public void AddNewItem(DK64_Item dk_id, int pointValue, bool isStarting, int howMany)
         {
-            Debug.WriteLine($"adding {dk_id.name} (ID: {dk_id.item_id}) to {this.levelName}");
-
-            foundItems.Add(dk_id.item_id);
-            //TODO: the part with the potions and the display
-            // also if id = 8 and isstarting is true, make these incoming items invisible (if settings permit)
-            if (pointValue >= 0)
+            
+            for (int i = 0; i < howMany; i++)
             {
-                currentPoints += pointValue;
-                UpdatePoints();
+                Debug.WriteLine($"adding {dk_id.name} (ID: {dk_id.item_id}) to {this.levelName}");
+                foundItems.Add(dk_id.item_id);
+                //TODO: the part with the potions and the display
+                // also if id = 8 and isstarting is true, make these incoming items invisible (if settings permit)
+                if (pointValue >= 0)
+                {
+                    currentPoints += pointValue;
+                    UpdatePoints();
+                }
             }
+            
         }
 
         public void AddCrankys(int crPoints, int crWOTHS, List<PotionTypes> crPotions)
