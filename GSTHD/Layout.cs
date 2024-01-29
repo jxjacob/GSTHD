@@ -21,7 +21,7 @@ namespace GSTHD
     public class Layout
     {
         public List<GenericLabel> ListLabels = new List<GenericLabel>();
-        public List<GenericTextBox> ListTextBoxes = new List<GenericTextBox>();
+        public List<ObjectPointTextbox> ListTextBoxes = new List<ObjectPointTextbox>();
         public List<ObjectPointGrid> ListTextBoxGrids = new List<ObjectPointGrid>();
         public List<ObjectPoint> ListItems = new List<ObjectPoint>();
         public List<ObjectPointGrid> ListItemGrids = new List<ObjectPointGrid>();
@@ -101,7 +101,7 @@ namespace GSTHD
                     {
                         foreach (var element in category.Value)
                         {
-                            ListTextBoxes.Add(JsonConvert.DeserializeObject<GenericTextBox>(element.ToString()));
+                            ListTextBoxes.Add(JsonConvert.DeserializeObject<ObjectPointTextbox>(element.ToString()));
                         }
                     }
 
@@ -313,6 +313,7 @@ namespace GSTHD
                         {
                             panelLayout.Controls.Add(new Label()
                             {
+                                Name = item.Name,
                                 Text = item.Text,
                                 Left = item.X,
                                 Top = item.Y,
@@ -331,18 +332,7 @@ namespace GSTHD
                     {
                         if (box.Visible)
                         {
-                            panelLayout.Controls.Add(new TextBox()
-                            {
-                                BackColor = box.BackColor,
-                                Name = box.Name,
-                                Font = new Font(box.FontName, box.FontSize, box.FontStyle),
-                                ForeColor = box.FontColor,
-                                Size = new Size(box.Width, box.Height),
-                                Location = new Point(box.X, box.Y),
-                                BorderStyle = box.BorderStyle,
-                                Padding = new Padding(5,10,5,5),
-                                Margin = new Padding(5,10,5,5)
-                            });
+                            panelLayout.Controls.Add(new TextBoxPlus(box, settings));
                         }
                     }
                 }
@@ -357,17 +347,22 @@ namespace GSTHD
                             {
                                 for (int i = 0; i < item.Columns; i++)
                                 {
-
-                                    panelLayout.Controls.Add(new TextBox()
+                                    ObjectPointTextbox temp = new ObjectPointTextbox()
                                     {
                                         BackColor = item.BackColor,
                                         Name = item.Name + j + i,
-                                        Font = new Font(item.FontName, item.FontSize, item.FontStyle),
-                                        ForeColor = item.FontColor,
-                                        Size = new Size(item.Width, item.Height),
-                                        Location = new Point(item.X + i * (item.Size.Width + item.Spacing.Width), item.Y + j * (item.Size.Height + item.Spacing.Height)),
+                                        FontName = item.FontName,
+                                        FontSize = item.FontSize,
+                                        FontStyle = item.FontStyle,
+                                        FontColor = item.FontColor,
+                                        Width = item.Width,
+                                        Height = item.Height,
+                                        X = item.X + i * (item.Size.Width + item.Spacing.Width),
+                                        Y = item.Y + j * (item.Size.Height + item.Spacing.Height),
                                         BorderStyle = item.BorderStyle,
-                                    });
+                                        isBroadcastable = item.isBroadcastable
+                                    };
+                                    panelLayout.Controls.Add(new TextBoxPlus(temp, settings));
                                 }
                             }
                         }
@@ -645,7 +640,7 @@ namespace GSTHD
                     {
                         foreach (var element in category.Value)
                         {
-                            ListTextBoxes.Add(JsonConvert.DeserializeObject<GenericTextBox>(element.ToString()));
+                            ListTextBoxes.Add(JsonConvert.DeserializeObject<ObjectPointTextbox>(element.ToString()));
                         }
                     }
 
@@ -839,6 +834,7 @@ namespace GSTHD
                         {
                             panelLayout.Controls.Add(new Label()
                             {
+                                Name = item.Name,
                                 Text = item.Text,
                                 Left = item.X,
                                 Top = item.Y,
@@ -846,7 +842,7 @@ namespace GSTHD
                                 ForeColor = Color.FromName(item.Color),
                                 BackColor = Color.Transparent,
                                 AutoSize = true,
-                            });
+                            }); ;
                         }
                     }
                 }
@@ -857,15 +853,7 @@ namespace GSTHD
                     {
                         if (box.Visible)
                         {
-                            panelLayout.Controls.Add(new TextBox()
-                            {
-                                BackColor = box.BackColor,
-                                Font = new Font(box.FontName, box.FontSize, box.FontStyle),
-                                ForeColor = box.FontColor,
-                                Size = new Size(box.Width, box.Height),
-                                Location = new Point(box.X, box.Y),
-                                BorderStyle = box.BorderStyle,
-                            });
+                            panelLayout.Controls.Add(new TextBoxPlus(box, settings));
                         }
                     }
                 }
@@ -881,15 +869,22 @@ namespace GSTHD
                                 for (int i = 0; i < item.Columns; i++)
                                 {
 
-                                    panelLayout.Controls.Add(new TextBox()
+                                    ObjectPointTextbox temp = new ObjectPointTextbox()
                                     {
                                         BackColor = item.BackColor,
-                                        Font = new Font(item.FontName, item.FontSize, item.FontStyle),
-                                        ForeColor = item.FontColor,
-                                        Size = new Size(item.Width, item.Height),
-                                        Location = new Point(item.X + i * (item.Size.Width + item.Spacing.Width), item.Y + j * (item.Size.Height + item.Spacing.Height)),
+                                        Name = item.Name + j + i,
+                                        FontName = item.FontName,
+                                        FontSize = item.FontSize,
+                                        FontStyle = item.FontStyle,
+                                        FontColor = item.FontColor,
+                                        Width = item.Width,
+                                        Height = item.Height,
+                                        X = item.X + i * (item.Size.Width + item.Spacing.Width),
+                                        Y = item.Y + j * (item.Size.Height + item.Spacing.Height),
                                         BorderStyle = item.BorderStyle,
-                                    });
+                                        isBroadcastable = item.isBroadcastable
+                                    };
+                                    panelLayout.Controls.Add(new TextBoxPlus(temp, settings));
                                 }
                             }
                         }
@@ -1120,6 +1115,7 @@ namespace GSTHD
 
     public class GenericLabel
     {
+        public string Name { get; set; }
         public string Text { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
@@ -1131,7 +1127,7 @@ namespace GSTHD
         public bool Visible { get; set; }
     }
 
-    public class GenericTextBox
+    public class ObjectPointTextbox
     {
         public string Name { get; set; }
         public int X { get; set; }
@@ -1145,6 +1141,7 @@ namespace GSTHD
         public int Width { get; set; }
         public int Height { get; set; }
         public BorderStyle BorderStyle { get; set; } = BorderStyle.FixedSingle;
+        public bool isBroadcastable { get; set; } = false;
     }
 
     public class ObjectPoint
