@@ -27,8 +27,8 @@ namespace GSTHD
         public Dictionary<int, DK64_Item> DK64Items;
         public Dictionary<int, int> DK64Maps;
 
-        Dictionary<string, string> spoilerData;
-        Dictionary<string, string> mainSettings;
+        public Dictionary<string, string> spoilerData;
+        public Dictionary<string, string> mainSettings;
 
         public List<int> levelOrder = new List<int>();
         public List<int> kroolOrder = new List<int>();

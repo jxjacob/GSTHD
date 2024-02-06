@@ -14,6 +14,9 @@ using System.Activities.Expressions;
 using System.Xml.Linq;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Text.RegularExpressions;
+using System.Drawing.Imaging;
+using System.Drawing.Drawing2D;
+using System.Windows.Forms.VisualStyles;
 
 namespace GSTHD
 {
@@ -36,31 +39,33 @@ namespace GSTHD
         }
     }
 
-    public class CellPictureBox : PictureBox, ProgressibleElement<int>
+    public class CellPictureBox : Control, ProgressibleElement<int>
     {
         private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
 
-        private readonly SpoilerCell hostCell;
+        public SpoilerCell hostCell;
 
-        private readonly int dk_id;
+        public int dk_id;
 
-        public CellPictureBox(Settings settings, SpoilerCell hostCell, int dk_id)
+        public bool isFaded;
+
+        public Graphics imgGra;
+        public Image Image;
+
+        public CellPictureBox(Settings settings)
         {
             ProgressBehaviour = new ProgressibleElementBehaviour<int>(this, settings);
             MouseDown += ProgressBehaviour.Mouse_ClickDown;
-            this.hostCell = hostCell;
-            this.dk_id = dk_id;
-            this.dk_id = dk_id;
         }
 
         public void IncrementState()
         {
-            // purposely empty
+            if (dk_id>=0) ToggleFade();
         }
 
         public void DecrementState()
         {
-            // purposely empty
+            if (dk_id >= 0) ToggleFade();
         }
 
         public void ResetState()
@@ -69,7 +74,59 @@ namespace GSTHD
             {
                 // ping the host cell to get it to remove itself
                 hostCell.RemoveItem(dk_id);
+                this.Dispose();
             }
+        }
+
+        public void ToggleFade()
+        {
+            if (isFaded)
+            {
+                // restore fadedness
+                isFaded = false;
+                DisplayImage();
+                hostCell.TellFaded(dk_id, isFaded);
+                Debug.WriteLine("restored feeling");
+            } else
+            {
+                // make faded
+                isFaded = true;
+                DisplayImage();
+                hostCell.TellFaded(dk_id, isFaded);
+                Debug.WriteLine("made faded");
+            }
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            DisplayImage();
+            base.OnPaint(e);
+        }
+
+        public void DisplayImage()
+        {
+            if (imgGra == null)
+            {
+                imgGra = this.CreateGraphics();
+            } else
+            imgGra.Clear(BackColor);
+
+            float howFaded = (isFaded) ? (float)0.5 : 1;
+
+            ColorMatrix cm = new ColorMatrix();
+            cm.Matrix00 = cm.Matrix11 = cm.Matrix22 = cm.Matrix44 = 1;
+            cm.Matrix33 = howFaded;
+
+            ImageAttributes ia = new ImageAttributes();
+            ia.SetColorMatrix(cm);
+
+
+
+            imgGra.DrawImage(Image,
+                new Rectangle(0, 0, this.Width, this.Height),
+                0, 0, this.Image.Width, this.Image.Height, GraphicsUnit.Pixel,
+                ia);
+            Debug.WriteLine($"id {this.dk_id} f {isFaded}");
         }
     }
 
@@ -78,6 +135,7 @@ namespace GSTHD
         public int potionType;
         public int item_id;
         public bool isStarting;
+        public bool isFaded = false;
     }
 
     public class SpoilerCell : Panel, UpdatableFromSettings
@@ -170,7 +228,6 @@ namespace GSTHD
 
             this.topRowHeight = topRowHeight;
             // final cell doesnt need padding for a key that doesnt exist
-            Debug.WriteLine($"lo: {levelOrder}");
             this.topRowPadding = (levelOrder == 9 && !MinimalMode) ? 0 : topRowPadding;
             this.bottomRowHeight = height - topRowHeight;
             this.PotionHeight = PotionHeight;
@@ -189,6 +246,7 @@ namespace GSTHD
             this.DragDrop += Mouse_DragDrop;
             this.AllowDrop = true;
 
+
             if (totalPoints >= 0) noPotions = true;
 
             int shownnumbers = 1;
@@ -204,18 +262,16 @@ namespace GSTHD
                     Width = labelWidth,
                     Height = WorldNumHeight,
                     AutoSize = false,
-                    TextAlign = ContentAlignment.MiddleRight,
+                    TextAlign = System.Drawing.ContentAlignment.MiddleRight,
                     Anchor = AnchorStyles.Right,
                     Location = new Point(width - (shownnumbers * labelSpacing) - 2 - this.topRowPadding, -1)
                 };
-                Debug.WriteLine($"points {pointLabel.Width}");
                 shownnumbers++;
                 if (totalPoints == 0) pointLabel.ForeColor = emptyColour;
                 Controls.Add(pointLabel);
             }
             if (totalWOTHS >= 0)
             {
-                Debug.WriteLine("adding woths");
                 wothLabel = new Label
                 {
                     Name = Guid.NewGuid().ToString(),
@@ -226,7 +282,7 @@ namespace GSTHD
                     Width = labelWidth,
                     Height = WorldNumHeight,
                     AutoSize = false,
-                    TextAlign = ContentAlignment.MiddleRight,
+                    TextAlign = System.Drawing.ContentAlignment.MiddleRight,
                     Location = new Point(width - (shownnumbers * labelSpacing) - 2 - this.topRowPadding, -1)
                 };
                 Controls.Add(wothLabel);
@@ -294,8 +350,8 @@ namespace GSTHD
                     // lookup the actual dk item
                     DK64_Item item = DK64Items[dropContent.dk_id];
                     int sentPoints = (noPotions) ? pointspread[item.itemType] : -2;
-                    //Debug.WriteLine($"{item}, {sentPoints}");
-                    AddNewItem(item, sentPoints, false, 1);
+                    //Debug.WriteLine($"{item}, {dropContent.IsAutocheck}");
+                    AddNewItem(item, sentPoints, false, 1, !dropContent.IsAutocheck);
                 }
             } catch { }
 
@@ -306,11 +362,9 @@ namespace GSTHD
         public void UpdateFromSettings()
         {
             // probably do something with being able to choose whether to display the icons
-            // also settings for 3 colours: woth number, point number, and completed number
             pointColour = Color.FromKnownColor(Settings.SpoilerPointColour);
             wothColour = Color.FromKnownColor(Settings.SpoilerWOTHColour);
             emptyColour = Color.FromKnownColor(Settings.SpoilerEmptyColour);
-            //Debug.WriteLine($"{isBroadcastable} - {emptyColour}");
             UpdatePotions();
             UpdatePoints();
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
@@ -327,23 +381,31 @@ namespace GSTHD
             {
                 foreach (PotionTypes pot in potionsList)
                 {
-                    displayList.Add(new CellDisplay { potionType = (int)pot, isStarting = false, item_id = -1 });
+                    displayList.Add(new CellDisplay { potionType = (int)pot, isStarting = false, item_id = -1, isFaded = false });
                 }
             }
         }
 
-        public void AddToDisplayList(DK64_Item item, bool starting = false)
+        public bool AddToDisplayList(DK64_Item item, bool starting, bool faded)
         {
             for (int i = 0; i < displayList.Count; i++)
             {
                 if (displayList[i].potionType == (int)item.potionType && displayList[i].item_id == -1)
                 {
+                    // new move into existing potion
                     displayList[i].item_id = item.item_id;
                     displayList[i].isStarting = starting;
-                    return;
+                    displayList[i].isFaded = faded;
+                    return false;
+                } else if ((displayList[i].potionType == (int)item.potionType || displayList[i].potionType == -1) && displayList[i].item_id == item.item_id && displayList[i].isFaded && !faded)
+                {
+                    // new move into existing faded slot (dupe preventing)
+                    displayList[i].isFaded = false;
+                    return false;
                 }
             }
-            displayList.Add(new CellDisplay { potionType = -1, isStarting = starting, item_id = item.item_id });
+            displayList.Add(new CellDisplay { potionType = -1, isStarting = starting, item_id = item.item_id, isFaded = faded});
+            return true;
         }
 
         public void RemoveFromDisplayList(int id)
@@ -356,6 +418,7 @@ namespace GSTHD
                     {
                         displayList[i].item_id = -1;
                         displayList[i].isStarting = false;
+                        displayList[i].isFaded = false;
                         //Debug.WriteLine($"wiped {id}");
                         return;
                     } else
@@ -364,6 +427,18 @@ namespace GSTHD
                         //Debug.WriteLine($"removed {id}"); 
                         return;
                     }
+                }
+            }
+        }
+
+        public void TellFaded(int dk_id, bool isFaded)
+        {
+            foreach (CellDisplay display in displayList)
+            {
+                if (display.item_id == dk_id)
+                {
+                    display.isFaded = isFaded;
+                    break;
                 }
             }
         }
@@ -431,6 +506,8 @@ namespace GSTHD
                         }
                     }
 
+                    displayList = displayList.OrderByDescending(i => i.item_id > 0).ThenBy(i => i.potionType).ToList();
+
                     int usedPotWidth = PotionWidth;
                     int usedPotHeight = PotionHeight;
                     // used to determine when to add a new row
@@ -446,12 +523,12 @@ namespace GSTHD
                             int neededrows = (int)System.Math.Ceiling((double)thingstodisplay/(double)displayablePotsWidth);
                             if (neededrows > displayablePotsHeight)
                             {
-                                Debug.WriteLine("needs resizing");
+                                //Debug.WriteLine("needs resizing");
                                 int newpotwidth = Width / (displayablePotsWidth + 1);
                                 double ratio = (double)usedPotWidth / (double)newpotwidth;
                                 usedPotWidth = newpotwidth;
                                 usedPotHeight = (int)System.Math.Floor((double)usedPotHeight / ratio);
-                                Debug.WriteLine($"{bottomRowHeight} - {usedPotWidth} {usedPotHeight}");
+                                //Debug.WriteLine($"{bottomRowHeight} - {usedPotWidth} {usedPotHeight}");
                             } else
                             {
                                 break;
@@ -477,16 +554,19 @@ namespace GSTHD
                         string toDisplay = (pot.item_id != -1) ? DK64Items[pot.item_id].image : potionImageList[(int)pot.potionType];
                         Debug.WriteLineIf((pot.item_id != -1), $"todisplay = {toDisplay}");
 
-                        CellPictureBox newPot = new CellPictureBox(Settings, this, pot.item_id)
+                        CellPictureBox newPot = new CellPictureBox(Settings)
                         {
                             Size = new Size(usedPotWidth, usedPotHeight),
-                            SizeMode = PictureBoxSizeMode.Zoom,
+                            //SizeMode = PictureBoxSizeMode.Zoom,
                             Location = new Point(newX, newY),
-                            Image = Image.FromFile(@"Resources/" + toDisplay)
+                            Image = Image.FromFile(@"Resources/" + toDisplay),
+                            hostCell = this,
+                            dk_id = pot.item_id,
+                            isFaded = pot.isFaded,
+                            BackColor = this.BackColor,
                         };
 
                         //Debug.WriteLine($"{thingsdisplayed}:   x:{newX} y:{newY} w:{newPot.Width} h:{newPot.Height}");
-                        // probably add pot to a displaylist
                         displayedPotions.Add(newPot);
                         Controls.Add(newPot);
                         thingsdisplayed++;
@@ -498,15 +578,15 @@ namespace GSTHD
             }
         }
 
-        public void AddNewItem(DK64_Item dk_id, int pointValue, bool isStarting, int howMany)
+        public void AddNewItem(DK64_Item dk_id, int pointValue, bool isStarting, int howMany, bool isFaded = false)
         {
             
             for (int i = 0; i < howMany; i++)
             {
-                foundItems.Add(dk_id.item_id);
-                // also if id = 8 and isstarting is true, make these incoming items invisible (if settings permit)
-                if (pointValue != -1) currentPoints += pointValue;
-                AddToDisplayList(dk_id, isStarting);
+                if (!isFaded) foundItems.Add(dk_id.item_id);
+                Debug.WriteLine($"{isFaded}");
+                bool result = AddToDisplayList(dk_id, isStarting, isFaded);
+                if (result && pointValue != -1) currentPoints += pointValue;
                 UpdatePotions();
                 UpdatePoints();
             }

@@ -438,7 +438,27 @@ namespace GSTHD
                     }
                 }
             }
+            //foreach (SpoilerPanel x in this.Controls[0].Controls.OfType<SpoilerPanel>())
+            //{
+            //    if (x.Name != "")
+            //    {
+            //        if (x.spoilerLoaded)
+            //        {
+            //            string thestring = $"{x.levelOrder},{x.spoilerData},{x.mainSettings}";
 
+
+
+            //           thejson.Add(x.Name, thestring);
+            //        }
+            //    }
+            //}
+            //foreach (SpoilerCell x in this.Controls[0].Controls.OfType<SpoilerCell>())
+            //{
+            //    if (x.Name != "")
+            //    {
+
+            //    }
+            //}
 
 
             if (force)
