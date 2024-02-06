@@ -35,6 +35,12 @@ namespace GSTHD
 
         public void BoxPlus_TextChanged(object sender, EventArgs e)
         {
+            //lol
+            Push();
+        }
+
+        public void Push()
+        {
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {
                 ((Label)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).Text = this.Text;

@@ -12,7 +12,7 @@ namespace GSTHD
     class GoMode : PictureBox
     {
         List<string> ListImageName;
-        string BackgroundImage;        
+        new string BackgroundImage;        
         Point FirstLocation;
         Timer tictac;
         int imageIndex = 0;

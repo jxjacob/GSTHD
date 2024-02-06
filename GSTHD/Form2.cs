@@ -109,6 +109,14 @@ namespace GSTHD
 
         }
 
+        //public void ForceLoadSettings(Settings s)
+        //{
+        //    // only from main view, cuz the broadcast isnt made aware of changes from form1's menu bar
+        //    Settings = Settings.Read();
+        //    Debug.WriteLine($"start s {s.SpoilerEmptyColour}");
+        //    Debug.WriteLine($"start settings {Settings.SpoilerEmptyColour}");
+        //}
+
 
         private void LoadLayout()
         {

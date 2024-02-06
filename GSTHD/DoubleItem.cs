@@ -17,6 +17,8 @@ namespace GSTHD
         bool isMouseDown = false;
         bool isColoredLeft = false;
         bool isColoredRight = false;
+        public int left_id;
+        public int right_id;
         Size DoubleItemSize;
 
         bool isBroadcastable;
@@ -34,6 +36,8 @@ namespace GSTHD
             DoubleItemSize = data.Size;
             this.Name = data.Name;
             this.Size = DoubleItemSize;
+            this.left_id = data.LeftDK64_ID;
+            this.right_id = data.RightDK64_ID;
 
             if (ImageNames.Length > 0)
             {
@@ -93,13 +97,13 @@ namespace GSTHD
             if (e.Button == MouseButtons.Left && isMouseDown)
             {
                 // TODO change that bool to DragBehaviour.AutocheckDragDrop
-                var dropContent = new DragDropContent(false, ImageNames[4]);
+                var dropContent = new DragDropContent(false, ImageNames[4], left_id);
                 this.DoDragDrop(dropContent, DragDropEffects.Copy);
                 isMouseDown = false;
             }
             if (e.Button == MouseButtons.Right && isMouseDown)
             {
-                var dropContent = new DragDropContent(false, ImageNames[5]);
+                var dropContent = new DragDropContent(false, ImageNames[5], right_id);
                 this.DoDragDrop(dropContent, DragDropEffects.Copy);
                 isMouseDown = false;
             }

@@ -191,7 +191,13 @@ namespace GSTHD
         public void UpdateLayoutFromSettings()
         {
             CurrentLayout.UpdateFromSettings();
-            //StoneCyclingTimer.Change(TimeSpan.FromSeconds(Settings.GossipCycleTime), TimeSpan.FromSeconds(Settings.GossipCycleTime));
+            // i CANNOT figure out why the broadcast view wont accept the new settings across the items, but the main view will
+            //if (this.CurrentLayout.App_Settings.EnableBroadcast && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+            //{
+            //    Debug.WriteLine("pushing new settings to broadcast");
+            //    ((Form2)Application.OpenForms["GSTHD_DK64 Broadcast View"]).ForceLoadSettings(Settings);
+            //    ((Form2)Application.OpenForms["GSTHD_DK64 Broadcast View"]).UpdateLayoutFromSettings();
+            //}
             StoneCyclingTimer.Close();
             StoneCyclingTimer = new System.Timers.Timer(Settings.GossipCycleTime * 1000);
             StoneCyclingTimer.Elapsed += IncrementStones;
@@ -605,6 +611,14 @@ namespace GSTHD
                 // this is not the correct way of doing this but lol. lmao, even
                 var lazy = x.GetState();
                 x.SetState(lazy);
+            }
+            foreach (TextBoxPlus x in this.Controls[0].Controls.OfType<TextBoxPlus>())
+            {
+                x.Push();
+            }
+            foreach (SpoilerPanel x in this.Controls[0].Controls.OfType<SpoilerPanel>())
+            {
+                x.Push();
             }
         }
     }

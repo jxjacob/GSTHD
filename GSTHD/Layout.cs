@@ -384,6 +384,7 @@ namespace GSTHD
                     {
                         if (item.Visible)
                         {
+                            int namenum = 0;
                             for (int j = 0; j < item.Rows; j++)
                             {
                                 for (int i = 0; i < item.Columns; i++)
@@ -391,7 +392,7 @@ namespace GSTHD
                                     var gs = new ObjectPoint()
                                     {
                                         Id = item.Id,
-                                        Name = item.Name + j + i,
+                                        Name = item.Name + namenum,
                                         X = item.X + i * (item.Size.Width + item.Spacing.Width),
                                         Y = item.Y + j * (item.Size.Height + item.Spacing.Height),
                                         Size = item.Size,
@@ -405,6 +406,7 @@ namespace GSTHD
                                         BackColor = item.BackColor
                                     };
                                     panelLayout.Controls.Add(new Item(gs, settings));
+                                    namenum++;
                                 }
                             }
                         }
@@ -612,14 +614,12 @@ namespace GSTHD
             ListUpdatables.Clear();
             if (settings.ActiveLayout != string.Empty)
             {
-                Debug.WriteLine("???" + settings.ActiveLayoutBroadcastFile);
                 if (settings.ActiveLayoutBroadcastFile == string.Empty || settings.ActiveLayoutBroadcastFile == null)
                 {
                     MessageBox.Show("Layout file " + settings.ActiveLayout.ToString() + " does not specify a BroadcastFile and cannot open the broadcast view.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Application.OpenForms["GSTHD_DK64 Broadcast View"].Close();
                     return;
                 }
-                Debug.WriteLine(settings.ActiveLayout);
                 JObject json_layout = JObject.Parse(File.ReadAllText($"{Path.GetFileName(Path.GetDirectoryName(settings.ActiveLayout))}\\{settings.ActiveLayoutBroadcastFile}"));
                 foreach (var category in json_layout)
                 {
@@ -906,6 +906,7 @@ namespace GSTHD
                     {
                         if (item.Visible)
                         {
+                            int namenum = 0;
                             for (int j = 0; j < item.Rows; j++)
                             {
                                 for (int i = 0; i < item.Columns; i++)
@@ -913,7 +914,7 @@ namespace GSTHD
                                     var gs = new ObjectPoint()
                                     {
                                         Id = item.Id,
-                                        Name = item.Name + j + i,
+                                        Name = item.Name + namenum,
                                         X = item.X + i * (item.Size.Width + item.Spacing.Width),
                                         Y = item.Y + j * (item.Size.Height + item.Spacing.Height),
                                         Size = item.Size,
@@ -926,6 +927,7 @@ namespace GSTHD
                                         AutoName = item.AutoName,
                                     };
                                     panelLayout.Controls.Add(new Item(gs, settings, true));
+                                    namenum++;
                                 }
                             }
                         }
@@ -1148,6 +1150,7 @@ namespace GSTHD
     {
         public string Id { get; set; }
         public string Name { get; set; }
+        public int DK64_ID { get; set; } = -1;
         public int X { get; set; }
         public int Y { get; set; }
         public Size Size { get; set; }
@@ -1160,6 +1163,8 @@ namespace GSTHD
         public bool isDraggable { get; set; } = true;
         public string DoubleBroadcastName { get; set; } = null;
         public string DoubleBroadcastSide { get; set; } = null;
+        public int LeftDK64_ID { get; set; } = -1;
+        public int RightDK64_ID { get; set; } = -1;
         public string AutoName { get; set; } = null;
         public bool CanCycle { get; set; } = false;
         public string DragImage { get; set; } = null;
@@ -1375,6 +1380,7 @@ namespace GSTHD
         public bool Visible { get; set; }
         public Color BackColor { get; set; }
         public Color DefaultColor { get; set; }
+        public Color CellBackColor { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
         public int Rows { get; set; }
@@ -1382,14 +1388,20 @@ namespace GSTHD
         public int RowPadding { get; set; }
         public int ColPadding { get; set; }
         public bool WriteByRow { get; set; } = true;
+        public bool ExtendFinalCell { get; set; } = false;
         public bool isMinimal { get; set; }
         public int DataRowHeight { get; set; }
+        public int DataRowPadding { get; set; } = 0;
         public int WorldNumWidth { get; set; }
         public int WorldNumHeight { get; set; }
-        public int PoitionWidth { get; set; }
+        public int PotionWidth { get; set; }
         public int PotionHeight { get; set; }
+        public string FontName { get; set; }
+        public int FontSize { get; set; }
+        public FontStyle FontStyle { get; set; }
+        public int LabelSpacing { get; set; }
+        public int LabelWidth { get; set; }
         public bool isBroadcastable { get; set; } = false;
-        // point font size
     }
 
     public class ObjectPointGoMode

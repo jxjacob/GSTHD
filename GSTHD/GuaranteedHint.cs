@@ -8,7 +8,6 @@ namespace GSTHD
     class GuaranteedHint : PictureBox
     {
         List<string> ListImageName = new List<string>();
-        bool isMouseDown = false;
 
         Size GuaranteddHintSize;
 

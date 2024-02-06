@@ -92,6 +92,7 @@ namespace GSTHD
         public bool EnableAutosave { get; set; } = true;
         public bool DeleteOldAutosaves { get; set; } = true;
         public bool SubtractItems { get; set; } = true;
+        public bool HideStarting {  get; set; } = false;
         public KnownColor LastWothColor { get; set; } = KnownColor.BlueViolet;
         public KnownColor SpoilerPointColour { get; set; } = KnownColor.White;
         public KnownColor SpoilerWOTHColour { get; set; } = KnownColor.ForestGreen;

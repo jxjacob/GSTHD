@@ -16,6 +16,7 @@ namespace GSTHD
         private string[] ImageNames;
         private int ImageIndex = 0;
         public int DefaultIndex = 0;
+        public int DK64_ID;
         private string DragImage = null;
 
         bool isBroadcastable;
@@ -45,6 +46,7 @@ namespace GSTHD
             this.AutoName = data.AutoName;
 
             this.DragImage = data.DragImage;
+            this.DK64_ID = data.DK64_ID;
 
             this.DefaultIndex = data.DefaultIndex;
             ImageIndex = DefaultIndex;
@@ -183,12 +185,12 @@ namespace GSTHD
         {
             if (DragImage != null)
             {
-                var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, DragImage);
+                var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, DragImage, DK64_ID);
                 DoDragDrop(dropContent, DragDropEffects.Copy);
             }
             else
             {
-                var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[System.Math.Max(ImageIndex, 1)]);
+                var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[System.Math.Max(ImageIndex, 1)], DK64_ID);
                 DoDragDrop(dropContent, DragDropEffects.Copy);
             }
         }

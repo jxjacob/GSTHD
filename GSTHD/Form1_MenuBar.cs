@@ -51,6 +51,7 @@ namespace GSTHD
 
             // Spoiler Hints
             public ToolStripMenuItem SpoilerLevelOrder;
+            public ToolStripMenuItem SpoilerHideStarting;
             public ToolStripMenuItem SpoilerPointColor;
             public ToolStripMenuItem SpoilerWothColor;
             public ToolStripMenuItem SpoilerEmptyColor;
@@ -363,6 +364,13 @@ namespace GSTHD
                     }
                     Items.SpoilerLevelOrder = new ToolStripMenuItem("Level Order", null, SpoilerOrderOptions.Values.ToArray());
                     spoilerSubMenu.DropDownItems.Add(Items.SpoilerLevelOrder);
+
+                    Items.SpoilerHideStarting = new ToolStripMenuItem("Hide Starting Moves", null, new EventHandler(menuBar_ToggleEnableHideStarting))
+                    {
+                        CheckOnClick = true,
+                    };
+                    spoilerSubMenu.DropDownItems.Add(Items.SpoilerHideStarting);
+
                     // point colour
                     Items.SpoilerPointColor = new ToolStripMenuItem("Point Number Color", null, SpoilerPointColorOptions.Values.ToArray());
                     spoilerSubMenu.DropDownItems.Add(Items.SpoilerPointColor);
@@ -497,7 +505,7 @@ namespace GSTHD
             // open file dialog for jsons
             OpenFileDialog filedia = new OpenFileDialog();
             filedia.Title = "Open GST Layout file";
-            filedia.InitialDirectory= Application.StartupPath;
+            filedia.InitialDirectory= Application.StartupPath + "/Layouts/";
             filedia.Filter = "json files (*.json)|*.json|All files (*.*)|*.*";
             filedia.Multiselect = false;
             // put that filename into settings' ActiveLayout
@@ -758,6 +766,13 @@ namespace GSTHD
         {
             // Items.EnableBarrenColors.Enabled = !Items.EnableBarrenColors.Enabled;
             Settings.EnableBarrenColors = Items.EnableBarrenColors.Checked;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
+        private void menuBar_ToggleEnableHideStarting(object sender, EventArgs e)
+        {
+            Settings.HideStarting = Items.SpoilerHideStarting.Checked;
             Settings.Write();
             Form.UpdateLayoutFromSettings();
         }
