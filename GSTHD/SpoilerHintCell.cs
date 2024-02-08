@@ -35,7 +35,26 @@ namespace GSTHD
 
         public override string ToString()
         {
-            return $"{totalPoints},{currentPoints},{totalWOTHS},{currentWOTHS},{foundItems},{potionsList},{displayList}";
+            string itemstring = "";
+            foreach (int item in foundItems)
+            {
+                if (itemstring.Length > 0)
+                {
+                    itemstring += ",";
+                }
+                itemstring += item.ToString();
+            }
+
+            string displaystring = "";
+            foreach (CellDisplay item in displayList)
+            {
+                if (displaystring.Length > 0)
+                {
+                    displaystring += ",";
+                }
+                displaystring += item.ToString();
+            }
+            return $"{currentPoints},{currentWOTHS}\n{itemstring}\n{displaystring}";
         }
     }
 
@@ -136,6 +155,11 @@ namespace GSTHD
         public int item_id;
         public bool isStarting;
         public bool isFaded = false;
+
+        public override string ToString()
+        {
+            return $"{potionType}\t{item_id}\t{isStarting}\t{isFaded}";
+        }
     }
 
     public class SpoilerCell : Panel, UpdatableFromSettings
@@ -662,6 +686,44 @@ namespace GSTHD
                 UpdatePoints();
                 UpdatePotions();
             }
+        }
+
+        public void SetState(string statestring)
+        {
+            //break up string into sections, recompile data. probably call the real setstate after tbh
+            // return $"{currentPoints},{currentWOTHS}\n{foundItems}\n{potionsList}\n{displayList}";
+            
+            string[] parts = statestring.Split('\n');
+            string[] firstPart = parts[0].Split(',');
+            //fp0 = currentpoints
+            //fp1 = currentwoths
+            currentPoints = int.Parse(firstPart[0]);
+            currentWOTHS = int.Parse(firstPart[1]);
+            //p1 = founditems
+            if (parts[1].Length > 0)
+            {
+                foundItems = parts[1].Split(',').Select(int.Parse).ToList();
+            }
+            //p2 = displaylist
+            if (parts[2].Length > 0)
+            {
+                string[] dl = parts[2].Split(',');
+
+                List<CellDisplay> newdl = new List<CellDisplay>();
+                foreach (string part in dl)
+                {
+                    string[] inner = part.Split('\t');
+                    //i0 = pottype (int)
+                    //i1 = itemid (int)
+                    //i2 = isstarting (bool
+                    //i3 = fiaded (bool
+                    newdl.Add(new CellDisplay() { potionType = int.Parse(inner[0]) , item_id = int.Parse(inner[1]) , isStarting = bool.Parse(inner[2]), isFaded = bool.Parse(inner[3]) });
+                }
+                displayList = newdl;
+            }
+
+            UpdatePoints();
+            UpdatePotions();
         }
     }
 }

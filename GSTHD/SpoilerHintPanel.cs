@@ -20,6 +20,8 @@ namespace GSTHD
 
         private Label DefaultLabel;
 
+        public string whereSpoiler;
+
         private Dictionary<string, int> pointspread;
         public List<SpoilerCell> cells = new List<SpoilerCell>();
         public List<int> startingItems = new List<int>();
@@ -193,6 +195,7 @@ namespace GSTHD
 
         public void ImportFromJson(string filepath)
         {
+            whereSpoiler = filepath;
             //Debug.WriteLine($"Import from file {filepath}");
             JObject loadedjson = JObject.Parse(File.ReadAllText(filepath));
             // check that its a legit json
@@ -413,15 +416,38 @@ namespace GSTHD
             }
         }
 
+        public void SetCells(string input)
+        {
+            //input is the ENTIRE selection of cell output, splitting on \f
+            string[] incells = input.Split('\f');
+
+            foreach (string strcell in incells)
+            {
+                string[] names = Regex.Split(strcell, @"\:\:\|\:\:");
+                //names0 is the actual name of the cell we're fucking with
+                //names1 is the rest
+
+                SpoilerCell thisCell = this.cells.Where(x => x.Name == names[0].Trim()).ToList()[0];
+
+                thisCell.SetState(names[1]);
+            }
+        }
+
         public void AddFromAT(int currentMap, int dk_id, int howMany)
         {
             if (spoilerLoaded && !startingItems.Contains(dk_id) && dk_id >=0)
             {
                 // i hate slams
-                if (dk_id == 36 && howMany > howManySlams)
+                if (dk_id == 36)
                 {
-                    howMany -= howManySlams;
-                    howManySlams += howMany;
+                    if (howMany > howManySlams)
+                    {
+                        howMany -= howManySlams;
+                        howManySlams += howMany;
+                    } else
+                    {
+                        howMany = 0;
+                    }
                 } else
                 {
                     howMany = 1;
@@ -450,7 +476,7 @@ namespace GSTHD
                 if (pointsMode) addedpoints = pointspread[dkitem.itemType];
                 //Debug.WriteLine($"{addedpoints}");
 
-                if (lastKnownMap >= 0 && !foundATItems.Contains(dk_id))
+                if (lastKnownMap >= 0 && !foundATItems.Contains(dk_id) && howMany > 0)
                 {
                     cells[lastKnownMap].AddNewItem(dkitem, addedpoints, isStarting, howMany);
                     // dupe slams are handled seperately and skip the queue

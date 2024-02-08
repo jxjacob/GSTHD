@@ -438,27 +438,36 @@ namespace GSTHD
                     }
                 }
             }
-            //foreach (SpoilerPanel x in this.Controls[0].Controls.OfType<SpoilerPanel>())
-            //{
-            //    if (x.Name != "")
-            //    {
-            //        if (x.spoilerLoaded)
-            //        {
-            //            string thestring = $"{x.levelOrder},{x.spoilerData},{x.mainSettings}";
-
-
-
-            //           thejson.Add(x.Name, thestring);
-            //        }
-            //    }
-            //}
-            //foreach (SpoilerCell x in this.Controls[0].Controls.OfType<SpoilerCell>())
-            //{
-            //    if (x.Name != "")
-            //    {
-
-            //    }
-            //}
+            foreach (SpoilerPanel x in this.Controls[0].Controls.OfType<SpoilerPanel>())
+            {
+                if (x.Name != "")
+                {
+                    if (x.spoilerLoaded)
+                    {
+                        string cellstring = "";
+                        foreach (SpoilerCell cell in x.cells)
+                        {
+                            SpoilerCellState cs = cell.GetState();
+                            if (cellstring.Length > 0)
+                            {
+                                cellstring += "\f";
+                            }
+                            cellstring += cell.Name + "::|::" + cs.ToString();
+                        }
+                        string ATstring = "";
+                        foreach (int item in x.foundATItems)
+                        {
+                            if (ATstring.Length > 0)
+                            {
+                                ATstring += ",";
+                            }
+                            ATstring += item.ToString();
+                        }
+                        string thestring = $"{x.whereSpoiler}\v{ATstring}\v{x.howManySlams}\v{cellstring}";
+                        thejson.Add(x.Name, thestring);
+                    }
+                }
+            }
 
 
             if (force)
@@ -581,10 +590,20 @@ namespace GSTHD
                         {
                             ((PanelWothBarren)found).SetQuantities((string)x.Value);
                         }
-
-
-
                     }
+                    else if (found is SpoilerPanel sp)
+                    {
+                        string conv = (string)x.Value;
+                        string[] words = conv.Split('\v');
+                        sp.ImportFromJson(words[0]);
+                        sp.foundATItems = words[1].Split(',').Select(int.Parse).ToList();
+                        sp.howManySlams = int.Parse(words[2]);
+                        sp.SetCells(words[3]);
+                    }
+                    //else if (found is SpoilerCell sc)
+                    //{
+                    //    sc.SetState((string)x.Value);
+                    //}
                 }
                 if (missingItems > 0)
                 {

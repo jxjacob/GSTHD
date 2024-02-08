@@ -505,15 +505,15 @@ namespace GSTHD
             // open file dialog for jsons
             OpenFileDialog filedia = new OpenFileDialog();
             filedia.Title = "Open GST Layout file";
-            filedia.InitialDirectory= Application.StartupPath + "/Layouts/";
+            filedia.InitialDirectory= Application.StartupPath + "\\Layouts";
             filedia.Filter = "json files (*.json)|*.json|All files (*.*)|*.*";
             filedia.Multiselect = false;
             // put that filename into settings' ActiveLayout
             if (filedia.ShowDialog() == DialogResult.OK)
             {
-                if (filedia.FileName.Contains(filedia.InitialDirectory))
+                if (filedia.FileName.Contains(Application.StartupPath))
                 {
-                    Settings.ActiveLayout = filedia.FileName.Substring((filedia.InitialDirectory.Length + 1));
+                    Settings.ActiveLayout = filedia.FileName.Substring((Application.StartupPath.Length + 1));
                 } else
                 {
                     Settings.ActiveLayout = filedia.FileName.ToString();
