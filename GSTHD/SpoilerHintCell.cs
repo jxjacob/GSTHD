@@ -139,11 +139,28 @@ namespace GSTHD
             ImageAttributes ia = new ImageAttributes();
             ia.SetColorMatrix(cm);
 
+            // makes a psuedo SizeMode.Zoom feature
+            int newWidth, newHeight, newX, newY;
+            if (this.Image.Width > this.Image.Height)
+            {
+                newX = 0;
+                float ratio = (float)Image.Width / (float)Width;
+                newWidth = (int)(Image.Width / ratio);
+                newHeight = (int)(Image.Height / ratio);
+                newY = (this.Height - newHeight) / 2;
+            } else
+            {
+                newY = 0;
+                float ratio = (float)Image.Height / (float)Height;
+                newWidth = (int)(Image.Width / ratio);
+                newHeight = (int)(Image.Height / ratio);
+                newX = (this.Width - newWidth)/2;
+            }
 
 
             imgGra.DrawImage(Image,
-                new Rectangle(0, 0, this.Width, this.Height),
-                0, 0, this.Image.Width, this.Image.Height, GraphicsUnit.Pixel,
+                new Rectangle(newX, newY, newWidth, newHeight),
+                0, 0, Image.Width, Image.Height, GraphicsUnit.Pixel,
                 ia);
             Debug.WriteLine($"id {this.dk_id} f {isFaded}");
         }
