@@ -4,7 +4,7 @@ Fork of Hapax (`Hapax#1729`)'s [fork](https://github.com/HapaxL/GSTHD) of Drekor
 Bodged together by JXJacob for his own selfish purposes. Compared to the main branch, this fork contains the following code changes:
 - Support for saving/loading the tracker state so a run can be resumed at a later point.
 - Support for broadcast views. This allows streamers to use a complex layout for their own notes while providing a more compact/basic layout to be synced with it and displayed for their viewers. More information about setting up this feature can be found [here](https://github.com/jxjacob/GSTHD/wiki/Broadcast-View---Setup)
-- Support for autotracking (with select N64 emulators). More information about setting up this feature can be found [here](https://github.com/jxjacob/GSTHD/wiki/Autotracking-setup-(From-existing-database)) and [here](https://github.com/jxjacob/GSTHD/wiki/Autotracking-setup-(Adding-a-new-game))
+- Support for autotracking (with select N64 emulators). More information about setting up this feature can be found [here](https://github.com/jxjacob/GSTHD/wiki/Autotracking-Creation-(From-existing-database)) and [here](https://github.com/jxjacob/GSTHD/wiki/Autotracking-Creation-(Adding-a-new-game))
 - Support for Item Grids to be placed in a layout.
 - Other backend bugfixes to improve system stability 😉
 
