@@ -323,30 +323,31 @@ namespace GSTHD
 
             for (uint potOff = 0x1380000; potOff < 0x29C95D8; potOff += 16)
             {
+                // this is honest to christ a bruteforce. with biz and RMG i had a reference for getting them to work, this was a fuckin guess
+                //     ToT had an option for muper64plus (which simple64 is based on), but this is a near-completely different approach
                 ulong romAddrStart = addressDLL + potOff;
 
 
                 // read the address to find the address of the starting point in the rom
                 ulong readAddress = Memory.ReadInt64(target.Handle, (romAddrStart));
-                //Debug.WriteLineIf(readAddress != 0, $"{readAddress} po: {potOff}");
 
                 if (gameInfo.Item2 == 8)
                 {
-                    var addr = Memory.Int8AddrFix(readAddress + 0x80000000 + gameInfo.Item1);
+                    var addr = Memory.Int8AddrFix(readAddress + gameInfo.Item1);
                     var wherethefuck = Memory.ReadInt8(target.Handle, addr);
                     if ((wherethefuck & 0xff) == gameInfo.Item3)
                     {
-                        return Tuple.Create(target, (readAddress + 0x80000000));
+                        return Tuple.Create(target, (readAddress));
 
                     }
                 }
                 else if (gameInfo.Item2 == 16)
                 {
-                    var addr = Memory.Int16AddrFix(readAddress + 0x80000000 + gameInfo.Item1);
+                    var addr = Memory.Int16AddrFix(readAddress + gameInfo.Item1);
                     var wherethefuck = Memory.ReadInt16(target.Handle, addr);
                     if ((wherethefuck & 0xffff) == gameInfo.Item3)
                     {
-                        return Tuple.Create(target, (readAddress + 0x80000000));
+                        return Tuple.Create(target, (readAddress));
 
                     }
                 }
@@ -354,7 +355,6 @@ namespace GSTHD
                 {
                     // use this previously read address to find the game verification data
                     var wherethefuck = Memory.ReadInt32(target.Handle, (readAddress + gameInfo.Item1));
-                    //Debug.WriteLineIf(wherethefuck!=0, wherethefuck);
                     if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress));
