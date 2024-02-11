@@ -383,6 +383,11 @@ namespace GSTHD
             UpdateImage();
         }
 
+        public void ToggleCheck()
+        {
+            Debug.WriteLine("force the thing");
+        }
+
         public void StartDragDrop()
         {
             var dropContent = new DragDropContent(false, HeldImages[CycleIndex]);

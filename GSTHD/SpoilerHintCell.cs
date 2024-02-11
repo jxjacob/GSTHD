@@ -97,6 +97,11 @@ namespace GSTHD
             }
         }
 
+        public void ToggleCheck()
+        {
+            // blank
+        }
+
         public void ToggleFade()
         {
             if (isFaded)

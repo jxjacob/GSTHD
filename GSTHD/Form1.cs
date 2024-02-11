@@ -50,6 +50,7 @@ namespace GSTHD
             //}
 
             // secret feature, will likely scrap
+            //Debug.WriteLine(e.Modifiers);
             if (e.Modifiers == Keys.Control)
             {
                 if (e.Control && e.KeyCode == Keys.Oemplus)

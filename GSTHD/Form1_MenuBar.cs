@@ -37,6 +37,7 @@ namespace GSTHD
             // Drag & Drop
             public ToolStripMenuItem DragButton;
             public ToolStripMenuItem AutocheckDragButton;
+            public ToolStripMenuItem ExtraButton;
 
             // Song Markers
             public ToolStripMenuItem MoveLocation;
@@ -82,6 +83,16 @@ namespace GSTHD
             { Settings.DragButtonOption.LeftAndRight, "Left + Right Click" },
         };
 
+        private readonly Dictionary<Settings.ExtraActionModButton, string> ExtraButtonNames = new Dictionary<Settings.ExtraActionModButton, string>
+        {
+            { Settings.ExtraActionModButton.None, "None" },
+            { Settings.ExtraActionModButton.Shift, "Shift" },
+            { Settings.ExtraActionModButton.Control, "Control" },
+            { Settings.ExtraActionModButton.Alt, "Alt" },
+            { Settings.ExtraActionModButton.MouseButton1, "Mouse Button 1" },
+            { Settings.ExtraActionModButton.MouseButton2, "Mouse Button 2" },
+        };
+
         private readonly Dictionary<Settings.SongMarkerBehaviourOption, string> SongMarkerBehaviourNames = new Dictionary<Settings.SongMarkerBehaviourOption, string>
         {
             { Settings.SongMarkerBehaviourOption.None, "None" },
@@ -112,6 +123,7 @@ namespace GSTHD
         MenuItems Items;
         Dictionary<Settings.DragButtonOption, ToolStripMenuItem> DragButtonOptions;
         Dictionary<Settings.DragButtonOption, ToolStripMenuItem> AutocheckDragButtonOptions;
+        Dictionary<Settings.ExtraActionModButton, ToolStripMenuItem> ExtraButtonOptions;
         Dictionary<Settings.SongMarkerBehaviourOption, ToolStripMenuItem> SongMarkerBehaviourOptions;
         Dictionary<Settings.SelectEmulatorOption, ToolStripMenuItem> SelectEmulatorOptions;
         Dictionary<Settings.SpoilerOrderOption, ToolStripMenuItem> SpoilerOrderOptions;
@@ -254,17 +266,15 @@ namespace GSTHD
                 }
                 optionMenu.DropDownItems.Add(scrollWheelSubMenu);
 
-                var dragDropSubMenu = new ToolStripMenuItem("Drag && Drop");
+                var dragDropSubMenu = new ToolStripMenuItem("Mouse Controls");
                 {
                     DragButtonOptions = new Dictionary<Settings.DragButtonOption, ToolStripMenuItem>();
                     AutocheckDragButtonOptions = new Dictionary<Settings.DragButtonOption, ToolStripMenuItem>();
 
-                    int i = 0;
                     foreach (var button in DragButtonNames)
                     {
                         DragButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetDragButton)));
                         AutocheckDragButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetAutocheckDragButton)));
-                        i++;
                     }
                     
                     Items.DragButton = new ToolStripMenuItem("Drag Button", null, DragButtonOptions.Values.ToArray());
@@ -272,6 +282,15 @@ namespace GSTHD
 
                     Items.AutocheckDragButton = new ToolStripMenuItem("Autocheck Drag Button", null, AutocheckDragButtonOptions.Values.ToArray());
                     dragDropSubMenu.DropDownItems.Add(Items.AutocheckDragButton);
+
+                    ExtraButtonOptions = new Dictionary<Settings.ExtraActionModButton, ToolStripMenuItem>();
+                    foreach (var button in ExtraButtonNames)
+                    {
+                        ExtraButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetExtraButton)));
+                    }
+                    Items.ExtraButton = new ToolStripMenuItem("Bonus Action Button", null, ExtraButtonOptions.Values.ToArray());
+                    dragDropSubMenu.DropDownItems.Add(Items.ExtraButton);
+
                 }
                 optionMenu.DropDownItems.Add(dragDropSubMenu);
 
@@ -474,6 +493,7 @@ namespace GSTHD
 
             DragButtonOptions[Settings.DragButton].Checked = true;
             AutocheckDragButtonOptions[Settings.AutocheckDragButton].Checked = true;
+            ExtraButtonOptions[Settings.ExtraActionButton].Checked = true;
 
             Items.MoveLocation.Checked = Settings.MoveLocationToSong;
             //Items.Autocheck.Checked = Settings.AutoCheckSongs;
@@ -728,6 +748,19 @@ namespace GSTHD
             var option = AutocheckDragButtonOptions.FirstOrDefault((x) => x.Value == choice);
             if (option.Value == null) throw new NotImplementedException();
             Settings.AutocheckDragButton = option.Key;
+            Settings.Write();
+        }
+
+        private void menuBar_SetExtraButton(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            ExtraButtonOptions[Settings.ExtraActionButton].Checked = false;
+            choice.Checked = true;
+
+            var option = ExtraButtonOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.ExtraActionButton = option.Key;
             Settings.Write();
         }
 

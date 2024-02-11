@@ -1,5 +1,6 @@
-﻿using GSTHD;
+using GSTHD;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -237,6 +238,11 @@ namespace GSTHD
             RemoveImage = true;
             ImageIndex = 0;
             UpdateImage();
+        }
+
+        public void ToggleCheck()
+        {
+            Debug.WriteLine("force the thing");
         }
 
         public void StartDragDrop()
@@ -505,6 +511,11 @@ namespace GSTHD
         {
             ImageIndex = 0;
             UpdateImage();
+        }
+
+        public void ToggleCheck()
+        {
+            Debug.WriteLine("force the thing");
         }
 
         public void StartDragDrop()

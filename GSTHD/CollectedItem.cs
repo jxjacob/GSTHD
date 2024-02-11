@@ -186,7 +186,10 @@ namespace GSTHD
             CollectedItems = CollectedItemDefault;
             UpdateCount();
         }
-
+        public void ToggleCheck()
+        {
+            Debug.WriteLine("force the thing");
+        }
         public void SetColor(Color color)
         {
             ItemCount.ForeColor = color;

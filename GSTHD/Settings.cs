@@ -33,6 +33,16 @@ namespace GSTHD
             Right,
             LeftAndRight,
         }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum ExtraActionModButton
+        {
+            None,
+            Shift,
+            Control,
+            Alt,
+            MouseButton1,
+            MouseButton2,
+        }
 
         [JsonConverter(typeof(StringEnumConverter))]
         public enum SelectEmulatorOption
@@ -49,7 +59,6 @@ namespace GSTHD
             Numerical,
             Chronological
         }
-
         private const SongMarkerBehaviourOption DefaultSongMarkerBehaviour = SongMarkerBehaviourOption.DropAndCheck;
 
         public bool ShowMenuBar { get; set; } = true;
@@ -61,6 +70,7 @@ namespace GSTHD
         public bool WraparoundDungeonNames { get; set; } = true;
         public DragButtonOption DragButton { get; set; } = DragButtonOption.Middle;
         public DragButtonOption AutocheckDragButton { get; set; } = DragButtonOption.None;
+        public ExtraActionModButton ExtraActionButton { get; set; } = ExtraActionModButton.None;
         public SelectEmulatorOption SelectEmulator { get; set; } = SelectEmulatorOption.Project64;
         public SpoilerOrderOption SpoilerOrder { get; set; } = SpoilerOrderOption.Numerical;
         public int MinDragThreshold { get; set; } = 6;

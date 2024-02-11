@@ -1,5 +1,7 @@
-﻿using System;
+using System;
+using System.Activities.Expressions;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Dynamic;
 using System.Linq;
@@ -81,6 +83,8 @@ namespace GSTHD
                 }
                 MouseDown += ProgressBehaviour.Mouse_ClickDown;
                 MouseWheel += Mouse_Wheel;
+                KeyDown += ProgressBehaviour.KeyDown;
+                KeyUp += ProgressBehaviour.KeyUp;
             }
         }
 
@@ -96,6 +100,27 @@ namespace GSTHD
             }
         }
 
+     protected override void OnPaint(PaintEventArgs e)
+        {
+            if (isMarked) DrawMark();
+            base.OnPaint(e);
+        }
+
+        public void DrawMark()
+        {
+            Debug.WriteLine("forcing");
+            if (markedGraphics == null)
+            {
+                Debug.WriteLine("creating");
+                markedImage = Image.FromFile(@"Resources/checkmark.png");
+                markedGraphics = Graphics.FromImage(markedImage);
+            }
+            markedGraphics.DrawImage(markedImage,
+            new Rectangle(0, 0, 16, 16),
+                0, 0, markedImage.Width, markedImage.Height, GraphicsUnit.Pixel);
+            this.Refresh();
+        }
+
         public void UpdateImage()
         {
             if (Image != null) Image.Dispose();
@@ -106,6 +131,7 @@ namespace GSTHD
                 if (DoubleBroadcastName == null || DoubleBroadcastSide == null)
                 {
                     ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
+                    ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
                     ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
                 } else
                 {
@@ -134,7 +160,6 @@ namespace GSTHD
                 }
                 
             };
-        }
 
         public int GetState()
         {
@@ -172,6 +197,12 @@ namespace GSTHD
         public void ResetState()
         {
             ImageIndex = 0;
+            UpdateImage();
+        }
+
+        public void ToggleCheck()
+        {
+            isMarked = !isMarked;
             UpdateImage();
         }
 
