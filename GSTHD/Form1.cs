@@ -8,6 +8,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Timers;
 using System.Windows.Forms;
 
@@ -25,7 +26,9 @@ namespace GSTHD
         public Autotracker TheAutotracker;
         public System.Timers.Timer StoneCyclingTimer;
         private int cyclecount = 0;
-        
+
+        private float GlobalScale = 1;
+
         public List<GossipStone> currentlyCycling = new List<GossipStone>();
 
         public Settings Settings;
@@ -46,13 +49,20 @@ namespace GSTHD
             //    this.Form1_Load(sender, new EventArgs());
             //}
 
-            /*
-            if(e.KeyCode == Keys.F2)
+            // secret feature, will likely scrap
+            if (e.Modifiers == Keys.Control)
             {
-                var window = new Editor(CurrentLayout);
-                window.Show();
+                if (e.Control && e.KeyCode == Keys.Oemplus)
+                {
+                    ZoomIn();
+                } else if (e.Control && e.KeyCode == Keys.OemMinus)
+                {
+                    ZoomOut();
+                } else if (e.Control && e.KeyCode == Keys.D0)
+                {
+                    ZoomReset();
+                }
             }
-            */
         }
 
         private void LoadAll(object sender, EventArgs e)
@@ -182,6 +192,7 @@ namespace GSTHD
             CurrentLayout = new Layout();
             CurrentLayout.LoadLayout(LayoutContent, Settings, ListSometimesHintsSuggestions, ListPlacesWithTag, this);
             Size = new Size(LayoutContent.Size.Width, LayoutContent.Size.Height + MenuBar.Size.Height);
+            GlobalScale = 1;
             LayoutContent.Dock = DockStyle.Top;
             Controls.Add(LayoutContent);
             MenuBar.Dock = DockStyle.Top;
@@ -274,6 +285,27 @@ namespace GSTHD
                 TheAutotracker.NukeTimer();
             }
             TheAutotracker = null;
+        }
+
+        public void ZoomIn()
+        {
+            this.Scale(new SizeF((GlobalScale + 0.1f)/GlobalScale, (GlobalScale + 0.1f) / GlobalScale));
+            GlobalScale += 0.1f;
+            Debug.WriteLine(GlobalScale);
+        }
+
+        public void ZoomOut()
+        {
+            this.Scale(new SizeF((GlobalScale - 0.1f) / GlobalScale, (GlobalScale - 0.1f) / GlobalScale));
+            GlobalScale -= 0.1f;
+            Debug.WriteLine(GlobalScale);
+        }
+
+        public void ZoomReset()
+        {
+            this.Scale(new SizeF((1f) / GlobalScale, (1f) / GlobalScale));
+            Debug.WriteLine(1f/GlobalScale);
+            GlobalScale = 1;
         }
 
         public void AddCycling(GossipStone gs) 

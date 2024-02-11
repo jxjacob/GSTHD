@@ -284,5 +284,96 @@ namespace GSTHD
             //MessageBox.Show("Could not find the correct RMG offset\nJXJacob hasn't figured out how to solve this one so you might be out of luck.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
         }
+
+
+        public static Tuple<Process, ulong> attachToSimple64(Form1 baseForm)
+        {
+            Process target = null;
+            try
+            {
+                target = Process.GetProcessesByName("simple64-gui")[0];
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message + "\nCould not find process \"simple64-gui\" on your machine.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+            Debug.WriteLine("shoutouts to simpleflips");
+
+            var gameInfo = getGameVerificationInfo(baseForm.CurrentLayout.App_Settings.AutotrackingGame);
+
+
+            ulong addressDLL = 0;
+            foreach (ProcessModule mo in target.Modules)
+            {
+                //Debug.WriteLine($"{mo.ModuleName} - {mo.BaseAddress.ToInt64():X}");
+                if (mo.ModuleName.ToLower() == "libmupen64plus.dll")
+                {
+                    addressDLL = (ulong)mo.BaseAddress.ToInt64();
+                    break;
+                }
+            }
+
+            if (addressDLL == 0)
+            {
+                MessageBox.Show("Could not find libmupen64plus loaded within simple64.\nPlease reinstall simple64 or reset it to its default settings.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+            Debug.WriteLine("found dll at 0x" + addressDLL.ToString("X"));
+
+            for (uint potOff = 0x1380000; potOff < 0x29C95D8; potOff += 16)
+            {
+                ulong romAddrStart = addressDLL + potOff;
+
+
+                // read the address to find the address of the starting point in the rom
+                ulong readAddress = Memory.ReadInt64(target.Handle, (romAddrStart));
+                //Debug.WriteLineIf(readAddress != 0, $"{readAddress} po: {potOff}");
+
+                if (gameInfo.Item2 == 8)
+                {
+                    var addr = Memory.Int8AddrFix(readAddress + 0x80000000 + gameInfo.Item1);
+                    var wherethefuck = Memory.ReadInt8(target.Handle, addr);
+                    if ((wherethefuck & 0xff) == gameInfo.Item3)
+                    {
+                        return Tuple.Create(target, (readAddress + 0x80000000));
+
+                    }
+                }
+                else if (gameInfo.Item2 == 16)
+                {
+                    var addr = Memory.Int16AddrFix(readAddress + 0x80000000 + gameInfo.Item1);
+                    var wherethefuck = Memory.ReadInt16(target.Handle, addr);
+                    if ((wherethefuck & 0xffff) == gameInfo.Item3)
+                    {
+                        return Tuple.Create(target, (readAddress + 0x80000000));
+
+                    }
+                }
+                else if (gameInfo.Item2 == 32)
+                {
+                    // use this previously read address to find the game verification data
+                    var wherethefuck = Memory.ReadInt32(target.Handle, (readAddress + gameInfo.Item1));
+                    //Debug.WriteLineIf(wherethefuck!=0, wherethefuck);
+                    if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
+                    {
+                        return Tuple.Create(target, (readAddress));
+
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Incorrect bytes set for verification.\nMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
+                }
+
+
+
+
+            }
+
+            //MessageBox.Show("Could not find the correct RMG offset\nJXJacob hasn't figured out how to solve this one so you might be out of luck.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return null;
+        }
     }
 }

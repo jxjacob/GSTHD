@@ -254,7 +254,7 @@ namespace GSTHD
 
             //currentMapValue = GoRead(currentMapAddr, currentMapBytes);
             int temp = GoRead(currentMapAddr, currentMapBytes);
-            if (spoilerPanel.DK64Maps.ContainsKey(temp))
+            if (spoilerPanel.spoilerLoaded && spoilerPanel.DK64Maps.ContainsKey(temp))
             {
                 currentMapValue = temp;
 

@@ -39,7 +39,8 @@ namespace GSTHD
         {
             Project64,
             Bizhawk,
-            RMG
+            RMG,
+            simple64
         }
 
         [JsonConverter(typeof(StringEnumConverter))]

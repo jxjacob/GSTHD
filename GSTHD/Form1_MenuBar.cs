@@ -23,9 +23,11 @@ namespace GSTHD
             public ToolStripMenuItem Reset;
             public ToolStripMenuItem SaveState;
             public ToolStripMenuItem LoadState;
-            // public ToolStripMenuItem LoadLayout;
             public ToolStripMenuItem ShowMenuBar;
             public ToolStripMenuItem BroadcastView;
+            //public ToolStripMenuItem ZoomIn;
+            //public ToolStripMenuItem ZoomOut;
+            //public ToolStripMenuItem ZoomReset;
 
             // Options
             // Scroll Wheel
@@ -95,6 +97,7 @@ namespace GSTHD
             { Settings.SelectEmulatorOption.Project64, "Project64 3.0.1" },
             { Settings.SelectEmulatorOption.Bizhawk, "Bizhawk-DK64" },
             { Settings.SelectEmulatorOption.RMG, "Rosalie's Mupen GUI" },
+            { Settings.SelectEmulatorOption.simple64, "simple64" }
         };
 
         private readonly Dictionary<Settings.SpoilerOrderOption, string> SpoilerOrderNames = new Dictionary<Settings.SpoilerOrderOption, string>
@@ -187,15 +190,12 @@ namespace GSTHD
 
                 layoutMenu.DropDownItems.Add("-");
 
-                //Items.LoadLayout = new ToolStripMenuItem("Load Layout", null, new EventHandler(menuBar_LoadLayout));
-                //layoutMenu.DropDownItems.Add(Items.LoadLayout);
-
                 Items.ShowMenuBar = new ToolStripMenuItem("Show Menu Bar", null, new EventHandler(menuBar_Enable))
                 {
                     ShortcutKeys = Keys.F10,
                     ShowShortcutKeys = true,
                     CheckOnClick = true,
-            };
+                };
                 layoutMenu.DropDownItems.Add(Items.ShowMenuBar);
 
 
@@ -206,6 +206,32 @@ namespace GSTHD
                     CheckOnClick = true,
                 };
                 layoutMenu.DropDownItems.Add(Items.BroadcastView);
+
+                //layoutMenu.DropDownItems.Add("-");
+
+                //Items.ZoomIn = new ToolStripMenuItem("Zoom In", null, new EventHandler(menuBar_ZoomIn))
+                //{
+                //    ShortcutKeys = Keys.Control | Keys.Oemplus,
+                //    ShowShortcutKeys = true,
+                //    ShortcutKeyDisplayString = "Ctrl++"
+                //};
+                //layoutMenu.DropDownItems.Add(Items.ZoomIn);
+
+                //Items.ZoomOut = new ToolStripMenuItem("Zoom Out", null, new EventHandler(menuBar_ZoomOut))
+                //{
+                //    ShortcutKeys = Keys.Control | Keys.OemMinus,
+                //    ShowShortcutKeys = true,
+                //    ShortcutKeyDisplayString = "Ctrl+-"
+                //};
+                //layoutMenu.DropDownItems.Add(Items.ZoomOut);
+
+                //Items.ZoomReset = new ToolStripMenuItem("Reset Zoom", null, new EventHandler(menuBar_ZoomReset))
+                //{
+                //    ShortcutKeys = Keys.Control | Keys.D0,
+                //    ShowShortcutKeys = true,
+                //};
+                //layoutMenu.DropDownItems.Add(Items.ZoomReset);
+
 
             }
             MenuStrip.Items.Add(layoutMenu);
@@ -635,6 +661,21 @@ namespace GSTHD
              } else { Items.BroadcastView.Checked = true;}
         }
 
+        public void menuBar_ZoomIn(object sender, EventArgs e)
+        {
+            Form.ZoomIn();
+        }
+
+        public void menuBar_ZoomOut(object sender, EventArgs e)
+        {
+            Form.ZoomOut();
+        }
+
+        public void menuBar_ZoomReset(object sender, EventArgs e)
+        {
+            Form.ZoomReset();
+        }
+
         public void menuBar_Show()
         {
             Size = SavedSize;
@@ -939,9 +980,25 @@ namespace GSTHD
                             MessageBox.Show("Could not connect to RMG\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                         break;
+                    case "simple64":
+                        var results64 = AttachToEmulators.attachToSimple64(Form);
+                        if (results64 != null)
+                        {
+                            if (results64.Item1 != null)
+                            {
+                                Form.SetAutotracker(results64.Item1, results64.Item2);
+                                MessageBox.Show("Connection to simple64 sucessful\nTracking will begin once you enter the main game mode (not the title screen or main menu)");
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("Could not connect to simple64\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        break;
                     default:
                         MessageBox.Show("No supported emulator selected.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         break;
+
                 }
             } else
             {
