@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace GSTHD
 {
-    public class Item : PictureBox, ProgressibleElement<int>, DraggableAutocheckElement<int>
+    public class Item : OrganicImage, ProgressibleElement<int>, DraggableAutocheckElement<int>
     {
         private readonly Settings Settings;
         private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
@@ -26,6 +26,8 @@ namespace GSTHD
         string DoubleBroadcastName;
         bool isDraggable;
 
+
+
         public string AutoName = null;
 
         delegate void SetStateCallback(int state);
@@ -40,7 +42,7 @@ namespace GSTHD
                 ImageNames = data.ImageCollection;
 
             Name = data.Name;
-            BackColor = data.BackColor;
+            if (data.BackColor != Color.Transparent) BackColor = data.BackColor;
             this.isBroadcastable = data.isBroadcastable && !isBroadcast;
 
             this.isDraggable = data.isDraggable;
@@ -59,7 +61,7 @@ namespace GSTHD
             if (ImageNames.Length > 0)
             {
                 UpdateImage();
-                SizeMode = (PictureBoxSizeMode)data.SizeMode;
+                SizeMode = data.SizeMode;
                 Size = data.Size;
             }
 
@@ -96,29 +98,8 @@ namespace GSTHD
                 ImageIndex += Settings.InvertScrollWheel ? scrolls : -scrolls;
                 if (ImageIndex < 0) ImageIndex = 0;
                 else if (ImageIndex >= ImageNames.Length) ImageIndex = ImageNames.Length - 1;
-                UpdateImage();
+                else UpdateImage();
             }
-        }
-
-     protected override void OnPaint(PaintEventArgs e)
-        {
-            if (isMarked) DrawMark();
-            base.OnPaint(e);
-        }
-
-        public void DrawMark()
-        {
-            Debug.WriteLine("forcing");
-            if (markedGraphics == null)
-            {
-                Debug.WriteLine("creating");
-                markedImage = Image.FromFile(@"Resources/checkmark.png");
-                markedGraphics = Graphics.FromImage(markedImage);
-            }
-            markedGraphics.DrawImage(markedImage,
-            new Rectangle(0, 0, 16, 16),
-                0, 0, markedImage.Width, markedImage.Height, GraphicsUnit.Pixel);
-            this.Refresh();
         }
 
         public void UpdateImage()
@@ -133,7 +114,8 @@ namespace GSTHD
                     ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
                     ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
                     ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
-                } else
+                }
+                else
                 {
                     //TODO: make this block cleaner
                     if (DoubleBroadcastSide == "left")
@@ -141,12 +123,14 @@ namespace GSTHD
                         if (ImageIndex == 0)
                         {
                             ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).DecrementLeftState();
-                        } else
+                        }
+                        else
                         {
                             ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).IncrementLeftState();
                         }
-                        
-                    } else
+
+                    }
+                    else
                     {
                         if (ImageIndex == 0)
                         {
@@ -158,8 +142,11 @@ namespace GSTHD
                         }
                     }
                 }
-                
-            };
+
+            }
+            if (IsHandleCreated) { DisplayImage(); }
+        }
+
 
         public int GetState()
         {
@@ -184,8 +171,11 @@ namespace GSTHD
 
         public void IncrementState()
         {
-            if (ImageIndex < ImageNames.Length - 1) ImageIndex += 1;
-            UpdateImage();
+            if (ImageIndex < ImageNames.Length - 1)
+            {
+                ImageIndex += 1;
+                UpdateImage();
+            }
         }
 
         public void DecrementState()

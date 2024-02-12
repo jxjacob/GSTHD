@@ -58,18 +58,13 @@ namespace GSTHD
         }
     }
 
-    public class CellPictureBox : Control, ProgressibleElement<int>
+    public class CellPictureBox : OrganicImage, ProgressibleElement<int>
     {
         private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
 
         public SpoilerCell hostCell;
 
         public int dk_id;
-
-        public bool isFaded;
-
-        public Graphics imgGra;
-        public Image Image;
 
         public CellPictureBox(Settings settings)
         {
@@ -100,6 +95,8 @@ namespace GSTHD
         public void ToggleCheck()
         {
             // blank
+            isMarked = !isMarked;
+            DisplayImage();
         }
 
         public void ToggleFade()
@@ -110,64 +107,13 @@ namespace GSTHD
                 isFaded = false;
                 DisplayImage();
                 hostCell.TellFaded(dk_id, isFaded);
-                Debug.WriteLine("restored feeling");
             } else
             {
                 // make faded
                 isFaded = true;
                 DisplayImage();
                 hostCell.TellFaded(dk_id, isFaded);
-                Debug.WriteLine("made faded");
             }
-        }
-
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            DisplayImage();
-            base.OnPaint(e);
-        }
-
-        public void DisplayImage()
-        {
-            if (imgGra == null)
-            {
-                imgGra = this.CreateGraphics();
-            } else
-            imgGra.Clear(BackColor);
-
-            float howFaded = (isFaded) ? (float)0.5 : 1;
-
-            ColorMatrix cm = new ColorMatrix();
-            cm.Matrix00 = cm.Matrix11 = cm.Matrix22 = cm.Matrix44 = 1;
-            cm.Matrix33 = howFaded;
-
-            ImageAttributes ia = new ImageAttributes();
-            ia.SetColorMatrix(cm);
-
-            // makes a psuedo SizeMode.Zoom feature
-            int newWidth, newHeight, newX, newY;
-            if (this.Image.Width > this.Image.Height)
-            {
-                newX = 0;
-                float ratio = (float)Image.Width / (float)Width;
-                newWidth = (int)(Image.Width / ratio);
-                newHeight = (int)(Image.Height / ratio);
-                newY = (this.Height - newHeight) / 2;
-            } else
-            {
-                newY = 0;
-                float ratio = (float)Image.Height / (float)Height;
-                newWidth = (int)(Image.Width / ratio);
-                newHeight = (int)(Image.Height / ratio);
-                newX = (this.Width - newWidth)/2;
-            }
-
-
-            imgGra.DrawImage(Image,
-                new Rectangle(newX, newY, newWidth, newHeight),
-                0, 0, Image.Width, Image.Height, GraphicsUnit.Pixel,
-                ia);
-            Debug.WriteLine($"id {this.dk_id} f {isFaded}");
         }
     }
 
