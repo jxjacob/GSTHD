@@ -502,6 +502,10 @@ namespace GSTHD
                 ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).spoilerData = spoilerData;
                 ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).mainSettings = mainSettings;
                 ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).InitializeCells();
+                foreach (SpoilerCell cell in cells)
+                {
+                    cell.UpdateVisuals();
+                }
             }
         }
 
