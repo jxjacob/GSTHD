@@ -9,8 +9,12 @@ using System.IO;
 
 namespace GSTHD
 {
-    public class DoubleItem : PictureBox
+
+    public class DoubleItem : OrganicImage, ProgressibleElement<int>
     {
+        private readonly Settings Settings;
+        private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
+
         private string[] ImageNames;
         private int ImageIndex = 0;
 
@@ -26,8 +30,10 @@ namespace GSTHD
 
         delegate void SetStateCallback(int state);
 
-        public DoubleItem(ObjectPoint data, bool isBroadcast = false)
+        public DoubleItem(ObjectPoint data, Settings settings, bool isBroadcast = false)
         {
+            Settings = settings;
+
             if (data.ImageCollection == null)
                 ImageNames = new string[0];
             else
@@ -46,50 +52,30 @@ namespace GSTHD
                 
             }
 
-            this.BackColor = Color.Transparent;
             this.isBroadcastable = data.isBroadcastable;
             this.AutoName = data.AutoName;
             this.Location = new Point(data.X, data.Y);
             this.TabStop = false;
             this.AllowDrop = false;
-            this.WaitOnLoad = false;
-            this.LoadCompleted += this.DoubleItem_LoadCompleted;
+            //this.WaitOnLoad = false;
+            //this.LoadCompleted += this.DoubleItem_LoadCompleted;
 
-           if (!isBroadcast)
+            ProgressBehaviour = new ProgressibleElementBehaviour<int>(this, Settings);
+
+            if (!isBroadcast)
             {
-                this.MouseUp += this.Click_MouseUp;
-                this.MouseDown += this.Click_MouseDown;
                 this.MouseMove += this.Click_MouseMove;
+                MouseDown += ProgressBehaviour.Mouse_ClickDown;
             }
         }
 
-        private void DoubleItem_LoadCompleted(Object sender, AsyncCompletedEventArgs e)
-        {
-            if (e.Error != null)
-            {
-                File.WriteAllText(@"red_X_" + DateTime.Now.ToString("MM-dd-yyyy-HH:mm:ss") + ".txt", e.Error.Message.ToString());
-            }
-        }
-
-        private void Click_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                ToggleLeftState();
-
-            }
-            if (e.Button == MouseButtons.Right)
-            {
-                ToggleRightState();
-            }
-        }
-
-        private void Click_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Clicks != 1)
-                isMouseDown = false;
-            else isMouseDown = true;
-        }
+        //private void DoubleItem_LoadCompleted(Object sender, AsyncCompletedEventArgs e)
+        //{
+        //    if (e.Error != null)
+        //    {
+        //        File.WriteAllText(@"red_X_" + DateTime.Now.ToString("MM-dd-yyyy-HH:mm:ss") + ".txt", e.Error.Message.ToString());
+        //    }
+        //}
 
 
         private void Click_MouseMove(object sender, MouseEventArgs e)
@@ -119,8 +105,10 @@ namespace GSTHD
                 ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
                 ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isColoredLeft = isColoredLeft;
                 ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isColoredRight = isColoredRight;
+                ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
                 ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
             };
+            if (IsHandleCreated) { Invalidate(); }
         }
 
         public void IncrementLeftState()
@@ -141,10 +129,12 @@ namespace GSTHD
             }
             UpdateImage();
         }
-        public void ToggleLeftState()
+        public void IncrementState()
         {
             if (isColoredLeft) DecrementLeftState(); else IncrementLeftState();
         }
+
+
 
         public void IncrementRightState()
         {
@@ -164,16 +154,24 @@ namespace GSTHD
             }
             UpdateImage();
         }
-        public void ToggleRightState()
+        public void DecrementState()
         {
             if (isColoredRight) DecrementRightState(); else IncrementRightState();
         }
 
+
+        public void ToggleCheck()
+        {
+            isMarked = !isMarked;
+            UpdateImage();
+        }
+
+
         public int GetState()
         {
             int run = 0;
-            if (isColoredLeft) { run = run ^ 1; }
-            if (isColoredRight) { run = run ^ 2; }
+            if (isColoredLeft) { run ^= 1; }
+            if (isColoredRight) { run ^= 2; }
             return run;
         }
 

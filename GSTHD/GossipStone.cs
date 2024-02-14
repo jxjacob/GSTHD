@@ -37,7 +37,7 @@ namespace GSTHD
         }
     }
 
-    public class GossipStone : PictureBox, ProgressibleElement<GossipStoneState>, DraggableElement<GossipStoneState>, UpdatableFromSettings
+    public class GossipStone : OrganicImage, ProgressibleElement<GossipStoneState>, DraggableElement<GossipStoneState>, UpdatableFromSettings
     {
         private readonly Settings Settings;
         private Form1 f1;
@@ -87,7 +87,7 @@ namespace GSTHD
             ProgressBehaviour = new ProgressibleElementBehaviour<GossipStoneState>(this, Settings);
             DragBehaviour = new DraggableElementBehaviour<GossipStoneState>(this, Settings);
 
-            this.BackColor = Color.Transparent;
+            
             this.Location = new Point(x, y);
             this.TabStop = false;
             this.AllowDrop = true;
@@ -187,15 +187,16 @@ namespace GSTHD
             }
             UpdateImage();
             DragBehaviour.SaveChanges();
-            if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
-            {
-                var remotewindow = ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]);
-                remotewindow.HoldsImage = HoldsImage;
-                remotewindow.HeldImages = HeldImages;
-                remotewindow.CycleIndex = 0;
-                remotewindow.UpdateImage();
+            //if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+            //{
+            //    var remotewindow = ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]);
+            //    remotewindow.HoldsImage = HoldsImage;
+            //    remotewindow.HeldImages = HeldImages;
+            //    remotewindow.CycleIndex = 0;
+            //    remotewindow.isMarked = isMarked;
+            //    remotewindow.UpdateImage();
             
-            }
+            //}
         }
 
         public void Mouse_ClickUp(object sender, MouseEventArgs e)
@@ -235,6 +236,7 @@ namespace GSTHD
                     remotewindow.HeldImages = HeldImages;
                     remotewindow.HoldsImage = true;
                     remotewindow.CycleIndex = CycleIndex;
+                    remotewindow.isMarked = isMarked;
                     remotewindow.UpdateImage();
                 }
             }
@@ -248,6 +250,7 @@ namespace GSTHD
                     var remotewindow = ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]);
                     remotewindow.HoldsImage = false;
                     remotewindow.ImageIndex = ImageIndex;
+                    remotewindow.isMarked = isMarked;
                     remotewindow.UpdateImage();
                 }
             }
@@ -265,6 +268,7 @@ namespace GSTHD
                 }
                 // if was cycling but now shouldnt be, remove from cycling
             }
+            if (IsHandleCreated) { Invalidate(); }
         }
 
         public GossipStoneState GetState()
@@ -385,7 +389,8 @@ namespace GSTHD
 
         public void ToggleCheck()
         {
-            Debug.WriteLine("force the thing");
+            isMarked = !isMarked;
+            UpdateImage();
         }
 
         public void StartDragDrop()

@@ -22,7 +22,7 @@ namespace GSTHD
         public override string ToString() => $"{ImageIndex},{MarkerState.HoldsImage},{MarkerState.HeldImageName},{MarkerState.ImageIndex}";
     }
 
-    public class SongMarker : PictureBox, UpdatableFromSettings, ProgressibleElement<SongMarkerState>, DraggableElement<SongMarkerState>
+    public class SongMarker : OrganicImage, UpdatableFromSettings, ProgressibleElement<SongMarkerState>, DraggableElement<SongMarkerState>
     {
         private readonly Settings Settings;
         private readonly ProgressibleElementBehaviour<SongMarkerState> ProgressBehaviour;
@@ -157,6 +157,7 @@ namespace GSTHD
                     ((SongMarker)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
                 }
             }
+            if (IsHandleCreated) { Invalidate(); }
         }
 
         public void Mouse_MiddleClickDown(object sender, MouseEventArgs e)
@@ -242,7 +243,8 @@ namespace GSTHD
 
         public void ToggleCheck()
         {
-            Debug.WriteLine("force the thing");
+            isMarked = !isMarked;
+            UpdateImage();
         }
 
         public void StartDragDrop()
@@ -267,7 +269,7 @@ namespace GSTHD
         public void CancelChanges() { }
     }
 
-    public class Song : PictureBox, UpdatableFromSettings, ProgressibleElement<int>, DraggableAutocheckElement<int>
+    public class Song : OrganicImage, UpdatableFromSettings, ProgressibleElement<int>, DraggableAutocheckElement<int>
     {
         private readonly Settings Settings;
         private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
@@ -416,8 +418,10 @@ namespace GSTHD
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {
                 ((Song)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
+                ((Song)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
                 ((Song)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
             }
+            if (IsHandleCreated) { Invalidate(); }
         }
 
         private void Mouse_Move(object sender, MouseEventArgs e)
@@ -515,7 +519,8 @@ namespace GSTHD
 
         public void ToggleCheck()
         {
-            Debug.WriteLine("force the thing");
+            isMarked = !isMarked;
+            UpdateImage();
         }
 
         public void StartDragDrop()

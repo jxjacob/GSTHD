@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace GSTHD
 {
-    class CollectedItem : PictureBox, ProgressibleElement<int>, DraggableAutocheckElement<int>
+    class CollectedItem : OrganicImage, ProgressibleElement<int>, DraggableAutocheckElement<int>
     {
         private readonly Settings Settings;
         private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
@@ -69,8 +69,8 @@ namespace GSTHD
 
             Location = new Point(data.X, data.Y);
             CollectedItemCountPosition = data.CountPosition.IsEmpty ? new Size(0, -7) : data.CountPosition;
-            
-            BackColor = data.BackGroundColor;
+
+            if (data.BackGroundColor != Color.Transparent) BackColor = data.BackGroundColor;
             TabStop = false;
 
 
@@ -132,6 +132,7 @@ namespace GSTHD
             if (Image != null) Image.Dispose();
             Image = null;
             Image = Image.FromFile(@"Resources/" + ImageNames[System.Math.Max(System.Math.Min(CollectedItems, ImageNames.Length - 1), 0)]);
+            if (IsHandleCreated) { Invalidate(); }
         }
 
         public void UpdateCount()
@@ -141,6 +142,7 @@ namespace GSTHD
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {
                 ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).CollectedItems = CollectedItems;
+                ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
                 ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateCount();
             }
             UpdateImage();
@@ -188,7 +190,8 @@ namespace GSTHD
         }
         public void ToggleCheck()
         {
-            Debug.WriteLine("force the thing");
+            isMarked = !isMarked;
+            UpdateCount();
         }
         public void SetColor(Color color)
         {

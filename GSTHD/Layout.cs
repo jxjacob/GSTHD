@@ -431,7 +431,7 @@ namespace GSTHD
                     foreach (var doubleItem in ListDoubleItems)
                     {
                         if (doubleItem.Visible)
-                            panelLayout.Controls.Add(new DoubleItem(doubleItem));
+                            panelLayout.Controls.Add(new DoubleItem(doubleItem, settings));
                     }
                 }
 
@@ -465,7 +465,7 @@ namespace GSTHD
                     foreach (var item in ListGuaranteedHints)
                     {
                         if (item.Visible)
-                            panelLayout.Controls.Add(new GuaranteedHint(item));
+                            panelLayout.Controls.Add(new GuaranteedHint(item, settings));
                     }
                 }
 
@@ -952,7 +952,7 @@ namespace GSTHD
                     foreach (var doubleItem in ListDoubleItems)
                     {
                         if (doubleItem.Visible)
-                            panelLayout.Controls.Add(new DoubleItem(doubleItem, true));
+                            panelLayout.Controls.Add(new DoubleItem(doubleItem, settings, true));
                     }
                 }
 
@@ -986,7 +986,7 @@ namespace GSTHD
                     foreach (var item in ListGuaranteedHints)
                     {
                         if (item.Visible)
-                            panelLayout.Controls.Add(new GuaranteedHint(item));
+                            panelLayout.Controls.Add(new GuaranteedHint(item, settings));
                     }
                 }
 

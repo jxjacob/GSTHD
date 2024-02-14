@@ -24,36 +24,62 @@ namespace GSTHD
         //TODO: make this actually work
         public PictureBoxSizeMode SizeMode = PictureBoxSizeMode.Zoom;
 
-        public delegate void UpdateImageCallback();
+        public delegate void UpdateImageCallback(PaintEventArgs state);
 
-        //public OrganicImage()
-        //{
-        //}
+        public OrganicImage()
+        {
+            this.DoubleBuffered = true;
+        }
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            DisplayImage();
+            DisplayImage(e);
             base.OnPaint(e);
         }
 
-        public void DisplayImage()
+        public int[] GetSizeDims()
         {
+            // newX newY newWidth newHeight
+            // imgX imgY imgWidth imgHeight
+
+
+            int newX, newY, newWidth, newHeight, imgX, imgY, imgWidth, imgHeight;
+            switch (SizeMode){
+                case PictureBoxSizeMode.Zoom:
+                    // this needs to be fixed for the world names
+                    float ratio = System.Math.Max((float)Image.Width / (float)Width, (float)Image.Height / (float)Height);
+                    newWidth = (int)(Image.Width / ratio);
+                    newHeight = (int)(Image.Height / ratio);
+                    newY = (this.Height - newHeight) / 2;
+                    newX = (this.Width - newWidth) / 2;
+                    
+                    return new int[] { newX, newY, newWidth, newHeight, 0, 0, Image.Width, Image.Height };
+                case PictureBoxSizeMode.CenterImage:
+                    newX = (Width-Image.Width) / 2;
+                    newY = (Height-Image.Height) / 2;
+                    return new int[] { newX, newY, Image.Width, Image.Height, 0, 0, Image.Width, Image.Height };
+                case PictureBoxSizeMode.Normal:
+                    return new int[] { 0, 0, this.Width, this.Height, 0, 0, this.Width, this.Height };
+                case PictureBoxSizeMode.StretchImage:
+                    return new int[] { 0, 0, this.Width, this.Height, 0, 0, Image.Width, Image.Height };
+                case PictureBoxSizeMode.AutoSize:
+                default:
+                    if (Width < Image.Width) Width = Image.Width;
+                    if (Height < Image.Height) Height = Image.Height;
+                    return new int[] { 0, 0, System.Math.Min(this.Width, Image.Width), System.Math.Min(this.Height, Image.Height), 0, 0, System.Math.Min(this.Width, Image.Width), System.Math.Min(this.Height, Image.Height) };
+            }
+        }
+
+        public void DisplayImage(PaintEventArgs e)
+        {
+            // self reminder that in order to force an image update, you need to call Invalidat()
             if (this.InvokeRequired)
             {
-                Invoke(new UpdateImageCallback(DisplayImage));
+                Invoke(new UpdateImageCallback(DisplayImage), new object[] { e });
                 return;
             }
             else
             {
-                if (imgGra == null)
-                {
-                    imgGra = this.CreateGraphics();
-                }
-                else
-                {
-                   imgGra.Clear(BackColor);
-                }
-
                 float howFaded = (isFaded) ? (float)0.5 : 1;
 
                 ColorMatrix cm = new ColorMatrix();
@@ -63,29 +89,12 @@ namespace GSTHD
                 ImageAttributes ia = new ImageAttributes();
                 ia.SetColorMatrix(cm);
 
-                // makes a psuedo SizeMode.Zoom feature
-                int newWidth, newHeight, newX, newY;
-                if (this.Image.Width > this.Image.Height)
-                {
-                    newX = 0;
-                    float ratio = (float)Image.Width / (float)Width;
-                    newWidth = (int)(Image.Width / ratio);
-                    newHeight = (int)(Image.Height / ratio);
-                    newY = (this.Height - newHeight) / 2;
-                }
-                else
-                {
-                    newY = 0;
-                    float ratio = (float)Image.Height / (float)Height;
-                    newWidth = (int)(Image.Width / ratio);
-                    newHeight = (int)(Image.Height / ratio);
-                    newX = (this.Width - newWidth) / 2;
-                }
 
+                var results = GetSizeDims();
 
-                imgGra.DrawImage(Image,
-                    new Rectangle(newX, newY, newWidth, newHeight),
-                    0, 0, Image.Width, Image.Height, GraphicsUnit.Pixel,
+                e.Graphics.DrawImage(Image,
+                    new Rectangle(results[0], results[1], results[2], results[3]),
+                    results[4], results[5], results[6], results[7], GraphicsUnit.Pixel,
                     ia);
 
                 if (isMarked)
@@ -94,7 +103,7 @@ namespace GSTHD
                     {
                         markedImage = Image.FromFile(@"Resources/checkmark.png");
                     }
-                    imgGra.DrawImage(markedImage,
+                    e.Graphics.DrawImage(markedImage,
                     new Rectangle(Width-8, 0, 8, 8),
                         0, 0, markedImage.Width, markedImage.Height, GraphicsUnit.Pixel);
                 }

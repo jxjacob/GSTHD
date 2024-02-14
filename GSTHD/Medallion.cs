@@ -15,7 +15,7 @@ namespace GSTHD
         public override string ToString() => $"{DungeonIndex},{ImageIndex}";
     }
 
-    public class Medallion : PictureBox, UpdatableFromSettings, ProgressibleElement<MedallionState>, DraggableAutocheckElement<MedallionState>
+    public class Medallion : OrganicImage, UpdatableFromSettings, ProgressibleElement<MedallionState>, DraggableAutocheckElement<MedallionState>
     {
         private readonly Settings Settings;
         private readonly ProgressibleElementBehaviour<MedallionState> ProgressBehaviour;
@@ -71,7 +71,6 @@ namespace GSTHD
             AutoName = data.AutoName;
 
             Name = data.Name;
-            BackColor = Color.Transparent;
 
             if (ImageNames.Length > 0)
             {
@@ -189,8 +188,10 @@ namespace GSTHD
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {
                 ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
+                ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
                 ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
             }
+            if (IsHandleCreated) { Invalidate(); }
         }
 
         public MedallionState GetState()
@@ -259,7 +260,8 @@ namespace GSTHD
 
         public void ToggleCheck()
         {
-            Debug.WriteLine("force the thing");
+            isMarked = !isMarked;
+            UpdateImage();
         }
 
         public void StartDragDrop()

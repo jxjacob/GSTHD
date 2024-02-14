@@ -144,7 +144,7 @@ namespace GSTHD
                 }
 
             }
-            if (IsHandleCreated) { DisplayImage(); }
+            if (IsHandleCreated) { Invalidate(); }
         }
 
 

@@ -94,9 +94,8 @@ namespace GSTHD
 
         public void ToggleCheck()
         {
-            // blank
             isMarked = !isMarked;
-            DisplayImage();
+            Invalidate();
         }
 
         public void ToggleFade()
@@ -105,13 +104,13 @@ namespace GSTHD
             {
                 // restore fadedness
                 isFaded = false;
-                DisplayImage();
+                Invalidate();
                 hostCell.TellFaded(dk_id, isFaded);
             } else
             {
                 // make faded
                 isFaded = true;
-                DisplayImage();
+                Invalidate();
                 hostCell.TellFaded(dk_id, isFaded);
             }
         }
@@ -146,9 +145,9 @@ namespace GSTHD
         public List<CellDisplay> displayList;
         public List<CellPictureBox> displayedPotions = new List<CellPictureBox>();
 
-        private PictureBox levelNumberImage;
+        private GuaranteedHint levelNumberImage;
         private Item unknownLevelNumberImage;
-        private PictureBox levelImage;
+        private GuaranteedHint levelImage;
 
         private int totalPoints;
         public int currentPoints = 0;
@@ -283,19 +282,20 @@ namespace GSTHD
             if (levelOrder > 0 && levelOrder < 9)
             {
                 // put in the static image
-                levelNumberImage = new PictureBox
+                ObjectPoint temp1 = new ObjectPoint()
                 {
-                    Image = Image.FromFile($"Resources/dk64/{levelOrder}.png"),
-                    Width = WorldNumWidth,
-                    Height = WorldNumHeight,
+                    ImageCollection = new string[] { $"dk64/{levelOrder}.png" },
+                    Size = new Size(WorldNumWidth, WorldNumHeight),
                     SizeMode = PictureBoxSizeMode.Zoom,
-                    Location = new Point(0, 0),
+                    X = 0,
+                    Y = 0,
                 };
+                levelNumberImage = new GuaranteedHint(temp1, settings);
                 Controls.Add(levelNumberImage);
             } else if (levelOrder < 0)
             {
                 // put in the item
-                ObjectPoint temp = new ObjectPoint()
+                ObjectPoint temp2 = new ObjectPoint()
                 {
                     Name = $"{name}_unknownLevel",
                     X = 0, Y = 0,
@@ -303,18 +303,19 @@ namespace GSTHD
                     ImageCollection = new string[] { "dk64/unknownnum.png", "dk64/1.png", "dk64/2.png", "dk64/3.png", "dk64/4.png", "dk64/5.png", "dk64/6.png", "dk64/7.png" },
                     isBroadcastable = true,
                 };
-                unknownLevelNumberImage = new Item(temp, settings);
+                unknownLevelNumberImage = new Item(temp2, settings);
                 Controls.Add(unknownLevelNumberImage);
             }
 
-            levelImage = new PictureBox
+            ObjectPoint temp3 = new ObjectPoint()
             {
-                Image = Image.FromFile($"Resources/dk64/{levelList[levelID]}.png"),
-                Width = 58,
-                Height = WorldNumHeight - 2,
+                ImageCollection = new string[] { $"dk64/{levelList[levelID]}.png" },
+                Size = new Size(58, WorldNumHeight - 2),
                 SizeMode = PictureBoxSizeMode.Zoom,
-                Location = new Point((!MinimalMode && levelOrder == 9) ? -6 : 18, 1),
+                X = (!MinimalMode && levelOrder == 9) ? -6 : 18,
+                Y = 1,
             };
+            levelImage = new GuaranteedHint(temp3, settings);
             Controls.Add(levelImage);
 
             InitializeDisplayList();
