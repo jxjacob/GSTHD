@@ -44,29 +44,32 @@ namespace GSTHD
 
         public void KeyUp(object sender, KeyEventArgs e)
         {
+            Debug.WriteLine("mod upping");
             modDown = false;
         }
 
+        public bool DetermineMouseInput(MouseEventArgs e, Settings.ExtraActionModButton ea)
+        {
+            // might move this to the MouseDetermination struct, depending on how i go about the Control clicking
+            if (e.Button == MouseButtons.Left && ea == Settings.ExtraActionModButton.Left ||
+                e.Button == MouseButtons.Middle && ea == Settings.ExtraActionModButton.Middle ||
+                e.Button == MouseButtons.Right && ea == Settings.ExtraActionModButton.Right ||
+                e.Button == MouseButtons.Left && ea == Settings.ExtraActionModButton.DoubleLeft && e.Clicks > 1)
+            {
+                return true;
+            } else { return false; }
+        }
+
+
         public void Mouse_ClickDown(object sender, MouseEventArgs e)
         {
-            switch (e.Button)
-            {
-                case MouseButtons.Left:
-                    if (e.Clicks > 1)
-                    {
-                        Element.ToggleCheck();
-                    } else
-                    {
-                        Mouse_LeftClickDown(sender, e);
-                    }
-                    break;
-                case MouseButtons.Middle:
-                    Mouse_MiddleClickDown(sender, e);
-                    break;
-                case MouseButtons.Right:
-                    Mouse_RightClickDown(sender, e);
-                    break;
-            }
+            // due to DoubleClick being an option, the Checkmark Item action must be checked right
+            if (DetermineMouseInput(e, ea:Settings.ExtraActionButton)) Element.ToggleCheck();
+            else if (MouseDetermination.DetermineBasicMouseInput(e, Settings.IncrementActionButton)) Mouse_LeftClickDown(sender, e);
+            else if (MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton)) Mouse_RightClickDown(sender, e);
+            else if (MouseDetermination.DetermineBasicMouseInput(e, Settings.ResetActionButton)) Mouse_MiddleClickDown(sender, e);
+
+
         }
 
         public void Mouse_LeftClickDown(object sender, MouseEventArgs e)

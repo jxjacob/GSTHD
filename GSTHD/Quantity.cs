@@ -82,18 +82,18 @@ namespace GSTHD
             tempOPCI.BackColor = subBackColor;
             tempOPCI.BackGroundColor = subBackColor;
 
-            Debug.WriteLine("making left CI");
+            //Debug.WriteLine("making left CI");
             leftCounterCI = new CollectedItem(tempOPCI, Settings, isBroadcastable);
             leftCounterCI.Location =
                 new Point(gossipStoneStartX + (leftCounterCI.Width + counterSpacing)*0, LabelPlace.Location.Y);
-            Debug.WriteLine(leftCounterCI.Location);
+            //Debug.WriteLine(leftCounterCI.Location);
 
-            Debug.WriteLine("rmaking right CI");
+           // Debug.WriteLine("rmaking right CI");
             tempOPCI.hasSlash = false;
             rightCounterCI = new CollectedItem(tempOPCI, Settings, isBroadcastable);
             rightCounterCI.Location =
                 new Point(gossipStoneStartX + (leftCounterCI.Width + counterSpacing), LabelPlace.Location.Y);
-            Debug.WriteLine(rightCounterCI.Location);
+            //Debug.WriteLine(rightCounterCI.Location);
 
 
             Colors = new Color[Settings.DefaultWothColors.Length + 1];
@@ -132,11 +132,11 @@ namespace GSTHD
 
         private void Mouse_ClickDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left && ColorIndex < Colors.Length - 1)
+            if (MouseDetermination.DetermineBasicMouseInput(e, Settings.IncrementActionButton) && ColorIndex < Colors.Length - 1)
             {
                 ColorIndex++;
             }
-            else if (e.Button == MouseButtons.Right && ColorIndex > MinIndex)
+            else if (MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton) && ColorIndex > MinIndex)
             {
                 ColorIndex--;
             }

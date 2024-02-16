@@ -66,6 +66,7 @@ namespace GSTHD
             {
                 this.MouseMove += this.Click_MouseMove;
                 MouseDown += ProgressBehaviour.Mouse_ClickDown;
+                MouseDown += this.Click_MouseDown;
             }
         }
 
@@ -76,18 +77,23 @@ namespace GSTHD
         //        File.WriteAllText(@"red_X_" + DateTime.Now.ToString("MM-dd-yyyy-HH:mm:ss") + ".txt", e.Error.Message.ToString());
         //    }
         //}
-
+        private void Click_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Clicks != 1)
+                isMouseDown = false;
+            else isMouseDown = true;
+        }
 
         private void Click_MouseMove(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left && isMouseDown)
+            if (MouseDetermination.DetermineBasicMouseInput(e, Settings.IncrementActionButton) && isMouseDown)
             {
                 // TODO change that bool to DragBehaviour.AutocheckDragDrop
                 var dropContent = new DragDropContent(false, ImageNames[4], left_id, isMarked);
                 this.DoDragDrop(dropContent, DragDropEffects.Copy);
                 isMouseDown = false;
             }
-            if (e.Button == MouseButtons.Right && isMouseDown)
+            if (MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton) && isMouseDown)
             {
                 var dropContent = new DragDropContent(false, ImageNames[5], right_id, isMarked);
                 this.DoDragDrop(dropContent, DragDropEffects.Copy);

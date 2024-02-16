@@ -37,12 +37,25 @@ namespace GSTHD
         public enum ExtraActionModButton
         {
             None,
-            Shift,
-            Control,
-            Alt,
+            Left,
+            Middle,
+            Right,
+            DoubleLeft,
             MouseButton1,
             MouseButton2,
+            Control,
+            Shift,
+            Alt
         }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum BasicActionButtonOption
+        {
+            None,
+            Left,
+            Middle,
+            Right
+        }
+
 
         [JsonConverter(typeof(StringEnumConverter))]
         public enum SelectEmulatorOption
@@ -70,6 +83,9 @@ namespace GSTHD
         public bool WraparoundDungeonNames { get; set; } = true;
         public DragButtonOption DragButton { get; set; } = DragButtonOption.Middle;
         public DragButtonOption AutocheckDragButton { get; set; } = DragButtonOption.None;
+        public BasicActionButtonOption IncrementActionButton { get; set; } = BasicActionButtonOption.Left;
+        public BasicActionButtonOption DecrementActionButton { get; set; } = BasicActionButtonOption.Right;
+        public BasicActionButtonOption ResetActionButton { get; set; } = BasicActionButtonOption.Middle;
         public ExtraActionModButton ExtraActionButton { get; set; } = ExtraActionModButton.None;
         public SelectEmulatorOption SelectEmulator { get; set; } = SelectEmulatorOption.Project64;
         public SpoilerOrderOption SpoilerOrder { get; set; } = SpoilerOrderOption.Numerical;

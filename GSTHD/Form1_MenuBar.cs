@@ -30,14 +30,15 @@ namespace GSTHD
             //public ToolStripMenuItem ZoomReset;
 
             // Options
-            // Scroll Wheel
-            public ToolStripMenuItem InvertScrollWheel;
-            public ToolStripMenuItem Wraparound;
-
-            // Drag & Drop
+            // Mouse Controls
+            public ToolStripMenuItem IncrementButton;
+            public ToolStripMenuItem DecrementButton;
+            public ToolStripMenuItem ResetButton;
+            public ToolStripMenuItem ExtraButton;
             public ToolStripMenuItem DragButton;
             public ToolStripMenuItem AutocheckDragButton;
-            public ToolStripMenuItem ExtraButton;
+            public ToolStripMenuItem InvertScrollWheel;
+            public ToolStripMenuItem Wraparound;
 
             // Song Markers
             public ToolStripMenuItem MoveLocation;
@@ -86,11 +87,23 @@ namespace GSTHD
         private readonly Dictionary<Settings.ExtraActionModButton, string> ExtraButtonNames = new Dictionary<Settings.ExtraActionModButton, string>
         {
             { Settings.ExtraActionModButton.None, "None" },
-            { Settings.ExtraActionModButton.Shift, "Shift" },
-            { Settings.ExtraActionModButton.Control, "Control" },
-            { Settings.ExtraActionModButton.Alt, "Alt" },
+            { Settings.ExtraActionModButton.Left, "Left Click" },
+            { Settings.ExtraActionModButton.Middle, "Middle Click" },
+            { Settings.ExtraActionModButton.Right, "Right Click" },
             { Settings.ExtraActionModButton.MouseButton1, "Mouse Button 1" },
             { Settings.ExtraActionModButton.MouseButton2, "Mouse Button 2" },
+            { Settings.ExtraActionModButton.DoubleLeft, "Double Left Click" },
+            { Settings.ExtraActionModButton.Shift, "Shift + Left Click" },
+            { Settings.ExtraActionModButton.Control, "Control + Left Click" },
+            { Settings.ExtraActionModButton.Alt, "Alt + Left Click" },
+        };
+
+        private readonly Dictionary<Settings.BasicActionButtonOption, string> BasicButtonNames = new Dictionary<Settings.BasicActionButtonOption, string>
+        {
+            { Settings.BasicActionButtonOption.None, "None" },
+            { Settings.BasicActionButtonOption.Left, "Left Click" },
+            { Settings.BasicActionButtonOption.Middle, "Middle Click" },
+            { Settings.BasicActionButtonOption.Right, "Right Click" }
         };
 
         private readonly Dictionary<Settings.SongMarkerBehaviourOption, string> SongMarkerBehaviourNames = new Dictionary<Settings.SongMarkerBehaviourOption, string>
@@ -121,6 +134,9 @@ namespace GSTHD
         Settings Settings;
         MenuStrip MenuStrip;
         MenuItems Items;
+        Dictionary<Settings.BasicActionButtonOption, ToolStripMenuItem> IncrementButtonOptions;
+        Dictionary<Settings.BasicActionButtonOption, ToolStripMenuItem> DecrementButtonOptions;
+        Dictionary<Settings.BasicActionButtonOption, ToolStripMenuItem> ResetButtonOptions;
         Dictionary<Settings.DragButtonOption, ToolStripMenuItem> DragButtonOptions;
         Dictionary<Settings.DragButtonOption, ToolStripMenuItem> AutocheckDragButtonOptions;
         Dictionary<Settings.ExtraActionModButton, ToolStripMenuItem> ExtraButtonOptions;
@@ -250,24 +266,43 @@ namespace GSTHD
 
             var optionMenu = new ToolStripMenuItem("Options");
             {
-                var scrollWheelSubMenu = new ToolStripMenuItem("Scroll Wheel");
-                {
-                    Items.InvertScrollWheel = new ToolStripMenuItem("Invert Scroll Wheel", null, new EventHandler(menuBar_ToggleInvertScrollWheel))
-                    {
-                        CheckOnClick = true,
-                    };
-                    scrollWheelSubMenu.DropDownItems.Add(Items.InvertScrollWheel);
-
-                    Items.Wraparound = new ToolStripMenuItem("Wraparound Dungeon Names", null, new EventHandler(menuBar_ToggleWraparound))
-                    {
-                        CheckOnClick = true,
-                    };
-                    scrollWheelSubMenu.DropDownItems.Add(Items.Wraparound);
-                }
-                optionMenu.DropDownItems.Add(scrollWheelSubMenu);
 
                 var dragDropSubMenu = new ToolStripMenuItem("Mouse Controls");
                 {
+
+                    //TODO: the three mouse buttons
+                    IncrementButtonOptions = new Dictionary<Settings.BasicActionButtonOption, ToolStripMenuItem>();
+                    DecrementButtonOptions = new Dictionary<Settings.BasicActionButtonOption, ToolStripMenuItem>();
+                    ResetButtonOptions = new Dictionary<Settings.BasicActionButtonOption, ToolStripMenuItem>();
+                    foreach (var button in BasicButtonNames)
+                    {
+                        IncrementButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetIncrementButton)));
+                        DecrementButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetDecrementButton)));
+                        ResetButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetResetButton)));
+                    }
+                    Items.IncrementButton = new ToolStripMenuItem("\"Increment Item\" Button", null, IncrementButtonOptions.Values.ToArray());
+                    dragDropSubMenu.DropDownItems.Add(Items.IncrementButton);
+
+                    Items.DecrementButton = new ToolStripMenuItem("\"Decrement Item\" Button", null, DecrementButtonOptions.Values.ToArray());
+                    dragDropSubMenu.DropDownItems.Add(Items.DecrementButton);
+
+                    Items.ResetButton = new ToolStripMenuItem("\"Reset Item\" Button", null, ResetButtonOptions.Values.ToArray());
+                    dragDropSubMenu.DropDownItems.Add(Items.ResetButton);
+
+
+
+
+
+                    ExtraButtonOptions = new Dictionary<Settings.ExtraActionModButton, ToolStripMenuItem>();
+                    foreach (var button in ExtraButtonNames)
+                    {
+                        ExtraButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetExtraButton)));
+                    }
+                    Items.ExtraButton = new ToolStripMenuItem("\"Checkmark Item\" Button", null, ExtraButtonOptions.Values.ToArray());
+                    dragDropSubMenu.DropDownItems.Add(Items.ExtraButton);
+
+
+
                     DragButtonOptions = new Dictionary<Settings.DragButtonOption, ToolStripMenuItem>();
                     AutocheckDragButtonOptions = new Dictionary<Settings.DragButtonOption, ToolStripMenuItem>();
 
@@ -283,13 +318,26 @@ namespace GSTHD
                     Items.AutocheckDragButton = new ToolStripMenuItem("Autocheck Drag Button", null, AutocheckDragButtonOptions.Values.ToArray());
                     dragDropSubMenu.DropDownItems.Add(Items.AutocheckDragButton);
 
-                    ExtraButtonOptions = new Dictionary<Settings.ExtraActionModButton, ToolStripMenuItem>();
-                    foreach (var button in ExtraButtonNames)
+                    
+
+
+
+                    var scrollWheelSubMenu = new ToolStripMenuItem("Scroll Wheel");
                     {
-                        ExtraButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetExtraButton)));
+                        Items.InvertScrollWheel = new ToolStripMenuItem("Invert Scroll Wheel", null, new EventHandler(menuBar_ToggleInvertScrollWheel))
+                        {
+                            CheckOnClick = true,
+                        };
+                        scrollWheelSubMenu.DropDownItems.Add(Items.InvertScrollWheel);
+
+                        Items.Wraparound = new ToolStripMenuItem("Wraparound Dungeon Names", null, new EventHandler(menuBar_ToggleWraparound))
+                        {
+                            CheckOnClick = true,
+                        };
+                        scrollWheelSubMenu.DropDownItems.Add(Items.Wraparound);
                     }
-                    Items.ExtraButton = new ToolStripMenuItem("Bonus Action Button", null, ExtraButtonOptions.Values.ToArray());
-                    dragDropSubMenu.DropDownItems.Add(Items.ExtraButton);
+                    dragDropSubMenu.DropDownItems.Add(scrollWheelSubMenu);
+
 
                 }
                 optionMenu.DropDownItems.Add(dragDropSubMenu);
@@ -494,6 +542,9 @@ namespace GSTHD
             DragButtonOptions[Settings.DragButton].Checked = true;
             AutocheckDragButtonOptions[Settings.AutocheckDragButton].Checked = true;
             ExtraButtonOptions[Settings.ExtraActionButton].Checked = true;
+            IncrementButtonOptions[Settings.IncrementActionButton].Checked = true;
+            DecrementButtonOptions[Settings.DecrementActionButton].Checked = true;
+            ResetButtonOptions[Settings.ResetActionButton].Checked = true;
 
             Items.MoveLocation.Checked = Settings.MoveLocationToSong;
             //Items.Autocheck.Checked = Settings.AutoCheckSongs;
@@ -750,6 +801,46 @@ namespace GSTHD
             Settings.AutocheckDragButton = option.Key;
             Settings.Write();
         }
+
+        private void menuBar_SetIncrementButton(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            IncrementButtonOptions[Settings.IncrementActionButton].Checked = false;
+            choice.Checked = true;
+
+            var option = IncrementButtonOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.IncrementActionButton = option.Key;
+            Settings.Write();
+        }
+
+        private void menuBar_SetDecrementButton(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            DecrementButtonOptions[Settings.DecrementActionButton].Checked = false;
+            choice.Checked = true;
+
+            var option = DecrementButtonOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.DecrementActionButton = option.Key;
+            Settings.Write();
+        }
+
+        private void menuBar_SetResetButton(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            ResetButtonOptions[Settings.ResetActionButton].Checked = false;
+            choice.Checked = true;
+
+            var option = ResetButtonOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.ResetActionButton = option.Key;
+            Settings.Write();
+        }
+
 
         private void menuBar_SetExtraButton(object sender, EventArgs e)
         {

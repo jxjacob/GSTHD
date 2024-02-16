@@ -141,11 +141,11 @@ namespace GSTHD
 
         private void Mouse_ClickDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left && ColorIndex < Colors.Length - 1)
+            if ((MouseDetermination.DetermineBasicMouseInput(e, Settings.IncrementActionButton)) && ColorIndex < Colors.Length - 1)
             {
                 ColorIndex++;
             }
-            else if (e.Button == MouseButtons.Right && ColorIndex > MinIndex)
+            else if ((MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton)) && ColorIndex > MinIndex)
             {
                 ColorIndex--;
             }

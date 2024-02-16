@@ -242,7 +242,7 @@ namespace GSTHD
                     }
                 }
 
-                Debug.WriteLine(App_Settings.BroadcastFile);
+                //Debug.WriteLine(App_Settings.BroadcastFile);
                 if (App_Settings.BroadcastFile != String.Empty)
                 {
                     settings.ActiveLayoutBroadcastFile = App_Settings.BroadcastFile;
