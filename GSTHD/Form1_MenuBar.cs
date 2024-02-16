@@ -570,6 +570,7 @@ namespace GSTHD
             }
 
             SpoilerOrderOptions[Settings.SpoilerOrder].Checked = true;
+            Items.SpoilerHideStarting.Checked = Settings.HideStarting;
             SpoilerPointColorOptions[Settings.SpoilerPointColour].Checked = true;
             SpoilerWothColorOptions[Settings.SpoilerWOTHColour].Checked = true;
             SpoilerEmptyColorOptions[Settings.SpoilerEmptyColour].Checked = true;

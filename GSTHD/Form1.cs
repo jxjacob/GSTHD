@@ -49,21 +49,20 @@ namespace GSTHD
             //    this.Form1_Load(sender, new EventArgs());
             //}
 
-            // secret feature, will likely scrap
-            //Debug.WriteLine(e.Modifiers);
-            if (e.Modifiers == Keys.Control)
-            {
-                if (e.Control && e.KeyCode == Keys.Oemplus)
-                {
-                    ZoomIn();
-                } else if (e.Control && e.KeyCode == Keys.OemMinus)
-                {
-                    ZoomOut();
-                } else if (e.Control && e.KeyCode == Keys.D0)
-                {
-                    ZoomReset();
-                }
-            }
+            // scrapped feature. does not play well with new OrganicImages
+            //if (e.Modifiers == Keys.Control)
+            //{
+            //    if (e.Control && e.KeyCode == Keys.Oemplus)
+            //    {
+            //        ZoomIn();
+            //    } else if (e.Control && e.KeyCode == Keys.OemMinus)
+            //    {
+            //        ZoomOut();
+            //    } else if (e.Control && e.KeyCode == Keys.D0)
+            //    {
+            //        ZoomReset();
+            //    }
+            //}
         }
 
         private void LoadAll(object sender, EventArgs e)

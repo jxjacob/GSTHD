@@ -320,8 +320,7 @@ namespace GSTHD
             Controls.Add(levelImage);
 
             InitializeDisplayList();
-            UpdatePotions();
-            UpdatePoints();
+            UpdateVisuals();
 
             //Debug.WriteLine(levelOrder + " " + Name + " " + Location + " " + totalPoints + " " + totalWOTHS + " -- " + string.Join(", ", potionsList.ToArray()));
         }
@@ -359,8 +358,7 @@ namespace GSTHD
             pointColour = Color.FromKnownColor(Settings.SpoilerPointColour);
             wothColour = Color.FromKnownColor(Settings.SpoilerWOTHColour);
             emptyColour = Color.FromKnownColor(Settings.SpoilerEmptyColour);
-            UpdatePotions();
-            UpdatePoints();
+            UpdateVisuals();
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {
                 ((SpoilerCell)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateFromSettings();
@@ -431,15 +429,16 @@ namespace GSTHD
         {
             foreach (CellDisplay display in displayList)
             {
-                if (display.item_id == dk_id)
+                if (display.item_id == dk_id && display.isFaded == !isFaded)
                 {
                     display.isFaded = isFaded;
+                    UpdateVisuals();
                     break;
                 }
             }
         }
 
-        public void UpdatePoints()
+        private void UpdatePoints()
         {
 
             if (this.InvokeRequired)
@@ -477,7 +476,7 @@ namespace GSTHD
 
         }
 
-        public void UpdatePotions()
+        private void UpdatePotions()
         {
             if (this.InvokeRequired)
             {
@@ -583,8 +582,7 @@ namespace GSTHD
                 if (!isFaded) foundItems.Add(dk_id.item_id);
                 bool result = AddToDisplayList(dk_id, isStarting, isFaded, isMarked);
                 if (result && pointValue != -1) currentPoints += pointValue;
-                UpdatePotions();
-                UpdatePoints();
+                UpdateVisuals();
             }
             
         }
@@ -595,8 +593,7 @@ namespace GSTHD
             currentPoints -= (noPotions) ? pointspread[temp.itemType] : 0;
 
             RemoveFromDisplayList(dk_id);
-            UpdatePotions();
-            UpdatePoints();
+            UpdateVisuals();
         }
 
         public void AddCrankys(int crPoints, int crWOTHS, List<PotionTypes> crPotions)
@@ -619,8 +616,7 @@ namespace GSTHD
             //    };
             //    Controls.Add(levelNumberImage);
             //}
-            UpdatePoints();
-            UpdatePotions();
+            UpdateVisuals();
         }
 
 
@@ -655,8 +651,7 @@ namespace GSTHD
                 foundItems = state.foundItems;
                 potionsList = state.potionsList;
                 displayList = state.displayList;
-                UpdatePoints();
-                UpdatePotions();
+                UpdateVisuals();
             }
         }
 
@@ -695,6 +690,12 @@ namespace GSTHD
                 displayList = newdl;
             }
 
+            UpdateVisuals();
+        }
+
+        public void UpdateVisuals()
+        {
+            // hotkey for both points and potions so i dont have the *chance* to forget them both
             UpdatePoints();
             UpdatePotions();
         }
