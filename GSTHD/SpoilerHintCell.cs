@@ -122,10 +122,11 @@ namespace GSTHD
         public int item_id;
         public bool isStarting;
         public bool isFaded = false;
+        public bool isMarked = false;
 
         public override string ToString()
         {
-            return $"{potionType}\t{item_id}\t{isStarting}\t{isFaded}";
+            return $"{potionType}\t{item_id}\t{isStarting}\t{isFaded}\t{isMarked}";
         }
     }
 
@@ -344,7 +345,7 @@ namespace GSTHD
                     DK64_Item item = DK64Items[dropContent.dk_id];
                     int sentPoints = (noPotions) ? pointspread[item.itemType] : -2;
                     //Debug.WriteLine($"{item}, {dropContent.IsAutocheck}");
-                    AddNewItem(item, sentPoints, false, 1, !dropContent.IsAutocheck);
+                    AddNewItem(item, sentPoints, false, 1, !dropContent.IsAutocheck, dropContent.isMarked);
                 }
             } catch { }
 
@@ -379,7 +380,7 @@ namespace GSTHD
             }
         }
 
-        public bool AddToDisplayList(DK64_Item item, bool starting, bool faded)
+        public bool AddToDisplayList(DK64_Item item, bool starting, bool faded, bool marked)
         {
             for (int i = 0; i < displayList.Count; i++)
             {
@@ -389,15 +390,17 @@ namespace GSTHD
                     displayList[i].item_id = item.item_id;
                     displayList[i].isStarting = starting;
                     displayList[i].isFaded = faded;
+                    displayList[i].isMarked = marked;
                     return false;
                 } else if ((displayList[i].potionType == (int)item.potionType || displayList[i].potionType == -1) && displayList[i].item_id == item.item_id && displayList[i].isFaded && !faded)
                 {
                     // new move into existing faded slot (dupe preventing)
                     displayList[i].isFaded = false;
+                    displayList[i].isMarked = marked;
                     return false;
                 }
             }
-            displayList.Add(new CellDisplay { potionType = -1, isStarting = starting, item_id = item.item_id, isFaded = faded});
+            displayList.Add(new CellDisplay { potionType = -1, isStarting = starting, item_id = item.item_id, isFaded = faded, isMarked = marked});
             return true;
         }
 
@@ -545,7 +548,7 @@ namespace GSTHD
                         int newY = (thingsdisplayed / displayablePotsWidth)*usedPotHeight + topRowHeight + yOffset;
 
                         string toDisplay = (pot.item_id != -1) ? DK64Items[pot.item_id].image : potionImageList[(int)pot.potionType];
-                        Debug.WriteLineIf((pot.item_id != -1), $"todisplay = {toDisplay}");
+                        //Debug.WriteLineIf((pot.item_id != -1), $"todisplay = {toDisplay}");
 
                         CellPictureBox newPot = new CellPictureBox(Settings)
                         {
@@ -557,6 +560,7 @@ namespace GSTHD
                             dk_id = pot.item_id,
                             isFaded = pot.isFaded,
                             BackColor = this.BackColor,
+                            isMarked = pot.isMarked,
                         };
 
                         //Debug.WriteLine($"{thingsdisplayed}:   x:{newX} y:{newY} w:{newPot.Width} h:{newPot.Height}");
@@ -571,14 +575,13 @@ namespace GSTHD
             }
         }
 
-        public void AddNewItem(DK64_Item dk_id, int pointValue, bool isStarting, int howMany, bool isFaded = false)
+        public void AddNewItem(DK64_Item dk_id, int pointValue, bool isStarting, int howMany, bool isFaded = false, bool isMarked = false)
         {
             
             for (int i = 0; i < howMany; i++)
             {
                 if (!isFaded) foundItems.Add(dk_id.item_id);
-                Debug.WriteLine($"{isFaded}");
-                bool result = AddToDisplayList(dk_id, isStarting, isFaded);
+                bool result = AddToDisplayList(dk_id, isStarting, isFaded, isMarked);
                 if (result && pointValue != -1) currentPoints += pointValue;
                 UpdatePotions();
                 UpdatePoints();
@@ -686,7 +689,8 @@ namespace GSTHD
                     //i1 = itemid (int)
                     //i2 = isstarting (bool
                     //i3 = fiaded (bool
-                    newdl.Add(new CellDisplay() { potionType = int.Parse(inner[0]) , item_id = int.Parse(inner[1]) , isStarting = bool.Parse(inner[2]), isFaded = bool.Parse(inner[3]) });
+                    //i4 = marked (bool
+                    newdl.Add(new CellDisplay() { potionType = int.Parse(inner[0]) , item_id = int.Parse(inner[1]) , isStarting = bool.Parse(inner[2]), isFaded = bool.Parse(inner[3]), isMarked = bool.Parse(inner[4]) });
                 }
                 displayList = newdl;
             }

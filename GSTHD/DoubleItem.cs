@@ -83,13 +83,13 @@ namespace GSTHD
             if (e.Button == MouseButtons.Left && isMouseDown)
             {
                 // TODO change that bool to DragBehaviour.AutocheckDragDrop
-                var dropContent = new DragDropContent(false, ImageNames[4], left_id);
+                var dropContent = new DragDropContent(false, ImageNames[4], left_id, isMarked);
                 this.DoDragDrop(dropContent, DragDropEffects.Copy);
                 isMouseDown = false;
             }
             if (e.Button == MouseButtons.Right && isMouseDown)
             {
-                var dropContent = new DragDropContent(false, ImageNames[5], right_id);
+                var dropContent = new DragDropContent(false, ImageNames[5], right_id, isMarked);
                 this.DoDragDrop(dropContent, DragDropEffects.Copy);
                 isMouseDown = false;
             }

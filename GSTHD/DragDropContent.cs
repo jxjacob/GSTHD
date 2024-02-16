@@ -11,12 +11,14 @@ namespace GSTHD
         public bool IsAutocheck;
         public string ImageName;
         public int dk_id;
+        public bool isMarked;
 
-        public DragDropContent(bool isAutocheck, string imageName, int dkid = -1)
+        public DragDropContent(bool isAutocheck, string imageName, int dkid = -1, bool marked = false)
         {
             IsAutocheck = isAutocheck;
             ImageName = imageName;
             dk_id = dkid;
+            isMarked = marked;
         }
     }
 }

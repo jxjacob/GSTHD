@@ -251,7 +251,7 @@ namespace GSTHD
         {
             HoldsImage = false;
             UpdateImage();
-            var dropContent = new DragDropContent(false, HeldImageName);
+            var dropContent = new DragDropContent(false, HeldImageName, marked: isMarked);
             DoDragDrop(dropContent, DragDropEffects.Copy);
             SaveChanges();
         }
@@ -525,7 +525,7 @@ namespace GSTHD
 
         public void StartDragDrop()
         {
-            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, DragPictureName);
+            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, DragPictureName, marked: isMarked);
             DoDragDrop(dropContent, DragDropEffects.Copy);
         }
 

@@ -204,16 +204,8 @@ namespace GSTHD
 
         public void StartDragDrop()
         {
-            if (DragImage != null)
-            {
-                var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, DragImage, DK64_ID);
-                DoDragDrop(dropContent, DragDropEffects.Copy);
-            }
-            else
-            {
-                var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[System.Math.Max(ImageIndex, 1)], DK64_ID);
-                DoDragDrop(dropContent, DragDropEffects.Copy);
-            }
+            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, (DragImage != null) ? DragImage : ImageNames[System.Math.Max(ImageIndex, 1)], DK64_ID, isMarked);
+            DoDragDrop(dropContent, DragDropEffects.Copy);
         }
 
         public void SaveChanges() { }

@@ -43,7 +43,7 @@ namespace GSTHD
             // imgX imgY imgWidth imgHeight
 
 
-            int newX, newY, newWidth, newHeight, imgX, imgY, imgWidth, imgHeight;
+            int newX, newY, newWidth, newHeight;
             switch (SizeMode){
                 case PictureBoxSizeMode.Zoom:
                     // this needs to be fixed for the world names

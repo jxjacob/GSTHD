@@ -433,7 +433,7 @@ namespace GSTHD
             }
         }
 
-        public void AddFromAT(int currentMap, int dk_id, int howMany)
+        public void AddFromAT(int currentMap, int dk_id, int howMany, bool marked)
         {
             if (spoilerLoaded && !startingItems.Contains(dk_id) && dk_id >=0)
             {
@@ -478,7 +478,7 @@ namespace GSTHD
 
                 if (lastKnownMap >= 0 && !foundATItems.Contains(dk_id) && howMany > 0)
                 {
-                    cells[lastKnownMap].AddNewItem(dkitem, addedpoints, isStarting, howMany);
+                    cells[lastKnownMap].AddNewItem(dkitem, addedpoints, isStarting, howMany, isMarked:marked);
                     // dupe slams are handled seperately and skip the queue
                     if (dk_id != 36) foundATItems.Add(dk_id);
                 }

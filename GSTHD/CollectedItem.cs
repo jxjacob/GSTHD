@@ -211,7 +211,7 @@ namespace GSTHD
 
         public void StartDragDrop()
         {
-            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[System.Math.Min(System.Math.Max(1, CollectedItems), ImageNames.Length - 1)]);
+            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[System.Math.Min(System.Math.Max(1, CollectedItems), ImageNames.Length - 1)], marked:isMarked);
             DoDragDrop(dropContent, DragDropEffects.Copy);
 
         }

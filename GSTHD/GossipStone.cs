@@ -178,12 +178,14 @@ namespace GSTHD
                 if (!HeldImages.Contains(dropContent.ImageName))
                 {
                     HeldImages.Add(dropContent.ImageName);
+                    isMarked = dropContent.isMarked;
                 }
             }
             else
             {
                 HeldImages.Clear();
                 HeldImages.Add(dropContent.ImageName);
+                isMarked = dropContent.isMarked;
             }
             UpdateImage();
             DragBehaviour.SaveChanges();
@@ -395,7 +397,7 @@ namespace GSTHD
 
         public void StartDragDrop()
         {
-            var dropContent = new DragDropContent(false, HeldImages[CycleIndex]);
+            var dropContent = new DragDropContent(false, HeldImages[CycleIndex], marked: isMarked);
             DoDragDrop(dropContent, DragDropEffects.Copy);
             HeldImages.Remove(dropContent.ImageName);
             if (HeldImages.Count == 0) HoldsImage = false;
