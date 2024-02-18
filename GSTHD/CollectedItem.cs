@@ -33,6 +33,7 @@ namespace GSTHD
         public string AutoSubName = null;
 
         delegate void SetStateCallback(int state);
+        delegate void UpdateCountCallback();
 
         public CollectedItem(ObjectPointCollectedItem data, Settings settings, bool isBroadcast = false)
         {
@@ -137,15 +138,23 @@ namespace GSTHD
 
         public void UpdateCount()
         {
-            ItemCount.Text = CollectedItems.ToString();
-            if (hasSlash) ItemCount.Text += " /";
-            if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+            if (this.InvokeRequired)
             {
-                ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).CollectedItems = CollectedItems;
-                ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
-                ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateCount();
+                this.Invoke(new UpdateCountCallback(UpdateCount));
+                return;
+
+            } else
+            {
+                ItemCount.Text = CollectedItems.ToString();
+                if (hasSlash) ItemCount.Text += " /";
+                if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+                {
+                    ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).CollectedItems = CollectedItems;
+                    ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
+                    ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateCount();
+                }
+                UpdateImage();
             }
-            UpdateImage();
         }
 
         public int GetState()
