@@ -54,7 +54,9 @@ namespace GSTHD
             if (e.Button == MouseButtons.Left && ea == Settings.ExtraActionModButton.Left ||
                 e.Button == MouseButtons.Middle && ea == Settings.ExtraActionModButton.Middle ||
                 e.Button == MouseButtons.Right && ea == Settings.ExtraActionModButton.Right ||
-                e.Button == MouseButtons.Left && ea == Settings.ExtraActionModButton.DoubleLeft && e.Clicks > 1)
+                e.Button == MouseButtons.Left && ea == Settings.ExtraActionModButton.DoubleLeft && e.Clicks > 1 ||
+                e.Button == MouseButtons.XButton1 && ea == Settings.ExtraActionModButton.MouseButton1 ||
+                e.Button == MouseButtons.XButton2 && ea == Settings.ExtraActionModButton.MouseButton2 )
             {
                 return true;
             } else { return false; }

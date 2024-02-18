@@ -48,7 +48,7 @@ namespace GSTHD
             CollectedItemMin = data.CountMin;
             CollectedItemMax = data.CountMax.HasValue ? data.CountMax.Value : 100;
             CollectedItemDefault = data.DefaultValue;
-            CollectedItems = System.Math.Min(System.Math.Max(CollectedItemMin, CollectedItemDefault), CollectedItemMax);
+            CollectedItems = Math.Clamp(CollectedItemDefault, CollectedItemMin, CollectedItemMax);
             Step = data.Step == 0 ? 1 : data.Step;
             CollectedItemSize = data.Size;
             isBroadcastable = data.isBroadcastable && !isBroadcast;
@@ -131,7 +131,7 @@ namespace GSTHD
         {
             if (Image != null) Image.Dispose();
             Image = null;
-            Image = Image.FromFile(@"Resources/" + ImageNames[System.Math.Max(System.Math.Min(CollectedItems, ImageNames.Length - 1), 0)]);
+            Image = Image.FromFile(@"Resources/" + ImageNames[Math.Clamp(CollectedItems, 0, ImageNames.Length-1)]);
             if (IsHandleCreated) { Invalidate(); }
         }
 
@@ -211,7 +211,7 @@ namespace GSTHD
 
         public void StartDragDrop()
         {
-            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[System.Math.Min(System.Math.Max(1, CollectedItems), ImageNames.Length - 1)], marked:isMarked);
+            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[Math.Clamp(CollectedItems, 1, ImageNames.Length - 1)], marked:isMarked);
             DoDragDrop(dropContent, DragDropEffects.Copy);
 
         }

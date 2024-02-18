@@ -211,7 +211,7 @@ namespace GSTHD
                 return;
             } else
             {
-                ImageIndex = state.ImageIndex;
+                ImageIndex = Math.Clamp(state.ImageIndex, 0, ImageNames.Length);
                 DungeonIndex = state.DungeonIndex;
                 SelectedDungeon.Text = DungeonNames[DungeonIndex];
                 UpdateImage();
@@ -228,7 +228,7 @@ namespace GSTHD
 
         public void SetImageState(int state)
         {
-            ImageIndex = System.Math.Min(ImageNames.Length, state);
+            ImageIndex = Math.Clamp(state, 0, ImageNames.Length);
             UpdateImage();
         }
 

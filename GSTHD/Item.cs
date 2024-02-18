@@ -162,7 +162,7 @@ namespace GSTHD
             }
             else
             {
-                ImageIndex = state;
+                ImageIndex = Math.Clamp(state, 0, ImageNames.Length);
                 VerifyState();
                 UpdateImage();
                 DragBehaviour.SaveChanges();

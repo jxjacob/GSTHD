@@ -51,5 +51,10 @@ namespace GSTHD
             int babs = System.Math.Abs(b);
             return a - babs * FlooredDiv(a, babs);
         }
+
+        public static int Clamp(int a, int min, int max)
+        {
+            return (a < min) ? min : ((a > max) ? max : a);
+        }
     }
 }
