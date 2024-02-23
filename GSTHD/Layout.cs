@@ -357,8 +357,8 @@ namespace GSTHD
                                         FontColor = item.FontColor,
                                         Width = item.Width,
                                         Height = item.Height,
-                                        X = item.X + i * (item.Size.Width + item.Spacing.Width),
-                                        Y = item.Y + j * (item.Size.Height + item.Spacing.Height),
+                                        X = item.X + i * (item.Width + item.Spacing.Width),
+                                        Y = item.Y + j * (item.Height + item.Spacing.Height),
                                         BorderStyle = item.BorderStyle,
                                         isBroadcastable = item.isBroadcastable
                                     };
@@ -879,8 +879,8 @@ namespace GSTHD
                                         FontColor = item.FontColor,
                                         Width = item.Width,
                                         Height = item.Height,
-                                        X = item.X + i * (item.Size.Width + item.Spacing.Width),
-                                        Y = item.Y + j * (item.Size.Height + item.Spacing.Height),
+                                        X = item.X + i * (item.Width + item.Spacing.Width),
+                                        Y = item.Y + j * (item.Height + item.Spacing.Height),
                                         BorderStyle = item.BorderStyle,
                                         isBroadcastable = item.isBroadcastable
                                     };
