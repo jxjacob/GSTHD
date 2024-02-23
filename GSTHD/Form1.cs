@@ -269,11 +269,13 @@ namespace GSTHD
 
         public void SetAutotracker(Process emulator, uint offset)
         {
+            StopAutotracker();
             TheAutotracker = new Autotracker(emulator, offset, this);
         }
 
         public void SetAutotracker(Process emulator, ulong offset)
         {
+            StopAutotracker();
             TheAutotracker = new Autotracker(emulator, offset, this);
         }
 

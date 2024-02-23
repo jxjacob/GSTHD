@@ -59,9 +59,11 @@ namespace GSTHD
             public ToolStripMenuItem SpoilerPointColor;
             public ToolStripMenuItem SpoilerWothColor;
             public ToolStripMenuItem SpoilerEmptyColor;
+            public ToolStripMenuItem CellOverrideCheckMark;
 
             // Gossip Stone Stuff
             public ToolStripMenuItem OverrideHeldImage;
+            public ToolStripMenuItem StoneOverrideCheckMark;
             public ToolStripMenuItem CycleLength;
             public ToolStripMenuItem ForceGossipCycles;
 
@@ -103,7 +105,9 @@ namespace GSTHD
             { Settings.BasicActionButtonOption.None, "None" },
             { Settings.BasicActionButtonOption.Left, "Left Click" },
             { Settings.BasicActionButtonOption.Middle, "Middle Click" },
-            { Settings.BasicActionButtonOption.Right, "Right Click" }
+            { Settings.BasicActionButtonOption.Right, "Right Click" },
+            { Settings.BasicActionButtonOption.MouseButton1, "Mouse Button 1" },
+            { Settings.BasicActionButtonOption.MouseButton2, "Mouse Button 2" }
         };
 
         private readonly Dictionary<Settings.SongMarkerBehaviourOption, string> SongMarkerBehaviourNames = new Dictionary<Settings.SongMarkerBehaviourOption, string>
@@ -426,6 +430,12 @@ namespace GSTHD
                     };
                     gossipSubMenu.DropDownItems.Add(Items.OverrideHeldImage);
 
+                    Items.StoneOverrideCheckMark = new ToolStripMenuItem("Ignore Incoming Checkmarks", null, new EventHandler(menuBar_ToggleOverrideStoneCheckmark))
+                    {
+                        CheckOnClick = true,
+                    };
+                    gossipSubMenu.DropDownItems.Add(Items.StoneOverrideCheckMark);
+
                     GossipeCycleLengthOptions = new Dictionary<double, ToolStripMenuItem>();
                     
                     for (double i = 0.25; i <= 2.0; i+=0.25)
@@ -463,6 +473,12 @@ namespace GSTHD
                         CheckOnClick = true,
                     };
                     spoilerSubMenu.DropDownItems.Add(Items.SpoilerHideStarting);
+
+                    Items.CellOverrideCheckMark = new ToolStripMenuItem("Ignore Incoming Checkmarks", null, new EventHandler(menuBar_ToggleOverrideCellCheckmark))
+                    {
+                        CheckOnClick = true,
+                    };
+                    spoilerSubMenu.DropDownItems.Add(Items.CellOverrideCheckMark);
 
                     // point colour
                     Items.SpoilerPointColor = new ToolStripMenuItem("Point Number Color", null, SpoilerPointColorOptions.Values.ToArray());
@@ -557,6 +573,8 @@ namespace GSTHD
             Items.EnableBarrenColors.Checked = Settings.EnableBarrenColors;
 
             Items.OverrideHeldImage.Checked = Settings.OverrideHeldImage;
+            Items.CellOverrideCheckMark.Checked = Settings.CellOverrideCheckMark;
+            Items.StoneOverrideCheckMark.Checked = Settings.StoneOverrideCheckMark;
             Items.ForceGossipCycles.Checked = Settings.ForceGossipCycles;
 
             Items.EnableAutosaves.Checked = Settings.EnableAutosave;
@@ -953,6 +971,20 @@ namespace GSTHD
         private void menuBar_ToggleOverrideHeldImage(object sender, EventArgs e)
         {
             Settings.OverrideHeldImage = Items.OverrideHeldImage.Checked;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
+        private void menuBar_ToggleOverrideStoneCheckmark(object sender, EventArgs e)
+        {
+            Settings.StoneOverrideCheckMark = Items.StoneOverrideCheckMark.Checked;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
+        private void menuBar_ToggleOverrideCellCheckmark(object sender, EventArgs e)
+        {
+            Settings.CellOverrideCheckMark = Items.CellOverrideCheckMark.Checked;
             Settings.Write();
             Form.UpdateLayoutFromSettings();
         }

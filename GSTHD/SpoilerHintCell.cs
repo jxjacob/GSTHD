@@ -95,6 +95,7 @@ namespace GSTHD
         public void ToggleCheck()
         {
             isMarked = !isMarked;
+            hostCell.TellMarked(dk_id, isMarked);
             Invalidate();
         }
 
@@ -285,13 +286,15 @@ namespace GSTHD
                 // put in the static image
                 ObjectPoint temp1 = new ObjectPoint()
                 {
+                    Name = $"{name}_levelImageNumber",
                     ImageCollection = new string[] { $"dk64/{levelOrder}.png" },
                     Size = new Size(WorldNumWidth, WorldNumHeight),
                     SizeMode = PictureBoxSizeMode.Zoom,
                     X = 0,
                     Y = 0,
+                    isBroadcastable = this.isBroadcastable
                 };
-                levelNumberImage = new GuaranteedHint(temp1, settings);
+                levelNumberImage = new GuaranteedHint(temp1, settings, !this.isBroadcastable);
                 Controls.Add(levelNumberImage);
             } else if (levelOrder < 0)
             {
@@ -302,7 +305,7 @@ namespace GSTHD
                     X = 0, Y = 0,
                     Size = new Size(WorldNumWidth, WorldNumHeight),
                     ImageCollection = new string[] { "dk64/unknownnum.png", "dk64/1.png", "dk64/2.png", "dk64/3.png", "dk64/4.png", "dk64/5.png", "dk64/6.png", "dk64/7.png" },
-                    isBroadcastable = true,
+                    isBroadcastable = this.isBroadcastable,
                 };
                 unknownLevelNumberImage = new Item(temp2, settings);
                 Controls.Add(unknownLevelNumberImage);
@@ -310,13 +313,15 @@ namespace GSTHD
 
             ObjectPoint temp3 = new ObjectPoint()
             {
+                Name = $"{name}_levelImageName",
                 ImageCollection = new string[] { $"dk64/{levelList[levelID]}.png" },
                 Size = new Size(58, WorldNumHeight - 2),
                 SizeMode = PictureBoxSizeMode.Zoom,
                 X = (!MinimalMode && levelOrder == 9) ? -6 : 18,
                 Y = 1,
+                isBroadcastable = this.isBroadcastable,
             };
-            levelImage = new GuaranteedHint(temp3, settings);
+            levelImage = new GuaranteedHint(temp3, settings, !this.isBroadcastable);
             Controls.Add(levelImage);
 
             InitializeDisplayList();
@@ -432,6 +437,19 @@ namespace GSTHD
                 if (display.item_id == dk_id && display.isFaded == !isFaded)
                 {
                     display.isFaded = isFaded;
+                    UpdateVisuals();
+                    break;
+                }
+            }
+        }
+
+        public void TellMarked(int dk_id, bool isMarked)
+        {
+            foreach (CellDisplay display in displayList)
+            {
+                if (display.item_id == dk_id && display.isMarked == !isMarked)
+                {
+                    display.isMarked = isMarked;
                     UpdateVisuals();
                     break;
                 }
@@ -580,7 +598,7 @@ namespace GSTHD
             for (int i = 0; i < howMany; i++)
             {
                 if (!isFaded) foundItems.Add(dk_id.item_id);
-                bool result = AddToDisplayList(dk_id, isStarting, isFaded, isMarked);
+                bool result = AddToDisplayList(dk_id, isStarting, isFaded, isMarked && !Settings.CellOverrideCheckMark);
                 if (result && pointValue != -1) currentPoints += pointValue;
                 UpdateVisuals();
             }

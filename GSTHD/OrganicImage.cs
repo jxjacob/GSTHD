@@ -97,7 +97,8 @@ namespace GSTHD
                     results[4], results[5], results[6], results[7], GraphicsUnit.Pixel,
                     ia);
 
-                if (isMarked)
+                // hide check if too dang small (if checkmark is over half of the visible image area)
+                if (isMarked && (8*8 < (results[2] * results[3]/2)))
                 {
                     if (markedImage == null)
                     {

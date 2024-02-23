@@ -247,6 +247,7 @@ namespace GSTHD
         public void ResetState()
         {
             ImageIndex = 0;
+            isMarked = false;
             UpdateImage();
             DungeonIndex = DefaultDungeonIndex;
             SelectedDungeon.Text = DungeonNames[DungeonIndex];

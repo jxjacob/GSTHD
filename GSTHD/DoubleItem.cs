@@ -197,6 +197,7 @@ namespace GSTHD
         public void ResetState()
         {
             ImageIndex = 0;
+            isMarked = false;
             isColoredRight = false;
             isColoredLeft = false;
             UpdateImage();

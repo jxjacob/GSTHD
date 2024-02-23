@@ -195,6 +195,7 @@ namespace GSTHD
         public void ResetState()
         {
             CollectedItems = CollectedItemDefault;
+            isMarked = false;
             UpdateCount();
         }
         public void ToggleCheck()

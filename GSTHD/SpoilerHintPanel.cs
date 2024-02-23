@@ -213,6 +213,11 @@ namespace GSTHD
             {
                 pointspread = JsonConvert.DeserializeObject<Dictionary<string, int>>(spoilerData["point_spread"]);
                 spoilerData.Remove("point_spread");
+                //futureproof fairymoves that evaded notice
+                if (!pointspread.ContainsKey("fairy_moves"))
+                {
+                    pointspread.Add("fairy_moves", pointspread["training_moves"]);
+                }
                 pointsMode = true;
             }
             else

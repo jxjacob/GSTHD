@@ -178,14 +178,14 @@ namespace GSTHD
                 if (!HeldImages.Contains(dropContent.ImageName))
                 {
                     HeldImages.Add(dropContent.ImageName);
-                    isMarked = dropContent.isMarked;
+                    isMarked = (!Settings.StoneOverrideCheckMark) ? dropContent.isMarked || isMarked : isMarked;
                 }
             }
             else
             {
                 HeldImages.Clear();
                 HeldImages.Add(dropContent.ImageName);
-                isMarked = dropContent.isMarked;
+                isMarked = (!Settings.StoneOverrideCheckMark) ? dropContent.isMarked || isMarked : isMarked;
             }
             UpdateImage();
             DragBehaviour.SaveChanges();
@@ -377,11 +377,13 @@ namespace GSTHD
                 RemoveImage = true;
                 HeldImages.Clear();
                 HoldsImage = false;
+                isMarked = false;
                 if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
                     var remotewindow = ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]);
                     remotewindow.RemoveImage = true;
                     remotewindow.HeldImages.Clear();
+                    remotewindow.isMarked = false;
                     remotewindow.HoldsImage = false;
                 }
                 ImageIndex = 0;

@@ -238,6 +238,7 @@ namespace GSTHD
         {
             RemoveImage = true;
             ImageIndex = 0;
+            isMarked = false;
             UpdateImage();
         }
 
@@ -514,6 +515,7 @@ namespace GSTHD
         public void ResetState()
         {
             ImageIndex = 0;
+            isMarked = false;
             UpdateImage();
         }
 

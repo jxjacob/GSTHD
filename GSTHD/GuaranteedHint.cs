@@ -11,10 +11,11 @@ namespace GSTHD
         private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
 
         List<string> ListImageName = new List<string>();
+        bool isBroadcastable = false;
 
         Size GuaranteddHintSize;
 
-        public GuaranteedHint(ObjectPoint data, Settings settings)
+        public GuaranteedHint(ObjectPoint data, Settings settings, bool isOnBroadcast)
         {
             Settings = settings;
 
@@ -34,12 +35,24 @@ namespace GSTHD
             this.Location = new Point(data.X, data.Y);
             this.TabStop = false;
             this.AllowDrop = false;
+            this.isBroadcastable = data.isBroadcastable;
 
-
-            ProgressBehaviour = new ProgressibleElementBehaviour<int>(this, Settings);
-            this.MouseDown += ProgressBehaviour.Mouse_ClickDown;
+            if (!isOnBroadcast)
+            {
+                ProgressBehaviour = new ProgressibleElementBehaviour<int>(this, Settings);
+                this.MouseDown += ProgressBehaviour.Mouse_ClickDown;
+            }
         }
 
+        public void UpdateImage()
+        {
+            if (IsHandleCreated) { Invalidate(); }
+            if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+            {
+                ((GuaranteedHint)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
+                ((GuaranteedHint)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
+            }
+        }
 
         // this is so fucking unneccesary just to allow you to checkmark a static image lmao
         public void IncrementState()
@@ -57,7 +70,7 @@ namespace GSTHD
         public void ToggleCheck()
         {
             isMarked = !isMarked;
-            if (IsHandleCreated) { Invalidate(); }
+            UpdateImage();
         }
     }
 }

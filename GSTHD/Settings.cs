@@ -53,7 +53,9 @@ namespace GSTHD
             None,
             Left,
             Middle,
-            Right
+            Right,
+            MouseButton1,
+            MouseButton2
         }
 
 
@@ -115,6 +117,8 @@ namespace GSTHD
         public bool EnableBarrenColors { get; set; } = true;
         public bool ForceGossipCycles { get; set; } = false;
         public bool OverrideHeldImage { get; set; } = false;
+        public bool StoneOverrideCheckMark { get; set; } = false;
+        public bool CellOverrideCheckMark { get; set; } = false;
         public double GossipCycleTime { get; set; } = 1;
         public bool EnableAutosave { get; set; } = true;
         public bool DeleteOldAutosaves { get; set; } = true;

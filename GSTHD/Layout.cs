@@ -465,7 +465,7 @@ namespace GSTHD
                     foreach (var item in ListGuaranteedHints)
                     {
                         if (item.Visible)
-                            panelLayout.Controls.Add(new GuaranteedHint(item, settings));
+                            panelLayout.Controls.Add(new GuaranteedHint(item, settings, false));
                     }
                 }
 
@@ -986,7 +986,7 @@ namespace GSTHD
                     foreach (var item in ListGuaranteedHints)
                     {
                         if (item.Visible)
-                            panelLayout.Controls.Add(new GuaranteedHint(item, settings));
+                            panelLayout.Controls.Add(new GuaranteedHint(item, settings, true));
                     }
                 }
 
