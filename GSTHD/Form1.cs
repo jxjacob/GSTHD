@@ -14,7 +14,15 @@ using System.Windows.Forms;
 
 namespace GSTHD
 {
-    public partial class Form1 : Form
+    public interface GSTForms
+    {
+        void Reset(object sender);
+
+        Color BackColor { get; set; }
+        String Name { get; set; }
+    }
+
+    public partial class Form1 : Form, GSTForms
     {
         Dictionary<string, string> ListPlacesWithTag = new Dictionary<string, string>();
         SortedSet<string> ListPlaces = new SortedSet<string>();
