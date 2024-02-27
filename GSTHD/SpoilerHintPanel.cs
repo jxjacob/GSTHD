@@ -328,7 +328,7 @@ namespace GSTHD
 
                     int newX = xmod * (cellWidth) + (xmod * rowPadding);
                     int newY = ymod * (cellHeight) + (ymod * colPadding);
-                    Debug.WriteLine($"p: {placement} l: {(string)parseddata["level_name"]} x: {newX} -- y: {newY}");
+                    //Debug.WriteLine($"p: {placement} l: {(string)parseddata["level_name"]} x: {newX} -- y: {newY}");
 
 
                     var newpotions = ParsePotions(parseddata["vial_colors"]);

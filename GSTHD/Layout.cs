@@ -80,6 +80,15 @@ namespace GSTHD
                     // force reload
                     form.Reset(null);
                     return;
+                } catch (FileNotFoundException)
+                {
+                    MessageBox.Show("File " + settings.ActiveLayout.ToString() + " could not be found.\nReverting to dk64.json.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // set settings to dk64.json
+                    settings.ActiveLayout = "layouts\\dk64.json";
+                    settings.Write();
+                    // force reload
+                    form.Reset(null);
+                    return;
                 }
                 
                 foreach (var category in json_layout)

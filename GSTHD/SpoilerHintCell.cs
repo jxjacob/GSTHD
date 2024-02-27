@@ -252,12 +252,12 @@ namespace GSTHD
                     Font = new Font(new FontFamily(fontName), fontSize, fontStyle),
                     ForeColor = pointColour,
                     //BackColor = Color.Red,
-                    Width = labelWidth,
+                    Width = labelWidth + ((int)System.Math.Max(0, System.Math.Floor(System.Math.Log10(totalPoints)) - 1) * 6),
                     Height = WorldNumHeight,
                     AutoSize = false,
                     TextAlign = System.Drawing.ContentAlignment.MiddleRight,
                     Anchor = AnchorStyles.Right,
-                    Location = new Point(width - (shownnumbers * labelSpacing) - 2 - this.topRowPadding, -1)
+                    Location = new Point(width - (shownnumbers * labelSpacing) - 2 - ((int)System.Math.Max(0, System.Math.Floor(System.Math.Log10(totalPoints)) - 1) * 6) - this.topRowPadding, -1)
                 };
                 shownnumbers++;
                 if (totalPoints == 0) pointLabel.ForeColor = emptyColour;
