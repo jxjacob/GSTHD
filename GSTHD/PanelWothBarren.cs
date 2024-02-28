@@ -509,31 +509,36 @@ namespace GSTHD
                 GossipStone foundStone = null;
                 bool storedHoldsImage = false;
                 List<string> storedHeldImageName = null;
-                if (secondPart.Length > 3)
+                int storedImageIndex = 0;
+                if (secondPart.Length > 4)
                 {
                     for (int i = 0; i < secondPart.Length; i++)
                     {
-                        if (i % 4 == 0)
+                        if (i % 5 == 0)
                         {
                             // 0th is the name
                             foundStone = (GossipStone)(this.Controls.Find(secondPart[i], true)[0]);
                         }
-                        else if (i % 4 == 1)
+                        else if (i % 5 == 1)
                         {
                             // 1st is the bool
                             storedHoldsImage = Boolean.Parse(secondPart[i]);
                         }
-                        else if (i % 4 == 2)
+                        else if (i % 5 == 2)
                         {
                             // 2nd is the stored image
                             string[] images = (secondPart[i]).Split('|');
                             storedHeldImageName = images.ToList();
                         }
-                        else if (i % 4 == 3)
+                        else if (i % 5 == 3)
                         {
                             // 3rd is the stateindex
+                            storedImageIndex = int.Parse(secondPart[i]);
+                        } else if (i % 5 == 4)
+                        {
+                            // 4th is 
                             // also we have all 4 so go and set the state
-                            foundStone.SetState(new GossipStoneState() { HoldsImage = storedHoldsImage, HeldImages = storedHeldImageName, ImageIndex = int.Parse(secondPart[i]) });
+                            foundStone.SetState(new GossipStoneState() { HoldsImage = storedHoldsImage, HeldImages = storedHeldImageName, ImageIndex = storedImageIndex, isMarked = bool.Parse(secondPart[i]) });
                         }
                     }
                 }

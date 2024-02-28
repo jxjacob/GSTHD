@@ -11,8 +11,9 @@ namespace GSTHD
     {
         public int DungeonIndex;
         public int ImageIndex;
+        public bool isMarked;
 
-        public override string ToString() => $"{DungeonIndex},{ImageIndex}";
+        public override string ToString() => $"{DungeonIndex},{ImageIndex},{isMarked}";
     }
 
     public class Medallion : OrganicImage, UpdatableFromSettings, ProgressibleElement<MedallionState>, DraggableAutocheckElement<MedallionState>
@@ -200,6 +201,7 @@ namespace GSTHD
             {
                 DungeonIndex = DungeonIndex,
                 ImageIndex = ImageIndex,
+                isMarked = isMarked,
             };
         }
 
@@ -214,6 +216,7 @@ namespace GSTHD
                 ImageIndex = Math.Clamp(state.ImageIndex, 0, ImageNames.Length);
                 DungeonIndex = state.DungeonIndex;
                 SelectedDungeon.Text = DungeonNames[DungeonIndex];
+                isMarked = state.isMarked;
                 UpdateImage();
                 SetSelectedDungeonLocation();
                 DragBehaviour.SaveChanges();

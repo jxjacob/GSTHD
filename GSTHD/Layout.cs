@@ -375,6 +375,7 @@ namespace GSTHD
                                 {
                                     ObjectPointTextbox temp = new ObjectPointTextbox()
                                     {
+                                        Text = item.Text,
                                         BackColor = item.BackColor,
                                         Name = item.Name + j + i,
                                         FontName = item.FontName,
@@ -654,6 +655,7 @@ namespace GSTHD
     public class ObjectPointTextbox
     {
         public string Name { get; set; }
+        public string Text { get; set; } = "";
         public int X { get; set; }
         public int Y { get; set; }
         public bool Visible { get; set; }
@@ -738,6 +740,7 @@ namespace GSTHD
     {
         public string Id { get; set; }
         public string Name { get; set; }
+        public string Text { get; set; } = "";
         public int X { get; set; }
         public int Y { get; set; }
         public int Columns { get; set; }

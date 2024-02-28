@@ -33,6 +33,7 @@ namespace GSTHD
         public string AutoSubName = null;
 
         delegate void SetStateCallback(int state);
+        delegate void SetWholeStateCallback(int state, bool marked);
         delegate void UpdateCountCallback();
 
         public CollectedItem(ObjectPointCollectedItem data, Settings settings, bool isBroadcast = false)
@@ -171,6 +172,27 @@ namespace GSTHD
             } else
             {
                 CollectedItems = state;
+                UpdateCount();
+                DragBehaviour.SaveChanges();
+            }
+        }
+
+        public Tuple<int,bool> GetWholeState()
+        {
+            return Tuple.Create(CollectedItems, isMarked);
+        }
+
+        public void SetWholeState(int state, bool marked)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new SetWholeStateCallback(SetWholeState), new object[] { state, marked });
+                return;
+            }
+            else
+            {
+                CollectedItems = state;
+                isMarked = marked;
                 UpdateCount();
                 DragBehaviour.SaveChanges();
             }

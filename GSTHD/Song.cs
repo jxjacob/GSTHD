@@ -12,14 +12,16 @@ namespace GSTHD
         public bool HoldsImage;
         public string HeldImageName;
         public int ImageIndex;
+        public bool isMarked;
     }
 
     public struct SongState
     {
         public int ImageIndex;
+        public bool isMarked;
         public SongMarkerState MarkerState;
 
-        public override string ToString() => $"{ImageIndex},{MarkerState.HoldsImage},{MarkerState.HeldImageName},{MarkerState.ImageIndex}";
+        public override string ToString() => $"{ImageIndex},{isMarked},{MarkerState.HoldsImage},{MarkerState.HeldImageName},{MarkerState.ImageIndex},{MarkerState.isMarked}";
     }
 
     public class SongMarker : OrganicImage, UpdatableFromSettings, ProgressibleElement<SongMarkerState>, DraggableElement<SongMarkerState>
@@ -200,6 +202,7 @@ namespace GSTHD
                 HoldsImage = HoldsImage,
                 HeldImageName = HeldImageName,
                 ImageIndex = ImageIndex,
+                isMarked = isMarked,
             };
         }
 
@@ -213,6 +216,7 @@ namespace GSTHD
             {
                 HoldsImage = state.HoldsImage;
                 HeldImageName = state.HeldImageName;
+                isMarked = state.isMarked;
                 ImageIndex = Math.Clamp(state.ImageIndex, 0, ImageNames.Length);
                 UpdateImage();
                 DragBehaviour.SaveChanges();
@@ -477,6 +481,7 @@ namespace GSTHD
             return new SongState()
             {
                 ImageIndex = ImageIndex,
+                isMarked = isMarked,
                 MarkerState = SongMarker.GetState(),
             };
         }
@@ -484,11 +489,13 @@ namespace GSTHD
         public void SetWholeState(SongState state)
         {
             ImageIndex = state.ImageIndex;
+            isMarked = state.isMarked;
             SongMarkerState temp = new SongMarkerState()
             {
                 HoldsImage = state.MarkerState.HoldsImage,
                 HeldImageName = state.MarkerState.HeldImageName,
                 ImageIndex = state.MarkerState.ImageIndex,
+                isMarked = state.MarkerState.isMarked,
             };
             SongMarker.SetState(temp);
             UpdateImage();

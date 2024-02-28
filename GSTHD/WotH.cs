@@ -21,7 +21,7 @@ namespace GSTHD
             string stoneString = "";
             foreach (GossipStone x in Stones) { 
                 GossipStoneState ugh = x.GetState();
-                if (ugh.ToString() != "False,,0")
+                if (ugh.ToString() != "False,,0,False")
                 {
                     if (stoneString.Length > 0)
                     {

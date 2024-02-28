@@ -364,10 +364,10 @@ namespace GSTHD
             {
                 if (x.Name != "")
                 {
-                    int state = x.GetState();
-                    if (state != x.DefaultIndex)
+                    Tuple<int, bool> state = x.GetWholeState();
+                    if (state.Item1 != x.DefaultIndex || state.Item2 != false)
                     {
-                        thejson.Add(x.Name, state.ToString());
+                        thejson.Add(x.Name, $"{state.Item1},{state.Item2}");
                     }
                 }
             }
@@ -375,10 +375,10 @@ namespace GSTHD
             {
                 if (x.Name != "")
                 {
-                    int state = x.GetState();
-                    if (state != x.CollectedItemDefault)
+                    Tuple<int, bool> state = x.GetWholeState();
+                    if (state.Item1 != x.CollectedItemDefault || state.Item2 != false)
                     {
-                        thejson.Add(x.Name, state.ToString());
+                        thejson.Add(x.Name, $"{state.Item1},{state.Item2}");
                     }
                 }
             }
@@ -386,10 +386,10 @@ namespace GSTHD
             {
                 if (x.Name != "")
                 {
-                    int state = x.GetState();
-                    if (state != 0)
+                    Tuple<int, bool> state = x.GetWholeState();
+                    if (state.Item1 != 0 || state.Item2 != false)
                     {
-                        thejson.Add(x.Name, state.ToString());
+                        thejson.Add(x.Name, $"{state.Item1},{state.Item2}");
                     }
                 }
             }
@@ -406,7 +406,7 @@ namespace GSTHD
                 {
                     GossipStoneState state = x.GetState();
                     string conv = state.ToString();
-                    if (conv != "False,,0")
+                    if (conv != "False,,0,False")
                     {
                         thejson.Add(x.Name, conv);
                     }
@@ -418,7 +418,7 @@ namespace GSTHD
                 {
                     MedallionState state = x.GetState();
                     string conv = state.ToString();
-                    if (conv != "0,0")
+                    if (conv != "0,0,False")
                     {
                         thejson.Add(x.Name, conv);
                     }
@@ -430,7 +430,7 @@ namespace GSTHD
                 {
                     SongState state = x.GetWholeState();
                     string conv = state.ToString();
-                    if (conv != "0,False,,0")
+                    if (conv != "0,False,False,,0,False")
                     {
                         thejson.Add(x.Name, conv);
                     }
@@ -510,6 +510,13 @@ namespace GSTHD
                     }
                 }
             }
+            foreach (GuaranteedHint x in this.Controls[0].Controls.OfType<GuaranteedHint>())
+            {
+                if (x.Name != "" && x.isMarked != false)
+                {
+                    thejson.Add(x.Name, x.isMarked);
+                }
+            }
 
 
             if (force)
@@ -562,29 +569,27 @@ namespace GSTHD
                         missingItems++;
                         Debug.WriteLine(x.Name + " not found in layout. Skipping");
                     }
-                    if (found is Item)
+                    if (found is Item i)
                     {
-                        int conv = (int)x.Value;
-                        ((Item)found).SetState(conv);
-                    } else if (found is DoubleItem)
+                        string[] words = ((string)x.Value).Split(',');
+                        i.SetWholeState(int.Parse(words[0]), bool.Parse(words[1]));
+                    } else if (found is DoubleItem di)
                     {
-                        int conv = (int)x.Value;
-                        ((DoubleItem)found).SetState(conv);
+                        string[] words = ((string)x.Value).Split(',');
+                        di.SetWholeState(int.Parse(words[0]), bool.Parse(words[1]));
                     }
-                    else if (found is CollectedItem)
+                    else if (found is CollectedItem ci)
                     {
-                        int conv = (int)x.Value;
-                        ((CollectedItem)found).SetState(conv);
+                        string[] words = ((string)x.Value).Split(',');
+                        ci.SetWholeState(int.Parse(words[0]), bool.Parse(words[1]));
                     } 
-                    else if (found is TextBox)
+                    else if (found is TextBox tb)
                     {
-                        string conv = (string)x.Value;
-                        ((TextBox)found).Text = conv;
+                        tb.Text = (string)x.Value;
                     } 
-                    else if (found is GossipStone)
+                    else if (found is GossipStone gs)
                     {
-                        string conv = (string)x.Value;
-                        string[] words = conv.Split(',');
+                        string[] words = ((string)x.Value).Split(',');
                         string[] hi = words[1].Split('|');
 
                         GossipStoneState newstate = new GossipStoneState()
@@ -592,60 +597,59 @@ namespace GSTHD
                             HoldsImage = Boolean.Parse(words[0]),
                             HeldImages = hi.ToList(),
                             ImageIndex = int.Parse(words[2]),
+                            isMarked = bool.Parse(words[3]),
                         };
-                        ((GossipStone)found).SetState(newstate);
+                        gs.SetState(newstate);
                     }
-                    else if (found is Medallion)
+                    else if (found is Medallion md)
                     {
-                        string conv = (string)x.Value;
-                        string[] words = conv.Split(',');
+                        string[] words = ((string)x.Value).Split(',');
                         MedallionState newstate = new MedallionState()
                         {
                             DungeonIndex = int.Parse(words[0]),
                             ImageIndex = int.Parse(words[1]),
+                            isMarked = bool.Parse(words[2])
                         };
-                        ((Medallion)found).SetState(newstate);
+                        md.SetState(newstate);
                     }
-                    else if (found is Song)
+                    else if (found is Song s)
                     {
-                        string conv = (string)x.Value;
-                        string[] words = conv.Split(',');
+                        string[] words = ((string)x.Value).Split(',');
                         SongState newstate = new SongState()
                         {
                             ImageIndex = int.Parse(words[0]),
+                            isMarked = bool.Parse(words[1]),
                             MarkerState = new SongMarkerState()
                             {
-                                HoldsImage = Boolean.Parse(words[1]),
-                                HeldImageName = words[2],
-                                ImageIndex = int.Parse(words[3]),
+                                HoldsImage = Boolean.Parse(words[2]),
+                                HeldImageName = words[3],
+                                ImageIndex = int.Parse(words[4]),
+                                isMarked = bool.Parse(words[5])
                             },
                         };
-                        ((Song)found).SetWholeState(newstate);
+                        s.SetWholeState(newstate);
                     }
-                    else if (found is PanelWothBarren) 
+                    else if (found is PanelWothBarren pa) 
                     {
-                        if (((PanelWothBarren)found).isWotH == 0){
-                            ((PanelWothBarren)found).SetWotH((string)x.Value);
-                        } else if (((PanelWothBarren)found).isWotH == 1){
-                            ((PanelWothBarren)found).SetBarren((string)x.Value);
-                        } else if (((PanelWothBarren)found).isWotH == 2)
-                        {
-                            ((PanelWothBarren)found).SetQuantities((string)x.Value);
+                        if (pa.isWotH == 0){
+                            pa.SetWotH((string)x.Value);
+                        } else if (pa.isWotH == 1){
+                            pa.SetBarren((string)x.Value);
+                        } else if (pa.isWotH == 2){
+                            pa.SetQuantities((string)x.Value);
                         }
                     }
                     else if (found is SpoilerPanel sp)
                     {
-                        string conv = (string)x.Value;
-                        string[] words = conv.Split('\v');
+                        string[] words = ((string)x.Value).Split('\v');
                         sp.ImportFromJson(words[0]);
-                        sp.foundATItems = words[1].Split(',').Select(int.Parse).ToList();
+                        if (words[1] != "") sp.foundATItems = words[1].Split(',').Select(int.Parse).ToList();
                         sp.howManySlams = int.Parse(words[2]);
                         sp.SetCells(words[3]);
+                    } else if (found is GuaranteedHint gh)
+                    {
+                        gh.isMarked = bool.Parse((string)x.Value);
                     }
-                    //else if (found is SpoilerCell sc)
-                    //{
-                    //    sc.SetState((string)x.Value);
-                    //}
                 }
                 if (missingItems > 0)
                 {

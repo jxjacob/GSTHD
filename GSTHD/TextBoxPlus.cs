@@ -18,6 +18,7 @@ namespace GSTHD
         {
             this.settings = settings;
 
+            Text = data.Text;
             BackColor = data.BackColor;
             Name = data.Name;
             Font = new Font(data.FontName, data.FontSize, data.FontStyle);

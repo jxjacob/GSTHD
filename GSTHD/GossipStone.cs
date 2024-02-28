@@ -15,7 +15,7 @@ namespace GSTHD
         public bool HoldsImage;
         public List<string> HeldImages;
         public int ImageIndex;
-
+        public bool isMarked;
 
         public override string ToString() {
             // for thing in heldimage
@@ -33,7 +33,7 @@ namespace GSTHD
             }
             // put in the name and then |
             // write that new string to the line below
-            return $"{HoldsImage},{exported},{ImageIndex}"; 
+            return $"{HoldsImage},{exported},{ImageIndex},{isMarked}"; 
         }
     }
 
@@ -280,16 +280,7 @@ namespace GSTHD
                 HoldsImage = HoldsImage,
                 HeldImages = HeldImages,
                 ImageIndex = ImageIndex,
-            };
-        }
-
-        public GossipStoneState GetStateBroadcast()
-        {
-            return new GossipStoneState()
-            {
-                HoldsImage = HoldsImage,
-                HeldImages = HeldImages,
-                ImageIndex = ImageIndex,
+                isMarked = isMarked,
             };
         }
 
@@ -297,6 +288,7 @@ namespace GSTHD
         {
             HoldsImage = state.HoldsImage;
             HeldImages = state.HeldImages;
+            isMarked = state.isMarked;
             ImageIndex = Math.Clamp(state.ImageIndex, 0, ImageNames.Length);
             UpdateImage();
             DragBehaviour.SaveChanges();

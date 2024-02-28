@@ -28,6 +28,10 @@ namespace GSTHD
         public int totalWOTHS;
         public int currentWOTHS;
 
+        public bool levelNumMarked;
+        public int levelNumIndex;
+        public bool levelLabelMarked;
+
         public List<int> foundItems;
         public List<PotionTypes> potionsList;
 
@@ -54,7 +58,7 @@ namespace GSTHD
                 }
                 displaystring += item.ToString();
             }
-            return $"{currentPoints},{currentWOTHS}\n{itemstring}\n{displaystring}";
+            return $"{currentPoints},{currentWOTHS},{levelNumIndex},{levelNumMarked},{levelLabelMarked}\n{itemstring}\n{displaystring}";
         }
     }
 
@@ -243,8 +247,10 @@ namespace GSTHD
             if (totalPoints >= 0) noPotions = true;
 
             int shownnumbers = 1;
+            int extradigits = 0;
             if (totalPoints >= 0)
             {
+                extradigits = (int)System.Math.Max(0, System.Math.Floor(System.Math.Log10(totalPoints)) - 1);
                 pointLabel = new Label
                 {
                     Name = Guid.NewGuid().ToString(),
@@ -252,12 +258,12 @@ namespace GSTHD
                     Font = new Font(new FontFamily(fontName), fontSize, fontStyle),
                     ForeColor = pointColour,
                     //BackColor = Color.Red,
-                    Width = labelWidth + ((int)System.Math.Max(0, System.Math.Floor(System.Math.Log10(totalPoints)) - 1) * 6),
+                    Width = labelWidth + (extradigits * 6),
                     Height = WorldNumHeight,
                     AutoSize = false,
                     TextAlign = System.Drawing.ContentAlignment.MiddleRight,
                     Anchor = AnchorStyles.Right,
-                    Location = new Point(width - (shownnumbers * labelSpacing) - 2 - ((int)System.Math.Max(0, System.Math.Floor(System.Math.Log10(totalPoints)) - 1) * 6) - this.topRowPadding, -1)
+                    Location = new Point(width - (shownnumbers * labelSpacing) - 2 - (extradigits * 6) - this.topRowPadding, -1)
                 };
                 shownnumbers++;
                 if (totalPoints == 0) pointLabel.ForeColor = emptyColour;
@@ -276,7 +282,7 @@ namespace GSTHD
                     Height = WorldNumHeight,
                     AutoSize = false,
                     TextAlign = System.Drawing.ContentAlignment.MiddleRight,
-                    Location = new Point(width - (shownnumbers * labelSpacing) - 2 - this.topRowPadding, -1)
+                    Location = new Point(width - (shownnumbers * labelSpacing) - 2 - (extradigits * 6) - this.topRowPadding, -1)
                 };
                 Controls.Add(wothLabel);
             }
@@ -649,8 +655,11 @@ namespace GSTHD
                 foundItems = foundItems,
                 potionsList = potionsList,
                 displayList = displayList,
-        };
-    }
+                levelLabelMarked = levelImage.isMarked,
+                levelNumMarked = (levelNumberImage != null) ? levelNumberImage.isMarked : (unknownLevelNumberImage != null) ? unknownLevelNumberImage.isMarked : false,
+                levelNumIndex = (unknownLevelNumberImage != null) ? unknownLevelNumberImage.GetState() : 0
+            };
+        }
 
         public void SetState(SpoilerCellState state)
         {
@@ -676,14 +685,24 @@ namespace GSTHD
         public void SetState(string statestring)
         {
             //break up string into sections, recompile data. probably call the real setstate after tbh
-            // return $"{currentPoints},{currentWOTHS}\n{foundItems}\n{potionsList}\n{displayList}";
-            
+            // return $"{currentPoints},{currentWOTHS},{levelNumIndex},{levelNumMarked},{levelLabelMarked}\n{itemstring}\n{displaystring}";
+
             string[] parts = statestring.Split('\n');
             string[] firstPart = parts[0].Split(',');
             //fp0 = currentpoints
             //fp1 = currentwoths
             currentPoints = int.Parse(firstPart[0]);
             currentWOTHS = int.Parse(firstPart[1]);
+            if (levelNumberImage != null)
+            {
+                levelNumberImage.isMarked = bool.Parse(firstPart[3]);
+            } else if (unknownLevelNumberImage != null)
+            {
+                unknownLevelNumberImage.isMarked = bool.Parse(firstPart[3]);
+                unknownLevelNumberImage.SetState(int.Parse(firstPart[2]));
+            }
+            levelImage.isMarked = bool.Parse(firstPart[4]);
+
             //p1 = founditems
             if (parts[1].Length > 0)
             {

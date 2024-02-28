@@ -31,6 +31,7 @@ namespace GSTHD
         public string AutoName = null;
 
         delegate void SetStateCallback(int state);
+        delegate void SetWholeStateCallback(int state, bool marked);
 
         public Item(ObjectPoint data, Settings settings, bool isBroadcast = false)
         {
@@ -73,7 +74,6 @@ namespace GSTHD
             AllowDrop = false;
 
             Control thething = this.Parent;
-            if (thething != null) { MessageBox.Show("Do you want to save changes to your text?", thething.Name); }
             if (!isBroadcast)
             {
                 if (isDraggable)
@@ -153,6 +153,7 @@ namespace GSTHD
             return ImageIndex;
         }
 
+
         public void SetState(int state)
         {
             if (this.InvokeRequired)
@@ -163,6 +164,27 @@ namespace GSTHD
             else
             {
                 ImageIndex = Math.Clamp(state, 0, ImageNames.Length);
+                VerifyState();
+                UpdateImage();
+                DragBehaviour.SaveChanges();
+            }
+        }
+        public Tuple<int, bool> GetWholeState()
+        {
+            return Tuple.Create(ImageIndex, isMarked);
+        }
+
+        public void SetWholeState(int state, bool marked)
+        {
+            if (this.InvokeRequired)
+            {
+                Invoke(new SetWholeStateCallback(SetWholeState), new object[] { state, marked });
+                return;
+            }
+            else
+            {
+                ImageIndex = Math.Clamp(state, 0, ImageNames.Length);
+                this.isMarked = marked;
                 VerifyState();
                 UpdateImage();
                 DragBehaviour.SaveChanges();
