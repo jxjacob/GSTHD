@@ -111,9 +111,15 @@ namespace GSTHD
             {
                 if (DoubleBroadcastName == null || DoubleBroadcastSide == null)
                 {
-                    ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
-                    ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
-                    ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
+                    try
+                    {
+                        ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
+                        ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
+                        ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
+                    } catch (IndexOutOfRangeException)
+                    {
+                        Debug.WriteLine($"Item {this.Name} could not be found on Broadcast, skipping...");
+                    }
                 }
                 else
                 {

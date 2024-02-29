@@ -678,6 +678,16 @@ namespace GSTHD
                 foundItems = state.foundItems;
                 potionsList = state.potionsList;
                 displayList = state.displayList;
+                levelImage.isMarked = state.levelLabelMarked;
+                if (levelNumberImage != null)
+                {
+                    levelNumberImage.isMarked = state.levelNumMarked;
+                } else if (unknownLevelNumberImage != null)
+                {
+                    unknownLevelNumberImage.isMarked = state.levelNumMarked;
+                    unknownLevelNumberImage.SetState(state.levelNumIndex);
+                }
+
                 UpdateVisuals();
             }
         }
