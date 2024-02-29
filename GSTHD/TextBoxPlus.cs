@@ -29,6 +29,7 @@ namespace GSTHD
             Padding = new Padding(5, 10, 5, 5);
             Margin = new Padding(5, 10, 5, 5);
             isBroadcastable = data.isBroadcastable;
+            TextAlign = data.TextAlignment;
 
             this.TextChanged += BoxPlus_TextChanged;
         }

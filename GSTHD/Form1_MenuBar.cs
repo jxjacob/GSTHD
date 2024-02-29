@@ -722,7 +722,7 @@ namespace GSTHD
 
         public void menuBar_Broadcast(object sender, EventArgs e)
         {
-            if (Form.CurrentLayout.App_Settings.EnableBroadcast)
+            if (Form.CurrentLayout.App_Settings.EnableBroadcast && Form.CurrentLayout.App_Settings.BroadcastFile != null)
             {
                 if (Items.BroadcastView.Checked)
                 {

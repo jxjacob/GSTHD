@@ -56,12 +56,6 @@ namespace GSTHD
         {
             bool isOnBroadcast = (form.Name == "GSTHD_DK64 Broadcast View") ? true : false;
 
-            if ((settings.ActiveLayoutBroadcastFile == string.Empty || settings.ActiveLayoutBroadcastFile == null) && isOnBroadcast)
-            {
-                MessageBox.Show("Layout file " + settings.ActiveLayout.ToString() + " does not specify a BroadcastFile and cannot open the broadcast view.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Application.OpenForms["GSTHD_DK64 Broadcast View"].Close();
-                return;
-            }
 
             ListUpdatables.Clear();
             if (settings.ActiveLayout != string.Empty)
@@ -267,12 +261,12 @@ namespace GSTHD
                 }
 
                 //Debug.WriteLine(App_Settings.BroadcastFile);
-                if (App_Settings.BroadcastFile != String.Empty)
+                if (App_Settings.BroadcastFile != String.Empty && !isOnBroadcast)
                 {
                     settings.ActiveLayoutBroadcastFile = App_Settings.BroadcastFile;
                 } else
                 {
-                    settings.ActiveLayoutBroadcastFile = null;
+                    if (!isOnBroadcast) settings.ActiveLayoutBroadcastFile = null;
                 }
                 settings.Write();
 
@@ -344,7 +338,9 @@ namespace GSTHD
                                 Font = new Font(new FontFamily(item.FontName), item.FontSize, item.FontStyle),
                                 ForeColor = Color.FromName(item.Color),
                                 BackColor = Color.Transparent,
-                                AutoSize = true,
+                                AutoSize = (item.TextAlignment == ContentAlignment.TopLeft),
+                                TextAlign = item.TextAlignment,
+                                Width = item.Width,
                             });
                         }
                     }
@@ -358,7 +354,39 @@ namespace GSTHD
                     {
                         if (box.Visible)
                         {
-                            panelLayout.Controls.Add(new TextBoxPlus(box, settings, isOnBroadcast));
+                            if (isOnBroadcast)
+                            {
+                                // converts boxes to labels
+                                ContentAlignment ca;
+                                switch (box.TextAlignment) {
+                                    case HorizontalAlignment.Center:
+                                        ca = ContentAlignment.TopCenter;
+                                        break;
+                                    case HorizontalAlignment.Right:
+                                        ca = ContentAlignment.TopRight;
+                                        break;
+                                    case HorizontalAlignment.Left:
+                                    default:
+                                        ca = ContentAlignment.TopLeft;
+                                        break;
+                                }
+                                panelLayout.Controls.Add(new Label()
+                                {
+                                    Name = box.Name,
+                                    Text = box.Text,
+                                    Left = box.X,
+                                    Top = box.Y,
+                                    Font = new Font(new FontFamily(box.FontName), box.FontSize, box.FontStyle),
+                                    ForeColor = box.FontColor,
+                                    BackColor = Color.Transparent,
+                                    AutoSize = (ca == ContentAlignment.TopLeft),
+                                    TextAlign = ca,
+                                    Width = box.Width,
+                                });
+                            } else
+                            {
+                                panelLayout.Controls.Add(new TextBoxPlus(box, settings, isOnBroadcast));
+                            }
                         }
                     }
                 }
@@ -387,7 +415,8 @@ namespace GSTHD
                                         X = item.X + i * (item.Width + item.Spacing.Width),
                                         Y = item.Y + j * (item.Height + item.Spacing.Height),
                                         BorderStyle = item.BorderStyle,
-                                        isBroadcastable = item.isBroadcastable
+                                        isBroadcastable = item.isBroadcastable,
+                                        TextAlignment = item.TextAlignment
                                     };
                                     panelLayout.Controls.Add(new TextBoxPlus(temp, settings, isOnBroadcast));
                                 }
@@ -650,12 +679,15 @@ namespace GSTHD
         public string Color { get; set; }
         // public Size MaxSize { get; set; }
         public bool Visible { get; set; }
+        public int Width { get; set; }
+        public ContentAlignment TextAlignment { get; set; } = ContentAlignment.TopLeft;
     }
 
     public class ObjectPointTextbox
     {
         public string Name { get; set; }
         public string Text { get; set; } = "";
+        public HorizontalAlignment TextAlignment {get; set;} = HorizontalAlignment.Left;
         public int X { get; set; }
         public int Y { get; set; }
         public bool Visible { get; set; }
@@ -741,6 +773,7 @@ namespace GSTHD
         public string Id { get; set; }
         public string Name { get; set; }
         public string Text { get; set; } = "";
+        public HorizontalAlignment TextAlignment { get; set; } = HorizontalAlignment.Left;
         public int X { get; set; }
         public int Y { get; set; }
         public int Columns { get; set; }
