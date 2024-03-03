@@ -70,10 +70,11 @@ namespace GSTHD
 
         public int dk_id;
 
-        public CellPictureBox(Settings settings)
+
+        public CellPictureBox(Settings settings, bool isOnBroadcast)
         {
             ProgressBehaviour = new ProgressibleElementBehaviour<int>(this, settings);
-            MouseDown += ProgressBehaviour.Mouse_ClickDown;
+            if (!isOnBroadcast) MouseDown += ProgressBehaviour.Mouse_ClickDown;
         }
 
         public void IncrementState()
@@ -573,7 +574,7 @@ namespace GSTHD
                         string toDisplay = (pot.item_id != -1) ? DK64Items[pot.item_id].image : potionImageList[(int)pot.potionType];
                         //Debug.WriteLineIf((pot.item_id != -1), $"todisplay = {toDisplay}");
 
-                        CellPictureBox newPot = new CellPictureBox(Settings)
+                        CellPictureBox newPot = new CellPictureBox(Settings, !isBroadcastable)
                         {
                             Size = new Size(usedPotWidth, usedPotHeight),
                             //SizeMode = PictureBoxSizeMode.Zoom,
