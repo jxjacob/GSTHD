@@ -83,18 +83,18 @@ namespace GSTHD
         private const SongMarkerBehaviourOption DefaultSongMarkerBehaviour = SongMarkerBehaviourOption.DropAndCheck;
 
         public bool ShowMenuBar { get; set; } = true;
-        public string ActiveLayout { get; set; } = string.Empty;
+        public string ActiveLayout { get; set; } = "Layouts\\dk64.json";
         public string ActiveLayoutBroadcastFile {  get; set; } = string.Empty;
         public string ActivePlaces { get; set; } = string.Empty;
         public string ActiveSometimesHints { get; set; } = string.Empty;
         public bool InvertScrollWheel { get; set; } = false;
         public bool WraparoundDungeonNames { get; set; } = true;
         public DragButtonOption DragButton { get; set; } = DragButtonOption.Middle;
-        public DragButtonOption AutocheckDragButton { get; set; } = DragButtonOption.None;
+        public DragButtonOption AutocheckDragButton { get; set; } = DragButtonOption.LeftAndRight;
         public BasicActionButtonOption IncrementActionButton { get; set; } = BasicActionButtonOption.Left;
         public BasicActionButtonOption DecrementActionButton { get; set; } = BasicActionButtonOption.Right;
         public BasicActionButtonOption ResetActionButton { get; set; } = BasicActionButtonOption.Middle;
-        public ExtraActionModButton ExtraActionButton { get; set; } = ExtraActionModButton.None;
+        public ExtraActionModButton ExtraActionButton { get; set; } = ExtraActionModButton.Shift;
         public SelectEmulatorOption SelectEmulator { get; set; } = SelectEmulatorOption.Project64;
         public SpoilerOrderOption SpoilerOrder { get; set; } = SpoilerOrderOption.Numerical;
         public int MinDragThreshold { get; set; } = 6;

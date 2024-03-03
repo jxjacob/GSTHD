@@ -17,35 +17,10 @@ namespace GSTHD
         protected ProgressibleElement<T> Element;
         protected Settings Settings;
 
-        protected bool modDown = false;
-
         public ProgressibleElementBehaviour(ProgressibleElement<T> element, Settings settings)
         {
             Element = element;
             Settings = settings;
-        }
-
-        public void KeyDown(object sender, KeyEventArgs e)
-        {
-            Debug.WriteLine($"{e.Modifiers} - {e.KeyCode}");
-            if ((Settings.ExtraActionButton == Settings.ExtraActionModButton.Control && e.Modifiers == Keys.Control) ||
-                (Settings.ExtraActionButton == Settings.ExtraActionModButton.Shift && e.Modifiers == Keys.Shift) ||
-                (Settings.ExtraActionButton == Settings.ExtraActionModButton.Alt && e.Modifiers == Keys.Alt) ||
-                (Settings.ExtraActionButton == Settings.ExtraActionModButton.MouseButton1 && e.KeyCode == Keys.XButton1) ||
-                (Settings.ExtraActionButton == Settings.ExtraActionModButton.MouseButton2 && e.KeyCode == Keys.XButton2))
-            {
-                Debug.WriteLine("mod downing");
-                modDown = true;
-            } else
-            {
-                Debug.WriteLine("fail");
-            }
-        }
-
-        public void KeyUp(object sender, KeyEventArgs e)
-        {
-            Debug.WriteLine("mod upping");
-            modDown = false;
         }
 
         public bool DetermineMouseInput(MouseEventArgs e, Settings.ExtraActionModButton ea)
@@ -79,11 +54,6 @@ namespace GSTHD
 
         public void Mouse_LeftClickDown(object sender, MouseEventArgs e)
         {
-            if (modDown)
-            {
-                Element.ToggleCheck();
-                return;
-            }
             Element.IncrementState();
         }
 

@@ -25,6 +25,10 @@ namespace GSTHD
         public int right_id;
         Size DoubleItemSize;
 
+        // purely used for handling broadcast marking logic
+        bool leftMark = false;
+        bool rightMark = false;
+
         bool isBroadcastable;
         public string AutoName = null;
 
@@ -141,6 +145,12 @@ namespace GSTHD
             if (isColoredLeft) DecrementLeftState(); else IncrementLeftState();
         }
 
+        public void SetLeftMark(bool mark)
+        {
+            leftMark = mark;
+            isMarked = (leftMark || rightMark);
+        }
+
 
 
         public void IncrementRightState()
@@ -164,6 +174,12 @@ namespace GSTHD
         public void DecrementState()
         {
             if (isColoredRight) DecrementRightState(); else IncrementRightState();
+        }
+
+        public void SetRightMark(bool mark)
+        {
+            rightMark = mark;
+            isMarked = (leftMark || rightMark);
         }
 
 

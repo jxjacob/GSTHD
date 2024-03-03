@@ -85,8 +85,6 @@ namespace GSTHD
                 }
                 MouseDown += ProgressBehaviour.Mouse_ClickDown;
                 MouseWheel += Mouse_Wheel;
-                KeyDown += ProgressBehaviour.KeyDown;
-                KeyUp += ProgressBehaviour.KeyUp;
             }
         }
 
@@ -126,6 +124,7 @@ namespace GSTHD
                     //TODO: make this block cleaner
                     if (DoubleBroadcastSide == "left")
                     {
+                        ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).SetLeftMark(isMarked);
                         if (ImageIndex == 0)
                         {
                             ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).DecrementLeftState();
@@ -138,6 +137,7 @@ namespace GSTHD
                     }
                     else
                     {
+                        ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).SetRightMark(isMarked);
                         if (ImageIndex == 0)
                         {
                             ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).DecrementRightState();
