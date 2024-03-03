@@ -115,7 +115,10 @@ namespace GSTHD
             CanDragDrop = ((Settings.DragButton == Settings.DragButtonOption.LeftAndRight || Settings.AutocheckDragButton == Settings.DragButtonOption.LeftAndRight) && LeftClickDown && RightClickDown)
                 || ((Settings.DragButton == Settings.DragButtonOption.Left || Settings.AutocheckDragButton == Settings.DragButtonOption.Left) && LeftClickDown)
                 || ((Settings.DragButton == Settings.DragButtonOption.Right || Settings.AutocheckDragButton == Settings.DragButtonOption.Right) && RightClickDown)
-                || ((Settings.DragButton == Settings.DragButtonOption.Middle || Settings.AutocheckDragButton == Settings.DragButtonOption.Middle) && MiddleClickDown);
+                || ((Settings.DragButton == Settings.DragButtonOption.Middle || Settings.AutocheckDragButton == Settings.DragButtonOption.Middle) && MiddleClickDown)
+                || ((Settings.DragButton == Settings.DragButtonOption.Control || Settings.AutocheckDragButton == Settings.DragButtonOption.Control) && LeftClickDown && Form.ModifierKeys == Keys.Control)
+                || ((Settings.DragButton == Settings.DragButtonOption.Shift || Settings.AutocheckDragButton == Settings.DragButtonOption.Shift) && LeftClickDown && Form.ModifierKeys == Keys.Shift)
+                || ((Settings.DragButton == Settings.DragButtonOption.Alt || Settings.AutocheckDragButton == Settings.DragButtonOption.Alt) && LeftClickDown && Form.ModifierKeys == Keys.Alt);
             if (CanDragDrop)
                 DragStartPoint = Cursor.Position;
         }

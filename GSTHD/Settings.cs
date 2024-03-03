@@ -32,6 +32,9 @@ namespace GSTHD
             Middle,
             Right,
             LeftAndRight,
+            Control,
+            Shift,
+            Alt
         }
         [JsonConverter(typeof(StringEnumConverter))]
         public enum ExtraActionModButton
@@ -55,7 +58,10 @@ namespace GSTHD
             Middle,
             Right,
             MouseButton1,
-            MouseButton2
+            MouseButton2,
+            Control,
+            Shift,
+            Alt
         }
 
 

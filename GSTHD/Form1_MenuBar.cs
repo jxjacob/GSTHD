@@ -84,6 +84,9 @@ namespace GSTHD
             { Settings.DragButtonOption.Middle, "Middle Click" },
             { Settings.DragButtonOption.Right, "Right Click" },
             { Settings.DragButtonOption.LeftAndRight, "Left + Right Click" },
+            { Settings.DragButtonOption.Shift, "Shift + Left Click" },
+            { Settings.DragButtonOption.Control, "Control + Left Click" },
+            { Settings.DragButtonOption.Alt, "Alt + Left Click" },
         };
 
         private readonly Dictionary<Settings.ExtraActionModButton, string> ExtraButtonNames = new Dictionary<Settings.ExtraActionModButton, string>
@@ -107,7 +110,10 @@ namespace GSTHD
             { Settings.BasicActionButtonOption.Middle, "Middle Click" },
             { Settings.BasicActionButtonOption.Right, "Right Click" },
             { Settings.BasicActionButtonOption.MouseButton1, "Mouse Button 1" },
-            { Settings.BasicActionButtonOption.MouseButton2, "Mouse Button 2" }
+            { Settings.BasicActionButtonOption.MouseButton2, "Mouse Button 2" },
+            { Settings.BasicActionButtonOption.Shift, "Shift + Left Click" },
+            { Settings.BasicActionButtonOption.Control, "Control + Left Click" },
+            { Settings.BasicActionButtonOption.Alt, "Alt + Left Click" },
         };
 
         private readonly Dictionary<Settings.SongMarkerBehaviourOption, string> SongMarkerBehaviourNames = new Dictionary<Settings.SongMarkerBehaviourOption, string>

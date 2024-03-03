@@ -56,7 +56,10 @@ namespace GSTHD
                 e.Button == MouseButtons.Right && ea == Settings.ExtraActionModButton.Right ||
                 e.Button == MouseButtons.Left && ea == Settings.ExtraActionModButton.DoubleLeft && e.Clicks > 1 ||
                 e.Button == MouseButtons.XButton1 && ea == Settings.ExtraActionModButton.MouseButton1 ||
-                e.Button == MouseButtons.XButton2 && ea == Settings.ExtraActionModButton.MouseButton2 )
+                e.Button == MouseButtons.XButton2 && ea == Settings.ExtraActionModButton.MouseButton2 ||
+                e.Button == MouseButtons.Left && ea == Settings.ExtraActionModButton.Control && Form.ModifierKeys == Keys.Control ||
+                e.Button == MouseButtons.Left && ea == Settings.ExtraActionModButton.Shift && Form.ModifierKeys == Keys.Shift ||
+                e.Button == MouseButtons.Left && ea == Settings.ExtraActionModButton.Alt && Form.ModifierKeys == Keys.Alt)
             {
                 return true;
             } else { return false; }
