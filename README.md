@@ -11,7 +11,7 @@ Bodged together by JXJacob for his own selfish purposes. Compared to the main br
 - Other backend bugfixes to improve system stability 😉
 
 
-## THE BIG PICTURE:
+## The Big Picture:
 GSTHD is based upon the primary idea of being able to **drag** your items into a "Gossip Stone" (usually a question mark or Wrinkly's greyed-out face in the DK64 layouts) to keep track of where you got said item and its corresponding hint paths.
 
 GSTHD also has a hint system with the ability to note the hint's path destination and the items you got in that region.
@@ -23,7 +23,7 @@ All GSTHD layouts are in plaintext .json files, so if you want to make a minor t
 There are 2 executables. If in doubt, use the one *without* the _32; if you have issues autotracking, try the one *with* the _32. Both are included due to unavoidable silly technical reasons.
 
 
-## USING GSTHD
+## Using GSTHD
 1) Click on your items as you get them (or use the autotracker so it clicks for you)
 2) As you encounter hints in-game, click on the coloured section and type the location of the hint out (ex: Galleon Outskirts) then press Enter
 3) In this newly created hint, there will be (usually) be one Stone to the left, and 2-3 to the right. The LEFT is the goal/destination of the hint, and the RIGHT are the items you find in the hinted region. To fill these stones, click and drag an item from the main section of the tracker into the Stones.
@@ -50,27 +50,27 @@ The priority of inputs (and their defualt binding) is listed below. With the top
 | `Reset Item`  | Middle Click  |
 
 
-## Controls (for almost everything):
+## Global-ish Controls:
 | Input Name  | Behaviour |
 | ------------- | ------------- |
 | `Increment Item` | Increments the item (ex: Green Slam -> Blue Slam -> Red Slam) |
 | `Decrement Item` | Decrements the item (ex: Red Slam -> Blue Slam -> Green Slam) |
 | `Reset Item` | Resets the item to its default state |
 | `Checkmark Item` | Adds a checkmark to the top right corner of the item |
-| Scroll Wheel | Alternate method of incrementing or decrementing |
 | `Drag` | Allows you to drag your items into a gossip stone or spoiler hint cell |
 | `Autocheck Drag` | Starts a drag while also incrementing the item on the tracker |
+| Scroll Wheel | Alternate method of incrementing or decrementing |
 > NOTE: Checkmarking an item does not hold any *inherent* meaning, but can be useful for marking an item as required, a region as cleared out, etc
 
 ## Medallion/Key Controls:
-Same controls as "almost everything", with the sole exception of
+Same controls as "Global-ish", with the sole exception of
 | Input Name  | Behaviour |
 | ------------- | ------------- |
 | Scroll Wheel | Increments or decrements the dungeon/world names |
 
 
 ## Gossip Stone Controls:
-Same controls as "almost everything", with the sole exception of:
+Same controls as "Global-ish", with the sole exception of:
 | Input Name  | Behaviour |
 | ------------- | ------------- |
 | `Reset Item` | (when items have been dragged into it) Removes the currently-displayed item from the stone |
@@ -82,7 +82,7 @@ Same controls as "almost everything", with the sole exception of:
 ### While Empty
 | Input Name  | Behaviour |
 | ------------- | ------------- |
-| Left Click | Enables the hint to by typed into |
+| Left Click | Enables the hint to be typed into |
 | Typing | Write your hint |
 | Enter | (after typing) Adds your typed words to the list of filled hints |
 
