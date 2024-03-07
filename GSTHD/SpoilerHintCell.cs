@@ -248,10 +248,8 @@ namespace GSTHD
             if (totalPoints >= 0) noPotions = true;
 
             int shownnumbers = 1;
-            int extradigits = 0;
             if (totalPoints >= 0)
             {
-                extradigits = (int)System.Math.Max(0, System.Math.Floor(System.Math.Log10(totalPoints)) - 1);
                 pointLabel = new Label
                 {
                     Name = Guid.NewGuid().ToString(),
@@ -259,15 +257,14 @@ namespace GSTHD
                     Font = new Font(new FontFamily(fontName), fontSize, fontStyle),
                     ForeColor = pointColour,
                     //BackColor = Color.Red,
-                    Width = labelWidth + (extradigits * 6),
+                    Width = labelWidth,
                     Height = WorldNumHeight,
                     AutoSize = false,
                     TextAlign = System.Drawing.ContentAlignment.MiddleRight,
                     Anchor = AnchorStyles.Right,
-                    Location = new Point(width - (shownnumbers * labelSpacing) - 2 - (extradigits * 6) - this.topRowPadding, -1)
+                    Location = new Point(width, -1)
                 };
                 shownnumbers++;
-                if (totalPoints == 0) pointLabel.ForeColor = emptyColour;
                 Controls.Add(pointLabel);
             }
             if (totalWOTHS >= 0)
@@ -283,7 +280,7 @@ namespace GSTHD
                     Height = WorldNumHeight,
                     AutoSize = false,
                     TextAlign = System.Drawing.ContentAlignment.MiddleRight,
-                    Location = new Point(width - (shownnumbers * labelSpacing) - 2 - (extradigits * 6) - this.topRowPadding, -1)
+                    Location = new Point(width, -1)
                 };
                 Controls.Add(wothLabel);
             }
@@ -488,6 +485,9 @@ namespace GSTHD
                     wothLabel.Text = totalWOTHS.ToString();
                     wothLabel.ForeColor = wothColour;
                 }
+
+                AdjustPointLocations();
+
                 if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
                     if (((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(Name.Split('_')[0], true)[0]).spoilerLoaded)
@@ -499,6 +499,28 @@ namespace GSTHD
 
             }
 
+        }
+
+        private void AdjustPointLocations()
+        {
+            Debug.WriteLine($"{this.Name}");
+            int pointWidth = 0;
+            if (pointLabel != null)
+            {
+                int pointMeasure = TextRenderer.MeasureText(pointLabel.Text, pointLabel.Font).Width;
+                pointLabel.Width = System.Math.Max(labelWidth, pointMeasure);
+                pointWidth = pointLabel.Width;
+                pointLabel.Location = new Point(this.Size.Width - (System.Math.Max(labelSpacing, pointMeasure)) - 1 - this.topRowPadding, pointLabel.Location.Y);
+                Debug.WriteLine($"point -- loc: {pointLabel.Location}   width: {pointLabel.Width}    pm: {pointMeasure}");
+            }
+
+            if (wothLabel != null)
+            {
+                int pointVis = (pointLabel != null) ? 1 : 0;
+                wothLabel.Width = System.Math.Max(labelWidth, TextRenderer.MeasureText(wothLabel.Text, wothLabel.Font).Width);
+                wothLabel.Location = new Point(this.Size.Width - (labelSpacing) - pointVis*(pointWidth) - 1 - this.topRowPadding, wothLabel.Location.Y);
+                Debug.WriteLine($"woth -- loc: {wothLabel.Location}   width: {wothLabel.Width}");
+            }
         }
 
         private void UpdatePotions()
