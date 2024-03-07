@@ -70,6 +70,8 @@ namespace GSTHD
         public bool spoilerLoaded = false;
         public bool isBroadcastable;
 
+        private bool isOnBroadcast = false;
+
         public Form1 f1;
         public Form2 f2;
 
@@ -113,6 +115,7 @@ namespace GSTHD
                 topRowHeight = data.DataRowHeight;
             }
             this.isBroadcastable = data.isBroadcastable && !isOnBroadcast;
+            this.isOnBroadcast = isOnBroadcast;
 
             // label for when a spoiler isnt loaded yet
             DefaultLabel = new Label
@@ -350,7 +353,7 @@ namespace GSTHD
                         Name + "_" + Unspace((string)parseddata["level_name"]), (string)parseddata["level_name"],
                         int.Parse(level.Key), theNum,
                         CellFontName, CellFontSize, CellFontStyle, CellLabelSpacing, CellLabelWidth,
-                        cellBackColor, MinimalMode, pointspread, DK64Items, isBroadcastable);
+                        cellBackColor, MinimalMode, pointspread, DK64Items, isBroadcastable, isOnBroadcast);
                     cells.Add(tempcell);
 
                 }
