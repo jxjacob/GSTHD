@@ -493,12 +493,12 @@ namespace GSTHD
                     // point colour
                     Items.SpoilerPointColor = new ToolStripMenuItem("Point Number Color", null, SpoilerPointColorOptions.Values.ToArray());
                     spoilerSubMenu.DropDownItems.Add(Items.SpoilerPointColor);
+                    // kinda empty colour
+                    Items.SpoilerKindaEmptyColor = new ToolStripMenuItem("\"0 Points Left (w/ Faded)\" Color", null, SpoilerKindaEmptyColorOptions.Values.ToArray());
+                    spoilerSubMenu.DropDownItems.Add(Items.SpoilerKindaEmptyColor);
                     // empty colour
                     Items.SpoilerEmptyColor = new ToolStripMenuItem("\"0 Points Left\" Color", null, SpoilerEmptyColorOptions.Values.ToArray());
                     spoilerSubMenu.DropDownItems.Add(Items.SpoilerEmptyColor);
-                    // kinda empty colour
-                    Items.SpoilerKindaEmptyColor = new ToolStripMenuItem("\"0 Points Left (with faded)\" Color", null, SpoilerKindaEmptyColorOptions.Values.ToArray());
-                    spoilerSubMenu.DropDownItems.Add(Items.SpoilerKindaEmptyColor);
                     // woth number colour
                     Items.SpoilerWothColor = new ToolStripMenuItem("WotH Number Color", null, SpoilerWothColorOptions.Values.ToArray());
                     spoilerSubMenu.DropDownItems.Add(Items.SpoilerWothColor);

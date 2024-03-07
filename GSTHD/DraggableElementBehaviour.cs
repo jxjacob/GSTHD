@@ -39,9 +39,9 @@ namespace GSTHD
 
         public void Mouse_ClickUp(object sender, MouseEventArgs e)
         {
-            if (MouseDetermination.DetermineBasicMouseInput(e, Settings.IncrementActionButton)) Mouse_LeftClickUp(sender, e);
-            else if (MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton)) Mouse_RightClickUp(sender, e);
-            else if (MouseDetermination.DetermineBasicMouseInput(e, Settings.ResetActionButton)) Mouse_MiddleClickUp(sender, e);
+            if (e.Button == MouseButtons.Left) Mouse_LeftClickUp(sender, e);
+            else if (e.Button == MouseButtons.Right) Mouse_RightClickUp(sender, e);
+            else if (e.Button == MouseButtons.Middle) Mouse_MiddleClickUp(sender, e);
             if (!LeftClickDown && !MiddleClickDown && !RightClickDown)
                 SaveChanges();
 
@@ -65,9 +65,9 @@ namespace GSTHD
 
         public void Mouse_ClickDown(object sender, MouseEventArgs e)
         {
-            if (MouseDetermination.DetermineBasicMouseInput(e, Settings.IncrementActionButton)) Mouse_LeftClickDown(sender, e);
-            else if (MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton)) Mouse_RightClickDown(sender, e);
-            else if (MouseDetermination.DetermineBasicMouseInput(e, Settings.ResetActionButton)) Mouse_MiddleClickDown(sender, e);
+            if (e.Button == MouseButtons.Left) Mouse_LeftClickDown(sender, e);
+            else if (e.Button == MouseButtons.Right) Mouse_RightClickDown(sender, e);
+            else if (e.Button == MouseButtons.Middle) Mouse_MiddleClickDown(sender, e);
             UpdateDragDropPreparationStatus();
         }
 
