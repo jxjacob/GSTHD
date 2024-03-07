@@ -9,11 +9,17 @@ using System.Windows.Forms;
 
 namespace GSTHD
 {
-    public class Item : OrganicImage, ProgressibleElement<int>, DraggableAutocheckElement<int>
+    public struct ItemState
+    {
+        public int ImageIndex;
+        public bool isMarked;
+
+    }
+    public class Item : OrganicImage, ProgressibleElement<ItemState>, DraggableAutocheckElement<ItemState>
     {
         private readonly Settings Settings;
-        private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
-        private readonly DraggableAutocheckElementBehaviour<int> DragBehaviour;
+        private readonly ProgressibleElementBehaviour<ItemState> ProgressBehaviour;
+        private readonly DraggableAutocheckElementBehaviour<ItemState> DragBehaviour;
 
         private string[] ImageNames;
         private int ImageIndex = 0;
@@ -30,8 +36,7 @@ namespace GSTHD
 
         public string AutoName = null;
 
-        delegate void SetStateCallback(int state);
-        delegate void SetWholeStateCallback(int state, bool marked);
+        delegate void SetStateCallback(ItemState state);
 
         public Item(ObjectPoint data, Settings settings, bool isBroadcast = false)
         {
@@ -66,8 +71,8 @@ namespace GSTHD
                 Size = data.Size;
             }
 
-            ProgressBehaviour = new ProgressibleElementBehaviour<int>(this, Settings);
-            DragBehaviour = new DraggableAutocheckElementBehaviour<int>(this, Settings);
+            ProgressBehaviour = new ProgressibleElementBehaviour<ItemState>(this, Settings);
+            DragBehaviour = new DraggableAutocheckElementBehaviour<ItemState>(this, Settings);
 
             Location = new Point(data.X, data.Y);
             TabStop = false;
@@ -154,13 +159,23 @@ namespace GSTHD
         }
 
 
-        public int GetState()
+        public ItemState GetState()
         {
-            return ImageIndex;
+            return new ItemState
+            {
+                ImageIndex = ImageIndex,
+                isMarked = isMarked,
+            };
         }
 
 
+        // legacy for autotracker
         public void SetState(int state)
+        {
+            Invoke(new SetStateCallback(SetState), new object[] { new ItemState { ImageIndex = state, isMarked = isMarked } });
+        }
+
+        public void SetState(ItemState state)
         {
             if (this.InvokeRequired)
             {
@@ -169,28 +184,8 @@ namespace GSTHD
             }
             else
             {
-                ImageIndex = Math.Clamp(state, 0, ImageNames.Length);
-                VerifyState();
-                UpdateImage();
-                DragBehaviour.SaveChanges();
-            }
-        }
-        public Tuple<int, bool> GetWholeState()
-        {
-            return Tuple.Create(ImageIndex, isMarked);
-        }
-
-        public void SetWholeState(int state, bool marked)
-        {
-            if (this.InvokeRequired)
-            {
-                Invoke(new SetWholeStateCallback(SetWholeState), new object[] { state, marked });
-                return;
-            }
-            else
-            {
-                ImageIndex = Math.Clamp(state, 0, ImageNames.Length);
-                this.isMarked = marked;
+                ImageIndex = Math.Clamp(state.ImageIndex, 0, ImageNames.Length);
+                isMarked = state.isMarked;
                 VerifyState();
                 UpdateImage();
                 DragBehaviour.SaveChanges();

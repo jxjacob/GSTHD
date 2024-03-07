@@ -9,11 +9,15 @@ using System.IO;
 
 namespace GSTHD
 {
-
-    public class DoubleItem : OrganicImage, ProgressibleElement<int>
+    public struct DoubleItemState
+    {
+        public int ImageIndex;
+        public bool isMarked;
+    }
+    public class DoubleItem : OrganicImage, ProgressibleElement<DoubleItemState>
     {
         private readonly Settings Settings;
-        private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
+        private readonly ProgressibleElementBehaviour<DoubleItemState> ProgressBehaviour;
 
         private string[] ImageNames;
         private int ImageIndex = 0;
@@ -32,8 +36,7 @@ namespace GSTHD
         bool isBroadcastable;
         public string AutoName = null;
 
-        delegate void SetStateCallback(int state);
-        delegate void SetWholeStateCallback(int state, bool marked);
+        delegate void SetStateCallback(DoubleItemState state);
 
         public DoubleItem(ObjectPoint data, Settings settings, bool isBroadcast = false)
         {
@@ -65,7 +68,7 @@ namespace GSTHD
             //this.WaitOnLoad = false;
             //this.LoadCompleted += this.DoubleItem_LoadCompleted;
 
-            ProgressBehaviour = new ProgressibleElementBehaviour<int>(this, Settings);
+            ProgressBehaviour = new ProgressibleElementBehaviour<DoubleItemState>(this, Settings);
 
             if (!isBroadcast)
             {
@@ -190,15 +193,25 @@ namespace GSTHD
         }
 
 
-        public int GetState()
+        public DoubleItemState GetState()
         {
             int run = 0;
             if (isColoredLeft) { run ^= 1; }
             if (isColoredRight) { run ^= 2; }
-            return run;
+            return new DoubleItemState
+            {
+                ImageIndex = run,
+                isMarked = isMarked
+            };
         }
 
+        // legacy for autotracker
         public void SetState(int state)
+        {
+            Invoke(new SetStateCallback(SetState), new object[] { new DoubleItemState { ImageIndex = state, isMarked=isMarked } });
+        }
+
+        public void SetState(DoubleItemState state)
         {
             if (this.InvokeRequired)
             {
@@ -206,33 +219,34 @@ namespace GSTHD
                 return;
             } else
             {
-                if ((state & 1) == 1) { IncrementLeftState(); }
-                if ((state & 2) == 2) { IncrementRightState(); }
+                isMarked = state.isMarked;
+                if ((state.ImageIndex & 1) == 1) { IncrementLeftState(); }
+                if ((state.ImageIndex & 2) == 2) { IncrementRightState(); }
             }
         }
 
-        public Tuple<int, bool> GetWholeState()
-        {
-            int run = 0;
-            if (isColoredLeft) { run ^= 1; }
-            if (isColoredRight) { run ^= 2; }
-            return Tuple.Create(run, isMarked);
-        }
+        //public Tuple<int, bool> GetWholeState()
+        //{
+        //    int run = 0;
+        //    if (isColoredLeft) { run ^= 1; }
+        //    if (isColoredRight) { run ^= 2; }
+        //    return Tuple.Create(run, isMarked);
+        //}
 
-        public void SetWholeState(int state, bool marked)
-        {
-            if (this.InvokeRequired)
-            {
-                Invoke(new SetWholeStateCallback(SetWholeState), new object[] { state, marked });
-                return;
-            }
-            else
-            {
-                isMarked = marked;
-                if ((state & 1) == 1) { IncrementLeftState(); }
-                if ((state & 2) == 2) { IncrementRightState(); }
-            }
-        }
+        //public void SetWholeState(int state, bool marked)
+        //{
+        //    if (this.InvokeRequired)
+        //    {
+        //        Invoke(new SetWholeStateCallback(SetWholeState), new object[] { state, marked });
+        //        return;
+        //    }
+        //    else
+        //    {
+        //        isMarked = marked;
+        //        if ((state & 1) == 1) { IncrementLeftState(); }
+        //        if ((state & 2) == 2) { IncrementRightState(); }
+        //    }
+        //}
 
         public void ResetState()
         {

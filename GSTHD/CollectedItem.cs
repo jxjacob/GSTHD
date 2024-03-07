@@ -9,11 +9,17 @@ using System.Windows.Forms;
 
 namespace GSTHD
 {
-    class CollectedItem : OrganicImage, ProgressibleElement<int>, DraggableAutocheckElement<int>
+    public struct CollectedItemState
+    {
+        public int CollectedItems;
+        public bool isMarked;
+
+    }
+    class CollectedItem : OrganicImage, ProgressibleElement<CollectedItemState>, DraggableAutocheckElement<CollectedItemState>
     {
         private readonly Settings Settings;
-        private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
-        private readonly DraggableAutocheckElementBehaviour<int> DragBehaviour;
+        private readonly ProgressibleElementBehaviour<CollectedItemState> ProgressBehaviour;
+        private readonly DraggableAutocheckElementBehaviour<CollectedItemState> DragBehaviour;
 
         private string[] ImageNames;
         private Label ItemCount;
@@ -32,8 +38,7 @@ namespace GSTHD
         public string AutoName = null;
         public string AutoSubName = null;
 
-        delegate void SetStateCallback(int state);
-        delegate void SetWholeStateCallback(int state, bool marked);
+        delegate void SetStateCallback(CollectedItemState state);
         delegate void UpdateCountCallback();
 
         public CollectedItem(ObjectPointCollectedItem data, Settings settings, bool isBroadcast = false)
@@ -66,8 +71,8 @@ namespace GSTHD
                 Size = CollectedItemSize;
             }
 
-            ProgressBehaviour = new ProgressibleElementBehaviour<int>(this, Settings);
-            DragBehaviour = new DraggableAutocheckElementBehaviour<int>(this, Settings);
+            ProgressBehaviour = new ProgressibleElementBehaviour<CollectedItemState>(this, Settings);
+            DragBehaviour = new DraggableAutocheckElementBehaviour<CollectedItemState>(this, Settings);
 
             Location = new Point(data.X, data.Y);
             CollectedItemCountPosition = data.CountPosition.IsEmpty ? new Size(0, -7) : data.CountPosition;
@@ -158,12 +163,22 @@ namespace GSTHD
             }
         }
 
-        public int GetState()
+        public CollectedItemState GetState()
         {
-            return CollectedItems;
+            return new CollectedItemState
+            {
+                CollectedItems = CollectedItems,
+                isMarked = isMarked,
+            };
         }
 
+        // legacy for autotracker
         public void SetState(int state)
+        {
+            Invoke(new SetStateCallback(SetState), new object[] { new CollectedItemState { CollectedItems = state, isMarked = isMarked } });
+        }
+
+        public void SetState(CollectedItemState state)
         {
             if (this.InvokeRequired)
             {
@@ -171,28 +186,8 @@ namespace GSTHD
                 return;
             } else
             {
-                CollectedItems = state;
-                UpdateCount();
-                DragBehaviour.SaveChanges();
-            }
-        }
-
-        public Tuple<int,bool> GetWholeState()
-        {
-            return Tuple.Create(CollectedItems, isMarked);
-        }
-
-        public void SetWholeState(int state, bool marked)
-        {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new SetWholeStateCallback(SetWholeState), new object[] { state, marked });
-                return;
-            }
-            else
-            {
-                CollectedItems = state;
-                isMarked = marked;
+                CollectedItems = state.CollectedItems;
+                isMarked = state.isMarked;
                 UpdateCount();
                 DragBehaviour.SaveChanges();
             }

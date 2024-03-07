@@ -364,10 +364,10 @@ namespace GSTHD
             {
                 if (x.Name != "")
                 {
-                    Tuple<int, bool> state = x.GetWholeState();
-                    if (state.Item1 != x.DefaultIndex || state.Item2 != false)
+                    ItemState state = x.GetState();
+                    if (state.ImageIndex != x.DefaultIndex || state.isMarked != false)
                     {
-                        thejson.Add(x.Name, $"{state.Item1},{state.Item2}");
+                        thejson.Add(x.Name, $"{state.ImageIndex},{state.isMarked}");
                     }
                 }
             }
@@ -375,10 +375,10 @@ namespace GSTHD
             {
                 if (x.Name != "")
                 {
-                    Tuple<int, bool> state = x.GetWholeState();
-                    if (state.Item1 != x.CollectedItemDefault || state.Item2 != false)
+                    CollectedItemState state = x.GetState();
+                    if (state.CollectedItems != x.CollectedItemDefault || state.isMarked != false)
                     {
-                        thejson.Add(x.Name, $"{state.Item1},{state.Item2}");
+                        thejson.Add(x.Name, $"{state.CollectedItems},{state.isMarked}");
                     }
                 }
             }
@@ -386,10 +386,10 @@ namespace GSTHD
             {
                 if (x.Name != "")
                 {
-                    Tuple<int, bool> state = x.GetWholeState();
-                    if (state.Item1 != 0 || state.Item2 != false)
+                    DoubleItemState state = x.GetState();
+                    if (state.ImageIndex != 0 || state.isMarked != false)
                     {
-                        thejson.Add(x.Name, $"{state.Item1},{state.Item2}");
+                        thejson.Add(x.Name, $"{state.ImageIndex},{state.isMarked}");
                     }
                 }
             }
@@ -572,16 +572,16 @@ namespace GSTHD
                     if (found is Item i)
                     {
                         string[] words = ((string)x.Value).Split(',');
-                        i.SetWholeState(int.Parse(words[0]), bool.Parse(words[1]));
+                        i.SetState(new ItemState { ImageIndex =  int.Parse(words[0]), isMarked = bool.Parse(words[1]) });
                     } else if (found is DoubleItem di)
                     {
                         string[] words = ((string)x.Value).Split(',');
-                        di.SetWholeState(int.Parse(words[0]), bool.Parse(words[1]));
+                        di.SetState(new DoubleItemState { ImageIndex = int.Parse(words[0]), isMarked = bool.Parse(words[1]) });
                     }
                     else if (found is CollectedItem ci)
                     {
                         string[] words = ((string)x.Value).Split(',');
-                        ci.SetWholeState(int.Parse(words[0]), bool.Parse(words[1]));
+                        ci.SetState(new CollectedItemState { CollectedItems = int.Parse(words[0]), isMarked = bool.Parse(words[1]) });
                     } 
                     else if (found is TextBox tb)
                     {

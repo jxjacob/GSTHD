@@ -695,7 +695,7 @@ namespace GSTHD
                 displayList = displayList,
                 levelLabelMarked = levelImage.isMarked,
                 levelNumMarked = (levelNumberImage != null) ? levelNumberImage.isMarked : (unknownLevelNumberImage != null) ? unknownLevelNumberImage.isMarked : false,
-                levelNumIndex = (unknownLevelNumberImage != null) ? unknownLevelNumberImage.GetState() : 0
+                levelNumIndex = (unknownLevelNumberImage != null) ? unknownLevelNumberImage.GetState().ImageIndex : 0
             };
         }
 
