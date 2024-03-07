@@ -167,6 +167,7 @@ namespace GSTHD
         private Label wothLabel;
 
         private Color emptyColour;
+        private Color kindaEmptyColour;
 
         public string fontName;
         public int fontSize;
@@ -205,6 +206,7 @@ namespace GSTHD
             pointColour = Color.FromKnownColor(Settings.SpoilerPointColour);
             wothColour = Color.FromKnownColor(Settings.SpoilerWOTHColour);
             emptyColour = Color.FromKnownColor(Settings.SpoilerEmptyColour);
+            kindaEmptyColour = Color.FromKnownColor(Settings.SpoilerKindaEmptyColour);
 
             // just concerns defining the shape of the panel
             this.BackColor = backColor;
@@ -369,6 +371,7 @@ namespace GSTHD
             pointColour = Color.FromKnownColor(Settings.SpoilerPointColour);
             wothColour = Color.FromKnownColor(Settings.SpoilerWOTHColour);
             emptyColour = Color.FromKnownColor(Settings.SpoilerEmptyColour);
+            kindaEmptyColour = Color.FromKnownColor(Settings.SpoilerKindaEmptyColour);
             UpdateVisuals();
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {
@@ -477,7 +480,8 @@ namespace GSTHD
                 if (totalPoints >= 0)
                 {
                     pointLabel.Text = (totalPoints - currentPoints).ToString();
-                    if (pointLabel.Text == "0") pointLabel.ForeColor = emptyColour;
+                    if (pointLabel.Text == "0" && !isThereAnyFaded()) { pointLabel.ForeColor = emptyColour; }
+                    else if (pointLabel.Text == "0") { pointLabel.ForeColor = kindaEmptyColour; }
                     else pointLabel.ForeColor = pointColour;
                     //Debug.WriteLine($"Update to {levelName}: Points={pointLabel.Text}");
                 }
@@ -501,6 +505,15 @@ namespace GSTHD
 
             }
 
+        }
+
+        private bool isThereAnyFaded()
+        {
+            foreach (CellDisplay thing in displayList)
+            {
+                if (thing.isFaded) return true;
+            }
+            return false;
         }
 
         private void AdjustPointLocations()

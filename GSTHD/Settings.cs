@@ -134,6 +134,7 @@ namespace GSTHD
         public KnownColor SpoilerPointColour { get; set; } = KnownColor.White;
         public KnownColor SpoilerWOTHColour { get; set; } = KnownColor.ForestGreen;
         public KnownColor SpoilerEmptyColour { get; set; } = KnownColor.Teal;
+        public KnownColor SpoilerKindaEmptyColour { get; set; } = KnownColor.GreenYellow;
 
         public MedallionLabel DefaultDungeonNames { get; set; } = new MedallionLabel()
         {

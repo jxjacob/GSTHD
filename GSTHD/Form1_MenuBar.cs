@@ -59,6 +59,7 @@ namespace GSTHD
             public ToolStripMenuItem SpoilerPointColor;
             public ToolStripMenuItem SpoilerWothColor;
             public ToolStripMenuItem SpoilerEmptyColor;
+            public ToolStripMenuItem SpoilerKindaEmptyColor;
             public ToolStripMenuItem CellOverrideCheckMark;
 
             // Gossip Stone Stuff
@@ -157,6 +158,7 @@ namespace GSTHD
         Dictionary<KnownColor, ToolStripMenuItem> SpoilerPointColorOptions;
         Dictionary<KnownColor, ToolStripMenuItem> SpoilerWothColorOptions;
         Dictionary<KnownColor, ToolStripMenuItem> SpoilerEmptyColorOptions;
+        Dictionary<KnownColor, ToolStripMenuItem> SpoilerKindaEmptyColorOptions;
         Dictionary<double, ToolStripMenuItem> GossipeCycleLengthOptions;
         Size SavedSize;
 
@@ -393,6 +395,7 @@ namespace GSTHD
                     SpoilerPointColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
                     SpoilerWothColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
                     SpoilerEmptyColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
+                    SpoilerKindaEmptyColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
 
                     var firstColorId = 28;
                     var lastColorId = 167;
@@ -404,6 +407,7 @@ namespace GSTHD
                         SpoilerPointColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerPointColor)));
                         SpoilerWothColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerWothColor)));
                         SpoilerEmptyColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerEmptyColor)));
+                        SpoilerKindaEmptyColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerKindaEmptyColor)));
                         i++;
                     }
 
@@ -492,6 +496,9 @@ namespace GSTHD
                     // empty colour
                     Items.SpoilerEmptyColor = new ToolStripMenuItem("\"0 Points Left\" Color", null, SpoilerEmptyColorOptions.Values.ToArray());
                     spoilerSubMenu.DropDownItems.Add(Items.SpoilerEmptyColor);
+                    // kinda empty colour
+                    Items.SpoilerKindaEmptyColor = new ToolStripMenuItem("\"0 Points Left (with faded)\" Color", null, SpoilerKindaEmptyColorOptions.Values.ToArray());
+                    spoilerSubMenu.DropDownItems.Add(Items.SpoilerKindaEmptyColor);
                     // woth number colour
                     Items.SpoilerWothColor = new ToolStripMenuItem("WotH Number Color", null, SpoilerWothColorOptions.Values.ToArray());
                     spoilerSubMenu.DropDownItems.Add(Items.SpoilerWothColor);
@@ -598,6 +605,7 @@ namespace GSTHD
             SpoilerPointColorOptions[Settings.SpoilerPointColour].Checked = true;
             SpoilerWothColorOptions[Settings.SpoilerWOTHColour].Checked = true;
             SpoilerEmptyColorOptions[Settings.SpoilerEmptyColour].Checked = true;
+            SpoilerKindaEmptyColorOptions[Settings.SpoilerKindaEmptyColour].Checked = true;
 
             SelectEmulatorOptions[Settings.SelectEmulator].Checked = true;
             Items.SubtractItem.Checked = Settings.SubtractItems;
@@ -1088,6 +1096,20 @@ namespace GSTHD
             var option = SpoilerEmptyColorOptions.FirstOrDefault((x) => x.Value == choice);
             if (option.Value == null) throw new NotImplementedException();
             Settings.SpoilerEmptyColour = option.Key;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
+        private void menuBar_SetSpoilerKindaEmptyColor(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            SpoilerKindaEmptyColorOptions[Settings.SpoilerKindaEmptyColour].Checked = false;
+            choice.Checked = true;
+
+            var option = SpoilerKindaEmptyColorOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.SpoilerKindaEmptyColour = option.Key;
             Settings.Write();
             Form.UpdateLayoutFromSettings();
         }
