@@ -85,8 +85,8 @@ namespace GSTHD
         public bool ShowMenuBar { get; set; } = true;
         public string ActiveLayout { get; set; } = "Layouts\\dk64.json";
         public string ActiveLayoutBroadcastFile {  get; set; } = string.Empty;
-        public string ActivePlaces { get; set; } = string.Empty;
-        public string ActiveSometimesHints { get; set; } = string.Empty;
+        public string ActivePlaces { get; set; } = "dk64_places.json";
+        public string ActiveSometimesHints { get; set; } = "sometimes_hints.json";
         public bool InvertScrollWheel { get; set; } = false;
         public bool WraparoundDungeonNames { get; set; } = true;
         public DragButtonOption DragButton { get; set; } = DragButtonOption.Middle;
