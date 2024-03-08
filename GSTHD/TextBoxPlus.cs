@@ -18,6 +18,7 @@ namespace GSTHD
         {
             this.settings = settings;
 
+            Text = data.Text;
             BackColor = data.BackColor;
             Name = data.Name;
             Font = new Font(data.FontName, data.FontSize, data.FontStyle);
@@ -28,6 +29,10 @@ namespace GSTHD
             Padding = new Padding(5, 10, 5, 5);
             Margin = new Padding(5, 10, 5, 5);
             isBroadcastable = data.isBroadcastable;
+            TextAlign = data.TextAlignment;
+            // for reasons unknown to man and machine, height=19 doesnt actually work with autosize=false
+            // i WILL find who is responsible for this bug and lobotomize them
+            AutoSize = (Height == 19 && BorderStyle == BorderStyle.FixedSingle);
 
             this.TextChanged += BoxPlus_TextChanged;
         }

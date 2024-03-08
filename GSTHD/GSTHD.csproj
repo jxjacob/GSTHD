@@ -184,6 +184,10 @@
     <Compile Include="Medallion.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="MouseDetermination.cs" />
+    <Compile Include="OrganicImage.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="ProgressibleElementBehaviour.cs" />
     <Compile Include="PanelWothBarren.cs">
       <SubType>Component</SubType>

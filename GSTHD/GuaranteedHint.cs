@@ -5,20 +5,26 @@ using System.Windows.Forms;
 
 namespace GSTHD
 {
-    class GuaranteedHint : PictureBox
+    class GuaranteedHint : OrganicImage, ProgressibleElement<int>
     {
+        private readonly Settings Settings;
+        private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
+
         List<string> ListImageName = new List<string>();
+        bool isBroadcastable = false;
 
         Size GuaranteddHintSize;
 
-        public GuaranteedHint(ObjectPoint data)
+        public GuaranteedHint(ObjectPoint data, Settings settings, bool isOnBroadcast)
         {
+            Settings = settings;
+
             if(data.ImageCollection != null)
                 ListImageName = data.ImageCollection.ToList();
 
             GuaranteddHintSize = data.Size;
 
-            this.BackColor = Color.Transparent;
+            if (data.BackColor != Color.Transparent) BackColor = data.BackColor;
             if (ListImageName.Count > 0)
             {
                 this.Name = ListImageName[0];
@@ -29,6 +35,42 @@ namespace GSTHD
             this.Location = new Point(data.X, data.Y);
             this.TabStop = false;
             this.AllowDrop = false;
+            this.isBroadcastable = data.isBroadcastable;
+
+            if (!isOnBroadcast)
+            {
+                ProgressBehaviour = new ProgressibleElementBehaviour<int>(this, Settings);
+                this.MouseDown += ProgressBehaviour.Mouse_ClickDown;
+            }
+        }
+
+        public void UpdateImage()
+        {
+            if (IsHandleCreated) { Invalidate(); }
+            if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+            {
+                ((GuaranteedHint)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
+                ((GuaranteedHint)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
+            }
+        }
+
+        // this is so fucking unneccesary just to allow you to checkmark a static image lmao
+        public void IncrementState()
+        {
+            //blanky
+        }
+        public void DecrementState()
+        {
+            //blanky
+        }
+        public void ResetState()
+        {
+            //blanky
+        }
+        public void ToggleCheck()
+        {
+            isMarked = !isMarked;
+            UpdateImage();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Net.Security;
@@ -10,11 +11,12 @@ namespace GSTHD
     {
         public int DungeonIndex;
         public int ImageIndex;
+        public bool isMarked;
 
-        public override string ToString() => $"{DungeonIndex},{ImageIndex}";
+        public override string ToString() => $"{DungeonIndex},{ImageIndex},{isMarked}";
     }
 
-    public class Medallion : PictureBox, UpdatableFromSettings, ProgressibleElement<MedallionState>, DraggableAutocheckElement<MedallionState>
+    public class Medallion : OrganicImage, UpdatableFromSettings, ProgressibleElement<MedallionState>, DraggableAutocheckElement<MedallionState>
     {
         private readonly Settings Settings;
         private readonly ProgressibleElementBehaviour<MedallionState> ProgressBehaviour;
@@ -70,7 +72,6 @@ namespace GSTHD
             AutoName = data.AutoName;
 
             Name = data.Name;
-            BackColor = Color.Transparent;
 
             if (ImageNames.Length > 0)
             {
@@ -188,8 +189,10 @@ namespace GSTHD
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {
                 ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
+                ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
                 ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
             }
+            if (IsHandleCreated) { Invalidate(); }
         }
 
         public MedallionState GetState()
@@ -198,6 +201,7 @@ namespace GSTHD
             {
                 DungeonIndex = DungeonIndex,
                 ImageIndex = ImageIndex,
+                isMarked = isMarked,
             };
         }
 
@@ -209,9 +213,10 @@ namespace GSTHD
                 return;
             } else
             {
-                ImageIndex = state.ImageIndex;
+                ImageIndex = Math.Clamp(state.ImageIndex, 0, ImageNames.Length);
                 DungeonIndex = state.DungeonIndex;
                 SelectedDungeon.Text = DungeonNames[DungeonIndex];
+                isMarked = state.isMarked;
                 UpdateImage();
                 SetSelectedDungeonLocation();
                 DragBehaviour.SaveChanges();
@@ -226,7 +231,7 @@ namespace GSTHD
 
         public void SetImageState(int state)
         {
-            ImageIndex = System.Math.Min(ImageNames.Length, state);
+            ImageIndex = Math.Clamp(state, 0, ImageNames.Length);
             UpdateImage();
         }
 
@@ -245,6 +250,7 @@ namespace GSTHD
         public void ResetState()
         {
             ImageIndex = 0;
+            isMarked = false;
             UpdateImage();
             DungeonIndex = DefaultDungeonIndex;
             SelectedDungeon.Text = DungeonNames[DungeonIndex];
@@ -256,9 +262,15 @@ namespace GSTHD
             }
         }
 
+        public void ToggleCheck()
+        {
+            isMarked = !isMarked;
+            UpdateImage();
+        }
+
         public void StartDragDrop()
         {
-            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[1]);
+            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[1], marked: isMarked);
             DoDragDrop(dropContent, DragDropEffects.Copy);
         }
 

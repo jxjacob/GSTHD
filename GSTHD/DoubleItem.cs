@@ -9,8 +9,16 @@ using System.IO;
 
 namespace GSTHD
 {
-    public class DoubleItem : PictureBox
+    public struct DoubleItemState
     {
+        public int ImageIndex;
+        public bool isMarked;
+    }
+    public class DoubleItem : OrganicImage, ProgressibleElement<DoubleItemState>
+    {
+        private readonly Settings Settings;
+        private readonly ProgressibleElementBehaviour<DoubleItemState> ProgressBehaviour;
+
         private string[] ImageNames;
         private int ImageIndex = 0;
 
@@ -21,13 +29,19 @@ namespace GSTHD
         public int right_id;
         Size DoubleItemSize;
 
+        // purely used for handling broadcast marking logic
+        bool leftMark = false;
+        bool rightMark = false;
+
         bool isBroadcastable;
         public string AutoName = null;
 
-        delegate void SetStateCallback(int state);
+        delegate void SetStateCallback(DoubleItemState state);
 
-        public DoubleItem(ObjectPoint data, bool isBroadcast = false)
+        public DoubleItem(ObjectPoint data, Settings settings, bool isBroadcast = false)
         {
+            Settings = settings;
+
             if (data.ImageCollection == null)
                 ImageNames = new string[0];
             else
@@ -46,44 +60,31 @@ namespace GSTHD
                 
             }
 
-            this.BackColor = Color.Transparent;
             this.isBroadcastable = data.isBroadcastable;
             this.AutoName = data.AutoName;
             this.Location = new Point(data.X, data.Y);
             this.TabStop = false;
             this.AllowDrop = false;
-            this.WaitOnLoad = false;
-            this.LoadCompleted += this.DoubleItem_LoadCompleted;
+            //this.WaitOnLoad = false;
+            //this.LoadCompleted += this.DoubleItem_LoadCompleted;
 
-           if (!isBroadcast)
+            ProgressBehaviour = new ProgressibleElementBehaviour<DoubleItemState>(this, Settings);
+
+            if (!isBroadcast)
             {
-                this.MouseUp += this.Click_MouseUp;
-                this.MouseDown += this.Click_MouseDown;
                 this.MouseMove += this.Click_MouseMove;
+                MouseDown += ProgressBehaviour.Mouse_ClickDown;
+                MouseDown += this.Click_MouseDown;
             }
         }
 
-        private void DoubleItem_LoadCompleted(Object sender, AsyncCompletedEventArgs e)
-        {
-            if (e.Error != null)
-            {
-                File.WriteAllText(@"red_X_" + DateTime.Now.ToString("MM-dd-yyyy-HH:mm:ss") + ".txt", e.Error.Message.ToString());
-            }
-        }
-
-        private void Click_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                ToggleLeftState();
-
-            }
-            if (e.Button == MouseButtons.Right)
-            {
-                ToggleRightState();
-            }
-        }
-
+        //private void DoubleItem_LoadCompleted(Object sender, AsyncCompletedEventArgs e)
+        //{
+        //    if (e.Error != null)
+        //    {
+        //        File.WriteAllText(@"red_X_" + DateTime.Now.ToString("MM-dd-yyyy-HH:mm:ss") + ".txt", e.Error.Message.ToString());
+        //    }
+        //}
         private void Click_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Clicks != 1)
@@ -91,19 +92,18 @@ namespace GSTHD
             else isMouseDown = true;
         }
 
-
         private void Click_MouseMove(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left && isMouseDown)
+            if (MouseDetermination.DetermineBasicMouseInput(e, Settings.IncrementActionButton) && isMouseDown)
             {
                 // TODO change that bool to DragBehaviour.AutocheckDragDrop
-                var dropContent = new DragDropContent(false, ImageNames[4], left_id);
+                var dropContent = new DragDropContent(false, ImageNames[4], left_id, isMarked);
                 this.DoDragDrop(dropContent, DragDropEffects.Copy);
                 isMouseDown = false;
             }
-            if (e.Button == MouseButtons.Right && isMouseDown)
+            if (MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton) && isMouseDown)
             {
-                var dropContent = new DragDropContent(false, ImageNames[5], right_id);
+                var dropContent = new DragDropContent(false, ImageNames[5], right_id, isMarked);
                 this.DoDragDrop(dropContent, DragDropEffects.Copy);
                 isMouseDown = false;
             }
@@ -119,8 +119,10 @@ namespace GSTHD
                 ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
                 ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isColoredLeft = isColoredLeft;
                 ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isColoredRight = isColoredRight;
+                ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
                 ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
             };
+            if (IsHandleCreated) { Invalidate(); }
         }
 
         public void IncrementLeftState()
@@ -141,10 +143,18 @@ namespace GSTHD
             }
             UpdateImage();
         }
-        public void ToggleLeftState()
+        public void IncrementState()
         {
             if (isColoredLeft) DecrementLeftState(); else IncrementLeftState();
         }
+
+        public void SetLeftMark(bool mark)
+        {
+            leftMark = mark;
+            isMarked = (leftMark || rightMark);
+        }
+
+
 
         public void IncrementRightState()
         {
@@ -164,20 +174,44 @@ namespace GSTHD
             }
             UpdateImage();
         }
-        public void ToggleRightState()
+        public void DecrementState()
         {
             if (isColoredRight) DecrementRightState(); else IncrementRightState();
         }
 
-        public int GetState()
+        public void SetRightMark(bool mark)
         {
-            int run = 0;
-            if (isColoredLeft) { run = run ^ 1; }
-            if (isColoredRight) { run = run ^ 2; }
-            return run;
+            rightMark = mark;
+            isMarked = (leftMark || rightMark);
         }
 
+
+        public void ToggleCheck()
+        {
+            isMarked = !isMarked;
+            UpdateImage();
+        }
+
+
+        public DoubleItemState GetState()
+        {
+            int run = 0;
+            if (isColoredLeft) { run ^= 1; }
+            if (isColoredRight) { run ^= 2; }
+            return new DoubleItemState
+            {
+                ImageIndex = run,
+                isMarked = isMarked
+            };
+        }
+
+        // legacy for autotracker
         public void SetState(int state)
+        {
+            Invoke(new SetStateCallback(SetState), new object[] { new DoubleItemState { ImageIndex = state, isMarked=isMarked } });
+        }
+
+        public void SetState(DoubleItemState state)
         {
             if (this.InvokeRequired)
             {
@@ -185,14 +219,16 @@ namespace GSTHD
                 return;
             } else
             {
-                if ((state & 1) == 1) { IncrementLeftState(); }
-                if ((state & 2) == 2) { IncrementRightState(); }
+                isMarked = state.isMarked;
+                if ((state.ImageIndex & 1) == 1) { IncrementLeftState(); }
+                if ((state.ImageIndex & 2) == 2) { IncrementRightState(); }
             }
         }
 
         public void ResetState()
         {
             ImageIndex = 0;
+            isMarked = false;
             isColoredRight = false;
             isColoredLeft = false;
             UpdateImage();

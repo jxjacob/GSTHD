@@ -28,6 +28,10 @@ namespace GSTHD
         public int totalWOTHS;
         public int currentWOTHS;
 
+        public bool levelNumMarked;
+        public int levelNumIndex;
+        public bool levelLabelMarked;
+
         public List<int> foundItems;
         public List<PotionTypes> potionsList;
 
@@ -54,11 +58,11 @@ namespace GSTHD
                 }
                 displaystring += item.ToString();
             }
-            return $"{currentPoints},{currentWOTHS}\n{itemstring}\n{displaystring}";
+            return $"{currentPoints},{currentWOTHS},{levelNumIndex},{levelNumMarked},{levelLabelMarked}\n{itemstring}\n{displaystring}";
         }
     }
 
-    public class CellPictureBox : Control, ProgressibleElement<int>
+    public class CellPictureBox : OrganicImage, ProgressibleElement<int>
     {
         private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
 
@@ -66,15 +70,11 @@ namespace GSTHD
 
         public int dk_id;
 
-        public bool isFaded;
 
-        public Graphics imgGra;
-        public Image Image;
-
-        public CellPictureBox(Settings settings)
+        public CellPictureBox(Settings settings, bool isOnBroadcast)
         {
             ProgressBehaviour = new ProgressibleElementBehaviour<int>(this, settings);
-            MouseDown += ProgressBehaviour.Mouse_ClickDown;
+            if (!isOnBroadcast) MouseDown += ProgressBehaviour.Mouse_ClickDown;
         }
 
         public void IncrementState()
@@ -97,72 +97,28 @@ namespace GSTHD
             }
         }
 
+        public void ToggleCheck()
+        {
+            isMarked = !isMarked;
+            hostCell.TellMarked(dk_id, isMarked);
+            Invalidate();
+        }
+
         public void ToggleFade()
         {
             if (isFaded)
             {
                 // restore fadedness
                 isFaded = false;
-                DisplayImage();
+                Invalidate();
                 hostCell.TellFaded(dk_id, isFaded);
-                Debug.WriteLine("restored feeling");
             } else
             {
                 // make faded
                 isFaded = true;
-                DisplayImage();
+                Invalidate();
                 hostCell.TellFaded(dk_id, isFaded);
-                Debug.WriteLine("made faded");
             }
-        }
-
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            DisplayImage();
-            base.OnPaint(e);
-        }
-
-        public void DisplayImage()
-        {
-            if (imgGra == null)
-            {
-                imgGra = this.CreateGraphics();
-            } else
-            imgGra.Clear(BackColor);
-
-            float howFaded = (isFaded) ? (float)0.5 : 1;
-
-            ColorMatrix cm = new ColorMatrix();
-            cm.Matrix00 = cm.Matrix11 = cm.Matrix22 = cm.Matrix44 = 1;
-            cm.Matrix33 = howFaded;
-
-            ImageAttributes ia = new ImageAttributes();
-            ia.SetColorMatrix(cm);
-
-            // makes a psuedo SizeMode.Zoom feature
-            int newWidth, newHeight, newX, newY;
-            if (this.Image.Width > this.Image.Height)
-            {
-                newX = 0;
-                float ratio = (float)Image.Width / (float)Width;
-                newWidth = (int)(Image.Width / ratio);
-                newHeight = (int)(Image.Height / ratio);
-                newY = (this.Height - newHeight) / 2;
-            } else
-            {
-                newY = 0;
-                float ratio = (float)Image.Height / (float)Height;
-                newWidth = (int)(Image.Width / ratio);
-                newHeight = (int)(Image.Height / ratio);
-                newX = (this.Width - newWidth)/2;
-            }
-
-
-            imgGra.DrawImage(Image,
-                new Rectangle(newX, newY, newWidth, newHeight),
-                0, 0, Image.Width, Image.Height, GraphicsUnit.Pixel,
-                ia);
-            Debug.WriteLine($"id {this.dk_id} f {isFaded}");
         }
     }
 
@@ -172,10 +128,11 @@ namespace GSTHD
         public int item_id;
         public bool isStarting;
         public bool isFaded = false;
+        public bool isMarked = false;
 
         public override string ToString()
         {
-            return $"{potionType}\t{item_id}\t{isStarting}\t{isFaded}";
+            return $"{potionType}\t{item_id}\t{isStarting}\t{isFaded}\t{isMarked}";
         }
     }
 
@@ -195,9 +152,9 @@ namespace GSTHD
         public List<CellDisplay> displayList;
         public List<CellPictureBox> displayedPotions = new List<CellPictureBox>();
 
-        private PictureBox levelNumberImage;
+        private GuaranteedHint levelNumberImage;
         private Item unknownLevelNumberImage;
-        private PictureBox levelImage;
+        private GuaranteedHint levelImage;
 
         private int totalPoints;
         public int currentPoints = 0;
@@ -210,6 +167,7 @@ namespace GSTHD
         private Label wothLabel;
 
         private Color emptyColour;
+        private Color kindaEmptyColour;
 
         public string fontName;
         public int fontSize;
@@ -230,6 +188,7 @@ namespace GSTHD
 
         public bool MinimalMode = false;
         public bool isBroadcastable = false;
+        private bool isOnBroadcast = false;
 
         public string[] levelList = { "japes", "aztec", "factory", "galleon", "forest", "caves", "castle", "helm", "isles" };
         public string[] potionImageList = { "dk64/potion_shared.png", "dk64/potion_dk.png", "dk64/potion_diddy.png", "dk64/potion_lanky.png", "dk64/potion_tiny.png", "dk64/potion_chunky.png", "dk64/ButWhereWasDK.png", "dk64/key_unknown.png" };
@@ -239,7 +198,7 @@ namespace GSTHD
         delegate void SetStateCallback(SpoilerCellState state);
 
 
-        public SpoilerCell(Settings settings, int width, int height, int x, int y, int points, int woths, List<PotionTypes> potions, int topRowHeight, int topRowPadding, int WorldNumWidth, int WorldNumHeight, int PotionWidth, int PotionHeight, string name, string levelname, int levelnum, int levelorder, string cellFontName, int cellFontSize, FontStyle cellFontStyle, int labelSpacing, int labelWidth, Color backColor, bool isMinimal, Dictionary<string, int> spread, Dictionary<int, DK64_Item> dkitems, bool isBroadcastable=false)
+        public SpoilerCell(Settings settings, int width, int height, int x, int y, int points, int woths, List<PotionTypes> potions, int topRowHeight, int topRowPadding, int WorldNumWidth, int WorldNumHeight, int PotionWidth, int PotionHeight, string name, string levelname, int levelnum, int levelorder, string cellFontName, int cellFontSize, FontStyle cellFontStyle, int labelSpacing, int labelWidth, Color backColor, bool isMinimal, Dictionary<string, int> spread, Dictionary<int, DK64_Item> dkitems, bool isBroadcastable=false, bool isOnBroadcast=false)
         {
             // when getting created, get the spoiler numebrs from the parent panel
             Settings = settings;
@@ -247,6 +206,7 @@ namespace GSTHD
             pointColour = Color.FromKnownColor(Settings.SpoilerPointColour);
             wothColour = Color.FromKnownColor(Settings.SpoilerWOTHColour);
             emptyColour = Color.FromKnownColor(Settings.SpoilerEmptyColour);
+            kindaEmptyColour = Color.FromKnownColor(Settings.SpoilerKindaEmptyColour);
 
             // just concerns defining the shape of the panel
             this.BackColor = backColor;
@@ -281,7 +241,8 @@ namespace GSTHD
             this.labelSpacing = labelSpacing;
             this.labelWidth = labelWidth;
 
-            this.isBroadcastable = isBroadcastable;
+            this.isBroadcastable = isBroadcastable && !isOnBroadcast;
+            this.isOnBroadcast = isOnBroadcast;
 
             this.DragEnter += Mouse_DragEnter;
             this.DragDrop += Mouse_DragDrop;
@@ -305,10 +266,9 @@ namespace GSTHD
                     AutoSize = false,
                     TextAlign = System.Drawing.ContentAlignment.MiddleRight,
                     Anchor = AnchorStyles.Right,
-                    Location = new Point(width - (shownnumbers * labelSpacing) - 2 - this.topRowPadding, -1)
+                    Location = new Point(width, -1)
                 };
                 shownnumbers++;
-                if (totalPoints == 0) pointLabel.ForeColor = emptyColour;
                 Controls.Add(pointLabel);
             }
             if (totalWOTHS >= 0)
@@ -324,7 +284,7 @@ namespace GSTHD
                     Height = WorldNumHeight,
                     AutoSize = false,
                     TextAlign = System.Drawing.ContentAlignment.MiddleRight,
-                    Location = new Point(width - (shownnumbers * labelSpacing) - 2 - this.topRowPadding, -1)
+                    Location = new Point(width, -1)
                 };
                 Controls.Add(wothLabel);
             }
@@ -332,38 +292,44 @@ namespace GSTHD
             if (levelOrder > 0 && levelOrder < 9)
             {
                 // put in the static image
-                levelNumberImage = new PictureBox
+                ObjectPoint temp1 = new ObjectPoint()
                 {
-                    Image = Image.FromFile($"Resources/dk64/{levelOrder}.png"),
-                    Width = WorldNumWidth,
-                    Height = WorldNumHeight,
+                    Name = $"{name}_levelImageNumber",
+                    ImageCollection = new string[] { $"dk64/{levelOrder}.png" },
+                    Size = new Size(WorldNumWidth, WorldNumHeight),
                     SizeMode = PictureBoxSizeMode.Zoom,
-                    Location = new Point(0, 0),
+                    X = 0,
+                    Y = 0,
+                    isBroadcastable = this.isBroadcastable
                 };
+                levelNumberImage = new GuaranteedHint(temp1, settings, isOnBroadcast);
                 Controls.Add(levelNumberImage);
             } else if (levelOrder < 0)
             {
                 // put in the item
-                ObjectPoint temp = new ObjectPoint()
+                ObjectPoint temp2 = new ObjectPoint()
                 {
                     Name = $"{name}_unknownLevel",
                     X = 0, Y = 0,
                     Size = new Size(WorldNumWidth, WorldNumHeight),
                     ImageCollection = new string[] { "dk64/unknownnum.png", "dk64/1.png", "dk64/2.png", "dk64/3.png", "dk64/4.png", "dk64/5.png", "dk64/6.png", "dk64/7.png" },
-                    isBroadcastable = true,
+                    isBroadcastable = this.isBroadcastable,
                 };
-                unknownLevelNumberImage = new Item(temp, settings);
+                unknownLevelNumberImage = new Item(temp2, settings);
                 Controls.Add(unknownLevelNumberImage);
             }
 
-            levelImage = new PictureBox
+            ObjectPoint temp3 = new ObjectPoint()
             {
-                Image = Image.FromFile($"Resources/dk64/{levelList[levelID]}.png"),
-                Width = 58,
-                Height = WorldNumHeight - 2,
+                Name = $"{name}_levelImageName",
+                ImageCollection = new string[] { $"dk64/{levelList[levelID]}.png" },
+                Size = new Size(58, WorldNumHeight - 2),
                 SizeMode = PictureBoxSizeMode.Zoom,
-                Location = new Point((!MinimalMode && levelOrder == 9) ? -6 : 18, 1),
+                X = (!MinimalMode && levelOrder == 9) ? -6 : 18,
+                Y = 1,
+                isBroadcastable = this.isBroadcastable,
             };
+            levelImage = new GuaranteedHint(temp3, settings, isOnBroadcast);
             Controls.Add(levelImage);
 
             InitializeDisplayList();
@@ -391,7 +357,7 @@ namespace GSTHD
                     DK64_Item item = DK64Items[dropContent.dk_id];
                     int sentPoints = (noPotions) ? pointspread[item.itemType] : -2;
                     //Debug.WriteLine($"{item}, {dropContent.IsAutocheck}");
-                    AddNewItem(item, sentPoints, false, 1, !dropContent.IsAutocheck);
+                    AddNewItem(item, sentPoints, false, 1, !dropContent.IsAutocheck, dropContent.isMarked);
                 }
             } catch { }
 
@@ -405,6 +371,7 @@ namespace GSTHD
             pointColour = Color.FromKnownColor(Settings.SpoilerPointColour);
             wothColour = Color.FromKnownColor(Settings.SpoilerWOTHColour);
             emptyColour = Color.FromKnownColor(Settings.SpoilerEmptyColour);
+            kindaEmptyColour = Color.FromKnownColor(Settings.SpoilerKindaEmptyColour);
             UpdateVisuals();
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {
@@ -425,7 +392,7 @@ namespace GSTHD
             }
         }
 
-        public bool AddToDisplayList(DK64_Item item, bool starting, bool faded)
+        public bool AddToDisplayList(DK64_Item item, bool starting, bool faded, bool marked)
         {
             for (int i = 0; i < displayList.Count; i++)
             {
@@ -435,15 +402,17 @@ namespace GSTHD
                     displayList[i].item_id = item.item_id;
                     displayList[i].isStarting = starting;
                     displayList[i].isFaded = faded;
+                    displayList[i].isMarked = marked;
                     return false;
                 } else if ((displayList[i].potionType == (int)item.potionType || displayList[i].potionType == -1) && displayList[i].item_id == item.item_id && displayList[i].isFaded && !faded)
                 {
                     // new move into existing faded slot (dupe preventing)
                     displayList[i].isFaded = false;
+                    displayList[i].isMarked = marked;
                     return false;
                 }
             }
-            displayList.Add(new CellDisplay { potionType = -1, isStarting = starting, item_id = item.item_id, isFaded = faded});
+            displayList.Add(new CellDisplay { potionType = -1, isStarting = starting, item_id = item.item_id, isFaded = faded, isMarked = marked});
             return true;
         }
 
@@ -483,6 +452,19 @@ namespace GSTHD
             }
         }
 
+        public void TellMarked(int dk_id, bool isMarked)
+        {
+            foreach (CellDisplay display in displayList)
+            {
+                if (display.item_id == dk_id && display.isMarked == !isMarked)
+                {
+                    display.isMarked = isMarked;
+                    UpdateVisuals();
+                    break;
+                }
+            }
+        }
+
         private void UpdatePoints()
         {
 
@@ -498,7 +480,8 @@ namespace GSTHD
                 if (totalPoints >= 0)
                 {
                     pointLabel.Text = (totalPoints - currentPoints).ToString();
-                    if (pointLabel.Text == "0") pointLabel.ForeColor = emptyColour;
+                    if (pointLabel.Text == "0" && !isThereAnyFaded()) { pointLabel.ForeColor = emptyColour; }
+                    else if (pointLabel.Text == "0") { pointLabel.ForeColor = kindaEmptyColour; }
                     else pointLabel.ForeColor = pointColour;
                     //Debug.WriteLine($"Update to {levelName}: Points={pointLabel.Text}");
                 }
@@ -508,6 +491,9 @@ namespace GSTHD
                     wothLabel.Text = totalWOTHS.ToString();
                     wothLabel.ForeColor = wothColour;
                 }
+
+                AdjustPointLocations();
+
                 if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
                     if (((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(Name.Split('_')[0], true)[0]).spoilerLoaded)
@@ -519,6 +505,37 @@ namespace GSTHD
 
             }
 
+        }
+
+        private bool isThereAnyFaded()
+        {
+            foreach (CellDisplay thing in displayList)
+            {
+                if (thing.isFaded) return true;
+            }
+            return false;
+        }
+
+        private void AdjustPointLocations()
+        {
+            //Debug.WriteLine($"{this.Name}");
+            int pointWidth = 0;
+            if (pointLabel != null)
+            {
+                int pointMeasure = TextRenderer.MeasureText(pointLabel.Text, pointLabel.Font).Width;
+                pointLabel.Width = System.Math.Max(labelWidth, pointMeasure);
+                pointWidth = pointLabel.Width;
+                pointLabel.Location = new Point(this.Size.Width - (System.Math.Max(labelSpacing, pointWidth)) - 1 - this.topRowPadding, pointLabel.Location.Y);
+                //Debug.WriteLine($"point -- loc: {pointLabel.Location}   width: {pointLabel.Width}    pm: {pointMeasure}    ls: {labelSpacing}");
+            }
+
+            if (wothLabel != null)
+            {
+                int pointVis = (pointLabel != null) ? 1 : 0;
+                wothLabel.Width = System.Math.Max(labelWidth, TextRenderer.MeasureText(wothLabel.Text, wothLabel.Font).Width);
+                wothLabel.Location = new Point(this.Size.Width - (labelSpacing) - pointVis*(pointWidth) - 1 - this.topRowPadding, wothLabel.Location.Y);
+                //Debug.WriteLine($"woth -- loc: {wothLabel.Location}   width: {wothLabel.Width}");
+            }
         }
 
         private void UpdatePotions()
@@ -592,9 +609,9 @@ namespace GSTHD
                         int newY = (thingsdisplayed / displayablePotsWidth)*usedPotHeight + topRowHeight + yOffset;
 
                         string toDisplay = (pot.item_id != -1) ? DK64Items[pot.item_id].image : potionImageList[(int)pot.potionType];
-                        Debug.WriteLineIf((pot.item_id != -1), $"todisplay = {toDisplay}");
+                        //Debug.WriteLineIf((pot.item_id != -1), $"todisplay = {toDisplay}");
 
-                        CellPictureBox newPot = new CellPictureBox(Settings)
+                        CellPictureBox newPot = new CellPictureBox(Settings, isOnBroadcast)
                         {
                             Size = new Size(usedPotWidth, usedPotHeight),
                             //SizeMode = PictureBoxSizeMode.Zoom,
@@ -604,6 +621,7 @@ namespace GSTHD
                             dk_id = pot.item_id,
                             isFaded = pot.isFaded,
                             BackColor = this.BackColor,
+                            isMarked = pot.isMarked,
                         };
 
                         //Debug.WriteLine($"{thingsdisplayed}:   x:{newX} y:{newY} w:{newPot.Width} h:{newPot.Height}");
@@ -618,14 +636,13 @@ namespace GSTHD
             }
         }
 
-        public void AddNewItem(DK64_Item dk_id, int pointValue, bool isStarting, int howMany, bool isFaded = false)
+        public void AddNewItem(DK64_Item dk_id, int pointValue, bool isStarting, int howMany, bool isFaded = false, bool isMarked = false)
         {
             
             for (int i = 0; i < howMany; i++)
             {
                 if (!isFaded) foundItems.Add(dk_id.item_id);
-                Debug.WriteLine($"{isFaded}");
-                bool result = AddToDisplayList(dk_id, isStarting, isFaded);
+                bool result = AddToDisplayList(dk_id, isStarting, isFaded, isMarked && !Settings.CellOverrideCheckMark);
                 if (result && pointValue != -1) currentPoints += pointValue;
                 UpdateVisuals();
             }
@@ -676,8 +693,11 @@ namespace GSTHD
                 foundItems = foundItems,
                 potionsList = potionsList,
                 displayList = displayList,
-        };
-    }
+                levelLabelMarked = levelImage.isMarked,
+                levelNumMarked = (levelNumberImage != null) ? levelNumberImage.isMarked : (unknownLevelNumberImage != null) ? unknownLevelNumberImage.isMarked : false,
+                levelNumIndex = (unknownLevelNumberImage != null) ? unknownLevelNumberImage.GetState().ImageIndex : 0
+            };
+        }
 
         public void SetState(SpoilerCellState state)
         {
@@ -696,6 +716,16 @@ namespace GSTHD
                 foundItems = state.foundItems;
                 potionsList = state.potionsList;
                 displayList = state.displayList;
+                levelImage.isMarked = state.levelLabelMarked;
+                if (levelNumberImage != null)
+                {
+                    levelNumberImage.isMarked = state.levelNumMarked;
+                } else if (unknownLevelNumberImage != null)
+                {
+                    unknownLevelNumberImage.isMarked = state.levelNumMarked;
+                    unknownLevelNumberImage.SetState(state.levelNumIndex);
+                }
+
                 UpdateVisuals();
             }
         }
@@ -703,14 +733,24 @@ namespace GSTHD
         public void SetState(string statestring)
         {
             //break up string into sections, recompile data. probably call the real setstate after tbh
-            // return $"{currentPoints},{currentWOTHS}\n{foundItems}\n{potionsList}\n{displayList}";
-            
+            // return $"{currentPoints},{currentWOTHS},{levelNumIndex},{levelNumMarked},{levelLabelMarked}\n{itemstring}\n{displaystring}";
+
             string[] parts = statestring.Split('\n');
             string[] firstPart = parts[0].Split(',');
             //fp0 = currentpoints
             //fp1 = currentwoths
             currentPoints = int.Parse(firstPart[0]);
             currentWOTHS = int.Parse(firstPart[1]);
+            if (levelNumberImage != null)
+            {
+                levelNumberImage.isMarked = bool.Parse(firstPart[3]);
+            } else if (unknownLevelNumberImage != null)
+            {
+                unknownLevelNumberImage.isMarked = bool.Parse(firstPart[3]);
+                unknownLevelNumberImage.SetState(int.Parse(firstPart[2]));
+            }
+            levelImage.isMarked = bool.Parse(firstPart[4]);
+
             //p1 = founditems
             if (parts[1].Length > 0)
             {
@@ -729,7 +769,8 @@ namespace GSTHD
                     //i1 = itemid (int)
                     //i2 = isstarting (bool
                     //i3 = fiaded (bool
-                    newdl.Add(new CellDisplay() { potionType = int.Parse(inner[0]) , item_id = int.Parse(inner[1]) , isStarting = bool.Parse(inner[2]), isFaded = bool.Parse(inner[3]) });
+                    //i4 = marked (bool
+                    newdl.Add(new CellDisplay() { potionType = int.Parse(inner[0]) , item_id = int.Parse(inner[1]) , isStarting = bool.Parse(inner[2]), isFaded = bool.Parse(inner[3]), isMarked = bool.Parse(inner[4]) });
                 }
                 displayList = newdl;
             }

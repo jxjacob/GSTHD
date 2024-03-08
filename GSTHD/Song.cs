@@ -1,5 +1,6 @@
-﻿using GSTHD;
+using GSTHD;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -11,17 +12,19 @@ namespace GSTHD
         public bool HoldsImage;
         public string HeldImageName;
         public int ImageIndex;
+        public bool isMarked;
     }
 
     public struct SongState
     {
         public int ImageIndex;
+        public bool isMarked;
         public SongMarkerState MarkerState;
 
-        public override string ToString() => $"{ImageIndex},{MarkerState.HoldsImage},{MarkerState.HeldImageName},{MarkerState.ImageIndex}";
+        public override string ToString() => $"{ImageIndex},{isMarked},{MarkerState.HoldsImage},{MarkerState.HeldImageName},{MarkerState.ImageIndex},{MarkerState.isMarked}";
     }
 
-    public class SongMarker : PictureBox, UpdatableFromSettings, ProgressibleElement<SongMarkerState>, DraggableElement<SongMarkerState>
+    public class SongMarker : OrganicImage, UpdatableFromSettings, ProgressibleElement<SongMarkerState>, DraggableElement<SongMarkerState>
     {
         private readonly Settings Settings;
         private readonly ProgressibleElementBehaviour<SongMarkerState> ProgressBehaviour;
@@ -156,6 +159,7 @@ namespace GSTHD
                     ((SongMarker)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
                 }
             }
+            if (IsHandleCreated) { Invalidate(); }
         }
 
         public void Mouse_MiddleClickDown(object sender, MouseEventArgs e)
@@ -198,6 +202,7 @@ namespace GSTHD
                 HoldsImage = HoldsImage,
                 HeldImageName = HeldImageName,
                 ImageIndex = ImageIndex,
+                isMarked = isMarked,
             };
         }
 
@@ -211,7 +216,8 @@ namespace GSTHD
             {
                 HoldsImage = state.HoldsImage;
                 HeldImageName = state.HeldImageName;
-                ImageIndex = state.ImageIndex;
+                isMarked = state.isMarked;
+                ImageIndex = Math.Clamp(state.ImageIndex, 0, ImageNames.Length);
                 UpdateImage();
                 DragBehaviour.SaveChanges();
             }
@@ -236,6 +242,13 @@ namespace GSTHD
         {
             RemoveImage = true;
             ImageIndex = 0;
+            isMarked = false;
+            UpdateImage();
+        }
+
+        public void ToggleCheck()
+        {
+            isMarked = !isMarked;
             UpdateImage();
         }
 
@@ -243,7 +256,7 @@ namespace GSTHD
         {
             HoldsImage = false;
             UpdateImage();
-            var dropContent = new DragDropContent(false, HeldImageName);
+            var dropContent = new DragDropContent(false, HeldImageName, marked: isMarked);
             DoDragDrop(dropContent, DragDropEffects.Copy);
             SaveChanges();
         }
@@ -261,7 +274,7 @@ namespace GSTHD
         public void CancelChanges() { }
     }
 
-    public class Song : PictureBox, UpdatableFromSettings, ProgressibleElement<int>, DraggableAutocheckElement<int>
+    public class Song : OrganicImage, UpdatableFromSettings, ProgressibleElement<int>, DraggableAutocheckElement<int>
     {
         private readonly Settings Settings;
         private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
@@ -410,8 +423,10 @@ namespace GSTHD
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {
                 ((Song)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
+                ((Song)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
                 ((Song)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
             }
+            if (IsHandleCreated) { Invalidate(); }
         }
 
         private void Mouse_Move(object sender, MouseEventArgs e)
@@ -454,7 +469,7 @@ namespace GSTHD
                 return;
             } else
             {
-                ImageIndex = state;
+                ImageIndex = Math.Clamp(state, 0, ImageNames.Length);
                 UpdateImage();
                 DragBehaviour.SaveChanges();
             }
@@ -466,6 +481,7 @@ namespace GSTHD
             return new SongState()
             {
                 ImageIndex = ImageIndex,
+                isMarked = isMarked,
                 MarkerState = SongMarker.GetState(),
             };
         }
@@ -473,11 +489,13 @@ namespace GSTHD
         public void SetWholeState(SongState state)
         {
             ImageIndex = state.ImageIndex;
+            isMarked = state.isMarked;
             SongMarkerState temp = new SongMarkerState()
             {
                 HoldsImage = state.MarkerState.HoldsImage,
                 HeldImageName = state.MarkerState.HeldImageName,
                 ImageIndex = state.MarkerState.ImageIndex,
+                isMarked = state.MarkerState.isMarked,
             };
             SongMarker.SetState(temp);
             UpdateImage();
@@ -504,12 +522,19 @@ namespace GSTHD
         public void ResetState()
         {
             ImageIndex = 0;
+            isMarked = false;
+            UpdateImage();
+        }
+
+        public void ToggleCheck()
+        {
+            isMarked = !isMarked;
             UpdateImage();
         }
 
         public void StartDragDrop()
         {
-            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, DragPictureName);
+            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, DragPictureName, marked: isMarked);
             DoDragDrop(dropContent, DragDropEffects.Copy);
         }
 

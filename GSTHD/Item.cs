@@ -1,5 +1,7 @@
-﻿using System;
+using System;
+using System.Activities.Expressions;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Dynamic;
 using System.Linq;
@@ -7,11 +9,17 @@ using System.Windows.Forms;
 
 namespace GSTHD
 {
-    public class Item : PictureBox, ProgressibleElement<int>, DraggableAutocheckElement<int>
+    public struct ItemState
+    {
+        public int ImageIndex;
+        public bool isMarked;
+
+    }
+    public class Item : OrganicImage, ProgressibleElement<ItemState>, DraggableAutocheckElement<ItemState>
     {
         private readonly Settings Settings;
-        private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
-        private readonly DraggableAutocheckElementBehaviour<int> DragBehaviour;
+        private readonly ProgressibleElementBehaviour<ItemState> ProgressBehaviour;
+        private readonly DraggableAutocheckElementBehaviour<ItemState> DragBehaviour;
 
         private string[] ImageNames;
         private int ImageIndex = 0;
@@ -24,9 +32,11 @@ namespace GSTHD
         string DoubleBroadcastName;
         bool isDraggable;
 
+
+
         public string AutoName = null;
 
-        delegate void SetStateCallback(int state);
+        delegate void SetStateCallback(ItemState state);
 
         public Item(ObjectPoint data, Settings settings, bool isBroadcast = false)
         {
@@ -38,7 +48,7 @@ namespace GSTHD
                 ImageNames = data.ImageCollection;
 
             Name = data.Name;
-            BackColor = data.BackColor;
+            if (data.BackColor != Color.Transparent) BackColor = data.BackColor;
             this.isBroadcastable = data.isBroadcastable && !isBroadcast;
 
             this.isDraggable = data.isDraggable;
@@ -57,19 +67,18 @@ namespace GSTHD
             if (ImageNames.Length > 0)
             {
                 UpdateImage();
-                SizeMode = (PictureBoxSizeMode)data.SizeMode;
+                SizeMode = data.SizeMode;
                 Size = data.Size;
             }
 
-            ProgressBehaviour = new ProgressibleElementBehaviour<int>(this, Settings);
-            DragBehaviour = new DraggableAutocheckElementBehaviour<int>(this, Settings);
+            ProgressBehaviour = new ProgressibleElementBehaviour<ItemState>(this, Settings);
+            DragBehaviour = new DraggableAutocheckElementBehaviour<ItemState>(this, Settings);
 
             Location = new Point(data.X, data.Y);
             TabStop = false;
             AllowDrop = false;
 
             Control thething = this.Parent;
-            if (thething != null) { MessageBox.Show("Do you want to save changes to your text?", thething.Name); }
             if (!isBroadcast)
             {
                 if (isDraggable)
@@ -92,7 +101,7 @@ namespace GSTHD
                 ImageIndex += Settings.InvertScrollWheel ? scrolls : -scrolls;
                 if (ImageIndex < 0) ImageIndex = 0;
                 else if (ImageIndex >= ImageNames.Length) ImageIndex = ImageNames.Length - 1;
-                UpdateImage();
+                else UpdateImage();
             }
         }
 
@@ -105,23 +114,35 @@ namespace GSTHD
             {
                 if (DoubleBroadcastName == null || DoubleBroadcastSide == null)
                 {
-                    ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
-                    ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
-                } else
+                    try
+                    {
+                        ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
+                        ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
+                        ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
+                    } catch (IndexOutOfRangeException)
+                    {
+                        Debug.WriteLine($"Item {this.Name} could not be found on Broadcast, skipping...");
+                    }
+                }
+                else
                 {
                     //TODO: make this block cleaner
                     if (DoubleBroadcastSide == "left")
                     {
+                        ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).SetLeftMark(isMarked);
                         if (ImageIndex == 0)
                         {
                             ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).DecrementLeftState();
-                        } else
+                        }
+                        else
                         {
                             ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).IncrementLeftState();
                         }
-                        
-                    } else
+
+                    }
+                    else
                     {
+                        ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).SetRightMark(isMarked);
                         if (ImageIndex == 0)
                         {
                             ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).DecrementRightState();
@@ -132,16 +153,29 @@ namespace GSTHD
                         }
                     }
                 }
-                
+
+            }
+            if (IsHandleCreated) { Invalidate(); }
+        }
+
+
+        public ItemState GetState()
+        {
+            return new ItemState
+            {
+                ImageIndex = ImageIndex,
+                isMarked = isMarked,
             };
         }
 
-        public int GetState()
+
+        // legacy for autotracker
+        public void SetState(int state)
         {
-            return ImageIndex;
+            Invoke(new SetStateCallback(SetState), new object[] { new ItemState { ImageIndex = state, isMarked = isMarked } });
         }
 
-        public void SetState(int state)
+        public void SetState(ItemState state)
         {
             if (this.InvokeRequired)
             {
@@ -150,7 +184,8 @@ namespace GSTHD
             }
             else
             {
-                ImageIndex = state;
+                ImageIndex = Math.Clamp(state.ImageIndex, 0, ImageNames.Length);
+                isMarked = state.isMarked;
                 VerifyState();
                 UpdateImage();
                 DragBehaviour.SaveChanges();
@@ -159,8 +194,11 @@ namespace GSTHD
 
         public void IncrementState()
         {
-            if (ImageIndex < ImageNames.Length - 1) ImageIndex += 1;
-            UpdateImage();
+            if (ImageIndex < ImageNames.Length - 1)
+            {
+                ImageIndex += 1;
+                UpdateImage();
+            }
         }
 
         public void DecrementState()
@@ -172,6 +210,13 @@ namespace GSTHD
         public void ResetState()
         {
             ImageIndex = 0;
+            isMarked = false;
+            UpdateImage();
+        }
+
+        public void ToggleCheck()
+        {
+            isMarked = !isMarked;
             UpdateImage();
         }
 
@@ -183,16 +228,8 @@ namespace GSTHD
 
         public void StartDragDrop()
         {
-            if (DragImage != null)
-            {
-                var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, DragImage, DK64_ID);
-                DoDragDrop(dropContent, DragDropEffects.Copy);
-            }
-            else
-            {
-                var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[System.Math.Max(ImageIndex, 1)], DK64_ID);
-                DoDragDrop(dropContent, DragDropEffects.Copy);
-            }
+            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, (DragImage != null) ? DragImage : ImageNames[System.Math.Max(ImageIndex, 1)], DK64_ID, isMarked);
+            DoDragDrop(dropContent, DragDropEffects.Copy);
         }
 
         public void SaveChanges() { }

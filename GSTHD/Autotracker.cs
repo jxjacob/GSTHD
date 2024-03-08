@@ -27,7 +27,7 @@ namespace GSTHD
         public int offset;
         public string type;
         public string group;
-        public Control targetControl;
+        public OrganicImage targetControl;
         public int dk64_id = -1;
     }
     public class TrackedGroup
@@ -38,7 +38,7 @@ namespace GSTHD
         public int count = 0;
         public int countMax;
         public bool isDouble = false;
-        public Control targetControl;
+        public OrganicImage targetControl;
     }
     public class Autotracker : UpdatableFromSettings
     {
@@ -138,12 +138,12 @@ namespace GSTHD
                         {
                             if (ci.AutoName == result.name)
                             {
-                                result.targetControl = thing;
+                                result.targetControl = (OrganicImage)thing;
                                 break;
                             }
                             else if (ci.AutoSubName == result.name && form.Settings.SubtractItems)
                             {
-                                result.targetControl = thing;
+                                result.targetControl = (OrganicImage)thing;
                                 break;
                             }
 
@@ -152,7 +152,7 @@ namespace GSTHD
                         {
                             if (di.AutoName == result.name)
                             {
-                                result.targetControl = thing;
+                                result.targetControl = (OrganicImage)thing;
                                 break;
                             }
                         }
@@ -160,7 +160,7 @@ namespace GSTHD
                         {
                             if (it.AutoName == result.name)
                             {
-                                result.targetControl = thing;
+                                result.targetControl = (OrganicImage)thing;
                                 break;
                             }
 
@@ -179,7 +179,7 @@ namespace GSTHD
                         {
                             if (it.AutoName == ta.name)
                             {
-                                ta.targetControl = thing;
+                                ta.targetControl = (OrganicImage)thing;
                                 break;
                             }
 
@@ -188,7 +188,7 @@ namespace GSTHD
                         {
                             if (md.AutoName == ta.name)
                             {
-                                ta.targetControl = thing;
+                                ta.targetControl = (OrganicImage)thing;
                                 break;
                             }
 
@@ -197,7 +197,7 @@ namespace GSTHD
                         {
                             if (sg.AutoName == ta.name)
                             {
-                                ta.targetControl = thing;
+                                ta.targetControl = (OrganicImage)thing;
                                 break;
                             }
 
@@ -206,7 +206,7 @@ namespace GSTHD
                         {
                             if (ci.AutoName == ta.name)
                             {
-                                ta.targetControl = thing;
+                                ta.targetControl = (OrganicImage)thing;
                                 break;
                             }
 
@@ -215,7 +215,7 @@ namespace GSTHD
                         {
                             if (it2.AutoName == ta.name)
                             {
-                                ta.targetControl = thing;
+                                ta.targetControl = (OrganicImage)thing;
                                 break;
                             }
 
@@ -321,11 +321,11 @@ namespace GSTHD
             }
         }
 
-        public void AttemptSpoilerUpdate(int dk_id, int readValue=1)
+        public void AttemptSpoilerUpdate(int dk_id, bool isOGMarked, int readValue=1)
         {
             if (LZTracking && dk_id != -1)
             {
-                spoilerPanel.AddFromAT(currentMapValue, dk_id, readValue);
+                spoilerPanel.AddFromAT(currentMapValue, dk_id, readValue, isOGMarked);
             }
         }
 
@@ -435,9 +435,9 @@ namespace GSTHD
                     //Debug.WriteLine($"move {ta.name} - umuh {theumuh} - cv {ta.currentValue}");
                     if (theumuh != (ta.currentValue & ta.bitmask))
                     {
-                        Debug.WriteLine("umuh and cv mismatch, should be a real item");
+                        //Debug.WriteLine("umuh and cv mismatch, should be a real item");
                         theItem.SetState(1 + ta.offset);
-                        AttemptSpoilerUpdate(ta.dk64_id);
+                        AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
                     }
                 } else if (theumuh == 0)
                 {
@@ -447,7 +447,7 @@ namespace GSTHD
             else
             {
                 theItem.SetState(theRead + ta.offset);
-                AttemptSpoilerUpdate(ta.dk64_id, theRead);
+                AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false, theRead);
             }
         }
 
@@ -466,14 +466,14 @@ namespace GSTHD
                     // have a funny feeling that this is supposed to be umuh and not 1
                     int goingIn = 1 + ta.offset;
                     theItem.SetState(goingIn);
-                    AttemptSpoilerUpdate(ta.dk64_id);
+                    AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
                 }
             }
             else
             {
                 int goingIn = theRead + ta.offset;
                 theItem.SetState(goingIn);
-                AttemptSpoilerUpdate(ta.dk64_id);
+                AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
             }
         }
 
@@ -488,14 +488,14 @@ namespace GSTHD
                     // have a funny feeling that this is supposed to be umuh and not 1
                     int goingIn = 1 + ta.offset - theSub;
                     theItem.SetState(goingIn);
-                    AttemptSpoilerUpdate(ta.dk64_id);
+                    AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
                 }
             }
             else
             {
                 int goingIn = theRead + ta.offset - theSub;
                 theItem.SetState(goingIn);
-                AttemptSpoilerUpdate(ta.dk64_id);
+                AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
             }
         }
 
@@ -512,7 +512,7 @@ namespace GSTHD
                 if (theumuh == ta.bitmask)
                 {
                     theItem.SetImageState(1 + ta.offset);
-                    AttemptSpoilerUpdate(ta.dk64_id);
+                    AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
                 }
                 else if (theumuh == 0)
                 {
@@ -522,7 +522,7 @@ namespace GSTHD
             else
             {
                 theItem.SetImageState(theRead + ta.offset);
-                AttemptSpoilerUpdate(ta.dk64_id);
+                AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
             }
         }
 
@@ -534,7 +534,7 @@ namespace GSTHD
                 if (theumuh == ta.bitmask)
                 {
                     theItem.SetState(1 + ta.offset);
-                    AttemptSpoilerUpdate(ta.dk64_id);
+                    AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
                 }
                 else if (theumuh == 0)
                 {
@@ -544,7 +544,7 @@ namespace GSTHD
             else
             {
                 theItem.SetState(theRead + ta.offset);
-                AttemptSpoilerUpdate(ta.dk64_id);
+                AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
             }
         }
 

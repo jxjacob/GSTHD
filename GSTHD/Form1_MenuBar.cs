@@ -30,13 +30,15 @@ namespace GSTHD
             //public ToolStripMenuItem ZoomReset;
 
             // Options
-            // Scroll Wheel
-            public ToolStripMenuItem InvertScrollWheel;
-            public ToolStripMenuItem Wraparound;
-
-            // Drag & Drop
+            // Mouse Controls
+            public ToolStripMenuItem IncrementButton;
+            public ToolStripMenuItem DecrementButton;
+            public ToolStripMenuItem ResetButton;
+            public ToolStripMenuItem ExtraButton;
             public ToolStripMenuItem DragButton;
             public ToolStripMenuItem AutocheckDragButton;
+            public ToolStripMenuItem InvertScrollWheel;
+            public ToolStripMenuItem Wraparound;
 
             // Song Markers
             public ToolStripMenuItem MoveLocation;
@@ -57,9 +59,12 @@ namespace GSTHD
             public ToolStripMenuItem SpoilerPointColor;
             public ToolStripMenuItem SpoilerWothColor;
             public ToolStripMenuItem SpoilerEmptyColor;
+            public ToolStripMenuItem SpoilerKindaEmptyColor;
+            public ToolStripMenuItem CellOverrideCheckMark;
 
             // Gossip Stone Stuff
             public ToolStripMenuItem OverrideHeldImage;
+            public ToolStripMenuItem StoneOverrideCheckMark;
             public ToolStripMenuItem CycleLength;
             public ToolStripMenuItem ForceGossipCycles;
 
@@ -80,6 +85,36 @@ namespace GSTHD
             { Settings.DragButtonOption.Middle, "Middle Click" },
             { Settings.DragButtonOption.Right, "Right Click" },
             { Settings.DragButtonOption.LeftAndRight, "Left + Right Click" },
+            { Settings.DragButtonOption.Shift, "Shift + Left Click" },
+            { Settings.DragButtonOption.Control, "Control + Left Click" },
+            { Settings.DragButtonOption.Alt, "Alt + Left Click" },
+        };
+
+        private readonly Dictionary<Settings.ExtraActionModButton, string> ExtraButtonNames = new Dictionary<Settings.ExtraActionModButton, string>
+        {
+            { Settings.ExtraActionModButton.None, "None" },
+            { Settings.ExtraActionModButton.Left, "Left Click" },
+            { Settings.ExtraActionModButton.Middle, "Middle Click" },
+            { Settings.ExtraActionModButton.Right, "Right Click" },
+            { Settings.ExtraActionModButton.MouseButton1, "Mouse Button 1" },
+            { Settings.ExtraActionModButton.MouseButton2, "Mouse Button 2" },
+            { Settings.ExtraActionModButton.DoubleLeft, "Double Left Click" },
+            { Settings.ExtraActionModButton.Shift, "Shift + Left Click" },
+            { Settings.ExtraActionModButton.Control, "Control + Left Click" },
+            { Settings.ExtraActionModButton.Alt, "Alt + Left Click" },
+        };
+
+        private readonly Dictionary<Settings.BasicActionButtonOption, string> BasicButtonNames = new Dictionary<Settings.BasicActionButtonOption, string>
+        {
+            { Settings.BasicActionButtonOption.None, "None" },
+            { Settings.BasicActionButtonOption.Left, "Left Click" },
+            { Settings.BasicActionButtonOption.Middle, "Middle Click" },
+            { Settings.BasicActionButtonOption.Right, "Right Click" },
+            { Settings.BasicActionButtonOption.MouseButton1, "Mouse Button 1" },
+            { Settings.BasicActionButtonOption.MouseButton2, "Mouse Button 2" },
+            { Settings.BasicActionButtonOption.Shift, "Shift + Left Click" },
+            { Settings.BasicActionButtonOption.Control, "Control + Left Click" },
+            { Settings.BasicActionButtonOption.Alt, "Alt + Left Click" },
         };
 
         private readonly Dictionary<Settings.SongMarkerBehaviourOption, string> SongMarkerBehaviourNames = new Dictionary<Settings.SongMarkerBehaviourOption, string>
@@ -110,8 +145,12 @@ namespace GSTHD
         Settings Settings;
         MenuStrip MenuStrip;
         MenuItems Items;
+        Dictionary<Settings.BasicActionButtonOption, ToolStripMenuItem> IncrementButtonOptions;
+        Dictionary<Settings.BasicActionButtonOption, ToolStripMenuItem> DecrementButtonOptions;
+        Dictionary<Settings.BasicActionButtonOption, ToolStripMenuItem> ResetButtonOptions;
         Dictionary<Settings.DragButtonOption, ToolStripMenuItem> DragButtonOptions;
         Dictionary<Settings.DragButtonOption, ToolStripMenuItem> AutocheckDragButtonOptions;
+        Dictionary<Settings.ExtraActionModButton, ToolStripMenuItem> ExtraButtonOptions;
         Dictionary<Settings.SongMarkerBehaviourOption, ToolStripMenuItem> SongMarkerBehaviourOptions;
         Dictionary<Settings.SelectEmulatorOption, ToolStripMenuItem> SelectEmulatorOptions;
         Dictionary<Settings.SpoilerOrderOption, ToolStripMenuItem> SpoilerOrderOptions;
@@ -119,6 +158,7 @@ namespace GSTHD
         Dictionary<KnownColor, ToolStripMenuItem> SpoilerPointColorOptions;
         Dictionary<KnownColor, ToolStripMenuItem> SpoilerWothColorOptions;
         Dictionary<KnownColor, ToolStripMenuItem> SpoilerEmptyColorOptions;
+        Dictionary<KnownColor, ToolStripMenuItem> SpoilerKindaEmptyColorOptions;
         Dictionary<double, ToolStripMenuItem> GossipeCycleLengthOptions;
         Size SavedSize;
 
@@ -238,33 +278,50 @@ namespace GSTHD
 
             var optionMenu = new ToolStripMenuItem("Options");
             {
-                var scrollWheelSubMenu = new ToolStripMenuItem("Scroll Wheel");
-                {
-                    Items.InvertScrollWheel = new ToolStripMenuItem("Invert Scroll Wheel", null, new EventHandler(menuBar_ToggleInvertScrollWheel))
-                    {
-                        CheckOnClick = true,
-                    };
-                    scrollWheelSubMenu.DropDownItems.Add(Items.InvertScrollWheel);
 
-                    Items.Wraparound = new ToolStripMenuItem("Wraparound Dungeon Names", null, new EventHandler(menuBar_ToggleWraparound))
-                    {
-                        CheckOnClick = true,
-                    };
-                    scrollWheelSubMenu.DropDownItems.Add(Items.Wraparound);
-                }
-                optionMenu.DropDownItems.Add(scrollWheelSubMenu);
-
-                var dragDropSubMenu = new ToolStripMenuItem("Drag && Drop");
+                var dragDropSubMenu = new ToolStripMenuItem("Mouse Controls");
                 {
+
+                    //TODO: the three mouse buttons
+                    IncrementButtonOptions = new Dictionary<Settings.BasicActionButtonOption, ToolStripMenuItem>();
+                    DecrementButtonOptions = new Dictionary<Settings.BasicActionButtonOption, ToolStripMenuItem>();
+                    ResetButtonOptions = new Dictionary<Settings.BasicActionButtonOption, ToolStripMenuItem>();
+                    foreach (var button in BasicButtonNames)
+                    {
+                        IncrementButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetIncrementButton)));
+                        DecrementButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetDecrementButton)));
+                        ResetButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetResetButton)));
+                    }
+                    Items.IncrementButton = new ToolStripMenuItem("\"Increment Item\" Button", null, IncrementButtonOptions.Values.ToArray());
+                    dragDropSubMenu.DropDownItems.Add(Items.IncrementButton);
+
+                    Items.DecrementButton = new ToolStripMenuItem("\"Decrement Item\" Button", null, DecrementButtonOptions.Values.ToArray());
+                    dragDropSubMenu.DropDownItems.Add(Items.DecrementButton);
+
+                    Items.ResetButton = new ToolStripMenuItem("\"Reset Item\" Button", null, ResetButtonOptions.Values.ToArray());
+                    dragDropSubMenu.DropDownItems.Add(Items.ResetButton);
+
+
+
+
+
+                    ExtraButtonOptions = new Dictionary<Settings.ExtraActionModButton, ToolStripMenuItem>();
+                    foreach (var button in ExtraButtonNames)
+                    {
+                        ExtraButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetExtraButton)));
+                    }
+                    Items.ExtraButton = new ToolStripMenuItem("\"Checkmark Item\" Button", null, ExtraButtonOptions.Values.ToArray());
+                    dragDropSubMenu.DropDownItems.Add(Items.ExtraButton);
+
+
+
                     DragButtonOptions = new Dictionary<Settings.DragButtonOption, ToolStripMenuItem>();
                     AutocheckDragButtonOptions = new Dictionary<Settings.DragButtonOption, ToolStripMenuItem>();
 
-                    int i = 0;
                     foreach (var button in DragButtonNames)
                     {
                         DragButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetDragButton)));
                         AutocheckDragButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetAutocheckDragButton)));
-                        i++;
                     }
                     
                     Items.DragButton = new ToolStripMenuItem("Drag Button", null, DragButtonOptions.Values.ToArray());
@@ -272,6 +329,28 @@ namespace GSTHD
 
                     Items.AutocheckDragButton = new ToolStripMenuItem("Autocheck Drag Button", null, AutocheckDragButtonOptions.Values.ToArray());
                     dragDropSubMenu.DropDownItems.Add(Items.AutocheckDragButton);
+
+                    
+
+
+
+                    var scrollWheelSubMenu = new ToolStripMenuItem("Scroll Wheel");
+                    {
+                        Items.InvertScrollWheel = new ToolStripMenuItem("Invert Scroll Wheel", null, new EventHandler(menuBar_ToggleInvertScrollWheel))
+                        {
+                            CheckOnClick = true,
+                        };
+                        scrollWheelSubMenu.DropDownItems.Add(Items.InvertScrollWheel);
+
+                        Items.Wraparound = new ToolStripMenuItem("Wraparound Dungeon Names", null, new EventHandler(menuBar_ToggleWraparound))
+                        {
+                            CheckOnClick = true,
+                        };
+                        scrollWheelSubMenu.DropDownItems.Add(Items.Wraparound);
+                    }
+                    dragDropSubMenu.DropDownItems.Add(scrollWheelSubMenu);
+
+
                 }
                 optionMenu.DropDownItems.Add(dragDropSubMenu);
 
@@ -316,6 +395,7 @@ namespace GSTHD
                     SpoilerPointColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
                     SpoilerWothColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
                     SpoilerEmptyColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
+                    SpoilerKindaEmptyColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
 
                     var firstColorId = 28;
                     var lastColorId = 167;
@@ -327,6 +407,7 @@ namespace GSTHD
                         SpoilerPointColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerPointColor)));
                         SpoilerWothColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerWothColor)));
                         SpoilerEmptyColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerEmptyColor)));
+                        SpoilerKindaEmptyColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerKindaEmptyColor)));
                         i++;
                     }
 
@@ -358,6 +439,12 @@ namespace GSTHD
                         CheckOnClick = true,
                     };
                     gossipSubMenu.DropDownItems.Add(Items.OverrideHeldImage);
+
+                    Items.StoneOverrideCheckMark = new ToolStripMenuItem("Ignore Incoming Checkmarks", null, new EventHandler(menuBar_ToggleOverrideStoneCheckmark))
+                    {
+                        CheckOnClick = true,
+                    };
+                    gossipSubMenu.DropDownItems.Add(Items.StoneOverrideCheckMark);
 
                     GossipeCycleLengthOptions = new Dictionary<double, ToolStripMenuItem>();
                     
@@ -397,9 +484,18 @@ namespace GSTHD
                     };
                     spoilerSubMenu.DropDownItems.Add(Items.SpoilerHideStarting);
 
+                    Items.CellOverrideCheckMark = new ToolStripMenuItem("Ignore Incoming Checkmarks", null, new EventHandler(menuBar_ToggleOverrideCellCheckmark))
+                    {
+                        CheckOnClick = true,
+                    };
+                    spoilerSubMenu.DropDownItems.Add(Items.CellOverrideCheckMark);
+
                     // point colour
                     Items.SpoilerPointColor = new ToolStripMenuItem("Point Number Color", null, SpoilerPointColorOptions.Values.ToArray());
                     spoilerSubMenu.DropDownItems.Add(Items.SpoilerPointColor);
+                    // kinda empty colour
+                    Items.SpoilerKindaEmptyColor = new ToolStripMenuItem("\"0 Points Left (w/ Faded)\" Color", null, SpoilerKindaEmptyColorOptions.Values.ToArray());
+                    spoilerSubMenu.DropDownItems.Add(Items.SpoilerKindaEmptyColor);
                     // empty colour
                     Items.SpoilerEmptyColor = new ToolStripMenuItem("\"0 Points Left\" Color", null, SpoilerEmptyColorOptions.Values.ToArray());
                     spoilerSubMenu.DropDownItems.Add(Items.SpoilerEmptyColor);
@@ -474,6 +570,10 @@ namespace GSTHD
 
             DragButtonOptions[Settings.DragButton].Checked = true;
             AutocheckDragButtonOptions[Settings.AutocheckDragButton].Checked = true;
+            ExtraButtonOptions[Settings.ExtraActionButton].Checked = true;
+            IncrementButtonOptions[Settings.IncrementActionButton].Checked = true;
+            DecrementButtonOptions[Settings.DecrementActionButton].Checked = true;
+            ResetButtonOptions[Settings.ResetActionButton].Checked = true;
 
             Items.MoveLocation.Checked = Settings.MoveLocationToSong;
             //Items.Autocheck.Checked = Settings.AutoCheckSongs;
@@ -486,6 +586,8 @@ namespace GSTHD
             Items.EnableBarrenColors.Checked = Settings.EnableBarrenColors;
 
             Items.OverrideHeldImage.Checked = Settings.OverrideHeldImage;
+            Items.CellOverrideCheckMark.Checked = Settings.CellOverrideCheckMark;
+            Items.StoneOverrideCheckMark.Checked = Settings.StoneOverrideCheckMark;
             Items.ForceGossipCycles.Checked = Settings.ForceGossipCycles;
 
             Items.EnableAutosaves.Checked = Settings.EnableAutosave;
@@ -503,6 +605,7 @@ namespace GSTHD
             SpoilerPointColorOptions[Settings.SpoilerPointColour].Checked = true;
             SpoilerWothColorOptions[Settings.SpoilerWOTHColour].Checked = true;
             SpoilerEmptyColorOptions[Settings.SpoilerEmptyColour].Checked = true;
+            SpoilerKindaEmptyColorOptions[Settings.SpoilerKindaEmptyColour].Checked = true;
 
             SelectEmulatorOptions[Settings.SelectEmulator].Checked = true;
             Items.SubtractItem.Checked = Settings.SubtractItems;
@@ -633,7 +736,7 @@ namespace GSTHD
 
         public void menuBar_Broadcast(object sender, EventArgs e)
         {
-            if (Form.CurrentLayout.App_Settings.EnableBroadcast)
+            if (Form.CurrentLayout.App_Settings.EnableBroadcast && Form.CurrentLayout.App_Settings.BroadcastFile != null)
             {
                 if (Items.BroadcastView.Checked)
                 {
@@ -729,6 +832,59 @@ namespace GSTHD
             var option = AutocheckDragButtonOptions.FirstOrDefault((x) => x.Value == choice);
             if (option.Value == null) throw new NotImplementedException();
             Settings.AutocheckDragButton = option.Key;
+            Settings.Write();
+        }
+
+        private void menuBar_SetIncrementButton(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            IncrementButtonOptions[Settings.IncrementActionButton].Checked = false;
+            choice.Checked = true;
+
+            var option = IncrementButtonOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.IncrementActionButton = option.Key;
+            Settings.Write();
+        }
+
+        private void menuBar_SetDecrementButton(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            DecrementButtonOptions[Settings.DecrementActionButton].Checked = false;
+            choice.Checked = true;
+
+            var option = DecrementButtonOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.DecrementActionButton = option.Key;
+            Settings.Write();
+        }
+
+        private void menuBar_SetResetButton(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            ResetButtonOptions[Settings.ResetActionButton].Checked = false;
+            choice.Checked = true;
+
+            var option = ResetButtonOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.ResetActionButton = option.Key;
+            Settings.Write();
+        }
+
+
+        private void menuBar_SetExtraButton(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            ExtraButtonOptions[Settings.ExtraActionButton].Checked = false;
+            choice.Checked = true;
+
+            var option = ExtraButtonOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.ExtraActionButton = option.Key;
             Settings.Write();
         }
 
@@ -833,6 +989,20 @@ namespace GSTHD
             Form.UpdateLayoutFromSettings();
         }
 
+        private void menuBar_ToggleOverrideStoneCheckmark(object sender, EventArgs e)
+        {
+            Settings.StoneOverrideCheckMark = Items.StoneOverrideCheckMark.Checked;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
+        private void menuBar_ToggleOverrideCellCheckmark(object sender, EventArgs e)
+        {
+            Settings.CellOverrideCheckMark = Items.CellOverrideCheckMark.Checked;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
         private void menuBar_ToggleSubtractItem(object sender, EventArgs e)
         {
             Settings.SubtractItems = Items.SubtractItem.Checked;
@@ -926,6 +1096,20 @@ namespace GSTHD
             var option = SpoilerEmptyColorOptions.FirstOrDefault((x) => x.Value == choice);
             if (option.Value == null) throw new NotImplementedException();
             Settings.SpoilerEmptyColour = option.Key;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
+        private void menuBar_SetSpoilerKindaEmptyColor(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            SpoilerKindaEmptyColorOptions[Settings.SpoilerKindaEmptyColour].Checked = false;
+            choice.Checked = true;
+
+            var option = SpoilerKindaEmptyColorOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.SpoilerKindaEmptyColour = option.Key;
             Settings.Write();
             Form.UpdateLayoutFromSettings();
         }

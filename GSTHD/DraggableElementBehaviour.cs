@@ -39,18 +39,9 @@ namespace GSTHD
 
         public void Mouse_ClickUp(object sender, MouseEventArgs e)
         {
-            switch (e.Button)
-            {
-                case MouseButtons.Left:
-                    Mouse_LeftClickUp(sender, e);
-                    break;
-                case MouseButtons.Middle:
-                    Mouse_MiddleClickUp(sender, e);
-                    break;
-                case MouseButtons.Right:
-                    Mouse_RightClickUp(sender, e);
-                    break;
-            }
+            if (e.Button == MouseButtons.Left) Mouse_LeftClickUp(sender, e);
+            else if (e.Button == MouseButtons.Right) Mouse_RightClickUp(sender, e);
+            else if (e.Button == MouseButtons.Middle) Mouse_MiddleClickUp(sender, e);
             if (!LeftClickDown && !MiddleClickDown && !RightClickDown)
                 SaveChanges();
 
@@ -74,18 +65,9 @@ namespace GSTHD
 
         public void Mouse_ClickDown(object sender, MouseEventArgs e)
         {
-            switch (e.Button)
-            {
-                case MouseButtons.Left:
-                    Mouse_LeftClickDown(sender, e);
-                    break;
-                case MouseButtons.Middle:
-                    Mouse_MiddleClickDown(sender, e);
-                    break;
-                case MouseButtons.Right:
-                    Mouse_RightClickDown(sender, e);
-                    break;
-            }
+            if (e.Button == MouseButtons.Left) Mouse_LeftClickDown(sender, e);
+            else if (e.Button == MouseButtons.Right) Mouse_RightClickDown(sender, e);
+            else if (e.Button == MouseButtons.Middle) Mouse_MiddleClickDown(sender, e);
             UpdateDragDropPreparationStatus();
         }
 
@@ -133,7 +115,10 @@ namespace GSTHD
             CanDragDrop = ((Settings.DragButton == Settings.DragButtonOption.LeftAndRight || Settings.AutocheckDragButton == Settings.DragButtonOption.LeftAndRight) && LeftClickDown && RightClickDown)
                 || ((Settings.DragButton == Settings.DragButtonOption.Left || Settings.AutocheckDragButton == Settings.DragButtonOption.Left) && LeftClickDown)
                 || ((Settings.DragButton == Settings.DragButtonOption.Right || Settings.AutocheckDragButton == Settings.DragButtonOption.Right) && RightClickDown)
-                || ((Settings.DragButton == Settings.DragButtonOption.Middle || Settings.AutocheckDragButton == Settings.DragButtonOption.Middle) && MiddleClickDown);
+                || ((Settings.DragButton == Settings.DragButtonOption.Middle || Settings.AutocheckDragButton == Settings.DragButtonOption.Middle) && MiddleClickDown)
+                || ((Settings.DragButton == Settings.DragButtonOption.Control || Settings.AutocheckDragButton == Settings.DragButtonOption.Control) && LeftClickDown && Form.ModifierKeys == Keys.Control)
+                || ((Settings.DragButton == Settings.DragButtonOption.Shift || Settings.AutocheckDragButton == Settings.DragButtonOption.Shift) && LeftClickDown && Form.ModifierKeys == Keys.Shift)
+                || ((Settings.DragButton == Settings.DragButtonOption.Alt || Settings.AutocheckDragButton == Settings.DragButtonOption.Alt) && LeftClickDown && Form.ModifierKeys == Keys.Alt);
             if (CanDragDrop)
                 DragStartPoint = Cursor.Position;
         }

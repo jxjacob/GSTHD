@@ -70,10 +70,14 @@ namespace GSTHD
         public bool spoilerLoaded = false;
         public bool isBroadcastable;
 
+        private bool isOnBroadcast = false;
+
         public Form1 f1;
         public Form2 f2;
 
         private static readonly Regex unspacer = new Regex(@"\s+");
+
+        delegate void AddFromATCallback(int currentMap, int dk_id, int howMany, bool marked);
 
         public SpoilerPanel(ObjectPanelSpoiler data, Settings settings, bool isOnBroadcast=false)
         {
@@ -111,6 +115,7 @@ namespace GSTHD
                 topRowHeight = data.DataRowHeight;
             }
             this.isBroadcastable = data.isBroadcastable && !isOnBroadcast;
+            this.isOnBroadcast = isOnBroadcast;
 
             // label for when a spoiler isnt loaded yet
             DefaultLabel = new Label
@@ -213,6 +218,11 @@ namespace GSTHD
             {
                 pointspread = JsonConvert.DeserializeObject<Dictionary<string, int>>(spoilerData["point_spread"]);
                 spoilerData.Remove("point_spread");
+                //futureproof fairymoves that evaded notice
+                if (!pointspread.ContainsKey("fairy_moves"))
+                {
+                    pointspread.Add("fairy_moves", pointspread["training_moves"]);
+                }
                 pointsMode = true;
             }
             else
@@ -244,7 +254,7 @@ namespace GSTHD
             if (parsedStartingInfo.ContainsKey("level_order"))
             {
                 levelOrder = parsedStartingInfo["level_order"].ToObject<List<int>>();
-                // manually att 8 for helm and 9 for isles
+                // manually add 8 for helm and 9 for isles
                 levelOrder.Add(7);
                 levelOrder.Add(8);
             }
@@ -323,7 +333,7 @@ namespace GSTHD
 
                     int newX = xmod * (cellWidth) + (xmod * rowPadding);
                     int newY = ymod * (cellHeight) + (ymod * colPadding);
-                    Debug.WriteLine($"p: {placement} l: {(string)parseddata["level_name"]} x: {newX} -- y: {newY}");
+                    //Debug.WriteLine($"p: {placement} l: {(string)parseddata["level_name"]} x: {newX} -- y: {newY}");
 
 
                     var newpotions = ParsePotions(parseddata["vial_colors"]);
@@ -343,7 +353,7 @@ namespace GSTHD
                         Name + "_" + Unspace((string)parseddata["level_name"]), (string)parseddata["level_name"],
                         int.Parse(level.Key), theNum,
                         CellFontName, CellFontSize, CellFontStyle, CellLabelSpacing, CellLabelWidth,
-                        cellBackColor, MinimalMode, pointspread, DK64Items, isBroadcastable);
+                        cellBackColor, MinimalMode, pointspread, DK64Items, isBroadcastable, isOnBroadcast);
                     cells.Add(tempcell);
 
                 }
@@ -433,64 +443,71 @@ namespace GSTHD
             }
         }
 
-        public void AddFromAT(int currentMap, int dk_id, int howMany)
+        public void AddFromAT(int currentMap, int dk_id, int howMany, bool marked)
         {
-            if (spoilerLoaded && !startingItems.Contains(dk_id) && dk_id >=0)
+            if (this.InvokeRequired)
             {
-                // i hate slams
-                if (dk_id == 36)
+                this.Invoke(new AddFromATCallback(AddFromAT), new object[] { currentMap, dk_id, howMany, marked });
+                return;
+            } else
+            {
+                if (spoilerLoaded && !startingItems.Contains(dk_id) && dk_id >=0)
                 {
-                    if (howMany > howManySlams)
+                    // i hate slams
+                    if (dk_id == 36)
                     {
-                        howMany -= howManySlams;
-                        howManySlams += howMany;
+                        if (howMany > howManySlams)
+                        {
+                            howMany -= howManySlams;
+                            howManySlams += howMany;
+                        } else
+                        {
+                            howMany = 0;
+                        }
                     } else
                     {
-                        howMany = 0;
+                        howMany = 1;
+                    }
+
+
+                    //Debug.WriteLine($"map: {currentMap} -- item: {dk_id}");
+                    bool isStarting = false;
+                    try
+                    {
+                        lastKnownMap = DK64Maps[currentMap];
+                        // special menu screen location
+                        if (lastKnownMap == -2)
+                        {
+                            lastKnownMap = 8;
+                            isStarting = true;
+                        }
+                    } catch {
+                        //Debug.WriteLine($"map: {currentMap} ISNT REAL");
+                    }
+
+                    DK64_Item dkitem = DK64Items[dk_id];
+                    int addedpoints = (pointsMode) ? pointspread[dkitem.itemType] : -1;
+                    //Debug.WriteLine($"{addedpoints}");
+
+                    if (lastKnownMap >= 0 && !foundATItems.Contains(dk_id) && howMany > 0)
+                    {
+                        // dupe slams are handled seperately and skip the queue
+                        if (dk_id != 36) foundATItems.Add(dk_id);
+                        Debug.WriteLine($"adding {howMany} copy of {dk_id} to map {lastKnownMap}, valued at {addedpoints} points");
+                        cells[lastKnownMap].AddNewItem(dkitem, addedpoints, isStarting, howMany, isMarked:marked);
                     }
                 } else
                 {
-                    howMany = 1;
+                    Debug.WriteLine($"ID: {dk_id} is a starting key/kong/camera and has been ignored.");
                 }
 
-
-                //Debug.WriteLine($"map: {currentMap} -- item: {dk_id}");
-                bool isStarting = false;
-                try
-                {
-                    lastKnownMap = DK64Maps[currentMap];
-                    // special menu screen location
-                    if (lastKnownMap == -2)
-                    {
-                        lastKnownMap = 8;
-                        isStarting = true;
-                    }
-                } catch {
-                    //Debug.WriteLine($"map: {currentMap} ISNT REAL");
-                }
-                // convert the map to the table i still need to make
-                // then update the corresponding cell
-
-                DK64_Item dkitem = DK64Items[dk_id];
-                int addedpoints = -1;
-                if (pointsMode) addedpoints = pointspread[dkitem.itemType];
-                //Debug.WriteLine($"{addedpoints}");
-
-                if (lastKnownMap >= 0 && !foundATItems.Contains(dk_id) && howMany > 0)
-                {
-                    cells[lastKnownMap].AddNewItem(dkitem, addedpoints, isStarting, howMany);
-                    // dupe slams are handled seperately and skip the queue
-                    if (dk_id != 36) foundATItems.Add(dk_id);
-                }
-            } else
-            {
-                Debug.WriteLine($"ID: {dk_id} is a starting key/kong/camera and has been ignored.");
             }
         }
 
         public void RemoveSlams(int count)
         {
-            // TODO: accoutn for manually removing slams from a cell, warranting an update to the panel's count
+            // this function is supposed to account for manually removing a slam from a cell, warranting an update to the panel's count
+            // however i am using the assumption that the "autotracker is always right" (and therefore always has the correct number of slams) and that "i will do nothing to correct user error" to get away with not actually implementing this
             howManySlams -= count;
         }
 

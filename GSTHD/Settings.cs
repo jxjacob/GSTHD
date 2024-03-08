@@ -32,7 +32,38 @@ namespace GSTHD
             Middle,
             Right,
             LeftAndRight,
+            Control,
+            Shift,
+            Alt
         }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum ExtraActionModButton
+        {
+            None,
+            Left,
+            Middle,
+            Right,
+            DoubleLeft,
+            MouseButton1,
+            MouseButton2,
+            Control,
+            Shift,
+            Alt
+        }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum BasicActionButtonOption
+        {
+            None,
+            Left,
+            Middle,
+            Right,
+            MouseButton1,
+            MouseButton2,
+            Control,
+            Shift,
+            Alt
+        }
+
 
         [JsonConverter(typeof(StringEnumConverter))]
         public enum SelectEmulatorOption
@@ -49,18 +80,21 @@ namespace GSTHD
             Numerical,
             Chronological
         }
-
         private const SongMarkerBehaviourOption DefaultSongMarkerBehaviour = SongMarkerBehaviourOption.DropAndCheck;
 
         public bool ShowMenuBar { get; set; } = true;
-        public string ActiveLayout { get; set; } = string.Empty;
+        public string ActiveLayout { get; set; } = "Layouts\\dk64.json";
         public string ActiveLayoutBroadcastFile {  get; set; } = string.Empty;
         public string ActivePlaces { get; set; } = string.Empty;
         public string ActiveSometimesHints { get; set; } = string.Empty;
         public bool InvertScrollWheel { get; set; } = false;
         public bool WraparoundDungeonNames { get; set; } = true;
         public DragButtonOption DragButton { get; set; } = DragButtonOption.Middle;
-        public DragButtonOption AutocheckDragButton { get; set; } = DragButtonOption.None;
+        public DragButtonOption AutocheckDragButton { get; set; } = DragButtonOption.LeftAndRight;
+        public BasicActionButtonOption IncrementActionButton { get; set; } = BasicActionButtonOption.Left;
+        public BasicActionButtonOption DecrementActionButton { get; set; } = BasicActionButtonOption.Right;
+        public BasicActionButtonOption ResetActionButton { get; set; } = BasicActionButtonOption.Middle;
+        public ExtraActionModButton ExtraActionButton { get; set; } = ExtraActionModButton.Shift;
         public SelectEmulatorOption SelectEmulator { get; set; } = SelectEmulatorOption.Project64;
         public SpoilerOrderOption SpoilerOrder { get; set; } = SpoilerOrderOption.Numerical;
         public int MinDragThreshold { get; set; } = 6;
@@ -89,6 +123,8 @@ namespace GSTHD
         public bool EnableBarrenColors { get; set; } = true;
         public bool ForceGossipCycles { get; set; } = false;
         public bool OverrideHeldImage { get; set; } = false;
+        public bool StoneOverrideCheckMark { get; set; } = false;
+        public bool CellOverrideCheckMark { get; set; } = false;
         public double GossipCycleTime { get; set; } = 1;
         public bool EnableAutosave { get; set; } = true;
         public bool DeleteOldAutosaves { get; set; } = true;
@@ -98,6 +134,7 @@ namespace GSTHD
         public KnownColor SpoilerPointColour { get; set; } = KnownColor.White;
         public KnownColor SpoilerWOTHColour { get; set; } = KnownColor.ForestGreen;
         public KnownColor SpoilerEmptyColour { get; set; } = KnownColor.Teal;
+        public KnownColor SpoilerKindaEmptyColour { get; set; } = KnownColor.GreenYellow;
 
         public MedallionLabel DefaultDungeonNames { get; set; } = new MedallionLabel()
         {

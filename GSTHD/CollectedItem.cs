@@ -9,11 +9,17 @@ using System.Windows.Forms;
 
 namespace GSTHD
 {
-    class CollectedItem : PictureBox, ProgressibleElement<int>, DraggableAutocheckElement<int>
+    public struct CollectedItemState
+    {
+        public int CollectedItems;
+        public bool isMarked;
+
+    }
+    class CollectedItem : OrganicImage, ProgressibleElement<CollectedItemState>, DraggableAutocheckElement<CollectedItemState>
     {
         private readonly Settings Settings;
-        private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
-        private readonly DraggableAutocheckElementBehaviour<int> DragBehaviour;
+        private readonly ProgressibleElementBehaviour<CollectedItemState> ProgressBehaviour;
+        private readonly DraggableAutocheckElementBehaviour<CollectedItemState> DragBehaviour;
 
         private string[] ImageNames;
         private Label ItemCount;
@@ -32,7 +38,8 @@ namespace GSTHD
         public string AutoName = null;
         public string AutoSubName = null;
 
-        delegate void SetStateCallback(int state);
+        delegate void SetStateCallback(CollectedItemState state);
+        delegate void UpdateCountCallback();
 
         public CollectedItem(ObjectPointCollectedItem data, Settings settings, bool isBroadcast = false)
         {
@@ -48,7 +55,7 @@ namespace GSTHD
             CollectedItemMin = data.CountMin;
             CollectedItemMax = data.CountMax.HasValue ? data.CountMax.Value : 100;
             CollectedItemDefault = data.DefaultValue;
-            CollectedItems = System.Math.Min(System.Math.Max(CollectedItemMin, CollectedItemDefault), CollectedItemMax);
+            CollectedItems = Math.Clamp(CollectedItemDefault, CollectedItemMin, CollectedItemMax);
             Step = data.Step == 0 ? 1 : data.Step;
             CollectedItemSize = data.Size;
             isBroadcastable = data.isBroadcastable && !isBroadcast;
@@ -64,13 +71,13 @@ namespace GSTHD
                 Size = CollectedItemSize;
             }
 
-            ProgressBehaviour = new ProgressibleElementBehaviour<int>(this, Settings);
-            DragBehaviour = new DraggableAutocheckElementBehaviour<int>(this, Settings);
+            ProgressBehaviour = new ProgressibleElementBehaviour<CollectedItemState>(this, Settings);
+            DragBehaviour = new DraggableAutocheckElementBehaviour<CollectedItemState>(this, Settings);
 
             Location = new Point(data.X, data.Y);
             CollectedItemCountPosition = data.CountPosition.IsEmpty ? new Size(0, -7) : data.CountPosition;
-            
-            BackColor = data.BackGroundColor;
+
+            if (data.BackGroundColor != Color.Transparent) BackColor = data.BackGroundColor;
             TabStop = false;
 
 
@@ -131,27 +138,47 @@ namespace GSTHD
         {
             if (Image != null) Image.Dispose();
             Image = null;
-            Image = Image.FromFile(@"Resources/" + ImageNames[System.Math.Max(System.Math.Min(CollectedItems, ImageNames.Length - 1), 0)]);
+            Image = Image.FromFile(@"Resources/" + ImageNames[Math.Clamp(CollectedItems, 0, ImageNames.Length-1)]);
+            if (IsHandleCreated) { Invalidate(); }
         }
 
         public void UpdateCount()
         {
-            ItemCount.Text = CollectedItems.ToString();
-            if (hasSlash) ItemCount.Text += " /";
-            if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+            if (this.InvokeRequired)
             {
-                ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).CollectedItems = CollectedItems;
-                ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateCount();
+                this.Invoke(new UpdateCountCallback(UpdateCount));
+                return;
+
+            } else
+            {
+                ItemCount.Text = CollectedItems.ToString();
+                if (hasSlash) ItemCount.Text += " /";
+                if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+                {
+                    ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).CollectedItems = CollectedItems;
+                    ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
+                    ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateCount();
+                }
+                UpdateImage();
             }
-            UpdateImage();
         }
 
-        public int GetState()
+        public CollectedItemState GetState()
         {
-            return CollectedItems;
+            return new CollectedItemState
+            {
+                CollectedItems = CollectedItems,
+                isMarked = isMarked,
+            };
         }
 
+        // legacy for autotracker
         public void SetState(int state)
+        {
+            Invoke(new SetStateCallback(SetState), new object[] { new CollectedItemState { CollectedItems = state, isMarked = isMarked } });
+        }
+
+        public void SetState(CollectedItemState state)
         {
             if (this.InvokeRequired)
             {
@@ -159,7 +186,8 @@ namespace GSTHD
                 return;
             } else
             {
-                CollectedItems = state;
+                CollectedItems = state.CollectedItems;
+                isMarked = state.isMarked;
                 UpdateCount();
                 DragBehaviour.SaveChanges();
             }
@@ -184,9 +212,14 @@ namespace GSTHD
         public void ResetState()
         {
             CollectedItems = CollectedItemDefault;
+            isMarked = false;
             UpdateCount();
         }
-
+        public void ToggleCheck()
+        {
+            isMarked = !isMarked;
+            UpdateCount();
+        }
         public void SetColor(Color color)
         {
             ItemCount.ForeColor = color;
@@ -205,7 +238,7 @@ namespace GSTHD
 
         public void StartDragDrop()
         {
-            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[System.Math.Min(System.Math.Max(1, CollectedItems), ImageNames.Length - 1)]);
+            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[Math.Clamp(CollectedItems, 1, ImageNames.Length - 1)], marked:isMarked);
             DoDragDrop(dropContent, DragDropEffects.Copy);
 
         }

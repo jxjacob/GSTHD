@@ -77,11 +77,11 @@ namespace GSTHD
             if (!Settings.EnableBarrenColors)
                 return;
 
-            if (e.Button == MouseButtons.Left && ColorIndex < Colors.Length - 1)
+            if ((MouseDetermination.DetermineBasicMouseInput(e, Settings.IncrementActionButton)) && ColorIndex < Colors.Length - 1)
             {
                 ColorIndex++;
             }
-            else if (e.Button == MouseButtons.Right && ColorIndex > 0)
+            else if ((MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton)) && ColorIndex > 0)
             {
                 ColorIndex--;
             }

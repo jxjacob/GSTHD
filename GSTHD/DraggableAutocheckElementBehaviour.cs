@@ -46,12 +46,18 @@ namespace GSTHD
         public override void UpdateDragDropPreparationStatus()
         {
             if ((Settings.AutocheckDragButton == Settings.DragButtonOption.LeftAndRight && LeftClickDown && RightClickDown)
-                || (Settings.AutocheckDragButton == Settings.DragButtonOption.Middle && MiddleClickDown))
+                || (Settings.AutocheckDragButton == Settings.DragButtonOption.Middle && MiddleClickDown)
+                || (Settings.AutocheckDragButton == Settings.DragButtonOption.Control && LeftClickDown && Form.ModifierKeys == Keys.Control)
+                || (Settings.AutocheckDragButton == Settings.DragButtonOption.Shift && LeftClickDown && Form.ModifierKeys == Keys.Shift)
+                || (Settings.AutocheckDragButton == Settings.DragButtonOption.Alt && LeftClickDown && Form.ModifierKeys == Keys.Alt))
             {
                 CanDragDrop = true;
                 AutocheckDragDrop = true;
             }
-            else if (Settings.DragButton == Settings.DragButtonOption.LeftAndRight && LeftClickDown && RightClickDown)
+            else if (Settings.DragButton == Settings.DragButtonOption.LeftAndRight && LeftClickDown && RightClickDown
+                || (Settings.DragButton == Settings.DragButtonOption.Control && LeftClickDown && Form.ModifierKeys == Keys.Control)
+                || (Settings.DragButton == Settings.DragButtonOption.Shift && LeftClickDown && Form.ModifierKeys == Keys.Shift)
+                || (Settings.DragButton == Settings.DragButtonOption.Alt && LeftClickDown && Form.ModifierKeys == Keys.Alt))
             {
                 CanDragDrop = true;
                 AutocheckDragDrop = false;

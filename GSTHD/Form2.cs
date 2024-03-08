@@ -12,7 +12,7 @@ using System.Windows.Forms;
 
 namespace GSTHD
 {
-    public partial class Form2 : Form
+    public partial class Form2 : Form, GSTForms
     {
         Dictionary<string, string> ListPlacesWithTag = new Dictionary<string, string>();
         SortedSet<string> ListPlaces = new SortedSet<string>();
@@ -124,7 +124,7 @@ namespace GSTHD
             if (LayoutContent != null) LayoutContent.Dispose();
             LayoutContent = new Panel();
             CurrentLayout = new Layout();
-            CurrentLayout.LoadBroadcastLayout(LayoutContent, Settings, ListSometimesHintsSuggestions, ListPlacesWithTag, this);
+            CurrentLayout.LoadLayout(LayoutContent, Settings, ListSometimesHintsSuggestions, ListPlacesWithTag, this);
             Size = new Size(LayoutContent.Size.Width, LayoutContent.Size.Height);
             LayoutContent.Dock = DockStyle.Top;
             Controls.Add(LayoutContent);
