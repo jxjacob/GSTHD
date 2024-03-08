@@ -518,7 +518,7 @@ namespace GSTHD
 
         private void AdjustPointLocations()
         {
-            Debug.WriteLine($"{this.Name}");
+            //Debug.WriteLine($"{this.Name}");
             int pointWidth = 0;
             if (pointLabel != null)
             {
@@ -526,7 +526,7 @@ namespace GSTHD
                 pointLabel.Width = System.Math.Max(labelWidth, pointMeasure);
                 pointWidth = pointLabel.Width;
                 pointLabel.Location = new Point(this.Size.Width - (System.Math.Max(labelSpacing, pointWidth)) - 1 - this.topRowPadding, pointLabel.Location.Y);
-                Debug.WriteLine($"point -- loc: {pointLabel.Location}   width: {pointLabel.Width}    pm: {pointMeasure}    ls: {labelSpacing}");
+                //Debug.WriteLine($"point -- loc: {pointLabel.Location}   width: {pointLabel.Width}    pm: {pointMeasure}    ls: {labelSpacing}");
             }
 
             if (wothLabel != null)
@@ -534,7 +534,7 @@ namespace GSTHD
                 int pointVis = (pointLabel != null) ? 1 : 0;
                 wothLabel.Width = System.Math.Max(labelWidth, TextRenderer.MeasureText(wothLabel.Text, wothLabel.Font).Width);
                 wothLabel.Location = new Point(this.Size.Width - (labelSpacing) - pointVis*(pointWidth) - 1 - this.topRowPadding, wothLabel.Location.Y);
-                Debug.WriteLine($"woth -- loc: {wothLabel.Location}   width: {wothLabel.Width}");
+                //Debug.WriteLine($"woth -- loc: {wothLabel.Location}   width: {wothLabel.Width}");
             }
         }
 

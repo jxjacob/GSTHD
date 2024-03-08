@@ -225,29 +225,6 @@ namespace GSTHD
             }
         }
 
-        //public Tuple<int, bool> GetWholeState()
-        //{
-        //    int run = 0;
-        //    if (isColoredLeft) { run ^= 1; }
-        //    if (isColoredRight) { run ^= 2; }
-        //    return Tuple.Create(run, isMarked);
-        //}
-
-        //public void SetWholeState(int state, bool marked)
-        //{
-        //    if (this.InvokeRequired)
-        //    {
-        //        Invoke(new SetWholeStateCallback(SetWholeState), new object[] { state, marked });
-        //        return;
-        //    }
-        //    else
-        //    {
-        //        isMarked = marked;
-        //        if ((state & 1) == 1) { IncrementLeftState(); }
-        //        if ((state & 2) == 2) { IncrementRightState(); }
-        //    }
-        //}
-
         public void ResetState()
         {
             ImageIndex = 0;
