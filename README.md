@@ -62,8 +62,18 @@ The priority of inputs (and their defualt binding) is listed below. With the top
 | Scroll Wheel | Alternate method of incrementing or decrementing |
 > NOTE: Checkmarking an item does not hold any *inherent* meaning, but can be useful for marking an item as required, a region as cleared out, etc
 
+
+## Double Item Controls:
+Same controls as "Global-ish", with the exception of:
+| Input Name  | Behaviour |
+| ------------- | ------------- |
+| `Increment Item` | Toggles the "left" half of the item |
+| `Increment Item` + Moving your mouse | Drag with the "left" half of the item |
+| `Decrement Item` | Toggles the "right" half of the item |
+| `Decrement Item` + Moving your mouse | Drag with the "right" half of the item |
+
 ## Medallion/Key Controls:
-Same controls as "Global-ish", with the sole exception of
+Same controls as "Global-ish", with the sole exception of:
 | Input Name  | Behaviour |
 | ------------- | ------------- |
 | Scroll Wheel | Increments or decrements the dungeon/world names |
@@ -159,7 +169,7 @@ Autotracker -> "Subtract from Collectables"
 
 # Common Issues
 
-Scroll wheel doesn't work with Items/Collectables
+Scroll wheel doesn't work with Items/Collectables/Dungeon-Labels
 - Go to your Windows settings -> "Devices" -> "Mouse" and enable "Scroll inactive windows when I hover over them".
 
 Menu Bar dissapears
