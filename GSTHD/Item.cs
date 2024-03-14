@@ -98,10 +98,15 @@ namespace GSTHD
             if (e.Delta != 0)
             {
                 var scrolls = e.Delta / SystemInformation.MouseWheelScrollDelta;
-                ImageIndex += Settings.InvertScrollWheel ? scrolls : -scrolls;
-                if (ImageIndex < 0) ImageIndex = 0;
-                else if (ImageIndex >= ImageNames.Length) ImageIndex = ImageNames.Length - 1;
-                else UpdateImage();
+                scrolls = (Settings.InvertScrollWheel ? scrolls : -scrolls);
+                if (scrolls > 0)
+                {
+                    for (int i = 0; i < scrolls; i++) IncrementState();
+                }
+                else if (scrolls < 0)
+                {
+                    for (int i = 0; i > scrolls; i--) DecrementState();
+                }
             }
         }
 
@@ -194,16 +199,15 @@ namespace GSTHD
 
         public void IncrementState()
         {
-            if (ImageIndex < ImageNames.Length - 1)
-            {
-                ImageIndex += 1;
-                UpdateImage();
-            }
+            if (ImageIndex < ImageNames.Length - 1) ImageIndex += 1;
+            else if (Settings.WraparoundItems) ImageIndex = 0;
+            UpdateImage();
         }
 
         public void DecrementState()
         {
             if (ImageIndex > 0) ImageIndex -= 1;
+            else if (Settings.WraparoundItems) ImageIndex = ImageNames.Length - 1;
             UpdateImage();
         }
 

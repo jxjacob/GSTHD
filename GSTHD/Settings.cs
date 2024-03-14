@@ -89,6 +89,7 @@ namespace GSTHD
         public string ActiveSometimesHints { get; set; } = "sometimes_hints.json";
         public bool InvertScrollWheel { get; set; } = false;
         public bool WraparoundDungeonNames { get; set; } = true;
+        public bool WraparoundItems { get; set; } = false;
         public DragButtonOption DragButton { get; set; } = DragButtonOption.Middle;
         public DragButtonOption AutocheckDragButton { get; set; } = DragButtonOption.LeftAndRight;
         public BasicActionButtonOption IncrementActionButton { get; set; } = BasicActionButtonOption.Left;

@@ -238,12 +238,14 @@ namespace GSTHD
         public void IncrementState()
         {
             if (ImageIndex < ImageNames.Length - 1) ImageIndex += 1;
+            else if (Settings.WraparoundItems) ImageIndex = 0;
             UpdateImage();
         }
 
         public void DecrementState()
         {
             if (ImageIndex > 0) ImageIndex -= 1;
+            else if (Settings.WraparoundItems) ImageIndex = ImageNames.Length - 1;
             UpdateImage();
         }
 

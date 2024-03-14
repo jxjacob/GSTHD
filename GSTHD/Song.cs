@@ -228,6 +228,7 @@ namespace GSTHD
         {
             RemoveImage = true;
             if (ImageIndex < ImageNames.Length - 1) ImageIndex += 1;
+            else if (Settings.WraparoundItems) ImageIndex = 0;
             UpdateImage();
         }
 
@@ -235,6 +236,7 @@ namespace GSTHD
         {
             RemoveImage = true;
             if (ImageIndex > 0) ImageIndex -= 1;
+            else if (Settings.WraparoundItems) ImageIndex = ImageNames.Length - 1;
             UpdateImage();
         }
 
@@ -503,20 +505,16 @@ namespace GSTHD
 
         public void IncrementState()
         {
-            if (ImageIndex < ImageNames.Length - 1)
-            {
-                ImageIndex += 1;
-                UpdateImage();
-            }
+            if (ImageIndex < ImageNames.Length - 1) ImageIndex += 1;
+            else if (Settings.WraparoundItems) ImageIndex = 0;
+            UpdateImage();
         }
 
         public void DecrementState()
         {
-            if (ImageIndex > 0)
-            {
-                ImageIndex -= 1;
-                UpdateImage();
-            }
+            if (ImageIndex > 0) ImageIndex -= 1;
+            else if (Settings.WraparoundItems) ImageIndex = ImageNames.Length - 1;
+            UpdateImage();
         }
 
         public void ResetState()

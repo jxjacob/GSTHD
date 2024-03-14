@@ -31,6 +31,7 @@ namespace GSTHD
 
             // Options
             // Mouse Controls
+            public ToolStripMenuItem IncrementWraparound;
             public ToolStripMenuItem IncrementButton;
             public ToolStripMenuItem DecrementButton;
             public ToolStripMenuItem ResetButton;
@@ -281,8 +282,12 @@ namespace GSTHD
 
                 var dragDropSubMenu = new ToolStripMenuItem("Mouse Controls");
                 {
+                    Items.IncrementWraparound = new ToolStripMenuItem("Increment/Decrement Wraparound", null, new EventHandler(menuBar_ToggleIncrementWraparound))
+                    {
+                        CheckOnClick = true,
+                    };
+                    dragDropSubMenu.DropDownItems.Add(Items.IncrementWraparound);
 
-                    //TODO: the three mouse buttons
                     IncrementButtonOptions = new Dictionary<Settings.BasicActionButtonOption, ToolStripMenuItem>();
                     DecrementButtonOptions = new Dictionary<Settings.BasicActionButtonOption, ToolStripMenuItem>();
                     ResetButtonOptions = new Dictionary<Settings.BasicActionButtonOption, ToolStripMenuItem>();
@@ -568,6 +573,7 @@ namespace GSTHD
             Items.InvertScrollWheel.Checked = Settings.InvertScrollWheel;
             Items.Wraparound.Checked = Settings.WraparoundDungeonNames;
 
+            Items.IncrementWraparound.Checked = Settings.WraparoundItems;
             DragButtonOptions[Settings.DragButton].Checked = true;
             AutocheckDragButtonOptions[Settings.AutocheckDragButton].Checked = true;
             ExtraButtonOptions[Settings.ExtraActionButton].Checked = true;
@@ -999,6 +1005,13 @@ namespace GSTHD
         private void menuBar_ToggleOverrideCellCheckmark(object sender, EventArgs e)
         {
             Settings.CellOverrideCheckMark = Items.CellOverrideCheckMark.Checked;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+        
+        private void menuBar_ToggleIncrementWraparound(object sender, EventArgs e)
+        {
+            Settings.WraparoundItems = Items.IncrementWraparound.Checked;
             Settings.Write();
             Form.UpdateLayoutFromSettings();
         }

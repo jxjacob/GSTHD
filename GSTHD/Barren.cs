@@ -77,13 +77,15 @@ namespace GSTHD
             if (!Settings.EnableBarrenColors)
                 return;
 
-            if ((MouseDetermination.DetermineBasicMouseInput(e, Settings.IncrementActionButton)) && ColorIndex < Colors.Length - 1)
+            if (MouseDetermination.DetermineBasicMouseInput(e, Settings.IncrementActionButton))
             {
-                ColorIndex++;
+                if (ColorIndex < Colors.Length - 1) ColorIndex++;
+                else if (Settings.WraparoundItems) ColorIndex = 0;
             }
-            else if ((MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton)) && ColorIndex > 0)
+            else if (MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton))
             {
-                ColorIndex--;
+                if (ColorIndex > 0) ColorIndex--;
+                else if (Settings.WraparoundItems) ColorIndex = Colors.Length - 1;
             }
             UpdateColor();
         }

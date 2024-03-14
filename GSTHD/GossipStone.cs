@@ -148,17 +148,15 @@ namespace GSTHD
             if (e.Delta != 0 && this.isScrollable == true)
             {
                 var scrolls = e.Delta / SystemInformation.MouseWheelScrollDelta;
-                int whichway = Settings.InvertScrollWheel ? scrolls : -scrolls;
-                if (whichway > 0)
+                scrolls = (Settings.InvertScrollWheel ? scrolls : -scrolls);
+                if (scrolls > 0)
                 {
-                    IncrementState();
-                } else if (whichway < 0)
-                {
-                    DecrementState();
+                    for (int i = 0; i < scrolls; i++) IncrementState();
                 }
-                //if (ImageIndex < 0) ImageIndex = 0;
-                //else if (ImageIndex >= ImageNames.Length) ImageIndex = ImageNames.Length - 1;
-                //UpdateImage();
+                else if (scrolls < 0)
+                {
+                    for (int i = 0; i > scrolls; i--) DecrementState();
+                }
             }
         }
 
@@ -302,6 +300,7 @@ namespace GSTHD
                 HoldsImage = false;
                 HeldImages.Clear();
                 if (ImageIndex < ImageNames.Length - 1) ImageIndex += 1;
+                else if (Settings.WraparoundItems) ImageIndex = 0;
                 UpdateImage();
             }
         }
@@ -314,6 +313,7 @@ namespace GSTHD
                 HoldsImage = false;
                 HeldImages.Clear();
                 if (ImageIndex > 0) ImageIndex -= 1;
+                else if (Settings.WraparoundItems) ImageIndex = ImageNames.Length - 1;
                 UpdateImage();
             }
         }

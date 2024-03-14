@@ -127,10 +127,14 @@ namespace GSTHD
             if (e.Delta != 0)
             {
                 var scrolls = e.Delta / SystemInformation.MouseWheelScrollDelta;
-                CollectedItems += Step * (Settings.InvertScrollWheel ? scrolls : -scrolls);
-                if (CollectedItems < CollectedItemMin) CollectedItems = CollectedItemMin;
-                else if (CollectedItems > CollectedItemMax) CollectedItems = CollectedItemMax;
-                UpdateCount();
+                scrolls = (Settings.InvertScrollWheel ? scrolls : -scrolls);
+                if (scrolls > 0)
+                {
+                    for (int i = 0; i < scrolls; i++) IncrementState();
+                } else if (scrolls < 0)
+                {
+                    for (int i = 0; i > scrolls; i--) DecrementState();
+                }
             }
         }
 
@@ -196,16 +200,16 @@ namespace GSTHD
         public void IncrementState()
         {
             CollectedItems += Step;
-            if (CollectedItems > CollectedItemMax) CollectedItems = CollectedItemMax;
-            if (CollectedItems < CollectedItemMin) CollectedItems = CollectedItemMin;
+            if (CollectedItems > CollectedItemMax && !Settings.WraparoundItems) CollectedItems = CollectedItemMax;
+            else if (CollectedItems > CollectedItemMax && Settings.WraparoundItems) CollectedItems = CollectedItemMin;
             UpdateCount();
         }
 
         public void DecrementState()
         {
             CollectedItems -= Step;
-            if (CollectedItems > CollectedItemMax) CollectedItems = CollectedItemMax;
-            if (CollectedItems < CollectedItemMin) CollectedItems = CollectedItemMin;
+            if (CollectedItems < CollectedItemMin && !Settings.WraparoundItems) CollectedItems = CollectedItemMin;
+            else if (CollectedItems < CollectedItemMin && Settings.WraparoundItems) CollectedItems = CollectedItemMax;
             UpdateCount();
         }
 
@@ -238,7 +242,8 @@ namespace GSTHD
 
         public void StartDragDrop()
         {
-            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[Math.Clamp(CollectedItems, 1, ImageNames.Length - 1)], marked:isMarked);
+
+            var dropContent = new DragDropContent(DragBehaviour.AutocheckDragDrop, ImageNames[System.Math.Max(CollectedItems, 1)], marked:isMarked);
             DoDragDrop(dropContent, DragDropEffects.Copy);
 
         }
