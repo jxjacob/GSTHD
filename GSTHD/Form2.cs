@@ -15,7 +15,7 @@ namespace GSTHD
     public partial class Form2 : Form, GSTForms
     {
         Dictionary<string, string> ListPlacesWithTag = new Dictionary<string, string>();
-        SortedSet<string> ListPlaces = new SortedSet<string>();
+        Dictionary<string, string> ListKeycodesWithTag = new Dictionary<string, string>();
         SortedSet<string> ListSometimesHintsSuggestions = new SortedSet<string>();
 
         Layout CurrentLayout;
@@ -86,26 +86,9 @@ namespace GSTHD
         {
             Settings = Settings.Read();
 
-            ListPlaces.Clear();
-            ListPlaces.Add("");
+            
             ListPlacesWithTag.Clear();
-            JObject json_places = JObject.Parse(File.ReadAllText(@"" + Settings.ActivePlaces));
-            foreach (var property in json_places)
-            {
-                ListPlaces.Add(property.Key.ToString());
-                ListPlacesWithTag.Add(property.Key, property.Value.ToString());
-            }
-
-            ListSometimesHintsSuggestions.Clear();
-            JObject json_hints = JObject.Parse(File.ReadAllText(@"" + Settings.ActiveSometimesHints));
-            foreach (var categorie in json_hints)
-            {
-                foreach (var hint in categorie.Value)
-                {
-                    ListSometimesHintsSuggestions.Add(hint.ToString());
-                }
-            }
-
+            ListKeycodesWithTag.Clear();
 
         }
 
@@ -124,7 +107,7 @@ namespace GSTHD
             if (LayoutContent != null) LayoutContent.Dispose();
             LayoutContent = new Panel();
             CurrentLayout = new Layout();
-            CurrentLayout.LoadLayout(LayoutContent, Settings, ListSometimesHintsSuggestions, ListPlacesWithTag, this);
+            CurrentLayout.LoadLayout(LayoutContent, Settings, ListSometimesHintsSuggestions, ListPlacesWithTag, ListKeycodesWithTag, this);
             Size = new Size(LayoutContent.Size.Width, LayoutContent.Size.Height);
             LayoutContent.Dock = DockStyle.Top;
             Controls.Add(LayoutContent);

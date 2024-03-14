@@ -50,6 +50,7 @@ namespace GSTHD
             public ToolStripMenuItem EnableLastWoth;
             public ToolStripMenuItem LastWothColor;
             public ToolStripMenuItem EnableDuplicateWoth;
+            public ToolStripMenuItem EnableHintPathAutofill;
 
             // Barren
             public ToolStripMenuItem EnableBarrenColors;
@@ -424,6 +425,12 @@ namespace GSTHD
                         CheckOnClick = true,
                     };
                     wothSubMenu.DropDownItems.Add(Items.EnableDuplicateWoth);
+
+                    Items.EnableHintPathAutofill = new ToolStripMenuItem("Path Autofill (Experimental)", null, new EventHandler(menuBar_ToggleEnableHintPathAutofill))
+                    {
+                        CheckOnClick = true,
+                    };
+                    wothSubMenu.DropDownItems.Add(Items.EnableHintPathAutofill);
                 }
                 optionMenu.DropDownItems.Add(wothSubMenu);
 
@@ -585,6 +592,7 @@ namespace GSTHD
             //Items.Autocheck.Checked = Settings.AutoCheckSongs;
             SongMarkerBehaviourOptions[Settings.SongMarkerBehaviour].Checked = true;
 
+            Items.EnableHintPathAutofill.Checked = Settings.HintPathAutofill;
             Items.EnableDuplicateWoth.Checked = Settings.EnableDuplicateWoth;
             Items.EnableLastWoth.Checked = Settings.EnableLastWoth;
             LastWothColorOptions[Settings.LastWothColor].Checked = true;
@@ -954,6 +962,13 @@ namespace GSTHD
         {
             // Items.EnableLastWoth.Enabled = !Items.EnableLastWoth.Enabled;
             Settings.EnableDuplicateWoth = Items.EnableDuplicateWoth.Checked;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+        
+        private void menuBar_ToggleEnableHintPathAutofill(object sender, EventArgs e)
+        {
+            Settings.HintPathAutofill = Items.EnableHintPathAutofill.Checked;
             Settings.Write();
             Form.UpdateLayoutFromSettings();
         }

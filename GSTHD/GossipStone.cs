@@ -45,7 +45,7 @@ namespace GSTHD
         private readonly DraggableElementBehaviour<GossipStoneState> DragBehaviour;
 
         private string[] ImageNames;
-        private bool HoldsImage;
+        public bool HoldsImage;
         public List<string> HeldImages = new List<string>();
         private int CycleIndex = 0;
         private bool canCycle = false;
@@ -187,16 +187,6 @@ namespace GSTHD
             }
             UpdateImage();
             DragBehaviour.SaveChanges();
-            //if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
-            //{
-            //    var remotewindow = ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]);
-            //    remotewindow.HoldsImage = HoldsImage;
-            //    remotewindow.HeldImages = HeldImages;
-            //    remotewindow.CycleIndex = 0;
-            //    remotewindow.isMarked = isMarked;
-            //    remotewindow.UpdateImage();
-            
-            //}
         }
 
         public void Mouse_ClickUp(object sender, MouseEventArgs e)

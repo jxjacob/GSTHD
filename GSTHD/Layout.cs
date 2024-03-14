@@ -52,7 +52,7 @@ namespace GSTHD
             }
         }
 
-        public void LoadLayout(Panel panelLayout, Settings settings, SortedSet<string> listSometimesHintsSuggestions, Dictionary<string, string> listPlacesWithTag, GSTForms form)
+        public void LoadLayout(Panel panelLayout, Settings settings, SortedSet<string> listSometimesHintsSuggestions, Dictionary<string, string> listPlacesWithTag, Dictionary<string, string> listKeycodesWithTag, GSTForms form)
         {
             bool isOnBroadcast = (form.Name == "GSTHD_DK64 Broadcast View") ? true : false;
 
@@ -595,7 +595,7 @@ namespace GSTHD
                         if (item.Visible)
                         {
                             var panel = new PanelWothBarren(item, settings);
-                            panel.PanelWoth(listPlacesWithTag, item);
+                            panel.PanelWoth(listPlacesWithTag, listKeycodesWithTag, item);
                             panelLayout.Controls.Add(panel);
                             panelLayout.Controls.Add(panel.textBoxCustom.SuggestionContainer);
                             ListUpdatables.Add(panel);

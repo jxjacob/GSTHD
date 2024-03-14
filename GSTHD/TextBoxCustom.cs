@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -11,14 +12,20 @@ namespace GSTHD
 {
     class TextBoxCustom : Control
     {
+        private Settings settings;
         public TextBox TextBoxField;
         public ListBox SuggestionContainer;
         Dictionary<string, string> ListSuggestion;
         bool SuggestionContainerIsFocus = false;
+        public string codestring = string.Empty;
+        private bool isPath = false;
 
-        public TextBoxCustom(Dictionary<string, string> listSuggestion, Point location, Color color, Font font, string name, Size size, string text)
+        public TextBoxCustom(Settings _settings, Dictionary<string, string> listSuggestion, Point location, Color color, Font font, string name, Size size, string text, bool _isPath=false)
         {
             ListSuggestion = listSuggestion;
+
+            settings = _settings;
+            isPath = _isPath;
 
             TextBoxField = new TextBox
             {
@@ -89,9 +96,17 @@ namespace GSTHD
 
             if (e.KeyCode == Keys.Enter)
             {
+                Debug.WriteLine("tbf");
                 var textbox = (TextBox)sender;
                 if(!SuggestionContainer.Items.Contains(textbox.Text) && SuggestionContainer.Items.Count > 0)
-                    textbox.Text = SuggestionContainer.Items[0].ToString();
+                {
+                    // this little .Lines shuffle is so that the event handler can take the keycode and the main text seperately in the PanelWothBarren
+                    // which is the closest thing i have to multiple piece of data through a vanilla textbox
+                    textbox.Lines = new string[] { codestring , SuggestionContainer.Items[0].ToString() };
+                } else
+                {
+                    textbox.Lines = textbox.Text.Split(new char[] { ' ' }, count: 2);
+                }
             }
         }
 
@@ -99,6 +114,7 @@ namespace GSTHD
         {
             if(e.KeyCode == Keys.Enter)
             {
+                Debug.WriteLine("sc");
                 TextBoxField.Text = SuggestionContainer.SelectedItem.ToString();
                 TextBoxField.Focus();
                 SuggestionContainer.Hide();
@@ -126,10 +142,26 @@ namespace GSTHD
                 var textbox = (TextBox)sender;
                 SuggestionContainer.Items.Clear();
 
-                var listTagFiltered = ListSuggestion.Where(x => x.Value.Contains(textbox.Text.ToLower())).Select(y => y.Key);
+                string vartext = textbox.Text.ToLower();
+                if (settings.HintPathAutofill && isPath)
+                {
+                    string[] sections = vartext.Split(new char[] { ' ' }, count:2);
+                    if (sections.Length > 1)
+                    {
+                        codestring = sections[0];
+                        vartext = sections[1];
+                    } else
+                    {
+                        codestring = string.Empty;
+                        vartext = sections[0];
+                    }
+                }
+
+
+                var listTagFiltered = ListSuggestion.Where(x => x.Value.Contains(vartext)).Select(y => y.Key);
                 SuggestionContainer.Items.AddRange(listTagFiltered.ToArray());
 
-                var listPlacesFiltered = ListSuggestion.Keys.Where(x => x.ToLower().Contains(textbox.Text.ToLower()));
+                var listPlacesFiltered = ListSuggestion.Keys.Where(x => x.ToLower().Contains(vartext));
                 foreach (var element in listPlacesFiltered.ToArray())
                 {
                     if (!SuggestionContainer.Items.Contains(element))
@@ -152,6 +184,7 @@ namespace GSTHD
         public void newLocation(Point newLocation, Point panelLocation)
         {
             TextBoxField.Location = newLocation;
+            TextBoxField.Multiline = false;
             SetSuggestionsContainerLocation(panelLocation);
         }
     }

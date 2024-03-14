@@ -25,7 +25,7 @@ namespace GSTHD
     public partial class Form1 : Form, GSTForms
     {
         Dictionary<string, string> ListPlacesWithTag = new Dictionary<string, string>();
-        SortedSet<string> ListPlaces = new SortedSet<string>();
+        Dictionary<string, string> ListKeycodesWithTag = new Dictionary<string, string>();
         SortedSet<string> ListSometimesHintsSuggestions = new SortedSet<string>();
 
         Form1_MenuBar MenuBar;
@@ -120,15 +120,30 @@ namespace GSTHD
         {
             Settings = Settings.Read();
 
-            ListPlaces.Clear();
-            ListPlaces.Add("");
             ListPlacesWithTag.Clear();
             currentlyCycling.Clear();
             JObject json_places = JObject.Parse(File.ReadAllText(@"" + Settings.ActivePlaces));
-            foreach (var property in json_places)
+            if (json_places.ContainsKey("places") && json_places.ContainsKey("keycodes"))
             {
-                ListPlaces.Add(property.Key.ToString());
-                ListPlacesWithTag.Add(property.Key, property.Value.ToString());
+                //new format
+                foreach (var property in JObject.Parse(json_places.SelectToken("places").ToString()))
+                {
+                    ListPlacesWithTag.Add(property.Key, property.Value.ToString());
+                }
+
+                foreach (var property in JObject.Parse(json_places.SelectToken("keycodes").ToString()))
+                {
+                    ListKeycodesWithTag.Add(property.Key, property.Value.ToString());
+                }
+
+            } else
+            {
+                // legacy format
+                foreach (var property in json_places)
+                {
+                    ListPlacesWithTag.Add(property.Key, property.Value.ToString());
+                }
+
             }
 
             ListSometimesHintsSuggestions.Clear();
@@ -198,7 +213,7 @@ namespace GSTHD
             if (LayoutContent != null) LayoutContent.Dispose();
             LayoutContent = new Panel();
             CurrentLayout = new Layout();
-            CurrentLayout.LoadLayout(LayoutContent, Settings, ListSometimesHintsSuggestions, ListPlacesWithTag, this);
+            CurrentLayout.LoadLayout(LayoutContent, Settings, ListSometimesHintsSuggestions, ListPlacesWithTag, ListKeycodesWithTag, this);
             Size = new Size(LayoutContent.Size.Width, LayoutContent.Size.Height + MenuBar.Size.Height);
             GlobalScale = 1;
             LayoutContent.Dock = DockStyle.Top;

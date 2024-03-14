@@ -15,6 +15,8 @@ namespace GSTHD
     {
         Settings Settings;
 
+        public Dictionary<string, string> KeycodesWithTag;
+
         public List<WotH> ListWotH = new List<WotH>();
         public List<Barren> ListBarren = new List<Barren>();
         public List<Quantity> ListQuantity = new List<Quantity>();
@@ -151,11 +153,13 @@ namespace GSTHD
             ((PanelWothBarren)panel).SetSuggestionContainer();
         }
 
-        public void PanelWoth(Dictionary<string, string> PlacesWithTag, ObjectPanelWotH data)
+        public void PanelWoth(Dictionary<string, string> PlacesWithTag, Dictionary<string, string> keycodesWithTag, ObjectPanelWotH data)
         {
             ListImage_WothItemsOption = data.GossipStoneImageCollection ?? Settings.DefaultGossipStoneImages;
             ListImage_GoalsOption = data.PathGoalImageCollection ?? Settings.DefaultPathGoalImages;
             NbMaxRows = data.NbMaxRows;
+
+            KeycodesWithTag = keycodesWithTag;
 
             LabelSettings = new Label
             {
@@ -168,13 +172,15 @@ namespace GSTHD
 
             textBoxCustom = new TextBoxCustom
             (
+                Settings,
                 PlacesWithTag,
                 new Point(0, 0),
                 data.TextBoxBackColor,
                 new Font(data.TextBoxFontName, data.TextBoxFontSize, data.TextBoxFontStyle),
                 data.TextBoxName,
                 new Size(data.Width, data.TextBoxHeight),
-                data.TextBoxText
+                data.TextBoxText,
+                (PathGoalCount > 0)
             );
             textBoxCustom.TextBoxField.KeyDown += textBoxCustom_KeyDown_WotH;
             textBoxCustom.TextBoxField.MouseClick += textBoxCustom_MouseClick;
@@ -196,6 +202,7 @@ namespace GSTHD
 
             textBoxCustom = new TextBoxCustom
                 (
+                    Settings,
                     PlacesWithTag,
                     new Point(0, 0),
                     data.TextBoxBackColor,
@@ -224,6 +231,7 @@ namespace GSTHD
 
             textBoxCustom = new TextBoxCustom
                 (
+                    Settings,
                     PlacesWithTag,
                     new Point(0, 0),
                     data.TextBoxBackColor,
@@ -290,16 +298,49 @@ namespace GSTHD
                 {
                     if (textbox.Text != string.Empty)
                     {
-                        AddWotH(textbox.Text);
+                        if (textbox.Lines.Length > 1)
+                        {
+                            AddWotH(textbox.Lines[1], textbox.Lines[0]);
+                        } else AddWotH(textbox.Text);
                     }
                 }
                 textbox.Text = string.Empty;
             }
         }
 
-        private void AddWotH(string text)
+        private void AddWotH(string text, string codestring="")
         {
-            var selectedPlace = text.ToUpper().Trim().Replace(",", "");
+            Dictionary<string, string> FoundKeycodes = new Dictionary<string, string> { };
+            string selectedPlace;
+            if ((codestring!="" || codestring != string.Empty) && PathGoalCount > 0 && Settings.HintPathAutofill)
+            {
+                // if theres a letter that isnt a code, bail
+                foreach (char x in codestring)
+                {
+                    if (KeycodesWithTag.ContainsKey(x.ToString()))
+                    {
+                        FoundKeycodes.Add(x.ToString(), KeycodesWithTag[x.ToString()]);
+                    } else
+                    {
+                        FoundKeycodes.Clear();
+                        break;
+                    }
+                }
+
+                // if there is no lookup, then assume the code is a misinterpit and add it back
+                if (FoundKeycodes.Count > 0)
+                {
+                    selectedPlace = text.ToUpper().Trim().Replace(",", "");
+                } else
+                {
+                    selectedPlace = (codestring + " " + text).ToUpper().Trim().Replace(",", "");
+
+                }
+
+            } else
+            {
+                selectedPlace = (codestring + " " + text).ToUpper().Trim().Replace(",", "");
+            }
 
             // add woth if duplicates are allowed or if there aren't any duplicates
             if (Settings.EnableDuplicateWoth || !ListWotH.Any(x => x.Name == selectedPlace))
@@ -322,9 +363,23 @@ namespace GSTHD
                 this.Controls.Add(newWotH.LabelPlace);
                 newWotH.LabelPlace.MouseClick += LabelPlace_MouseClick_WotH;
 
+
                 foreach (var gossipStone in newWotH.listGossipStone)
                 {
                     this.Controls.Add(gossipStone);
+                }
+                
+                
+                if (FoundKeycodes.Count > 0)
+                {
+                    Debug.WriteLine("slakjdhflkjadshf");
+                    GossipStone pathStone = newWotH.listGossipStone.Where(x => x.Name == newWotH.Name + "_GoalGossipStone0").ToList()[0];
+                    foreach (var x in FoundKeycodes)
+                    {
+                        if (!pathStone.HeldImages.Contains(x.Value)) pathStone.HeldImages.Add(x.Value);
+                    }
+                    pathStone.HoldsImage = true;
+                    pathStone.UpdateImage();
                 }
                 //Move TextBoxCustom
                 textBoxCustom.newLocation(new Point(0, newWotH.LabelPlace.Location.Y + newWotH.LabelPlace.Height), this.Location);
