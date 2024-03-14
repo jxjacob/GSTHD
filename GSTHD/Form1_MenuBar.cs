@@ -388,7 +388,7 @@ namespace GSTHD
                 }
                 optionMenu.DropDownItems.Add(songMarkersSubMenu);
 
-                ToolStripMenuItem wothSubMenu = new ToolStripMenuItem("WotH");
+                ToolStripMenuItem wothSubMenu = new ToolStripMenuItem("WotH/Path");
                 {
                     Items.EnableLastWoth = new ToolStripMenuItem("Enable Last WotH", null, new EventHandler(menuBar_ToggleEnableLastWotH))
                     {

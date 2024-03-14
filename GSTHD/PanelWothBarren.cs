@@ -372,7 +372,6 @@ namespace GSTHD
                 
                 if (FoundKeycodes.Count > 0)
                 {
-                    Debug.WriteLine("slakjdhflkjadshf");
                     GossipStone pathStone = newWotH.listGossipStone.Where(x => x.Name == newWotH.Name + "_GoalGossipStone0").ToList()[0];
                     foreach (var x in FoundKeycodes)
                     {

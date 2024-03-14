@@ -96,16 +96,16 @@ namespace GSTHD
 
             if (e.KeyCode == Keys.Enter)
             {
-                Debug.WriteLine("tbf");
                 var textbox = (TextBox)sender;
-                if(!SuggestionContainer.Items.Contains(textbox.Text) && SuggestionContainer.Items.Count > 0)
+                if(isPath)
                 {
                     // this little .Lines shuffle is so that the event handler can take the keycode and the main text seperately in the PanelWothBarren
                     // which is the closest thing i have to multiple piece of data through a vanilla textbox
-                    textbox.Lines = new string[] { codestring , SuggestionContainer.Items[0].ToString() };
-                } else
+                    if (!SuggestionContainer.Items.Contains(textbox.Text) && SuggestionContainer.Items.Count > 0) textbox.Lines = new string[] { codestring , SuggestionContainer.Items[0].ToString() };
+                    else textbox.Lines = textbox.Text.Split(new char[] { ' ' }, count: 2);
+                } else if (!SuggestionContainer.Items.Contains(textbox.Text) && SuggestionContainer.Items.Count > 0)
                 {
-                    textbox.Lines = textbox.Text.Split(new char[] { ' ' }, count: 2);
+                    textbox.Text = SuggestionContainer.Items[0].ToString();
                 }
             }
         }
