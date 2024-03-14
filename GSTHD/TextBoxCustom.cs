@@ -114,8 +114,11 @@ namespace GSTHD
         {
             if(e.KeyCode == Keys.Enter)
             {
-                Debug.WriteLine("sc");
-                TextBoxField.Text = SuggestionContainer.SelectedItem.ToString();
+                var fulltext = TextBoxField.Text.Split(new char[] { ' ' }, count: 2);
+                if (fulltext.Length > 1)
+                {
+                    TextBoxField.Text = fulltext[0] + " " + SuggestionContainer.SelectedItem.ToString();
+                } else TextBoxField.Text = SuggestionContainer.SelectedItem.ToString();
                 TextBoxField.Focus();
                 SuggestionContainer.Hide();
                 SuggestionContainerIsFocus = false;
