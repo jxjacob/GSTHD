@@ -32,7 +32,7 @@ namespace GSTHD
         string DoubleBroadcastName;
         bool isDraggable;
 
-
+        public string OuterPathID;
 
         public string AutoName = null;
 
@@ -57,6 +57,7 @@ namespace GSTHD
 
             this.DragImage = data.DragImage;
             this.DK64_ID = data.DK64_ID;
+            this.OuterPathID = data.OuterPathID;
 
             this.DefaultIndex = data.DefaultIndex;
             ImageIndex = DefaultIndex;

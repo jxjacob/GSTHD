@@ -459,7 +459,8 @@ namespace GSTHD
                                         isBroadcastable = item.isBroadcastable,
                                         isDraggable = item.isDraggable,
                                         AutoName = item.AutoName,
-                                        BackColor = item.BackColor
+                                        BackColor = item.BackColor,
+                                        OuterPathID = (item.OuterPathID != null) ? $"{namenum}{item.OuterPathID}" : null,
                                     };
                                     panelLayout.Controls.Add(new Item(gs, settings, isOnBroadcast));
                                     namenum++;
@@ -722,6 +723,7 @@ namespace GSTHD
         public int LeftDK64_ID { get; set; } = -1;
         public int RightDK64_ID { get; set; } = -1;
         public string AutoName { get; set; } = null;
+        public string OuterPathID { get; set; } = null;
         public bool CanCycle { get; set; } = false;
         public string DragImage { get; set; } = null;
         public Color BackColor { get; set; } = Color.Transparent;
@@ -794,6 +796,7 @@ namespace GSTHD
         public PictureBoxSizeMode SizeMode { get; set; } = PictureBoxSizeMode.Zoom;
         public bool isBroadcastable { get; set; } = false;
         public string AutoName { get; set; } = null;
+        public string OuterPathID { get; set; } = null;
         public bool isDraggable { get; set; } = true;
         public bool CanCycle { get; set; } = false;
         public BorderStyle BorderStyle { get; set; } = BorderStyle.FixedSingle;
@@ -850,6 +853,7 @@ namespace GSTHD
         public string[] PathGoalImageCollection { get; set; }
         public int PathGoalSpacing { get; set; }
         public bool PathCycling { get; set; } = false;
+        public string OuterPathID { get; set; }
 
         public PictureBoxSizeMode SizeMode { get; set; } = PictureBoxSizeMode.Zoom;
         public bool isBroadcastable { get; set; } = false;

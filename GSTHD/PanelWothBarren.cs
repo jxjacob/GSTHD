@@ -40,6 +40,7 @@ namespace GSTHD
         bool isScrollable;
         bool isBroadcastable;
         bool PathCycling = false;
+        string OuterPathID;
         // 0 = WotH, 1 = Barren, 2 = Quantity
         public int isWotH;
         PictureBoxSizeMode SizeMode;
@@ -160,6 +161,7 @@ namespace GSTHD
             NbMaxRows = data.NbMaxRows;
 
             KeycodesWithTag = keycodesWithTag;
+            OuterPathID = data.OuterPathID;
 
             LabelSettings = new Label
             {
@@ -180,7 +182,7 @@ namespace GSTHD
                 data.TextBoxName,
                 new Size(data.Width, data.TextBoxHeight),
                 data.TextBoxText,
-                (PathGoalCount > 0)
+                (PathGoalCount > 0 || OuterPathID != null)
             );
             textBoxCustom.TextBoxField.KeyDown += textBoxCustom_KeyDown_WotH;
             textBoxCustom.TextBoxField.MouseClick += textBoxCustom_MouseClick;
@@ -312,7 +314,7 @@ namespace GSTHD
         {
             Dictionary<string, string> FoundKeycodes = new Dictionary<string, string> { };
             string selectedPlace;
-            if ((codestring!="" || codestring != string.Empty) && PathGoalCount > 0 && Settings.HintPathAutofill)
+            if ((codestring!="" || codestring != string.Empty) && (PathGoalCount > 0 || OuterPathID != null) && Settings.HintPathAutofill)
             {
                 // if theres a letter that isnt a code, bail
                 foreach (char x in codestring)
@@ -372,13 +374,28 @@ namespace GSTHD
                 
                 if (FoundKeycodes.Count > 0)
                 {
-                    GossipStone pathStone = newWotH.listGossipStone.Where(x => x.Name == newWotH.Name + "_GoalGossipStone0").ToList()[0];
-                    foreach (var x in FoundKeycodes)
+                    if (PathGoalCount > 0)
                     {
-                        if (!pathStone.HeldImages.Contains(x.Value)) pathStone.HeldImages.Add(x.Value);
+                        GossipStone pathStone = null;
+                        int y = 0;
+                        foreach (var z in FoundKeycodes)
+                        {
+                            // spreads the paths evenly across multiple path stones (if applicable)
+                            pathStone = newWotH.listGossipStone.Where(x => x.Name == newWotH.Name + $"_GoalGossipStone{y}").ToList()[0];
+                            if (!pathStone.HeldImages.Contains(z.Value)) pathStone.HeldImages.Add(z.Value);
+                            if (PathGoalCount > 1) y = (y + 1) % (PathGoalCount);
+                            pathStone.HoldsImage = true;
+                            pathStone.UpdateImage();
+                        }
+                    } else if (OuterPathID != null)
+                    {
+                        GSTForms f = (GSTForms)this.FindForm();
+                        foreach (var z in FoundKeycodes)
+                        {
+                            var search = f.Controls[0].Controls.OfType<Item>().Where(x => x.OuterPathID == $"{OuterPathID}_{z.Key.ToUpper()}").ToList();
+                            if (search.Count > 0) search[0].SetState(1);
+                        }
                     }
-                    pathStone.HoldsImage = true;
-                    pathStone.UpdateImage();
                 }
                 //Move TextBoxCustom
                 textBoxCustom.newLocation(new Point(0, newWotH.LabelPlace.Location.Y + newWotH.LabelPlace.Height), this.Location);
@@ -492,7 +509,7 @@ namespace GSTHD
                     ListWotH[i].listGossipStone[j].Location = new Point(newX, newY);
                 }
             }
-            textBoxCustom.newLocation(new Point(2, ListWotH.Count * woth.LabelPlace.Height), this.Location);
+            textBoxCustom.newLocation(new Point(0, ListWotH.Count * woth.LabelPlace.Height), this.Location);
         }
 
         public void RemoveBarren(Barren barren)
@@ -504,9 +521,9 @@ namespace GSTHD
             for (int i = 0; i < ListBarren.Count; i++)
             {
                 var wothLabel = ListBarren[i].LabelPlace;
-                wothLabel.Location = new Point(2, (i * wothLabel.Height));
+                wothLabel.Location = new Point(0, (i * wothLabel.Height));
             }
-            textBoxCustom.newLocation(new Point(2, ListBarren.Count * barren.LabelPlace.Height), this.Location);
+            textBoxCustom.newLocation(new Point(0, ListBarren.Count * barren.LabelPlace.Height), this.Location);
         }
 
         public void RemoveQuantity(Quantity quantity)
@@ -521,7 +538,7 @@ namespace GSTHD
             {
                 var wothLabel = ListQuantity[i].LabelPlace;
                 var newY = i * wothLabel.Height;
-                wothLabel.Location = new Point(2, newY);
+                wothLabel.Location = new Point(0, newY);
                 ListQuantity[i].leftCounterCI.Location = new Point(ListQuantity[i].leftCounterCI.Location.X, newY);
                 ListQuantity[i].rightCounterCI.Location = new Point(ListQuantity[i].rightCounterCI.Location.X, newY);
             }

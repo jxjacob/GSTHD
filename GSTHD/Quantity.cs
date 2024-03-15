@@ -105,11 +105,6 @@ namespace GSTHD
             UpdateFromSettings();
         }
 
-        ~Quantity()
-        {
-            Debug.WriteLine("Quantity " + this.Name + " being killed");
-        }
-
         public void UpdateFromSettings()
         {
             MinIndex = Settings.EnableLastWoth ? 0 : 1;

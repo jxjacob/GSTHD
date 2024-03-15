@@ -72,9 +72,6 @@ namespace GSTHD
 
         private bool isOnBroadcast = false;
 
-        public Form1 f1;
-        public Form2 f2;
-
         private static readonly Regex unspacer = new Regex(@"\s+");
 
         delegate void AddFromATCallback(int currentMap, int dk_id, int howMany, bool marked);
@@ -292,11 +289,10 @@ namespace GSTHD
         {
             DK64Items = DK64_Items.GenerateDK64Items();
             DK64Maps = DK64_Items.GenerateDK64Maps();
-            cellWidth = ((Width - (rowPadding * (numRows - 1))) / numRows);
-            cellHeight = ((Height - (colPadding * (numCols - 1))) / numCols);
+            cellWidth = ((Width - (rowPadding * System.Math.Max(numRows - 1, 1))) / numRows);
+            cellHeight = ((Height - (colPadding * System.Math.Max(numCols - 1, 1))) / numCols);
             //Debug.WriteLine($"w: {cellWidth} -- h: {cellHeight}");
 
-            // TODO: alternate method for not only row first
             foreach (var level in spoilerData)
             {
                 var parseddata = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(level.Value);
@@ -365,17 +361,14 @@ namespace GSTHD
 
             }
 
-            Control tempf = this.FindForm();
-            if (tempf is Form1 f1t){ f1 = f1t; } 
-            else if (tempf is Form2 f2t) { f2 = f2t; }
+            GSTForms f = (GSTForms)this.FindForm();
 
             for (int i = 0; i < helmOrder.Count; i++)
             {
                 Item temp;
                 try
                 {
-                    if (f1 != null) { temp = (Item)f1.Controls[0].Controls.Find($"HelmOrder{i}", false)[0]; }
-                    else { temp = (Item)f2.Controls[0].Controls.Find($"HelmOrder{i}", false)[0]; }
+                    temp = (Item)f.Controls[0].Controls.Find($"HelmOrder{i}", false)[0];
                     temp.SetState(helmOrder[i] + 1);
                 } catch { }
             }
@@ -385,8 +378,7 @@ namespace GSTHD
                 Item temp;
                 try
                 {
-                    if (f1 != null) { temp = (Item)f1.Controls[0].Controls.Find($"KroolOrder{i}", false)[0]; }
-                    else { temp = (Item)f2.Controls[0].Controls.Find($"KroolOrder{i}", false)[0]; }
+                    temp = (Item)f.Controls[0].Controls.Find($"KroolOrder{i}", false)[0];
                     temp.SetState(kroolOrder[i] + 1);
                 }
                 catch { }

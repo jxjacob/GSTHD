@@ -20,6 +20,8 @@ namespace GSTHD
 
         Color BackColor { get; set; }
         String Name { get; set; }
+
+        Control.ControlCollection Controls { get; }
     }
 
     public partial class Form1 : Form, GSTForms
@@ -40,7 +42,7 @@ namespace GSTHD
         public List<GossipStone> currentlyCycling = new List<GossipStone>();
 
         public Settings Settings;
-        
+
         public Form1()
         {
             InitializeComponent();

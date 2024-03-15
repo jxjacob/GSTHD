@@ -112,11 +112,6 @@ namespace GSTHD
             UpdateFromSettings();
         }
 
-        ~WotH()
-        {
-            Debug.WriteLine("woth " + this.Name + " being killed");
-        }
-
         public void UpdateFromSettings()
         {
             MinIndex = Settings.EnableLastWoth ? 0 : 1;
