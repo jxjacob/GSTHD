@@ -29,7 +29,7 @@ namespace GSTHD
 
             TextBoxField = new TextBox
             {
-                Location = location,
+                Location = new Point(location.X, location.Y),
                 BorderStyle = BorderStyle.None,
                 BackColor = color,
                 CausesValidation = false,
@@ -148,7 +148,7 @@ namespace GSTHD
                 string vartext = textbox.Text.ToLower();
                 if (settings.HintPathAutofill && isPath)
                 {
-                    string[] sections = vartext.Split(new char[] { ' ' }, count:2);
+                    string[] sections = vartext.Trim().Split(new char[] { ' ' }, count:2);
                     if (sections.Length > 1)
                     {
                         codestring = sections[0];

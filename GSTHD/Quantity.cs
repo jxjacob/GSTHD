@@ -36,7 +36,6 @@ namespace GSTHD
 
         private Color[] Colors;
         private int ColorIndex;
-        private int MinIndex;
 
         public Quantity(Settings settings,
             string selectedPlace,
@@ -107,7 +106,6 @@ namespace GSTHD
 
         public void UpdateFromSettings()
         {
-            MinIndex = Settings.EnableLastWoth ? 0 : 1;
             Colors[0] = Color.FromKnownColor(Settings.LastWothColor);
             UpdateColor();
         }

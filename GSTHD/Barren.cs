@@ -31,7 +31,7 @@ namespace GSTHD
             Settings = settings;
             Name = selectedPlace;
 
-            LabelPlace = new Label
+            LabelPlace = new LabelExtended
             {
                 Name = Guid.NewGuid().ToString(),
                 Text = selectedPlace,

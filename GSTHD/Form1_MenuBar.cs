@@ -51,6 +51,7 @@ namespace GSTHD
             public ToolStripMenuItem LastWothColor;
             public ToolStripMenuItem EnableDuplicateWoth;
             public ToolStripMenuItem EnableHintPathAutofill;
+            public ToolStripMenuItem EnableHintPathAutofillAggressive;
 
             // Barren
             public ToolStripMenuItem EnableBarrenColors;
@@ -431,6 +432,11 @@ namespace GSTHD
                         CheckOnClick = true,
                     };
                     wothSubMenu.DropDownItems.Add(Items.EnableHintPathAutofill);
+                    Items.EnableHintPathAutofillAggressive = new ToolStripMenuItem("Ignore Invalid Autofill Keycodes", null, new EventHandler(menuBar_ToggleEnableHintPathAutofillAggressive))
+                    {
+                        CheckOnClick = true,
+                    };
+                    wothSubMenu.DropDownItems.Add(Items.EnableHintPathAutofillAggressive);
                 }
                 optionMenu.DropDownItems.Add(wothSubMenu);
 
@@ -593,6 +599,7 @@ namespace GSTHD
             SongMarkerBehaviourOptions[Settings.SongMarkerBehaviour].Checked = true;
 
             Items.EnableHintPathAutofill.Checked = Settings.HintPathAutofill;
+            Items.EnableHintPathAutofillAggressive.Checked = Settings.HintPathAutofillAggressive;
             Items.EnableDuplicateWoth.Checked = Settings.EnableDuplicateWoth;
             Items.EnableLastWoth.Checked = Settings.EnableLastWoth;
             LastWothColorOptions[Settings.LastWothColor].Checked = true;
@@ -969,6 +976,13 @@ namespace GSTHD
         private void menuBar_ToggleEnableHintPathAutofill(object sender, EventArgs e)
         {
             Settings.HintPathAutofill = Items.EnableHintPathAutofill.Checked;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
+        private void menuBar_ToggleEnableHintPathAutofillAggressive(object sender, EventArgs e)
+        {
+            Settings.HintPathAutofillAggressive = Items.EnableHintPathAutofillAggressive.Checked;
             Settings.Write();
             Form.UpdateLayoutFromSettings();
         }

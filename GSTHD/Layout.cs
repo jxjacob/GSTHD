@@ -54,7 +54,7 @@ namespace GSTHD
 
         public void LoadLayout(Panel panelLayout, Settings settings, SortedSet<string> listSometimesHintsSuggestions, Dictionary<string, string> listPlacesWithTag, Dictionary<string, string> listKeycodesWithTag, GSTForms form)
         {
-            bool isOnBroadcast = (form.Name == "GSTHD_DK64 Broadcast View") ? true : false;
+            bool isOnBroadcast = (form.Name == "GSTHD_DK64 Broadcast View");
 
 
             ListUpdatables.Clear();

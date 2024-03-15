@@ -212,7 +212,7 @@ namespace GSTHD
             StoneCyclingTimer.Elapsed += IncrementStones;
             StoneCyclingTimer.AutoReset = true;
             StoneCyclingTimer.Enabled = true;
-            if (LayoutContent != null) LayoutContent.Dispose();
+            LayoutContent?.Dispose();
             LayoutContent = new Panel();
             CurrentLayout = new Layout();
             CurrentLayout.LoadLayout(LayoutContent, Settings, ListSometimesHintsSuggestions, ListPlacesWithTag, ListKeycodesWithTag, this);
@@ -548,9 +548,11 @@ namespace GSTHD
             else
             {
                 //open file to write to
-                SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-                saveFileDialog1.Filter = "json files (*.json)|*.json|All files (*.*)|*.*";
-                saveFileDialog1.Title = "Save state to JSON file";
+                SaveFileDialog saveFileDialog1 = new SaveFileDialog
+                {
+                    Filter = "json files (*.json)|*.json|All files (*.*)|*.*",
+                    Title = "Save state to JSON file"
+                };
                 saveFileDialog1.ShowDialog();
 
                 if (saveFileDialog1.FileName != "")
@@ -563,10 +565,12 @@ namespace GSTHD
 
         public void LoadState()
         {
-            OpenFileDialog filedia = new OpenFileDialog();
-            filedia.Title = "Load state from JSON file";
-            filedia.Filter = "json files (*.json)|*.json|All files (*.*)|*.*";
-            filedia.Multiselect = false;
+            OpenFileDialog filedia = new OpenFileDialog
+            {
+                Title = "Load state from JSON file",
+                Filter = "json files (*.json)|*.json|All files (*.*)|*.*",
+                Multiselect = false
+            };
             // put that filename into settings' ActivePlaces
             if (filedia.ShowDialog() == DialogResult.OK)
             {

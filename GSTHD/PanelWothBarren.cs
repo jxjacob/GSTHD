@@ -137,18 +137,18 @@ namespace GSTHD
                     if (element is CollectedItem ci)
                         if (ci.hoveredOver) return;
                 }
-                var moveDirection = 0;
+                int moveDirection;
                 if (e.Delta < 0) moveDirection = -15; else moveDirection = +15;
                 foreach (var element in panel.Controls)
                 {
-                    if (element is Label)
-                        ((Label)element).Location = new Point(((Label)element).Location.X, ((Label)element).Location.Y + moveDirection);
-                    if (element is GossipStone)
-                        ((GossipStone)element).Location = new Point(((GossipStone)element).Location.X, ((GossipStone)element).Location.Y + moveDirection);
-                    if (element is TextBox)
-                        ((TextBox)element).Location = new Point(((TextBox)element).Location.X, ((TextBox)element).Location.Y + moveDirection);
-                    if (element is CollectedItem)
-                        ((CollectedItem)element).Location = new Point(((CollectedItem)element).Location.X, ((CollectedItem)element).Location.Y + moveDirection);
+                    if (element is Label la)
+                        la.Location = new Point(la.Location.X, la.Location.Y + moveDirection);
+                    if (element is GossipStone gs)
+                        gs.Location = new Point(gs.Location.X, gs.Location.Y + moveDirection);
+                    if (element is TextBox tb)
+                        tb.Location = new Point(tb.Location.X, tb.Location.Y + moveDirection);
+                    if (element is CollectedItem ci)
+                        ci.Location = new Point(ci.Location.X, ci.Location.Y + moveDirection);
                 }
             }
             ((PanelWothBarren)panel).SetSuggestionContainer();
@@ -322,7 +322,7 @@ namespace GSTHD
                     if (KeycodesWithTag.ContainsKey(x.ToString()))
                     {
                         FoundKeycodes.Add(x.ToString(), KeycodesWithTag[x.ToString()]);
-                    } else
+                    } else if (!Settings.HintPathAutofillAggressive)
                     {
                         FoundKeycodes.Clear();
                         break;
@@ -347,25 +347,15 @@ namespace GSTHD
             // add woth if duplicates are allowed or if there aren't any duplicates
             if (Settings.EnableDuplicateWoth || !ListWotH.Any(x => x.Name == selectedPlace))
             {
-                WotH newWotH = null;
-                if (ListWotH.Count <= 0)
-                    newWotH = new WotH(Settings, selectedPlace,
+                var newlocation = (ListWotH.Count <= 0) ? new Point(0, -LabelSettings.Height) : ListWotH.Last().LabelPlace.Location;
+                WotH newWotH = new WotH(Settings, selectedPlace,
                         GossipStoneCount, ListImage_WothItemsOption, GossipStoneSpacing,
                         PathGoalCount, ListImage_GoalsOption, PathGoalSpacing,
-                        new Point(0, -LabelSettings.Height), LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling);
-                else
-                {
-                    var lastLocation = ListWotH.Last().LabelPlace.Location;
-                    newWotH = new WotH(Settings, selectedPlace,
-                        GossipStoneCount, ListImage_WothItemsOption, GossipStoneSpacing,
-                        PathGoalCount, ListImage_GoalsOption, PathGoalSpacing,
-                        lastLocation, LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling);
-                }
+                        newlocation, LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling);
+                
                 ListWotH.Add(newWotH);
                 this.Controls.Add(newWotH.LabelPlace);
                 newWotH.LabelPlace.MouseClick += LabelPlace_MouseClick_WotH;
-
-
                 foreach (var gossipStone in newWotH.listGossipStone)
                 {
                     this.Controls.Add(gossipStone);
@@ -405,17 +395,12 @@ namespace GSTHD
         private void AddBarren(string text)
         {
             var selectedPlace = text.ToUpper().Trim().Replace(",", "");
-            var find = ListBarren.Where(x => x.Name == selectedPlace);
-            if (find.Count() <= 0)
+            // prevent dupes
+            if (!ListBarren.Any(x => x.Name == selectedPlace))
             {
-                Barren newBarren = null;
-                if (ListBarren.Count <= 0)
-                    newBarren = new Barren(Settings, selectedPlace, new Point(0, -LabelSettings.Height), LabelSettings);
-                else
-                {
-                    var lastLocation = ListBarren.Last().LabelPlace.Location;
-                    newBarren = new Barren(Settings, selectedPlace, lastLocation, LabelSettings);
-                }
+                var newlocation = (ListBarren.Count <= 0) ? new Point(0, -LabelSettings.Height) : ListBarren.Last().LabelPlace.Location;
+                Barren newBarren = newBarren = new Barren(Settings, selectedPlace, newlocation, LabelSettings);
+                
                 ListBarren.Add(newBarren);
                 this.Controls.Add(newBarren.LabelPlace);
                 newBarren.LabelPlace.MouseClick += LabelPlace_MouseClick_Barren;
@@ -423,36 +408,28 @@ namespace GSTHD
             }
         }
 
-
         private void AddQuantity(string text)
         {
             var selectedPlace = text.ToUpper().Trim().Replace(",", "");
-
-            var find = ListQuantity.Where(x => x.Name == selectedPlace);
-            Quantity newQuan = null;
-            if (ListQuantity.Count <= 0)
+            // prevent dupes
+            if (!ListQuantity.Any(x => x.Name == selectedPlace))
             {
-                newQuan = new Quantity(Settings, selectedPlace,
-                    CounterFontSize, CounterSpacing, CounterImage,
-                    subBoxSize, subFontSize, subBackColor, subFontColor,
-                    new Point(2, -LabelSettings.Height), LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling);
-            }
-            else
-            {
-                var lastLocation = ListQuantity.Last().LabelPlace.Location;
-                newQuan = new Quantity(Settings, selectedPlace,
-                    CounterFontSize, CounterSpacing, CounterImage,
-                    subBoxSize, subFontSize, subBackColor, subFontColor,
-                    lastLocation, LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling);
-            }
-            ListQuantity.Add(newQuan);
-            this.Controls.Add(newQuan.LabelPlace);
-            newQuan.LabelPlace.MouseClick += LabelPlace_MouseClick_Quantity;
+                var newlocation = (ListQuantity.Count <= 0) ? new Point(2, -LabelSettings.Height) : ListQuantity.Last().LabelPlace.Location;
+                Quantity newQuan = new Quantity(Settings, selectedPlace,
+                        CounterFontSize, CounterSpacing, CounterImage,
+                        subBoxSize, subFontSize, subBackColor, subFontColor,
+                        newlocation, LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling);
+            
+                ListQuantity.Add(newQuan);
+                this.Controls.Add(newQuan.LabelPlace);
+                newQuan.LabelPlace.MouseClick += LabelPlace_MouseClick_Quantity;
 
-            this.Controls.Add(newQuan.leftCounterCI);
-            this.Controls.Add(newQuan.rightCounterCI);
+                this.Controls.Add(newQuan.leftCounterCI);
+                this.Controls.Add(newQuan.rightCounterCI);
 
-            textBoxCustom.newLocation(new Point(0, newQuan.LabelPlace.Location.Y + newQuan.LabelPlace.Height), this.Location);
+                textBoxCustom.newLocation(new Point(0, newQuan.LabelPlace.Location.Y + newQuan.LabelPlace.Height), this.Location);
+
+            }
 
         }
 
