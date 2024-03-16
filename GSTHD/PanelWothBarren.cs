@@ -240,7 +240,8 @@ namespace GSTHD
                     new Font(data.TextBoxFontName, data.TextBoxFontSize, data.TextBoxFontStyle),
                     data.TextBoxName,
                     new Size(data.TextBoxWidth, data.TextBoxHeight),
-                    data.TextBoxText
+                    data.TextBoxText,
+                    true
                 );
             textBoxCustom.TextBoxField.KeyDown += textBoxCustom_KeyDown_Quantity;
             textBoxCustom.TextBoxField.MouseClick += textBoxCustom_MouseClick;
@@ -282,7 +283,14 @@ namespace GSTHD
                 var textbox = (TextBox)sender;
                 if (ListQuantity.Count < NbMaxRows)
                 {
-                    AddQuantity(textbox.Text);
+                    if (textbox.Text != string.Empty)
+                    {
+                        if (textbox.Lines.Length > 1)
+                        {
+                            AddQuantity(textbox.Lines[1], textbox.Lines[0]);
+                        }
+                        else AddQuantity(textbox.Text);
+                    }
                 }
                 textbox.Text = string.Empty;
             }
@@ -408,9 +416,37 @@ namespace GSTHD
             }
         }
 
-        private void AddQuantity(string text)
+        private void AddQuantity(string text, string codestring = "")
         {
-            var selectedPlace = text.ToUpper().Trim().Replace(",", "");
+            string selectedPlace;
+            int foundin = 0;
+            if ((codestring != "" || codestring != string.Empty) && Settings.HintPathAutofill)
+            {
+                // if theres a letter that isnt a code, bail
+
+                try
+                {
+                    foundin = int.Parse(codestring);
+                } catch {
+                
+                }
+
+                // if there is no lookup, then assume the code is a misinterpit and add it back
+                if (foundin != 0)
+                {
+                    selectedPlace = text.ToUpper().Trim().Replace(",", "");
+                }
+                else
+                {
+                    selectedPlace = (codestring + " " + text).ToUpper().Trim().Replace(",", "");
+
+                }
+
+            }
+            else
+            {
+                selectedPlace = (codestring + " " + text).ToUpper().Trim().Replace(",", "");
+            }
             // prevent dupes
             if (!ListQuantity.Any(x => x.Name == selectedPlace))
             {
@@ -428,6 +464,11 @@ namespace GSTHD
                 this.Controls.Add(newQuan.rightCounterCI);
 
                 textBoxCustom.newLocation(new Point(0, newQuan.LabelPlace.Location.Y + newQuan.LabelPlace.Height), this.Location);
+
+                if (foundin != 0)
+                {
+                    newQuan.rightCounterCI.SetState(foundin);
+                }
 
             }
 
