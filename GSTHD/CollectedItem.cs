@@ -200,16 +200,16 @@ namespace GSTHD
         public void IncrementState()
         {
             CollectedItems += Step;
-            if (CollectedItems > CollectedItemMax && !Settings.WraparoundItems) CollectedItems = CollectedItemMax;
-            else if (CollectedItems > CollectedItemMax && Settings.WraparoundItems) CollectedItems = CollectedItemMin;
+            if (CollectedItems > CollectedItemMax) CollectedItems = (this.Settings.WraparoundItems) ? CollectedItemMin : CollectedItemMax;
+            else if (CollectedItems < CollectedItemMin) CollectedItems = (this.Settings.WraparoundItems) ? CollectedItemMax : CollectedItemMin;
             UpdateCount();
         }
 
         public void DecrementState()
         {
             CollectedItems -= Step;
-            if (CollectedItems < CollectedItemMin && !Settings.WraparoundItems) CollectedItems = CollectedItemMin;
-            else if (CollectedItems < CollectedItemMin && Settings.WraparoundItems) CollectedItems = CollectedItemMax;
+            if (CollectedItems < CollectedItemMin) CollectedItems = (this.Settings.WraparoundItems) ? CollectedItemMax : CollectedItemMin;
+            else if (CollectedItems > CollectedItemMax) CollectedItems = (this.Settings.WraparoundItems) ? CollectedItemMin : CollectedItemMax;
             UpdateCount();
         }
 
