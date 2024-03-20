@@ -183,6 +183,7 @@ namespace GSTHD
         public int bottomRowHeight;
         public int WorldNumWidth;
         public int WorldNumHeight;
+        public int WorldLabelWidth;
         public int PotionWidth;
         public int PotionHeight;
 
@@ -198,7 +199,7 @@ namespace GSTHD
         delegate void SetStateCallback(SpoilerCellState state);
 
 
-        public SpoilerCell(Settings settings, int width, int height, int x, int y, int points, int woths, List<PotionTypes> potions, int topRowHeight, int topRowPadding, int WorldNumWidth, int WorldNumHeight, int PotionWidth, int PotionHeight, string name, string levelname, int levelnum, int levelorder, string cellFontName, int cellFontSize, FontStyle cellFontStyle, int labelSpacing, int labelWidth, Color backColor, bool isMinimal, Dictionary<string, int> spread, Dictionary<int, DK64_Item> dkitems, bool isBroadcastable=false, bool isOnBroadcast=false)
+        public SpoilerCell(Settings settings, int width, int height, int x, int y, int points, int woths, List<PotionTypes> potions, int topRowHeight, int topRowPadding, int WorldNumWidth, int WorldNumHeight, int WorldLabelWidth, int PotionWidth, int PotionHeight, string name, string levelname, int levelnum, int levelorder, string cellFontName, int cellFontSize, FontStyle cellFontStyle, int labelSpacing, int labelWidth, Color backColor, bool isMinimal, Dictionary<string, int> spread, Dictionary<int, DK64_Item> dkitems, bool isBroadcastable=false, bool isOnBroadcast=false)
         {
             // when getting created, get the spoiler numebrs from the parent panel
             Settings = settings;
@@ -235,6 +236,7 @@ namespace GSTHD
             this.PotionWidth = PotionWidth;
             this.WorldNumWidth = WorldNumWidth;
             this.WorldNumHeight = WorldNumHeight;
+            this.WorldLabelWidth = WorldLabelWidth;
             this.fontName = cellFontName;
             this.fontSize = cellFontSize;
             this.fontStyle = cellFontStyle;
@@ -323,9 +325,9 @@ namespace GSTHD
             {
                 Name = $"{name}_levelImageName",
                 ImageCollection = new string[] { $"dk64/{levelList[levelID]}.png" },
-                Size = new Size(58, WorldNumHeight - 2),
+                Size = new Size(WorldLabelWidth, WorldNumHeight - 2),
                 SizeMode = PictureBoxSizeMode.Zoom,
-                X = (!MinimalMode && levelOrder == 9) ? -6 : 18,
+                X = (!MinimalMode && levelOrder == 9) ? -6 : WorldNumWidth,
                 Y = 1,
                 isBroadcastable = this.isBroadcastable,
             };

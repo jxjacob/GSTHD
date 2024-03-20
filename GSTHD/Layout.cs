@@ -956,6 +956,7 @@ namespace GSTHD
         public int DataRowPadding { get; set; } = 0;
         public int WorldNumWidth { get; set; }
         public int WorldNumHeight { get; set; }
+        public int WorldLabelWidth { get; set; }
         public int PotionWidth { get; set; }
         public int PotionHeight { get; set; }
         public string FontName { get; set; }

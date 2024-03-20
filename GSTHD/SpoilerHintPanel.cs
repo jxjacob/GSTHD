@@ -51,6 +51,7 @@ namespace GSTHD
         public int topRowPadding;
         public int WorldNumWidth;
         public int WorldNumHeight;
+        public int WorldLabelWidth;
         public int PotionWidth;
         public int PotionHeight;
         public string CellFontName;
@@ -96,6 +97,7 @@ namespace GSTHD
             this.topRowPadding = data.DataRowPadding;
             this.WorldNumWidth = data.WorldNumWidth;
             this.WorldNumHeight = data.WorldNumHeight;
+            this.WorldLabelWidth = data.WorldLabelWidth;
             this.PotionHeight = data.PotionHeight;
             this.PotionWidth = data.PotionWidth;
             this.CellFontName = data.FontName;
@@ -345,7 +347,7 @@ namespace GSTHD
                     SpoilerCell tempcell = new SpoilerCell(Settings, finalWidth, cellHeight,
                         newX, newY,
                         (int)parseddata["points"], (int)parseddata["woth_count"], newpotions,
-                        topRowHeight, topRowPadding, WorldNumWidth, WorldNumHeight, PotionWidth, PotionHeight,
+                        topRowHeight, topRowPadding, WorldNumWidth, WorldNumHeight, WorldLabelWidth, PotionWidth, PotionHeight,
                         Name + "_" + Unspace((string)parseddata["level_name"]), (string)parseddata["level_name"],
                         int.Parse(level.Key), theNum,
                         CellFontName, CellFontSize, CellFontStyle, CellLabelSpacing, CellLabelWidth,
