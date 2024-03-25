@@ -186,7 +186,7 @@ Some antivirus programs can **incorrectly** flag GSTHD_DK64 as malicious (due to
 
 
 ### Special Thanks
-- Drekorig and Hapaz, for the original GST and GSTHD versions, respectively.
+- Drekorig and Hapax, for the original GST and GSTHD versions, respectively.
 - Selene-T, for creating [Tracker of Time](https://github.com/Selene-T/Tracker-of-Time), which was used as the reference for GSTHD_DK64's autotracking implementation.
 - All the monkey scientists for the documentation of DK64 memory addresses used in the autotracking
 - Viewers like you
