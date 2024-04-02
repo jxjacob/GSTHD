@@ -36,6 +36,7 @@ namespace GSTHD
 
         private Color[] Colors;
         private int ColorIndex;
+        private int MinIndex;
 
         public Quantity(Settings settings,
             string selectedPlace,
@@ -106,6 +107,7 @@ namespace GSTHD
 
         public void UpdateFromSettings()
         {
+            MinIndex = Settings.EnableLastWoth ? 0 : 1;
             Colors[0] = Color.FromKnownColor(Settings.LastWothColor);
             UpdateColor();
         }
@@ -128,9 +130,9 @@ namespace GSTHD
             if (MouseDetermination.DetermineBasicMouseInput(e, Settings.IncrementActionButton))
             {
                 if (ColorIndex < Colors.Length - 1) ColorIndex++;
-                else if (Settings.WraparoundItems) ColorIndex = 0;
+                else if (Settings.WraparoundItems) ColorIndex = MinIndex;
             }
-            else if (MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton))
+            else if (MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton) && ColorIndex > MinIndex)
             {
                 if (ColorIndex > 0) ColorIndex--;
                 else if (Settings.WraparoundItems) ColorIndex = Colors.Length - 1;
