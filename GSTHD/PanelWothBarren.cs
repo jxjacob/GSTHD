@@ -329,7 +329,7 @@ namespace GSTHD
                 {
                     if (KeycodesWithTag.ContainsKey(x.ToString()))
                     {
-                        FoundKeycodes.Add(x.ToString(), KeycodesWithTag[x.ToString()]);
+                        if (!FoundKeycodes.ContainsKey(x.ToString())) FoundKeycodes.Add(x.ToString(), KeycodesWithTag[x.ToString()]);
                     } else if (!Settings.HintPathAutofillAggressive)
                     {
                         FoundKeycodes.Clear();
