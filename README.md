@@ -176,8 +176,13 @@ Menu Bar dissapears
 - Hit F10 to toggle it.
 - If your keyboard lacks F10, open "settings.json" and change "ShowMenuBar": false to "ShowMenuBar": true.
 
-Some antivirus programs can **incorrectly** flag GSTHD_DK64 as malicious (due to the method used to autotrack via the emulators), this can be fixed by making an exception in your antivirus program. I have better things to do with my time than do malicious things to your machine, trust me.
+Keys being autotracked incorrectly:
+- You are almost certainly playing DK64Rando with the Keys **not** in the item pool.
+- Due to how it was implemented in-game at the time (predating the modern item rando system), the keys in-game are assigned the flags in memory of other keys based on level order (ie: Key 4 could be assigned the flag of Key 6 if Caves is in Lobby 4). Due to level order not being autotrackable, there is no good way to account for this for the time being.
+- The DK64Rando devs are aware of this issue, but for obvious reasons it is a low priority fix to something that only affects the autotrackers.
+- For now, the keys will have to be autotracked incorrectly with this setting. Apologies for the inconvenience.
 
+Some antivirus programs can **incorrectly** flag GSTHD_DK64 as malicious (due to the method used to autotrack via the emulators), this can be fixed by making an exception in your antivirus program. I have better things to do with my time than run malicious code to your machine, trust me.
 
 
 **If you find any other issues with GSTHD_DK64, please track down JXJacob on Discord and he'll try to resolve whatever technical issue you're having.**
