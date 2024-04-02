@@ -78,7 +78,7 @@ namespace GSTHD
         private void LoadAll(object sender, EventArgs e)
         {
             var assembly = Assembly.GetEntryAssembly().GetName();
-            this.Text = $"{Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyTitleAttribute>().Title} v{assembly.Version.Major}.{assembly.Version.Minor}.{assembly.Version.Build}";
+            this.Text = $"{Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyTitleAttribute>().Title} v{assembly.Version.Major}.{assembly.Version.Minor}.{assembly.Version.Build} {((!Environment.Is64BitProcess) ? "(32-bit)" : String.Empty)}";
             this.AcceptButton = null;
             this.MaximizeBox = false;
 

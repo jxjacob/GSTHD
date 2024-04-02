@@ -427,7 +427,7 @@ namespace GSTHD
                     };
                     wothSubMenu.DropDownItems.Add(Items.EnableDuplicateWoth);
 
-                    Items.EnableHintPathAutofill = new ToolStripMenuItem("Path Autofill (Experimental)", null, new EventHandler(menuBar_ToggleEnableHintPathAutofill))
+                    Items.EnableHintPathAutofill = new ToolStripMenuItem("Path Goal Autofill (Experimental)", null, new EventHandler(menuBar_ToggleEnableHintPathAutofill))
                     {
                         CheckOnClick = true,
                     };

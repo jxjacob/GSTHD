@@ -30,7 +30,7 @@ namespace GSTHD
         public Dictionary<int, int> DK64Maps;
 
         public Dictionary<string, string> spoilerData;
-        public Dictionary<string, string> mainSettings;
+        public Dictionary<string, object> mainSettings;
 
         public List<int> levelOrder = new List<int>();
         public List<int> kroolOrder = new List<int>();
@@ -210,7 +210,7 @@ namespace GSTHD
             }
             // go to the "Spoiler Hints Data"
             spoilerData = loadedjson.GetValue("Spoiler Hints Data").ToObject<Dictionary<string, string>>();
-            mainSettings = loadedjson.GetValue("Settings").ToObject<Dictionary<string, string>>();
+            mainSettings = loadedjson.GetValue("Settings").ToObject<Dictionary<string, object>>();
 
             // dump points from json
             if (spoilerData.ContainsKey("point_spread"))
@@ -243,7 +243,7 @@ namespace GSTHD
                     );
             }
             // grab the Shockwave Shuffle data and add Camera/Shockwave's item IDs if the player statrs with them
-            string shockstate = mainSettings["Shockwave Shuffle"];
+            string shockstate = (string)mainSettings["Shockwave Shuffle"];
             if (shockstate == "start_with")
             {
                 startingItems.Add(34);
