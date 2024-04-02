@@ -141,9 +141,9 @@ namespace GSTHD
                 if (ColorIndex < Colors.Length - 1) ColorIndex++;
                 else if (Settings.WraparoundItems) ColorIndex = MinIndex;
             }
-            else if (MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton) && ColorIndex > MinIndex)
+            else if (MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton))
             {
-                if (ColorIndex > 0) ColorIndex--;
+                if (ColorIndex > MinIndex) ColorIndex--;
                 else if (Settings.WraparoundItems) ColorIndex = Colors.Length - 1;
             }
             UpdateColor();
