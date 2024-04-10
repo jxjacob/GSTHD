@@ -447,7 +447,6 @@ namespace GSTHD
                                 {
                                     var gs = new ObjectPoint()
                                     {
-                                        Id = item.Id,
                                         Name = item.Name + namenum,
                                         X = item.X + i * (item.Size.Width + item.Spacing.Width),
                                         Y = item.Y + j * (item.Size.Height + item.Spacing.Height),
@@ -551,7 +550,6 @@ namespace GSTHD
                                 {
                                     var gs = new ObjectPoint()
                                     {
-                                        Id = item.Id,
                                         Name = item.Name + j + i,
                                         X = item.X + i * (item.Size.Width + item.Spacing.Width),
                                         Y = item.Y + j * (item.Size.Height + item.Spacing.Height),
@@ -705,7 +703,6 @@ namespace GSTHD
 
     public class ObjectPoint
     {
-        public string Id { get; set; }
         public string Name { get; set; }
         public int DK64_ID { get; set; } = -1;
         public int X { get; set; }
@@ -732,7 +729,6 @@ namespace GSTHD
 
     public class ObjectPointSong
     {
-        public string Id { get; set; }
         public string Name { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
@@ -772,7 +768,6 @@ namespace GSTHD
 
     public class ObjectPointGrid
     {
-        public string Id { get; set; }
         public string Name { get; set; }
         public string Text { get; set; } = "";
         public HorizontalAlignment TextAlignment { get; set; } = HorizontalAlignment.Left;
