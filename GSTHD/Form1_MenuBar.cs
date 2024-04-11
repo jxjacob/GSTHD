@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using static GSTHD.Settings;
+using System.Xml.Linq;
 
 namespace GSTHD
 {
@@ -185,7 +186,7 @@ namespace GSTHD
             MenuStrip = new MenuStrip();
             Items = new MenuItems();
 
-            var layoutMenu = new ToolStripMenuItem("Layout");
+            var layoutMenu = new ToolStripMenuItem("File");
             {
                 Items.OpenLayout = new ToolStripMenuItem("Open Layout", null, new EventHandler(menuBar_OpenLayout))
                 {
@@ -279,7 +280,7 @@ namespace GSTHD
             }
             MenuStrip.Items.Add(layoutMenu);
 
-            var optionMenu = new ToolStripMenuItem("Options");
+            var optionMenu = new ToolStripMenuItem("Global Options");
             {
 
                 var dragDropSubMenu = new ToolStripMenuItem("Mouse Controls");
@@ -544,6 +545,8 @@ namespace GSTHD
             }
             MenuStrip.Items.Add(optionMenu);
 
+            MenuStrip.Items.Add(new ToolStripMenuItem("Layout Options"));
+
             var MemoryMenu = new ToolStripMenuItem("Autotracker");
             {
                 SelectEmulatorOptions = new Dictionary<Settings.SelectEmulatorOption, ToolStripMenuItem>();
@@ -572,6 +575,7 @@ namespace GSTHD
             }
             MenuStrip.Items.Add(MemoryMenu);
 
+            
         }
 
         public void ReadSettings()
@@ -649,6 +653,89 @@ namespace GSTHD
             }
 
             MenuStrip.Renderer = new ToolStripProfessionalRenderer(theme);
+        }
+
+        // All of these functions could really benefit from a better naming scheme
+
+        public void ClearAlternates()
+        {
+            // empties menuitem 2 (alternates)
+            ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Clear();
+        }
+
+        public void AddEmptyAlternatesOption()
+        {
+            ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Add(new ToolStripMenuItem("None Available") { Enabled = false });
+        }
+
+        public bool CheckAlternatesForSubmenu(string name)
+        {
+            return ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.ContainsKey(name);
+        }
+
+        //TODO: might also wanna be careful about toolstrip names with spaces instead of underscores
+
+        public void AddToggleToAlternates(string name)
+        {
+            //Debug.WriteLine("adding toggle " + name);
+            ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Add(name, null, new EventHandler(Alternates_GenericFunction));
+        }
+
+        public void AddGroupToAlternates(string groupname)
+        {
+            //Debug.WriteLine("adding group " + name);
+            ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Add(new ToolStripMenuItem(groupname) { Name = groupname });
+        }
+
+        public void AddToAlternatesGroup(string groupname, string name)
+        {
+            //Debug.WriteLine("adding " + name + " to group " + groupname);
+            if (name == string.Empty)
+            {
+                var item = ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Find(groupname, false)[0];
+                ((ToolStripDropDownItem)item).DropDownItems.Add(new ToolStripMenuItem("Disabled", null, new EventHandler(Alternates_GenericFunction)) { Tag = groupname} );
+            } else
+            {
+                var item = ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Find(groupname, false)[0];
+                ((ToolStripDropDownItem)item).DropDownItems.Add(new ToolStripMenuItem(name, null, new EventHandler(Alternates_GenericFunction)) { Tag = groupname });
+            }
+        }
+
+        private void Alternates_GenericFunction(object sender, EventArgs e)
+        {
+            ToolStripMenuItem choice = (ToolStripMenuItem)sender;
+            string usedtag;
+            string LastUsed = string.Empty;
+
+            if (choice.Tag == null)
+            {
+                choice.Checked = !choice.Checked;
+                usedtag = null;
+            } else
+            {
+                // clicking the already enabled option is pointless, ignore
+                if (choice.Checked) return;
+                usedtag = choice.Tag.ToString();
+                foreach (ToolStripMenuItem x in ((ToolStripMenuItem)(choice.OwnerItem)).DropDownItems)
+                {
+                    if (x == choice)
+                    {
+                        x.Checked = true;
+                    } else
+                    {
+                        if (x.Checked == true)
+                        {
+                            LastUsed = x.Text;
+                            x.Checked = false;
+                        }
+                    }
+                    
+                }
+            }
+
+            Debug.WriteLine(choice.Text + " :: " + choice.Tag + " :: " + choice.Checked.ToString());
+            //Settings.Write();
+            Form.CurrentLayout.ApplyAlternates(choice.Text, usedtag, choice.Checked, LastUsed);
         }
 
         public void menuBar_OpenLayout(object sender, EventArgs e)
@@ -784,21 +871,6 @@ namespace GSTHD
             if (Items.BroadcastView.Checked) {
                Items.BroadcastView.Checked = false;
              } else { Items.BroadcastView.Checked = true;}
-        }
-
-        public void menuBar_ZoomIn(object sender, EventArgs e)
-        {
-            Form.ZoomIn();
-        }
-
-        public void menuBar_ZoomOut(object sender, EventArgs e)
-        {
-            Form.ZoomOut();
-        }
-
-        public void menuBar_ZoomReset(object sender, EventArgs e)
-        {
-            Form.ZoomReset();
         }
 
         public void menuBar_Show()

@@ -7,9 +7,11 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace GSTHD
 {
@@ -20,29 +22,33 @@ namespace GSTHD
 
     public class Layout
     {
-        public List<GenericLabel> ListLabels = new List<GenericLabel>();
-        public List<ObjectPointTextbox> ListTextBoxes = new List<ObjectPointTextbox>();
-        public List<ObjectPointGrid> ListTextBoxGrids = new List<ObjectPointGrid>();
-        public List<ObjectPoint> ListItems = new List<ObjectPoint>();
-        public List<ObjectPointGrid> ListItemGrids = new List<ObjectPointGrid>();
-        public List<ObjectPointSong> ListSongs = new List<ObjectPointSong>();
-        public List<ObjectPoint> ListDoubleItems = new List<ObjectPoint>();
-        public List<ObjectPointCollectedItem> ListCollectedItems = new List<ObjectPointCollectedItem>();
-        public List<ObjectPointMedallion> ListMedallions = new List<ObjectPointMedallion>();
-        public List<ObjectPoint> ListGuaranteedHints = new List<ObjectPoint>();
-        public List<ObjectPoint> ListGossipStones = new List<ObjectPoint>();
-        public List<ObjectPointGrid> ListGossipStoneGrids = new List<ObjectPointGrid>();
-        public List<AutoFillTextBox> ListSometimesHints = new List<AutoFillTextBox>();
-        public List<AutoFillTextBox> ListChronometers = new List<AutoFillTextBox>();
-        public List<ObjectPanelWotH> ListPanelWotH = new List<ObjectPanelWotH>();
-        public List<ObjectPanelBarren> ListPanelBarren = new List<ObjectPanelBarren>();
-        public List<ObjectPanelQuantity> ListPanelQuantity = new List<ObjectPanelQuantity>();
-        public List<ObjectPanelSpoiler> ListPanelSpoiler = new List<ObjectPanelSpoiler>();
-        public List<ObjectPointGoMode> ListGoMode = new List<ObjectPointGoMode>();
+        public List<GenericLabel> ListLabels { get; }  = new List<GenericLabel>();
+        public List<ObjectPointTextbox> ListTextBoxes { get; } = new List<ObjectPointTextbox>();
+        public List<ObjectPointGrid> ListTextBoxGrids { get; } = new List<ObjectPointGrid>();
+        public List<ObjectPoint> ListItems { get; } = new List<ObjectPoint>();
+        public List<ObjectPointGrid> ListItemGrids { get; } = new List<ObjectPointGrid>();
+        public List<ObjectPointSong> ListSongs { get; } = new List<ObjectPointSong>();
+        public List<ObjectPoint> ListDoubleItems { get; } = new List<ObjectPoint>();
+        public List<ObjectPointCollectedItem> ListCollectedItems { get; } = new List<ObjectPointCollectedItem>();
+        public List<ObjectPointMedallion> ListMedallions { get; } = new List<ObjectPointMedallion>();
+        public List<ObjectPoint> ListGuaranteedHints { get; } = new List<ObjectPoint>();
+        public List<ObjectPoint> ListGossipStones { get; } = new List<ObjectPoint>();
+        public List<ObjectPointGrid> ListGossipStoneGrids { get; } = new List<ObjectPointGrid>();
+        public List<AutoFillTextBox> ListSometimesHints { get; } = new List<AutoFillTextBox>();
+        public List<AutoFillTextBox> ListChronometers { get; } = new List<AutoFillTextBox>();
+        public List<ObjectPanelWotH> ListPanelWotH { get; } = new List<ObjectPanelWotH>();
+        public List<ObjectPanelBarren> ListPanelBarren { get; } = new List<ObjectPanelBarren>();
+        public List<ObjectPanelQuantity> ListPanelQuantity { get; } = new List<ObjectPanelQuantity>();
+        public List<ObjectPanelSpoiler> ListPanelSpoiler { get; } = new List<ObjectPanelSpoiler>();
+        public List<ObjectPointGoMode> ListGoMode { get; } = new List<ObjectPointGoMode>();
+
+        public List<AlternateSettings> ListAlternates { get; } = new List<AlternateSettings>();
 
         public List<UpdatableFromSettings> ListUpdatables = new List<UpdatableFromSettings>();
 
         public AppSettings App_Settings = new AppSettings();
+
+        private GSTForms hostForm;
 
         public void UpdateFromSettings()
         {
@@ -54,7 +60,8 @@ namespace GSTHD
 
         public void LoadLayout(Panel panelLayout, Settings settings, SortedSet<string> listSometimesHintsSuggestions, Dictionary<string, string> listPlacesWithTag, Dictionary<string, string> listKeycodesWithTag, GSTForms form)
         {
-            bool isOnBroadcast = (form.Name == "GSTHD_DK64 Broadcast View");
+            hostForm = form;
+            bool isOnBroadcast = (hostForm.Name == "GSTHD_DK64 Broadcast View");
 
 
             ListUpdatables.Clear();
@@ -105,6 +112,14 @@ namespace GSTHD
                     if (category.Key.ToString() == "AppSize")
                     {
                         App_Settings = JsonConvert.DeserializeObject<AppSettings>(category.Value.ToString());
+                    }
+
+                    if (category.Key.ToString() == "Alternates")
+                    {
+                        foreach (var element in category.Value)
+                        {
+                            ListAlternates.Add(JsonConvert.DeserializeObject<AlternateSettings>(element.ToString()));
+                        }
                     }
 
                     if (category.Key.ToString() == "Labels")
@@ -272,8 +287,8 @@ namespace GSTHD
 
                 panelLayout.Size = new Size(App_Settings.Width, App_Settings.Height);
                 if (App_Settings.BackgroundColor.HasValue)
-                    form.BackColor = App_Settings.BackgroundColor.Value;
-                panelLayout.BackColor = form.BackColor;
+                    hostForm.BackColor = App_Settings.BackgroundColor.Value;
+                panelLayout.BackColor = hostForm.BackColor;
 
                 if (App_Settings.DefaultSongMarkerImages != null)
                 {
@@ -323,6 +338,47 @@ namespace GSTHD
                         settings.DefaultDungeonNames.FontStyle = App_Settings.DefaultDungeonNames.FontStyle;
                 }
 
+
+                //TODO: somewhere in this declaration, i will need to do Settings lookups to see if they are checked or not
+                    //and then later, actually apply the stuff
+
+                if (!isOnBroadcast)
+                {
+                    var theMenu = ((Form1)hostForm).MenuBar;
+                    theMenu.ClearAlternates();
+                    if (ListAlternates.Count > 0)
+                    {
+                        foreach(var item in ListAlternates)
+                        {
+                            //Debug.WriteLine(item.Name);
+                            if (item.Group != string.Empty)
+                            {
+                                if (theMenu.CheckAlternatesForSubmenu(item.Group))
+                                {
+                                    theMenu.AddToAlternatesGroup(item.Group, item.Name);
+                                } else
+                                {
+                                    theMenu.AddGroupToAlternates(item.Group);
+                                    // add "Disabled" to menugroup first
+                                    theMenu.AddToAlternatesGroup(item.Group, string.Empty);
+                                    theMenu.AddToAlternatesGroup(item.Group, item.Name);
+                                }
+                            } else
+                            {
+                                // make single menuitem
+                                theMenu.AddToggleToAlternates(item.Name);
+                            }
+
+                        }
+
+                    }
+                    else
+                    {
+                        theMenu.AddEmptyAlternatesOption();
+                    }
+                } 
+
+
                 if (ListLabels.Count > 0)
                 {
                     foreach (var item in ListLabels)
@@ -346,8 +402,6 @@ namespace GSTHD
                     }
                 }
 
-
-                //TODO for this and the if below: if on broadcast, swap the boxes out for labels
                 if (ListTextBoxes.Count > 0)
                 {
                     foreach (var box in ListTextBoxes)
@@ -663,6 +717,139 @@ namespace GSTHD
             }
         }
 
+
+        public void ApplyAlternates(string name, string groupname, bool check, string lastUsed)
+        {
+            int mult = (check) ? 1 : -1;
+            if (groupname == null)
+            {
+                AlternateSettings targetAlt = ListAlternates.Find(item => item.Name == name);
+                IterateAlternateChanges(targetAlt, mult);
+            } else
+            {
+                AlternateSettings targetAlt = ListAlternates.Find(item => (item.Name == lastUsed) && (item.Group == groupname));
+                // if theres no previosly checked value
+                if (targetAlt != null)
+                {
+                    // get the previously marked setting, undo those
+                    IterateAlternateChanges(targetAlt, mult, true);
+
+                }
+
+                targetAlt = ListAlternates.Find(item => (item.Name == name) && (item.Group == groupname));
+                // if this is not disabled
+                if (targetAlt != null)
+                {
+                    IterateAlternateChanges(targetAlt, mult);
+                }
+            }
+            // TODO: do the same for broadcast
+        }
+
+        private void IterateAlternateChanges(AlternateSettings targetAlt, int mult, bool undo=false)
+        {
+            foreach (var x in targetAlt.Changes)
+            {
+                foreach (var y in x.Value)
+                {
+                    if (x.Key == "Items")
+                    {
+                        Item target = null;
+                        foreach (JProperty z in y)
+                        {
+                            if (z.Name == "Name") target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as Item;
+                            else if (target != null)
+                            {
+                                if (undo)
+                                {
+                                    ObjectPoint ogPoint = ListItems.Where(g => g.Name == target.Name).First();
+                                    object ogValue = ogPoint.GetType().GetProperty(z.Name).GetValue(ogPoint, null);
+                                    ApplyAlternatesChanges(target, z.Name, ogValue, mult, true);
+                                } else
+                                {
+                                    ApplyAlternatesChanges(target, z.Name, z.Value, mult, false);
+                                }
+                            }
+                        }
+                    }
+                    // keys is collecteditems ,etc
+
+
+
+
+
+
+
+                }
+            }
+
+            //keeping this around for future reference on how to dial in
+            //foreach (var x in item.Changes)
+            //{
+            //    Debug.WriteLine("    " + x.Key);
+            //    foreach (var y in x.Value)
+            //    {
+            //        foreach (JProperty z in y)
+            //        {
+            //            Debug.WriteLine("        " + z.Name + ":" + z.Value.ToString());
+            //        }
+            //        Debug.WriteLine("        ");
+            //    }
+            //}
+
+        }
+
+        private void ApplyAlternatesChanges(Control target, string name, object value, int mult, bool undoing)
+        {
+            name = TranslationLayer(name);
+            var targetType = target.GetType().GetProperty(name).GetValue(target, null);
+            string basedon = targetType.GetType().ToString();
+            switch (basedon)
+            {
+                case "System.Drawing.Size":
+                    if (undoing)
+                    {
+                        target.GetType().GetProperty(name).SetValue(target, (Size)value);
+                    } else
+                    {
+                        // format `1, 2`
+                        var newvalues = value.ToString().Split(',');
+                        target.GetType().GetProperty(name).SetValue(target, new Size(((Size)targetType).Width + int.Parse(newvalues[0])*mult, ((Size)targetType).Height + int.Parse(newvalues[1])*mult));
+                    }
+                    break;
+                case "System.String":
+                    target.GetType().GetProperty(name).SetValue(target, value.ToString());
+                    break;
+                case "System.String[]":
+                    if (value is JArray ja)
+                    {
+                        target.GetType().GetProperty(name).SetValue(target, ja.ToObject<string[]>());
+                    } else
+                    {
+                        target.GetType().GetProperty(name).SetValue(target, value);
+                    }
+                    break;
+                default:
+                    throw new NotImplementedException(basedon);
+            }
+            if (target is OrganicImage oi)
+            {
+                if (oi is Item i) i.UpdateImage();
+                oi.Invalidate();
+            }
+        }
+
+        private string TranslationLayer(string input)
+        {
+            // why did i not make the names 1 to 1 aaaaaaaaaaaaaa
+            switch (input)
+            {
+                case "ImageCollection":
+                    return "ImageNames";
+                default:
+                    return input;
+            }
+        }
 
     }
 
@@ -1015,5 +1202,12 @@ namespace GSTHD
         public bool EnableBroadcast { get; set; } = false;
         public string BroadcastFile { get; set; } = null;
         public string AutotrackingGame { get; set; } = null;
+    }
+
+    public class AlternateSettings
+    {
+        public string Name { get; set; }
+        public string Group { get; set; } = string.Empty;
+        public Dictionary<string, dynamic[]> Changes { get; set; } = null;
     }
 }

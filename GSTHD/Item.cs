@@ -21,20 +21,20 @@ namespace GSTHD
         private readonly ProgressibleElementBehaviour<ItemState> ProgressBehaviour;
         private readonly DraggableAutocheckElementBehaviour<ItemState> DragBehaviour;
 
-        private string[] ImageNames;
-        private int ImageIndex = 0;
-        public int DefaultIndex = 0;
-        public int DK64_ID;
-        private string DragImage = null;
+        public string[] ImageNames { get; set; }
+        private int ImageIndex { get; set; } = 0;
+        public int DefaultIndex { get; set; } = 0;
+        public int DK64_ID { get; set; }
+        private string DragImage { get; set; } = null;
 
-        bool isBroadcastable;
-        string DoubleBroadcastSide;
-        string DoubleBroadcastName;
-        bool isDraggable;
+        bool isBroadcastable { get; set; }
+        string DoubleBroadcastSide { get; set; }
+        string DoubleBroadcastName { get; set; }
+        bool isDraggable { get; set; }
 
-        public string OuterPathID;
+        public string OuterPathID { get; set; }
 
-        public string AutoName = null;
+        public string AutoName { get; set; } = null;
 
         delegate void SetStateCallback(ItemState state);
 

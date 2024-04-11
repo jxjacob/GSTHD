@@ -22,6 +22,7 @@ namespace GSTHD
         String Name { get; set; }
 
         Control.ControlCollection Controls { get; }
+
     }
 
     public partial class Form1 : Form, GSTForms
@@ -30,14 +31,12 @@ namespace GSTHD
         Dictionary<string, string> ListKeycodesWithTag = new Dictionary<string, string>();
         SortedSet<string> ListSometimesHintsSuggestions = new SortedSet<string>();
 
-        Form1_MenuBar MenuBar;
+        public Form1_MenuBar MenuBar;
         public Layout CurrentLayout;
         Panel LayoutContent;
         public Autotracker TheAutotracker;
         public System.Timers.Timer StoneCyclingTimer;
         private int cyclecount = 0;
-
-        private float GlobalScale = 1;
 
         public List<GossipStone> currentlyCycling = new List<GossipStone>();
 
@@ -78,7 +77,7 @@ namespace GSTHD
         private void LoadAll(object sender, EventArgs e)
         {
             var assembly = Assembly.GetEntryAssembly().GetName();
-            this.Text = $"{Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyTitleAttribute>().Title} v{assembly.Version.Major}.{assembly.Version.Minor}.{assembly.Version.Build} {((!Environment.Is64BitProcess) ? "(32-bit)" : String.Empty)}";
+            this.Text = $"{Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyTitleAttribute>().Title} v{assembly.Version.Major}.{assembly.Version.Minor}.{assembly.Version.Build} {((!Environment.Is64BitProcess) ? "(32-bit)" : string.Empty)}";
             this.AcceptButton = null;
             this.MaximizeBox = false;
 
@@ -217,7 +216,6 @@ namespace GSTHD
             CurrentLayout = new Layout();
             CurrentLayout.LoadLayout(LayoutContent, Settings, ListSometimesHintsSuggestions, ListPlacesWithTag, ListKeycodesWithTag, this);
             Size = new Size(LayoutContent.Size.Width, LayoutContent.Size.Height + MenuBar.Size.Height);
-            GlobalScale = 1;
             LayoutContent.Dock = DockStyle.Top;
             Controls.Add(LayoutContent);
             MenuBar.Dock = DockStyle.Top;
@@ -312,27 +310,6 @@ namespace GSTHD
                 TheAutotracker.NukeTimer();
             }
             TheAutotracker = null;
-        }
-
-        public void ZoomIn()
-        {
-            this.Scale(new SizeF((GlobalScale + 0.1f)/GlobalScale, (GlobalScale + 0.1f) / GlobalScale));
-            GlobalScale += 0.1f;
-            Debug.WriteLine(GlobalScale);
-        }
-
-        public void ZoomOut()
-        {
-            this.Scale(new SizeF((GlobalScale - 0.1f) / GlobalScale, (GlobalScale - 0.1f) / GlobalScale));
-            GlobalScale -= 0.1f;
-            Debug.WriteLine(GlobalScale);
-        }
-
-        public void ZoomReset()
-        {
-            this.Scale(new SizeF((1f) / GlobalScale, (1f) / GlobalScale));
-            Debug.WriteLine(1f/GlobalScale);
-            GlobalScale = 1;
         }
 
         public void AddCycling(GossipStone gs) 
