@@ -743,7 +743,14 @@ namespace GSTHD
                     IterateAlternateChanges(targetAlt, mult);
                 }
             }
-            // TODO: do the same for broadcast
+            // push to broadcast
+            if (hostForm is Form1 f1)
+            {
+                if (App_Settings.EnableBroadcast && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+                {
+                    ((Form2)Application.OpenForms["GSTHD_DK64 Broadcast View"]).CurrentLayout.ApplyAlternates(name, groupname, check, lastUsed);
+                }
+            }
         }
 
         private void IterateAlternateChanges(AlternateSettings targetAlt, int mult, bool undo=false)
@@ -757,8 +764,13 @@ namespace GSTHD
                         Item target = null;
                         foreach (JProperty z in y)
                         {
-                            if (z.Name == "Name") target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as Item;
-                            else if (target != null)
+                            try
+                            {
+                                if (z.Name == "Name") target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as Item;
+                            } catch (IndexOutOfRangeException){
+                                //ignore
+                            }
+                            if (target != null && z.Name != "Name")
                             {
                                 if (undo)
                                 {
@@ -803,10 +815,9 @@ namespace GSTHD
         {
             name = TranslationLayer(name);
             var targetType = target.GetType().GetProperty(name).GetValue(target, null);
-            string basedon = targetType.GetType().ToString();
-            switch (basedon)
+            switch (targetType)
             {
-                case "System.Drawing.Size":
+                case Size _:
                     if (undoing)
                     {
                         target.GetType().GetProperty(name).SetValue(target, (Size)value);
@@ -817,10 +828,10 @@ namespace GSTHD
                         target.GetType().GetProperty(name).SetValue(target, new Size(((Size)targetType).Width + int.Parse(newvalues[0])*mult, ((Size)targetType).Height + int.Parse(newvalues[1])*mult));
                     }
                     break;
-                case "System.String":
+                case string _:
                     target.GetType().GetProperty(name).SetValue(target, value.ToString());
                     break;
-                case "System.String[]":
+                case string[] _:
                     if (value is JArray ja)
                     {
                         target.GetType().GetProperty(name).SetValue(target, ja.ToObject<string[]>());
@@ -830,7 +841,7 @@ namespace GSTHD
                     }
                     break;
                 default:
-                    throw new NotImplementedException(basedon);
+                    throw new NotImplementedException(targetType.GetType().ToString());
             }
             if (target is OrganicImage oi)
             {
