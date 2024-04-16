@@ -383,22 +383,20 @@ namespace GSTHD
                 {
                     foreach (var item in ListLabels)
                     {
-                        if (item.Visible)
+                        panelLayout.Controls.Add(new Label()
                         {
-                            panelLayout.Controls.Add(new Label()
-                            {
-                                Name = item.Name,
-                                Text = item.Text,
-                                Left = item.X,
-                                Top = item.Y,
-                                Font = new Font(new FontFamily(item.FontName), item.FontSize, item.FontStyle),
-                                ForeColor = Color.FromName(item.Color),
-                                BackColor = Color.Transparent,
-                                AutoSize = (item.TextAlignment == ContentAlignment.TopLeft),
-                                TextAlign = item.TextAlignment,
-                                Width = item.Width,
-                            });
-                        }
+                            Name = item.Name,
+                            Visible = item.Visible,
+                            Text = item.Text,
+                            Left = item.X,
+                            Top = item.Y,
+                            Font = new Font(new FontFamily(item.FontName), item.FontSize, item.FontStyle),
+                            ForeColor = Color.FromName(item.Color),
+                            BackColor = Color.Transparent,
+                            AutoSize = (item.TextAlignment == ContentAlignment.TopLeft),
+                            TextAlign = item.TextAlignment,
+                            Width = item.Width,
+                        });
                     }
                 }
 
@@ -406,42 +404,42 @@ namespace GSTHD
                 {
                     foreach (var box in ListTextBoxes)
                     {
-                        if (box.Visible)
+                        
+                        if (isOnBroadcast)
                         {
-                            if (isOnBroadcast)
-                            {
-                                // converts boxes to labels
-                                ContentAlignment ca;
-                                switch (box.TextAlignment) {
-                                    case HorizontalAlignment.Center:
-                                        ca = ContentAlignment.TopCenter;
-                                        break;
-                                    case HorizontalAlignment.Right:
-                                        ca = ContentAlignment.TopRight;
-                                        break;
-                                    case HorizontalAlignment.Left:
-                                    default:
-                                        ca = ContentAlignment.TopLeft;
-                                        break;
-                                }
-                                panelLayout.Controls.Add(new Label()
-                                {
-                                    Name = box.Name,
-                                    Text = box.Text,
-                                    Left = box.X,
-                                    Top = box.Y,
-                                    Font = new Font(new FontFamily(box.FontName), box.FontSize, box.FontStyle),
-                                    ForeColor = box.FontColor,
-                                    BackColor = Color.Transparent,
-                                    AutoSize = (ca == ContentAlignment.TopLeft),
-                                    TextAlign = ca,
-                                    Width = box.Width,
-                                });
-                            } else
-                            {
-                                panelLayout.Controls.Add(new TextBoxPlus(box, settings, isOnBroadcast));
+                            // converts boxes to labels
+                            ContentAlignment ca;
+                            switch (box.TextAlignment) {
+                                case HorizontalAlignment.Center:
+                                    ca = ContentAlignment.TopCenter;
+                                    break;
+                                case HorizontalAlignment.Right:
+                                    ca = ContentAlignment.TopRight;
+                                    break;
+                                case HorizontalAlignment.Left:
+                                default:
+                                    ca = ContentAlignment.TopLeft;
+                                    break;
                             }
+                            panelLayout.Controls.Add(new Label()
+                            {
+                                Name = box.Name,
+                                Visible= box.Visible,
+                                Text = box.Text,
+                                Left = box.X,
+                                Top = box.Y,
+                                Font = new Font(new FontFamily(box.FontName), box.FontSize, box.FontStyle),
+                                ForeColor = box.FontColor,
+                                BackColor = Color.Transparent,
+                                AutoSize = (ca == ContentAlignment.TopLeft),
+                                TextAlign = ca,
+                                Width = box.Width,
+                            });
+                        } else
+                        {
+                            panelLayout.Controls.Add(new TextBoxPlus(box, settings, isOnBroadcast));
                         }
+                        
                     }
                 }
 
@@ -449,33 +447,33 @@ namespace GSTHD
                 {
                     foreach (var item in ListTextBoxGrids)
                     {
-                        if (item.Visible)
+                        
+                        for (int j = 0; j < item.Rows; j++)
                         {
-                            for (int j = 0; j < item.Rows; j++)
+                            for (int i = 0; i < item.Columns; i++)
                             {
-                                for (int i = 0; i < item.Columns; i++)
+                                ObjectPointTextbox temp = new ObjectPointTextbox()
                                 {
-                                    ObjectPointTextbox temp = new ObjectPointTextbox()
-                                    {
-                                        Text = item.Text,
-                                        BackColor = item.BackColor,
-                                        Name = item.Name + j + i,
-                                        FontName = item.FontName,
-                                        FontSize = item.FontSize,
-                                        FontStyle = item.FontStyle,
-                                        FontColor = item.FontColor,
-                                        Width = item.Width,
-                                        Height = item.Height,
-                                        X = item.X + i * (item.Width + item.Spacing.Width),
-                                        Y = item.Y + j * (item.Height + item.Spacing.Height),
-                                        BorderStyle = item.BorderStyle,
-                                        isBroadcastable = item.isBroadcastable,
-                                        TextAlignment = item.TextAlignment
-                                    };
-                                    panelLayout.Controls.Add(new TextBoxPlus(temp, settings, isOnBroadcast));
-                                }
+                                    Text = item.Text,
+                                    Visible = item.Visible,
+                                    BackColor = item.BackColor,
+                                    Name = item.Name + j + i,
+                                    FontName = item.FontName,
+                                    FontSize = item.FontSize,
+                                    FontStyle = item.FontStyle,
+                                    FontColor = item.FontColor,
+                                    Width = item.Width,
+                                    Height = item.Height,
+                                    X = item.X + i * (item.Width + item.Spacing.Width),
+                                    Y = item.Y + j * (item.Height + item.Spacing.Height),
+                                    BorderStyle = item.BorderStyle,
+                                    isBroadcastable = item.isBroadcastable,
+                                    TextAlignment = item.TextAlignment
+                                };
+                                panelLayout.Controls.Add(new TextBoxPlus(temp, settings, isOnBroadcast));
                             }
                         }
+                        
                     }
                 }
 
@@ -483,8 +481,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListItems)
                     {
-                        if (item.Visible)
-                            panelLayout.Controls.Add(new Item(item, settings, isOnBroadcast));
+                        panelLayout.Controls.Add(new Item(item, settings, isOnBroadcast) { Visible = item.Visible} );
                     }
                 }
 
@@ -492,34 +489,33 @@ namespace GSTHD
                 {
                     foreach (var item in ListItemGrids)
                     {
-                        if (item.Visible)
+                        
+                        int namenum = 0;
+                        for (int j = 0; j < item.Rows; j++)
                         {
-                            int namenum = 0;
-                            for (int j = 0; j < item.Rows; j++)
+                            for (int i = 0; i < item.Columns; i++)
                             {
-                                for (int i = 0; i < item.Columns; i++)
+                                var gs = new ObjectPoint()
                                 {
-                                    var gs = new ObjectPoint()
-                                    {
-                                        Name = item.Name + namenum,
-                                        X = item.X + i * (item.Size.Width + item.Spacing.Width),
-                                        Y = item.Y + j * (item.Size.Height + item.Spacing.Height),
-                                        Size = item.Size,
-                                        ImageCollection = item.ImageCollection,
-                                        TinyImageCollection = item.TinyImageCollection,
-                                        Visible = item.Visible,
-                                        SizeMode = item.SizeMode,
-                                        isBroadcastable = item.isBroadcastable,
-                                        isDraggable = item.isDraggable,
-                                        AutoName = item.AutoName,
-                                        BackColor = item.BackColor,
-                                        OuterPathID = (item.OuterPathID != null) ? $"{namenum}{item.OuterPathID}" : null,
-                                    };
-                                    panelLayout.Controls.Add(new Item(gs, settings, isOnBroadcast));
-                                    namenum++;
-                                }
+                                    Name = item.Name + namenum,
+                                    X = item.X + i * (item.Size.Width + item.Spacing.Width),
+                                    Y = item.Y + j * (item.Size.Height + item.Spacing.Height),
+                                    Size = item.Size,
+                                    ImageCollection = item.ImageCollection,
+                                    TinyImageCollection = item.TinyImageCollection,
+                                    Visible = item.Visible,
+                                    SizeMode = item.SizeMode,
+                                    isBroadcastable = item.isBroadcastable,
+                                    isDraggable = item.isDraggable,
+                                    AutoName = item.AutoName,
+                                    BackColor = item.BackColor,
+                                    OuterPathID = (item.OuterPathID != null) ? $"{namenum}{item.OuterPathID}" : null,
+                                };
+                                panelLayout.Controls.Add(new Item(gs, settings, isOnBroadcast) { Visible = item.Visible } );
+                                namenum++;
                             }
                         }
+                        
                     }
                 }
 
@@ -527,12 +523,9 @@ namespace GSTHD
                 {
                     foreach (var song in ListSongs)
                     {
-                        if (song.Visible)
-                        {
-                            var s = new Song(song, settings, isOnBroadcast);
-                            panelLayout.Controls.Add(s);
-                            ListUpdatables.Add(s);
-                        }
+                        var s = new Song(song, settings, isOnBroadcast) { Visible = song.Visible };
+                        panelLayout.Controls.Add(s);
+                        ListUpdatables.Add(s);
                     }
                 }
 
@@ -540,8 +533,7 @@ namespace GSTHD
                 {
                     foreach (var doubleItem in ListDoubleItems)
                     {
-                        if (doubleItem.Visible)
-                            panelLayout.Controls.Add(new DoubleItem(doubleItem, settings, isOnBroadcast));
+                        panelLayout.Controls.Add(new DoubleItem(doubleItem, settings, isOnBroadcast) { Visible = doubleItem.Visible });
                     }
                 }
 
@@ -549,8 +541,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListCollectedItems)
                     {
-                        if (item.Visible)
-                            panelLayout.Controls.Add(new CollectedItem(item, settings, isOnBroadcast));
+                        panelLayout.Controls.Add(new CollectedItem(item, settings, isOnBroadcast) { Visible = item.Visible });
                     }
                 }
 
@@ -558,15 +549,12 @@ namespace GSTHD
                 {
                     foreach (var medallion in ListMedallions)
                     {
-                        if (medallion.Visible)
-                        {
-                            var element = new Medallion(medallion, settings, isOnBroadcast);
-                            panelLayout.Controls.Add(element);
-                            panelLayout.Controls.Add(element.SelectedDungeon);
-                            ListUpdatables.Add(element);
-                            element.SetSelectedDungeonLocation();
-                            element.SelectedDungeon.BringToFront();
-                        }
+                        var element = new Medallion(medallion, settings, isOnBroadcast) { Visible = medallion.Visible };
+                        panelLayout.Controls.Add(element);
+                        panelLayout.Controls.Add(element.SelectedDungeon);
+                        ListUpdatables.Add(element);
+                        element.SetSelectedDungeonLocation();
+                        element.SelectedDungeon.BringToFront();
                     }
                 }
 
@@ -574,8 +562,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListGuaranteedHints)
                     {
-                        if (item.Visible)
-                            panelLayout.Controls.Add(new GuaranteedHint(item, settings, isOnBroadcast));
+                        panelLayout.Controls.Add(new GuaranteedHint(item, settings, isOnBroadcast) { Visible = item.Visible });
                     }
                 }
 
@@ -583,12 +570,9 @@ namespace GSTHD
                 {
                     foreach (var item in ListGossipStones)
                     {
-                        if (item.Visible)
-                        {
-                            var g = new GossipStone(item, settings, isOnBroadcast);
-                            panelLayout.Controls.Add(g);
-                            ListUpdatables.Add(g);
-                        }
+                        var g = new GossipStone(item, settings, isOnBroadcast) { Visible = item.Visible };
+                        panelLayout.Controls.Add(g);
+                        ListUpdatables.Add(g);
                     }
                 }
 
@@ -596,30 +580,28 @@ namespace GSTHD
                 {
                     foreach (var item in ListGossipStoneGrids)
                     {
-                        if (item.Visible)
+                        for (int j = 0; j < item.Rows; j++)
                         {
-                            for (int j = 0; j < item.Rows; j++)
+                            for (int i = 0; i < item.Columns; i++)
                             {
-                                for (int i = 0; i < item.Columns; i++)
+                                var gs = new ObjectPoint()
                                 {
-                                    var gs = new ObjectPoint()
-                                    {
-                                        Name = item.Name + j + i,
-                                        X = item.X + i * (item.Size.Width + item.Spacing.Width),
-                                        Y = item.Y + j * (item.Size.Height + item.Spacing.Height),
-                                        Size = item.Size,
-                                        ImageCollection = item.ImageCollection,
-                                        TinyImageCollection = item.TinyImageCollection,
-                                        Visible = item.Visible,
-                                        SizeMode = item.SizeMode,
-                                        isBroadcastable = item.isBroadcastable
-                                    };
-                                    var g = new GossipStone(gs, settings, isOnBroadcast);
-                                    panelLayout.Controls.Add(g);
-                                    ListUpdatables.Add(g);
-                                }
+                                    Name = item.Name + j + i,
+                                    X = item.X + i * (item.Size.Width + item.Spacing.Width),
+                                    Y = item.Y + j * (item.Size.Height + item.Spacing.Height),
+                                    Size = item.Size,
+                                    ImageCollection = item.ImageCollection,
+                                    TinyImageCollection = item.TinyImageCollection,
+                                    Visible = item.Visible,
+                                    SizeMode = item.SizeMode,
+                                    isBroadcastable = item.isBroadcastable
+                                };
+                                var g = new GossipStone(gs, settings, isOnBroadcast) { Visible = item.Visible };
+                                panelLayout.Controls.Add(g);
+                                ListUpdatables.Add(g);
                             }
                         }
+                        
                     }
                 }
 
@@ -627,8 +609,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListSometimesHints)
                     {
-                        if (item.Visible)
-                            panelLayout.Controls.Add(new SometimesHint(listSometimesHintsSuggestions, item));
+                        panelLayout.Controls.Add(new SometimesHint(listSometimesHintsSuggestions, item) { Visible = item.Visible });
                     }
                 }
 
@@ -645,15 +626,12 @@ namespace GSTHD
                 {
                     foreach (var item in ListPanelWotH)
                     {
-                        if (item.Visible)
-                        {
-                            var panel = new PanelWothBarren(item, settings);
-                            panel.PanelWoth(listPlacesWithTag, listKeycodesWithTag, item);
-                            panelLayout.Controls.Add(panel);
-                            panelLayout.Controls.Add(panel.textBoxCustom.SuggestionContainer);
-                            ListUpdatables.Add(panel);
-                            panel.SetSuggestionContainer();
-                        }
+                        var panel = new PanelWothBarren(item, settings) { Visible = item.Visible };
+                        panel.PanelWoth(listPlacesWithTag, listKeycodesWithTag, item);
+                        panelLayout.Controls.Add(panel);
+                        panelLayout.Controls.Add(panel.textBoxCustom.SuggestionContainer);
+                        ListUpdatables.Add(panel);
+                        panel.SetSuggestionContainer();
                     }
                 }
 
@@ -661,15 +639,12 @@ namespace GSTHD
                 {
                     foreach (var item in ListPanelBarren)
                     {
-                        if (item.Visible)
-                        {
-                            var panel = new PanelWothBarren(item, settings);
-                            panel.PanelBarren(listPlacesWithTag, item);
-                            panelLayout.Controls.Add(panel);
-                            panelLayout.Controls.Add(panel.textBoxCustom.SuggestionContainer);
-                            ListUpdatables.Add(panel);
-                            panel.SetSuggestionContainer();
-                        }
+                        var panel = new PanelWothBarren(item, settings) { Visible = item.Visible };
+                        panel.PanelBarren(listPlacesWithTag, item);
+                        panelLayout.Controls.Add(panel);
+                        panelLayout.Controls.Add(panel.textBoxCustom.SuggestionContainer);
+                        ListUpdatables.Add(panel);
+                        panel.SetSuggestionContainer();
                     }
                 }
 
@@ -677,15 +652,12 @@ namespace GSTHD
                 {
                     foreach (var item in ListPanelQuantity)
                     {
-                        if (item.Visible)
-                        {
-                            var panel = new PanelWothBarren(item, settings);
-                            panel.PanelQuantity(listPlacesWithTag, item);
-                            panelLayout.Controls.Add(panel);
-                            panelLayout.Controls.Add(panel.textBoxCustom.SuggestionContainer);
-                            ListUpdatables.Add(panel);
-                            panel.SetSuggestionContainer();
-                        }
+                        var panel = new PanelWothBarren(item, settings) { Visible = item.Visible };
+                        panel.PanelQuantity(listPlacesWithTag, item);
+                        panelLayout.Controls.Add(panel);
+                        panelLayout.Controls.Add(panel.textBoxCustom.SuggestionContainer);
+                        ListUpdatables.Add(panel);
+                        panel.SetSuggestionContainer();
                     }
                 }
 
@@ -693,12 +665,9 @@ namespace GSTHD
                 {
                     foreach (var item in ListPanelSpoiler)
                     {
-                        if (item.Visible)
-                        {
-                            var panel = new SpoilerPanel(item, settings, isOnBroadcast);
-                            panelLayout.Controls.Add(panel);
-                            ListUpdatables.Add(panel);
-                        }
+                        var panel = new SpoilerPanel(item, settings, isOnBroadcast) { Visible = item.Visible };
+                        panelLayout.Controls.Add(panel);
+                        ListUpdatables.Add(panel);
                     }
                 }
 
@@ -706,12 +675,9 @@ namespace GSTHD
                 {
                     foreach (var item in ListGoMode)
                     {
-                        if (item.Visible)
-                        {
-                            var element = new GoMode(item);
-                            panelLayout.Controls.Add(element);
-                            element.SetLocation();
-                        }
+                        var element = new GoMode(item) { Visible = item.Visible };
+                        panelLayout.Controls.Add(element);
+                        element.SetLocation();
                     }
                 }
             }
@@ -732,7 +698,7 @@ namespace GSTHD
                 if (targetAlt != null)
                 {
                     // get the previously marked setting, undo those
-                    IterateAlternateChanges(targetAlt, mult, true);
+                    IterateAlternateChanges(targetAlt, -1, true);
 
                 }
 
@@ -774,9 +740,7 @@ namespace GSTHD
                             {
                                 if (undo)
                                 {
-                                    ObjectPoint ogPoint = ListItems.Where(g => g.Name == target.Name).First();
-                                    object ogValue = ogPoint.GetType().GetProperty(z.Name).GetValue(ogPoint, null);
-                                    ApplyAlternatesChanges(target, z.Name, ogValue, mult, true);
+                                    ApplyAlternatesChanges(target, z.Name, z.Value, mult, true);
                                 } else
                                 {
                                     ApplyAlternatesChanges(target, z.Name, z.Value, mult, false);
@@ -784,7 +748,7 @@ namespace GSTHD
                             }
                         }
                     }
-                    // keys is collecteditems ,etc
+                    // keys is collecteditems, grids, etc
 
 
 
@@ -813,31 +777,61 @@ namespace GSTHD
 
         private void ApplyAlternatesChanges(Control target, string name, object value, int mult, bool undoing)
         {
-            name = TranslationLayer(name);
-            var targetType = target.GetType().GetProperty(name).GetValue(target, null);
+            string translatedname = TranslationLayer(name);
+            var targetType = target.GetType().GetProperty(translatedname).GetValue(target, null);
             switch (targetType)
             {
-                case Size _:
-                    if (undoing)
+                case Size si:
+                    
+                    // format: `1,2`
+                    var newvalues = value.ToString().Split(',');
+                    target.GetType().GetProperty(translatedname).SetValue(target, new Size(si.Width + int.Parse(newvalues[0]) * mult, si.Height + int.Parse(newvalues[1]) * mult));
+                    break;
+                case Point po:
+                    if (name == "X")
                     {
-                        target.GetType().GetProperty(name).SetValue(target, (Size)value);
+                        target.GetType().GetProperty(translatedname).SetValue(target, new Point(po.X + int.Parse(value.ToString()) * mult, po.Y));
                     } else
                     {
-                        // format `1, 2`
-                        var newvalues = value.ToString().Split(',');
-                        target.GetType().GetProperty(name).SetValue(target, new Size(((Size)targetType).Width + int.Parse(newvalues[0])*mult, ((Size)targetType).Height + int.Parse(newvalues[1])*mult));
+                        target.GetType().GetProperty(translatedname).SetValue(target, new Point(po.X, po.Y + int.Parse(value.ToString()) * mult));
+                    }
+                    break;
+                case int i:
+                    target.GetType().GetProperty(translatedname).SetValue(target, i + int.Parse(value.ToString())*mult);
+                    break;
+                case bool _:
+                    if (undoing || mult < 0)
+                    {
+                        ObjectPoint ogPoint = ListItems.Where(g => g.Name == target.Name).First();
+                        object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                        target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
+                    }
+                    else
+                    {
+                        target.GetType().GetProperty(translatedname).SetValue(target, bool.Parse(value.ToString()));
                     }
                     break;
                 case string _:
-                    target.GetType().GetProperty(name).SetValue(target, value.ToString());
-                    break;
-                case string[] _:
-                    if (value is JArray ja)
+                    if (undoing)
                     {
-                        target.GetType().GetProperty(name).SetValue(target, ja.ToObject<string[]>());
+                        ObjectPoint ogPoint = ListItems.Where(g => g.Name == target.Name).First();
+                        object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                        target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
                     } else
                     {
-                        target.GetType().GetProperty(name).SetValue(target, value);
+                        if (value.ToString() == "null") target.GetType().GetProperty(translatedname).SetValue(target, null);
+                        else target.GetType().GetProperty(translatedname).SetValue(target, value.ToString());
+                    }
+                    break;
+                case string[] _:
+                    if (undoing)
+                    {
+                        ObjectPoint ogPoint = ListItems.Where(g => g.Name == target.Name).First();
+                        object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                        target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
+                    } else
+                    {
+                        target.GetType().GetProperty(translatedname).SetValue(target, ((JArray)value).ToObject<string[]>());
                     }
                     break;
                 default:
@@ -857,6 +851,9 @@ namespace GSTHD
             {
                 case "ImageCollection":
                     return "ImageNames";
+                case "X":
+                case "Y":
+                    return "Location";
                 default:
                     return input;
             }
