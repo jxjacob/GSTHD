@@ -701,6 +701,19 @@ namespace GSTHD
             }
         }
 
+        public void AddCollectionToAlternates(string groupname)
+        {
+            //Debug.WriteLine("adding group " + name);
+            ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Add(new ToolStripMenuItem(groupname) { Name = groupname });
+        }
+
+        public void AddToAlternatesCollection(string Collectionname, string name)
+        {
+            //Debug.WriteLine("adding " + name + " to group " + groupname);
+            var item = ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Find(Collectionname, false)[0];
+            ((ToolStripDropDownItem)item).DropDownItems.Add(new ToolStripMenuItem(name, null, new EventHandler(Alternates_GenericFunction)));
+        }
+
         private void Alternates_GenericFunction(object sender, EventArgs e)
         {
             ToolStripMenuItem choice = (ToolStripMenuItem)sender;

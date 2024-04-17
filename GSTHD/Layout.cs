@@ -363,6 +363,17 @@ namespace GSTHD
                                     theMenu.AddToAlternatesGroup(item.Group, string.Empty);
                                     theMenu.AddToAlternatesGroup(item.Group, item.Name);
                                 }
+                            } else if (item.Collection != string.Empty) {
+                                if (theMenu.CheckAlternatesForSubmenu(item.Collection))
+                                {
+                                    theMenu.AddToAlternatesCollection(item.Collection, item.Name);
+                                }
+                                else
+                                {
+                                    theMenu.AddCollectionToAlternates(item.Collection);
+                                    // add "Disabled" to menugroup first
+                                    theMenu.AddToAlternatesCollection(item.Collection, item.Name);
+                                }
                             } else
                             {
                                 // make single menuitem
@@ -812,7 +823,7 @@ namespace GSTHD
                     }
                     break;
                 case string _:
-                    if (undoing)
+                    if (undoing || mult < 0)
                     {
                         ObjectPoint ogPoint = ListItems.Where(g => g.Name == target.Name).First();
                         object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
@@ -824,7 +835,7 @@ namespace GSTHD
                     }
                     break;
                 case string[] _:
-                    if (undoing)
+                    if (undoing || mult < 0)
                     {
                         ObjectPoint ogPoint = ListItems.Where(g => g.Name == target.Name).First();
                         object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
@@ -1216,6 +1227,7 @@ namespace GSTHD
     {
         public string Name { get; set; }
         public string Group { get; set; } = string.Empty;
+        public string Collection { get; set; } = string.Empty;
         public Dictionary<string, dynamic[]> Changes { get; set; } = null;
     }
 }
