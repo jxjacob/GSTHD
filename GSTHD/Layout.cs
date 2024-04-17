@@ -486,7 +486,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListItems)
                     {
-                        panelLayout.Controls.Add(new Item(item, settings, isOnBroadcast) { Visible = item.Visible} );
+                        panelLayout.Controls.Add(new Item(item, settings, isOnBroadcast));
                     }
                 }
 
@@ -516,7 +516,7 @@ namespace GSTHD
                                     BackColor = item.BackColor,
                                     OuterPathID = (item.OuterPathID != null) ? $"{namenum}{item.OuterPathID}" : null,
                                 };
-                                panelLayout.Controls.Add(new Item(gs, settings, isOnBroadcast) { Visible = item.Visible } );
+                                panelLayout.Controls.Add(new Item(gs, settings, isOnBroadcast));
                                 namenum++;
                             }
                         }
@@ -528,7 +528,7 @@ namespace GSTHD
                 {
                     foreach (var song in ListSongs)
                     {
-                        var s = new Song(song, settings, isOnBroadcast) { Visible = song.Visible };
+                        var s = new Song(song, settings, isOnBroadcast);
                         panelLayout.Controls.Add(s);
                         ListUpdatables.Add(s);
                     }
@@ -538,7 +538,7 @@ namespace GSTHD
                 {
                     foreach (var doubleItem in ListDoubleItems)
                     {
-                        panelLayout.Controls.Add(new DoubleItem(doubleItem, settings, isOnBroadcast) { Visible = doubleItem.Visible });
+                        panelLayout.Controls.Add(new DoubleItem(doubleItem, settings, isOnBroadcast));
                     }
                 }
 
@@ -546,7 +546,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListCollectedItems)
                     {
-                        panelLayout.Controls.Add(new CollectedItem(item, settings, isOnBroadcast) { Visible = item.Visible });
+                        panelLayout.Controls.Add(new CollectedItem(item, settings, isOnBroadcast));
                     }
                 }
 
@@ -554,7 +554,7 @@ namespace GSTHD
                 {
                     foreach (var medallion in ListMedallions)
                     {
-                        var element = new Medallion(medallion, settings, isOnBroadcast) { Visible = medallion.Visible };
+                        var element = new Medallion(medallion, settings, isOnBroadcast);
                         panelLayout.Controls.Add(element);
                         panelLayout.Controls.Add(element.SelectedDungeon);
                         ListUpdatables.Add(element);
@@ -567,7 +567,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListGuaranteedHints)
                     {
-                        panelLayout.Controls.Add(new GuaranteedHint(item, settings, isOnBroadcast) { Visible = item.Visible });
+                        panelLayout.Controls.Add(new GuaranteedHint(item, settings, isOnBroadcast));
                     }
                 }
 
@@ -575,7 +575,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListGossipStones)
                     {
-                        var g = new GossipStone(item, settings, isOnBroadcast) { Visible = item.Visible };
+                        var g = new GossipStone(item, settings, isOnBroadcast);
                         panelLayout.Controls.Add(g);
                         ListUpdatables.Add(g);
                     }
@@ -601,7 +601,7 @@ namespace GSTHD
                                     SizeMode = item.SizeMode,
                                     isBroadcastable = item.isBroadcastable
                                 };
-                                var g = new GossipStone(gs, settings, isOnBroadcast) { Visible = item.Visible };
+                                var g = new GossipStone(gs, settings, isOnBroadcast);
                                 panelLayout.Controls.Add(g);
                                 ListUpdatables.Add(g);
                             }
@@ -614,7 +614,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListSometimesHints)
                     {
-                        panelLayout.Controls.Add(new SometimesHint(listSometimesHintsSuggestions, item) { Visible = item.Visible });
+                        panelLayout.Controls.Add(new SometimesHint(listSometimesHintsSuggestions, item));
                     }
                 }
 
@@ -631,7 +631,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListPanelWotH)
                     {
-                        var panel = new PanelWothBarren(item, settings) { Visible = item.Visible };
+                        var panel = new PanelWothBarren(item, settings);
                         panel.PanelWoth(listPlacesWithTag, listKeycodesWithTag, item);
                         panelLayout.Controls.Add(panel);
                         panelLayout.Controls.Add(panel.textBoxCustom.SuggestionContainer);
@@ -644,7 +644,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListPanelBarren)
                     {
-                        var panel = new PanelWothBarren(item, settings) { Visible = item.Visible };
+                        var panel = new PanelWothBarren(item, settings);
                         panel.PanelBarren(listPlacesWithTag, item);
                         panelLayout.Controls.Add(panel);
                         panelLayout.Controls.Add(panel.textBoxCustom.SuggestionContainer);
@@ -657,7 +657,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListPanelQuantity)
                     {
-                        var panel = new PanelWothBarren(item, settings) { Visible = item.Visible };
+                        var panel = new PanelWothBarren(item, settings);
                         panel.PanelQuantity(listPlacesWithTag, item);
                         panelLayout.Controls.Add(panel);
                         panelLayout.Controls.Add(panel.textBoxCustom.SuggestionContainer);
@@ -670,7 +670,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListPanelSpoiler)
                     {
-                        var panel = new SpoilerPanel(item, settings, isOnBroadcast) { Visible = item.Visible };
+                        var panel = new SpoilerPanel(item, settings, isOnBroadcast);
                         panelLayout.Controls.Add(panel);
                         ListUpdatables.Add(panel);
                     }
@@ -680,7 +680,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListGoMode)
                     {
-                        var element = new GoMode(item) { Visible = item.Visible };
+                        var element = new GoMode(item);
                         panelLayout.Controls.Add(element);
                         element.SetLocation();
                     }
@@ -695,7 +695,7 @@ namespace GSTHD
             if (groupname == null)
             {
                 AlternateSettings targetAlt = ListAlternates.Find(item => item.Name == name);
-                IterateAlternateChanges(targetAlt, mult, (mult < 0));
+                IterateAlternateChanges(targetAlt, mult);
             } else
             {
                 AlternateSettings targetAlt = ListAlternates.Find(item => (item.Name == lastUsed) && (item.Group == groupname));
@@ -703,7 +703,7 @@ namespace GSTHD
                 if (targetAlt != null)
                 {
                     // get the previously marked setting, undo those
-                    IterateAlternateChanges(targetAlt, -1, true);
+                    IterateAlternateChanges(targetAlt, -1);
 
                 }
 
@@ -724,7 +724,7 @@ namespace GSTHD
             }
         }
 
-        private void IterateAlternateChanges(AlternateSettings targetAlt, int mult, bool undo=false)
+        private void IterateAlternateChanges(AlternateSettings targetAlt, int mult)
         {
             foreach (var x in targetAlt.Changes)
             {
@@ -743,13 +743,7 @@ namespace GSTHD
                             }
                             if (target != null && z.Name != "Name")
                             {
-                                if (undo)
-                                {
-                                    ApplyAlternatesChanges(target, z.Name, z.Value, mult, true);
-                                } else
-                                {
-                                    ApplyAlternatesChanges(target, z.Name, z.Value, mult, false);
-                                }
+                                ApplyAlternatesChanges(target, z.Name, z.Value, mult);
                             }
                         }
                     } else if (x.Key == "ItemGrids")
@@ -760,14 +754,10 @@ namespace GSTHD
                         {
                             try
                             {
-                                if (z.Name == "Name")
-                                {
-                                    // find original entry in grids
-                                    ogGrid = ListItemGrids.Where(g => g.Name == z.Value.ToString()).First();
-                                }
+                                // find original entry in grids
+                                if (z.Name == "Name")ogGrid = ListItemGrids.Where(g => g.Name == z.Value.ToString()).First();
                             }
-                            catch (IndexOutOfRangeException)
-                            {
+                            catch (IndexOutOfRangeException){
                                 //ignore
                             }
                             // we ignore cols and rows (for now)
@@ -778,7 +768,7 @@ namespace GSTHD
                                     for (int i = 0; i < ogGrid.Columns; i++)
                                     {
                                         Item target = hostForm.Controls.Find(ogGrid.Name + namenum.ToString(), true)[0] as Item;
-                                        ApplyAlternatesChanges(target, z.Name, z.Value, mult, undo, namenum.ToString());
+                                        ApplyAlternatesChanges(target, z.Name, z.Value, mult, namenum.ToString());
                                         namenum++;
 
                                     }
@@ -813,7 +803,7 @@ namespace GSTHD
 
         }
 
-        private void ApplyAlternatesChanges(Control target, string name, object value, int mult, bool undoing, string namenum="")
+        private void ApplyAlternatesChanges(Control target, string name, object value, int mult, string namenum="")
         {
             string translatedname = TranslationLayer(name);
             var targetType = target.GetType().GetProperty(translatedname).GetValue(target, null);
@@ -838,7 +828,7 @@ namespace GSTHD
                     target.GetType().GetProperty(translatedname).SetValue(target, i + int.Parse(value.ToString())*mult);
                     break;
                 case bool _:
-                    if (undoing || mult < 0)
+                    if (mult < 0)
                     {
                         object ogPoint;
                         if (namenum == "")
@@ -858,7 +848,7 @@ namespace GSTHD
                     }
                     break;
                 case string _:
-                    if (undoing || mult < 0)
+                    if (mult < 0)
                     {
                         object ogPoint;
                         if (namenum == "")
@@ -878,7 +868,7 @@ namespace GSTHD
                     }
                     break;
                 case string[] _:
-                    if (undoing || mult < 0)
+                    if (mult < 0)
                     {
                         object ogPoint;
                         if (namenum == "")

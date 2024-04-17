@@ -304,6 +304,8 @@ namespace GSTHD
             ProgressBehaviour = new ProgressibleElementBehaviour<int>(this, settings);
             DragBehaviour = new DraggableAutocheckElementBehaviour<int>(this, settings);
 
+            Visible = data.Visible;
+
             if (data.ImageCollection != null)
             {
                 ImageNames = data.ImageCollection;

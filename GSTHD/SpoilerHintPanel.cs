@@ -80,6 +80,7 @@ namespace GSTHD
         public SpoilerPanel(ObjectPanelSpoiler data, Settings settings, bool isOnBroadcast=false)
         {
             Settings = settings;
+            Visible = data.Visible;
 
             // just concerns defining the shape of the panel
             cellBackColor = data.CellBackColor;

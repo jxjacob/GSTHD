@@ -22,6 +22,7 @@ namespace GSTHD
 
         public GoMode(ObjectPointGoMode data)
         {
+            Visible = data.Visible;
             tictac = new Timer();
             tictac.Interval = 95;
             tictac.Tick += Tictac_Tick;

@@ -9,6 +9,7 @@ namespace GSTHD
     {
         public SometimesHint(SortedSet<string> listSometimesHints, AutoFillTextBox textInput)
         {
+            Visible = textInput.Visible;
             this.BackColor = textInput.BackColor;
             this.Font = new Font(textInput.FontName, textInput.FontSize, textInput.FontStyle);
             this.ForeColor = textInput.FontColor;

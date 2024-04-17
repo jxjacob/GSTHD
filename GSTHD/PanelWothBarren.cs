@@ -49,6 +49,7 @@ namespace GSTHD
         public PanelWothBarren(ObjectPanelWotH data, Settings settings)
         {
             Settings = settings;
+            Visible = data.Visible;
 
             GossipStoneSize = data.GossipStoneSize;
             this.BackColor = data.BackColor;

@@ -18,8 +18,9 @@ namespace GSTHD
         public GuaranteedHint(ObjectPoint data, Settings settings, bool isOnBroadcast)
         {
             Settings = settings;
+            Visible = data.Visible;
 
-            if(data.ImageCollection != null)
+            if (data.ImageCollection != null)
                 ListImageName = data.ImageCollection.ToList();
 
             GuaranteddHintSize = data.Size;

@@ -44,6 +44,7 @@ namespace GSTHD
         public CollectedItem(ObjectPointCollectedItem data, Settings settings, bool isBroadcast = false)
         {
             Settings = settings;
+            Visible = data.Visible;
 
             if (data.ImageCollection == null)
                 ImageNames = new string[0];

@@ -17,6 +17,7 @@ namespace GSTHD
         public TextBoxPlus(ObjectPointTextbox data, Settings settings, bool isOnBroadcast = false)
         {
             this.settings = settings;
+            Visible = data.Visible;
 
             Text = data.Text;
             BackColor = data.BackColor;
