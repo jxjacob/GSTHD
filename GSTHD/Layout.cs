@@ -353,30 +353,24 @@ namespace GSTHD
                             //Debug.WriteLine(item.Name);
                             if (item.Group != string.Empty)
                             {
-                                if (theMenu.CheckAlternatesForSubmenu(item.Group))
-                                {
-                                    theMenu.AddToAlternatesGroup(item.Group, item.Name);
-                                } else
+                                // add mutually-exclusive toggles
+                                if (!theMenu.CheckAlternatesForSubmenu(item.Group))
                                 {
                                     theMenu.AddGroupToAlternates(item.Group);
                                     // add "Disabled" to menugroup first
                                     theMenu.AddToAlternatesGroup(item.Group, string.Empty);
-                                    theMenu.AddToAlternatesGroup(item.Group, item.Name);
                                 }
+                                theMenu.AddToAlternatesGroup(item.Group, item.Name);
                             } else if (item.Collection != string.Empty) {
-                                if (theMenu.CheckAlternatesForSubmenu(item.Collection))
-                                {
-                                    theMenu.AddToAlternatesCollection(item.Collection, item.Name);
-                                }
-                                else
+                                // put the toggles in a folder somewhere
+                                if (!theMenu.CheckAlternatesForSubmenu(item.Collection))
                                 {
                                     theMenu.AddCollectionToAlternates(item.Collection);
-                                    // add "Disabled" to menugroup first
-                                    theMenu.AddToAlternatesCollection(item.Collection, item.Name);
                                 }
+                                theMenu.AddToAlternatesCollection(item.Collection, item.Name);
                             } else
                             {
-                                // make single menuitem
+                                // make single toggle
                                 theMenu.AddToggleToAlternates(item.Name);
                             }
 
@@ -701,7 +695,7 @@ namespace GSTHD
             if (groupname == null)
             {
                 AlternateSettings targetAlt = ListAlternates.Find(item => item.Name == name);
-                IterateAlternateChanges(targetAlt, mult);
+                IterateAlternateChanges(targetAlt, mult, (mult < 0));
             } else
             {
                 AlternateSettings targetAlt = ListAlternates.Find(item => (item.Name == lastUsed) && (item.Group == groupname));
@@ -758,6 +752,39 @@ namespace GSTHD
                                 }
                             }
                         }
+                    } else if (x.Key == "ItemGrids")
+                    {
+                        ObjectPointGrid ogGrid = null;
+                        int namenum = 0;
+                        foreach (JProperty z in y)
+                        {
+                            try
+                            {
+                                if (z.Name == "Name")
+                                {
+                                    // find original entry in grids
+                                    ogGrid = ListItemGrids.Where(g => g.Name == z.Value.ToString()).First();
+                                }
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                //ignore
+                            }
+                            // we ignore cols and rows (for now)
+                            if (ogGrid != null && z.Name != "Name" && z.Name != "Columns" && z.Name != "Rows")
+                            {
+                                for (int j = 0; j < ogGrid.Rows; j++)
+                                {
+                                    for (int i = 0; i < ogGrid.Columns; i++)
+                                    {
+                                        Item target = hostForm.Controls.Find(ogGrid.Name + namenum.ToString(), true)[0] as Item;
+                                        ApplyAlternatesChanges(target, z.Name, z.Value, mult, undo, namenum.ToString());
+                                        namenum++;
+
+                                    }
+                                }
+                            }
+                        }
                     }
                     // keys is collecteditems, grids, etc
 
@@ -786,7 +813,7 @@ namespace GSTHD
 
         }
 
-        private void ApplyAlternatesChanges(Control target, string name, object value, int mult, bool undoing)
+        private void ApplyAlternatesChanges(Control target, string name, object value, int mult, bool undoing, string namenum="")
         {
             string translatedname = TranslationLayer(name);
             var targetType = target.GetType().GetProperty(translatedname).GetValue(target, null);
@@ -813,7 +840,15 @@ namespace GSTHD
                 case bool _:
                     if (undoing || mult < 0)
                     {
-                        ObjectPoint ogPoint = ListItems.Where(g => g.Name == target.Name).First();
+                        object ogPoint;
+                        if (namenum == "")
+                        {
+                            ogPoint = ListItems.Where(g => g.Name == target.Name).First();
+                        }
+                        else
+                        {
+                            ogPoint = ListItemGrids.Where(g => g.Name == target.Name.Substring(0, target.Name.Length - namenum.Length)).First();
+                        }
                         object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
                         target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
                     }
@@ -825,7 +860,15 @@ namespace GSTHD
                 case string _:
                     if (undoing || mult < 0)
                     {
-                        ObjectPoint ogPoint = ListItems.Where(g => g.Name == target.Name).First();
+                        object ogPoint;
+                        if (namenum == "")
+                        {
+                            ogPoint = ListItems.Where(g => g.Name == target.Name).First();
+                        }
+                        else
+                        {
+                            ogPoint = ListItemGrids.Where(g => g.Name == target.Name.Substring(0, target.Name.Length - namenum.Length)).First();
+                        }
                         object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
                         target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
                     } else
@@ -837,7 +880,13 @@ namespace GSTHD
                 case string[] _:
                     if (undoing || mult < 0)
                     {
-                        ObjectPoint ogPoint = ListItems.Where(g => g.Name == target.Name).First();
+                        object ogPoint;
+                        if (namenum == "")
+                        {
+                            ogPoint = ListItems.Where(g => g.Name == target.Name).First();
+                        } else {
+                            ogPoint = ListItemGrids.Where(g => g.Name == target.Name.Substring(0, target.Name.Length - namenum.Length)).First();
+                        }
                         object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
                         target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
                     } else
