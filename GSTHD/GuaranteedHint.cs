@@ -10,13 +10,14 @@ namespace GSTHD
         private readonly Settings Settings;
         private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
 
-        List<string> ListImageName = new List<string>();
-        bool isBroadcastable = false;
+        public List<string> ListImageName { get; set; } = new List<string>();
+        public bool isBroadcastable { get; set; } = false;
 
-        Size GuaranteddHintSize;
+        public Size GuaranteddHintSize { get; set; }
 
         public GuaranteedHint(ObjectPoint data, Settings settings, bool isOnBroadcast)
         {
+            Name = data.Name;
             Settings = settings;
             Visible = data.Visible;
 
@@ -28,7 +29,6 @@ namespace GSTHD
             if (data.BackColor != Color.Transparent) BackColor = data.BackColor;
             if (ListImageName.Count > 0)
             {
-                this.Name = ListImageName[0];
                 this.Image = Image.FromFile(@"Resources/" + ListImageName[0]);
                 this.SizeMode = (PictureBoxSizeMode)data.SizeMode;
                 this.Size = GuaranteddHintSize;

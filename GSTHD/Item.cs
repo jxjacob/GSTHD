@@ -22,15 +22,15 @@ namespace GSTHD
         private readonly DraggableAutocheckElementBehaviour<ItemState> DragBehaviour;
 
         public string[] ImageNames { get; set; }
-        private int ImageIndex { get; set; } = 0;
+        public int ImageIndex { get; set; } = 0;
         public int DefaultIndex { get; set; } = 0;
         public int DK64_ID { get; set; }
-        private string DragImage { get; set; } = null;
+        public string DragImage { get; set; } = null;
 
-        bool isBroadcastable { get; set; }
-        string DoubleBroadcastSide { get; set; }
-        string DoubleBroadcastName { get; set; }
-        bool isDraggable { get; set; }
+        public bool isBroadcastable { get; set; }
+        public string DoubleBroadcastSide { get; set; }
+        public string DoubleBroadcastName { get; set; }
+        public bool isDraggable { get; set; }
 
         public string OuterPathID { get; set; }
 
@@ -119,7 +119,7 @@ namespace GSTHD
             Image = Image.FromFile(@"Resources/" + ImageNames[ImageIndex]);
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {
-                if (DoubleBroadcastName == null || DoubleBroadcastSide == null)
+                if (DoubleBroadcastName == null || DoubleBroadcastSide == null || DoubleBroadcastName == string.Empty || DoubleBroadcastSide == string.Empty)
                 {
                     try
                     {
@@ -147,7 +147,7 @@ namespace GSTHD
                         }
 
                     }
-                    else
+                    else if (DoubleBroadcastSide == "right")
                     {
                         ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).SetRightMark(isMarked);
                         if (ImageIndex == 0)

@@ -20,6 +20,7 @@ namespace GSTHD
 
         Color BackColor { get; set; }
         String Name { get; set; }
+        Size Size { get; set; }
 
         Control.ControlCollection Controls { get; }
 

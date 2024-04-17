@@ -22,7 +22,7 @@ namespace GSTHD
         public Image markedImage = null;
 
         //TODO: make this actually work
-        public PictureBoxSizeMode SizeMode = PictureBoxSizeMode.Zoom;
+        public PictureBoxSizeMode SizeMode { get; set; } = PictureBoxSizeMode.Zoom;
 
         public delegate void UpdateImageCallback(PaintEventArgs state);
 

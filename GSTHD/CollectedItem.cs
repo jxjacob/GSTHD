@@ -21,22 +21,22 @@ namespace GSTHD
         private readonly ProgressibleElementBehaviour<CollectedItemState> ProgressBehaviour;
         private readonly DraggableAutocheckElementBehaviour<CollectedItemState> DragBehaviour;
 
-        private string[] ImageNames;
-        private Label ItemCount;
-        private Size CollectedItemSize;
-        private Size CollectedItemCountPosition;
-        private readonly int CollectedItemMin;
-        private readonly int CollectedItemMax;
-        public readonly int CollectedItemDefault;
-        public int CollectedItems;
-        private readonly int Step;
+        public string[] ImageNames { get; set; }
+        public Label ItemCount { get; set; }
+        public Size CollectedItemSize { get; set; }
+        public Size CollectedItemCountPosition { get; set; }
+        public int CollectedItemMin { get; set; }
+        public int CollectedItemMax { get; set; }
+        public int CollectedItemDefault { get; set; }
+        public int CollectedItems { get; set; }
+        public int Step { get; set; }
 
-        private bool isBroadcastable;
-        public bool hasSlash;
-        public bool hoveredOver;
+        public bool isBroadcastable { get; set; }
+        public bool hasSlash { get; set; }
+        public bool hoveredOver { get; set; }
 
-        public string AutoName = null;
-        public string AutoSubName = null;
+        public string AutoName { get; set; } = null;
+        public string AutoSubName { get; set; } = null;
 
         delegate void SetStateCallback(CollectedItemState state);
         delegate void UpdateCountCallback();

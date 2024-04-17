@@ -19,22 +19,22 @@ namespace GSTHD
         private readonly Settings Settings;
         private readonly ProgressibleElementBehaviour<DoubleItemState> ProgressBehaviour;
 
-        private string[] ImageNames;
-        private int ImageIndex = 0;
+        public string[] ImageNames { get; set; }
+        public int ImageIndex { get; set; } = 0;
 
-        bool isMouseDown = false;
-        bool isColoredLeft = false;
-        bool isColoredRight = false;
-        public int left_id;
-        public int right_id;
-        Size DoubleItemSize;
+        public bool isMouseDown { get; set; } = false;
+        public bool isColoredLeft { get; set; } = false;
+        public bool isColoredRight { get; set; } = false;
+        public int left_id { get; set; }
+        public int right_id { get; set; }
+        public Size DoubleItemSize { get; set; }
 
         // purely used for handling broadcast marking logic
-        bool leftMark = false;
-        bool rightMark = false;
+        public bool leftMark { get; set; } = false;
+        public bool rightMark { get; set; } = false;
 
-        bool isBroadcastable;
-        public string AutoName = null;
+        public bool isBroadcastable { get; set; }
+        public string AutoName { get; set; } = null;
 
         delegate void SetStateCallback(DoubleItemState state);
 

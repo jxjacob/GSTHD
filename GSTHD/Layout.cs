@@ -89,19 +89,36 @@ namespace GSTHD
                     }
                 } catch (JsonReaderException)
                 {
-                    MessageBox.Show("File " + settings.ActiveLayout.ToString() + " does not appear to be a proper json file.\nReverting to dk64.json.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    // set settings to dk64.json
-                    settings.ActiveLayout = "layouts\\dk64.json";
-                    settings.Write();
+                    if (isOnBroadcast)
+                    {
+                        MessageBox.Show("File " + settings.ActiveLayoutBroadcastFile.ToString() + " appears to contian incorrect JSON formatting.\nClosing broadcast and reloading.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        ((Form2)hostForm).Close();
+                    } else
+                    {
+                        MessageBox.Show("File " + settings.ActiveLayout.ToString() + " appears to contian incorrect JSON formatting.\nReverting to dk64.json.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        // if this IS dk64.json and its having issues, force close so it doesnt loop
+                        if (settings.ActiveLayout == "layouts\\dk64.json") Application.Exit();
+                        // set settings to dk64.json
+                        settings.ActiveLayout = "layouts\\dk64.json";
+                        settings.Write();
+                    }
                     // force reload
                     form.Reset(null);
                     return;
                 } catch (FileNotFoundException)
                 {
-                    MessageBox.Show("File " + settings.ActiveLayout.ToString() + " could not be found.\nReverting to dk64.json.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    // set settings to dk64.json
-                    settings.ActiveLayout = "layouts\\dk64.json";
-                    settings.Write();
+                    if (isOnBroadcast)
+                    {
+                        MessageBox.Show("File " + settings.ActiveLayoutBroadcastFile.ToString() + " could not be found.\nClosing broadcast and reloading.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        ((Form2)hostForm).Close();
+                    }
+                    else
+                    {
+                        MessageBox.Show("File " + settings.ActiveLayout.ToString() + " could not be found.\nReverting to dk64.json.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        // set settings to dk64.json
+                        settings.ActiveLayout = "layouts\\dk64.json";
+                        settings.Write();
+                    }
                     // force reload
                     form.Reset(null);
                     return;
@@ -452,7 +469,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListTextBoxGrids)
                     {
-                        
+                        int namenum = 0;
                         for (int j = 0; j < item.Rows; j++)
                         {
                             for (int i = 0; i < item.Columns; i++)
@@ -462,7 +479,7 @@ namespace GSTHD
                                     Text = item.Text,
                                     Visible = item.Visible,
                                     BackColor = item.BackColor,
-                                    Name = item.Name + j + i,
+                                    Name = item.Name + namenum,
                                     FontName = item.FontName,
                                     FontSize = item.FontSize,
                                     FontStyle = item.FontStyle,
@@ -476,6 +493,7 @@ namespace GSTHD
                                     TextAlignment = item.TextAlignment
                                 };
                                 panelLayout.Controls.Add(new TextBoxPlus(temp, settings, isOnBroadcast));
+                                namenum++;
                             }
                         }
                         
@@ -585,13 +603,14 @@ namespace GSTHD
                 {
                     foreach (var item in ListGossipStoneGrids)
                     {
+                        int namenum = 0;
                         for (int j = 0; j < item.Rows; j++)
                         {
                             for (int i = 0; i < item.Columns; i++)
                             {
                                 var gs = new ObjectPoint()
                                 {
-                                    Name = item.Name + j + i,
+                                    Name = item.Name + namenum,
                                     X = item.X + i * (item.Size.Width + item.Spacing.Width),
                                     Y = item.Y + j * (item.Size.Height + item.Spacing.Height),
                                     Size = item.Size,
@@ -604,6 +623,7 @@ namespace GSTHD
                                 var g = new GossipStone(gs, settings, isOnBroadcast);
                                 panelLayout.Controls.Add(g);
                                 ListUpdatables.Add(g);
+                                namenum++;
                             }
                         }
                         
@@ -726,6 +746,7 @@ namespace GSTHD
 
         private void IterateAlternateChanges(AlternateSettings targetAlt, int mult)
         {
+            if (targetAlt == null) return;
             foreach (var x in targetAlt.Changes)
             {
                 foreach (var y in x.Value)
@@ -733,34 +754,45 @@ namespace GSTHD
                     if (x.Key == "Items")
                     {
                         Item target = null;
+                        ObjectPoint ogPoint = null;
                         foreach (JProperty z in y)
                         {
                             try
                             {
-                                if (z.Name == "Name") target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as Item;
+                                if (z.Name == "Name")
+                                {
+                                    target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as Item;
+                                    ogPoint = ListItems.Where(g => g.Name == target.Name).First();
+                                }
                             } catch (IndexOutOfRangeException){
                                 //ignore
                             }
                             if (target != null && z.Name != "Name")
                             {
-                                ApplyAlternatesChanges(target, z.Name, z.Value, mult);
+                                ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
                             }
                         }
-                    } else if (x.Key == "ItemGrids")
+                        if (target != null)
+                        {
+                            target.Invalidate();
+                            target.UpdateImage();
+                        }
+                    }
+                    else if (x.Key == "ItemGrids")
                     {
                         ObjectPointGrid ogGrid = null;
-                        int namenum = 0;
                         foreach (JProperty z in y)
                         {
                             try
                             {
                                 // find original entry in grids
-                                if (z.Name == "Name")ogGrid = ListItemGrids.Where(g => g.Name == z.Value.ToString()).First();
+                                if (z.Name == "Name") ogGrid = ListItemGrids.Where(g => g.Name == z.Value.ToString()).First();
                             }
                             catch (IndexOutOfRangeException){
                                 //ignore
                             }
                             // we ignore cols and rows (for now)
+                            int namenum = 0;
                             if (ogGrid != null && z.Name != "Name" && z.Name != "Columns" && z.Name != "Rows")
                             {
                                 for (int j = 0; j < ogGrid.Rows; j++)
@@ -768,11 +800,185 @@ namespace GSTHD
                                     for (int i = 0; i < ogGrid.Columns; i++)
                                     {
                                         Item target = hostForm.Controls.Find(ogGrid.Name + namenum.ToString(), true)[0] as Item;
-                                        ApplyAlternatesChanges(target, z.Name, z.Value, mult, namenum.ToString());
+                                        if (z.Name == "Spacing")
+                                        {
+                                            var newvalues = z.Value.ToString().Split(',');
+                                            ApplyAlternatesChanges(target, ogGrid, "X", i * int.Parse(newvalues[0]), mult);
+                                            ApplyAlternatesChanges(target, ogGrid, "Y", j * int.Parse(newvalues[1]), mult);
+                                        } else
+                                        {
+                                            ApplyAlternatesChanges(target, ogGrid, z.Name, z.Value, mult);
+                                        }
+                                        namenum++;
+                                        // sucks that this is super expensive
+                                        target.Invalidate();
+                                        target.UpdateImage();
+                                    }
+                                }
+                            }
+                        }
+                    } else if (x.Key == "TextBoxes")
+                    {
+                        TextBoxPlus target = null;
+                        ObjectPointTextbox ogPoint = null;
+                        foreach (JProperty z in y)
+                        {
+                            try
+                            {
+                                if (z.Name == "Name")
+                                {
+                                    target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as TextBoxPlus;
+                                    ogPoint = ListTextBoxes.Where(g => g.Name == target.Name).First();
+                                }
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                //ignore
+                            }
+                            if (target != null && z.Name != "Name")
+                            {
+                                ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                            }
+                        }
+                    }
+                    else if (x.Key == "TextBoxGrids")
+                    {
+                        ObjectPointGrid ogGrid = null;
+                        foreach (JProperty z in y)
+                        {
+                            try
+                            {
+                                // find original entry in grids
+                                if (z.Name == "Name") ogGrid = ListTextBoxGrids.Where(g => g.Name == z.Value.ToString()).First();
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                //ignore
+                            }
+                            // we ignore cols and rows (for now)
+                            int namenum = 0;
+                            if (ogGrid != null && z.Name != "Name" && z.Name != "Columns" && z.Name != "Rows")
+                            {
+                                for (int j = 0; j < ogGrid.Rows; j++)
+                                {
+                                    for (int i = 0; i < ogGrid.Columns; i++)
+                                    {
+                                        TextBoxPlus target = hostForm.Controls.Find(ogGrid.Name + namenum.ToString(), true)[0] as TextBoxPlus;
+                                        if (z.Name == "Spacing")
+                                        {
+                                            var newvalues = z.Value.ToString().Split(',');
+                                            ApplyAlternatesChanges(target, ogGrid, "X", i * int.Parse(newvalues[0]), mult);
+                                            ApplyAlternatesChanges(target, ogGrid, "Y", j * int.Parse(newvalues[1]), mult);
+                                        }
+                                        else
+                                        {
+                                            ApplyAlternatesChanges(target, ogGrid, z.Name, z.Value, mult);
+                                        }
                                         namenum++;
 
                                     }
                                 }
+                            }
+                        }
+                    }
+                    else if (x.Key == "DoubleItems")
+                    {
+                        DoubleItem target = null;
+                        ObjectPoint ogPoint = null;
+                        foreach (JProperty z in y)
+                        {
+                            try
+                            {
+                                if (z.Name == "Name")
+                                {
+                                    target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as DoubleItem;
+                                    ogPoint = ListDoubleItems.Where(g => g.Name == target.Name).First();
+                                }
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                //ignore
+                            }
+                            if (target != null && z.Name != "Name")
+                            {
+                                ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                            }
+                        }
+                        if (target != null)
+                        {
+                            target.Invalidate();
+                            target.UpdateImage();
+                        }
+                    }
+                    else if (x.Key == "CollectedItems")
+                    {
+                        CollectedItem target = null;
+                        ObjectPointCollectedItem ogPoint = null;
+                        foreach (JProperty z in y)
+                        {
+                            try
+                            {
+                                if (z.Name == "Name")
+                                {
+                                    target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as CollectedItem;
+                                    ogPoint = ListCollectedItems.Where(g => g.Name == target.Name).First();
+                                }
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                //ignore
+                            }
+                            if (target != null && z.Name != "Name")
+                            {
+                                ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                            }
+                        }
+                        if (target != null)
+                        {
+                            target.Invalidate();
+                            target.UpdateCount();
+                        }
+                    }
+                    else if (x.Key == "GuaranteedHints")
+                    {
+                        GuaranteedHint target = null;
+                        ObjectPoint ogPoint = null;
+                        foreach (JProperty z in y)
+                        {
+                            try
+                            {
+                                if (z.Name == "Name")
+                                {
+                                    target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as GuaranteedHint;
+                                    ogPoint = ListGuaranteedHints.Where(g => g.Name == target.Name).First();
+                                }
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                //ignore
+                            }
+                            if (target != null && z.Name != "Name")
+                            {
+                                ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                            }
+                        }
+                        if (target != null)
+                        {
+                            target.Invalidate();
+                            target.UpdateImage();
+                        }
+                    }
+                    else if (x.Key == "AppSize")
+                    {
+                        // HACKY AF
+                        foreach (JProperty z in y)
+                        {
+                            if (z.Name == "Width")
+                            {
+                                hostForm.Size = new Size(hostForm.Size.Width + int.Parse(z.Value.ToString()) * mult, hostForm.Size.Height);
+                            } else if (z.Name == "Height")
+                            {
+                                hostForm.Size = new Size(hostForm.Size.Width, hostForm.Size.Height + int.Parse(z.Value.ToString()) * mult);
                             }
                         }
                     }
@@ -803,7 +1009,7 @@ namespace GSTHD
 
         }
 
-        private void ApplyAlternatesChanges(Control target, string name, object value, int mult, string namenum="")
+        private void ApplyAlternatesChanges(Control target, object ogPoint, string name, object value, int mult)
         {
             string translatedname = TranslationLayer(name);
             var targetType = target.GetType().GetProperty(translatedname).GetValue(target, null);
@@ -819,7 +1025,7 @@ namespace GSTHD
                     if (name == "X")
                     {
                         target.GetType().GetProperty(translatedname).SetValue(target, new Point(po.X + int.Parse(value.ToString()) * mult, po.Y));
-                    } else
+                    } else if (name == "Y")
                     {
                         target.GetType().GetProperty(translatedname).SetValue(target, new Point(po.X, po.Y + int.Parse(value.ToString()) * mult));
                     }
@@ -830,15 +1036,6 @@ namespace GSTHD
                 case bool _:
                     if (mult < 0)
                     {
-                        object ogPoint;
-                        if (namenum == "")
-                        {
-                            ogPoint = ListItems.Where(g => g.Name == target.Name).First();
-                        }
-                        else
-                        {
-                            ogPoint = ListItemGrids.Where(g => g.Name == target.Name.Substring(0, target.Name.Length - namenum.Length)).First();
-                        }
                         object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
                         target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
                     }
@@ -850,33 +1047,17 @@ namespace GSTHD
                 case string _:
                     if (mult < 0)
                     {
-                        object ogPoint;
-                        if (namenum == "")
-                        {
-                            ogPoint = ListItems.Where(g => g.Name == target.Name).First();
-                        }
-                        else
-                        {
-                            ogPoint = ListItemGrids.Where(g => g.Name == target.Name.Substring(0, target.Name.Length - namenum.Length)).First();
-                        }
                         object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
                         target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
                     } else
                     {
-                        if (value.ToString() == "null") target.GetType().GetProperty(translatedname).SetValue(target, null);
+                        if (value.ToString() == "null") target.GetType().GetProperty(translatedname).SetValue(target, string.Empty);
                         else target.GetType().GetProperty(translatedname).SetValue(target, value.ToString());
                     }
                     break;
                 case string[] _:
                     if (mult < 0)
                     {
-                        object ogPoint;
-                        if (namenum == "")
-                        {
-                            ogPoint = ListItems.Where(g => g.Name == target.Name).First();
-                        } else {
-                            ogPoint = ListItemGrids.Where(g => g.Name == target.Name.Substring(0, target.Name.Length - namenum.Length)).First();
-                        }
                         object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
                         target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
                     } else
@@ -884,13 +1065,19 @@ namespace GSTHD
                         target.GetType().GetProperty(translatedname).SetValue(target, ((JArray)value).ToObject<string[]>());
                     }
                     break;
+                case PictureBoxSizeMode _:
+                    if (mult < 0)
+                    {
+                        object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                        target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
+                    } else
+                    {
+                        target.GetType().GetProperty(translatedname).SetValue(target, (PictureBoxSizeMode)(int.Parse(value.ToString())));
+                    }
+
+                    break;
                 default:
                     throw new NotImplementedException(targetType.GetType().ToString());
-            }
-            if (target is OrganicImage oi)
-            {
-                if (oi is Item i) i.UpdateImage();
-                oi.Invalidate();
             }
         }
 

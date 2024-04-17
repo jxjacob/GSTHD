@@ -12,7 +12,7 @@ namespace GSTHD
     {
         Settings settings;
 
-        public bool isBroadcastable;
+        public bool isBroadcastable { get; set; }
 
         public TextBoxPlus(ObjectPointTextbox data, Settings settings, bool isOnBroadcast = false)
         {
