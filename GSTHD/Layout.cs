@@ -8,8 +8,10 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Forms;
 using System.Xml.Linq;
 
@@ -755,24 +757,42 @@ namespace GSTHD
                     {
                         Item target = null;
                         ObjectPoint ogPoint = null;
+                        string[] names = null;
                         foreach (JProperty z in y)
                         {
                             try
                             {
                                 if (z.Name == "Name")
                                 {
-                                    target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as Item;
-                                    ogPoint = ListItems.Where(g => g.Name == target.Name).First();
+                                    if (z.Value.Count() > 1)
+                                    {
+                                        names = ((JArray)z.Value).ToObject<string[]>();
+                                    } else
+                                    {
+                                        target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as Item;
+                                        ogPoint = ListItems.Where(g => g.Name == target.Name).First();
+                                    }
                                 }
                             } catch (IndexOutOfRangeException){
                                 //ignore
                             }
-                            if (target != null && z.Name != "Name")
+                            if ((target != null || names != null) && z.Name != "Name")
                             {
-                                ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                if (names != null)
+                                {
+                                    foreach (string zname in names)
+                                    {
+                                        target = hostForm.Controls.Find(zname, true)[0] as Item;
+                                        ogPoint = ListItems.Where(g => g.Name == target.Name).First();
+                                        ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                        // sucks that this is super expensive
+                                        target.Invalidate();
+                                        target.UpdateImage();
+                                    }
+                                } else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
                             }
                         }
-                        if (target != null)
+                        if (target != null && names != null)
                         {
                             target.Invalidate();
                             target.UpdateImage();
@@ -817,27 +837,45 @@ namespace GSTHD
                                 }
                             }
                         }
-                    } else if (x.Key == "TextBoxes")
+                    } 
+                    else if (x.Key == "TextBoxes")
                     {
                         TextBoxPlus target = null;
                         ObjectPointTextbox ogPoint = null;
+                        string[] names = null;
                         foreach (JProperty z in y)
                         {
                             try
                             {
                                 if (z.Name == "Name")
                                 {
-                                    target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as TextBoxPlus;
-                                    ogPoint = ListTextBoxes.Where(g => g.Name == target.Name).First();
+                                    if (z.Value.Count() > 1)
+                                    {
+                                        names = ((JArray)z.Value).ToObject<string[]>();
+                                    }
+                                    else
+                                    {
+                                        target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as TextBoxPlus;
+                                        ogPoint = ListTextBoxes.Where(g => g.Name == target.Name).First();
+                                    }
                                 }
                             }
                             catch (IndexOutOfRangeException)
                             {
                                 //ignore
                             }
-                            if (target != null && z.Name != "Name")
+                            if ((target != null || names != null) && z.Name != "Name")
                             {
-                                ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                if (names != null)
+                                {
+                                    foreach (string zname in names)
+                                    {
+                                        target = hostForm.Controls.Find(zname, true)[0] as TextBoxPlus;
+                                        ogPoint = ListTextBoxes.Where(g => g.Name == target.Name).First();
+                                        ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                    }
+                                }
+                                else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
                             }
                         }
                     }
@@ -885,23 +923,43 @@ namespace GSTHD
                     {
                         DoubleItem target = null;
                         ObjectPoint ogPoint = null;
+                        string[] names = null;
                         foreach (JProperty z in y)
                         {
                             try
                             {
                                 if (z.Name == "Name")
                                 {
-                                    target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as DoubleItem;
-                                    ogPoint = ListDoubleItems.Where(g => g.Name == target.Name).First();
+                                    if (z.Value.Count() > 1)
+                                    {
+                                        names = ((JArray)z.Value).ToObject<string[]>();
+                                    }
+                                    else
+                                    {
+                                        target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as DoubleItem;
+                                        ogPoint = ListDoubleItems.Where(g => g.Name == target.Name).First();
+                                    }
                                 }
                             }
                             catch (IndexOutOfRangeException)
                             {
                                 //ignore
                             }
-                            if (target != null && z.Name != "Name")
+                            if ((target != null || names != null) && z.Name != "Name")
                             {
-                                ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                if (names != null)
+                                {
+                                    foreach (string zname in names)
+                                    {
+                                        target = hostForm.Controls.Find(zname, true)[0] as DoubleItem;
+                                        ogPoint = ListDoubleItems.Where(g => g.Name == target.Name).First();
+                                        ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                        // sucks that this is super expensive
+                                        target.Invalidate();
+                                        target.UpdateImage();
+                                    }
+                                }
+                                else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
                             }
                         }
                         if (target != null)
@@ -914,23 +972,43 @@ namespace GSTHD
                     {
                         CollectedItem target = null;
                         ObjectPointCollectedItem ogPoint = null;
+                        string[] names = null;
                         foreach (JProperty z in y)
                         {
                             try
                             {
                                 if (z.Name == "Name")
                                 {
-                                    target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as CollectedItem;
-                                    ogPoint = ListCollectedItems.Where(g => g.Name == target.Name).First();
+                                    if (z.Value.Count() > 1)
+                                    {
+                                        names = ((JArray)z.Value).ToObject<string[]>();
+                                    }
+                                    else
+                                    {
+                                        target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as CollectedItem;
+                                        ogPoint = ListCollectedItems.Where(g => g.Name == target.Name).First();
+                                    }
                                 }
                             }
                             catch (IndexOutOfRangeException)
                             {
                                 //ignore
                             }
-                            if (target != null && z.Name != "Name")
+                            if ((target != null || names != null) && z.Name != "Name")
                             {
-                                ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                if (names != null)
+                                {
+                                    foreach (string zname in names)
+                                    {
+                                        target = hostForm.Controls.Find(zname, true)[0] as CollectedItem;
+                                        ogPoint = ListCollectedItems.Where(g => g.Name == target.Name).First();
+                                        ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                        // sucks that this is super expensive
+                                        target.Invalidate();
+                                        target.UpdateImage();
+                                    }
+                                }
+                                else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
                             }
                         }
                         if (target != null)
@@ -943,23 +1021,43 @@ namespace GSTHD
                     {
                         GuaranteedHint target = null;
                         ObjectPoint ogPoint = null;
+                        string[] names = null;
                         foreach (JProperty z in y)
                         {
                             try
                             {
                                 if (z.Name == "Name")
                                 {
-                                    target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as GuaranteedHint;
-                                    ogPoint = ListGuaranteedHints.Where(g => g.Name == target.Name).First();
+                                    if (z.Value.Count() > 1)
+                                    {
+                                        names = ((JArray)z.Value).ToObject<string[]>();
+                                    }
+                                    else
+                                    {
+                                        target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as GuaranteedHint;
+                                        ogPoint = ListGuaranteedHints.Where(g => g.Name == target.Name).First();
+                                    }
                                 }
                             }
                             catch (IndexOutOfRangeException)
                             {
                                 //ignore
                             }
-                            if (target != null && z.Name != "Name")
+                            if ((target != null || names != null) && z.Name != "Name")
                             {
-                                ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                if (names != null)
+                                {
+                                    foreach (string zname in names)
+                                    {
+                                        target = hostForm.Controls.Find(zname, true)[0] as GuaranteedHint;
+                                        ogPoint = ListGuaranteedHints.Where(g => g.Name == target.Name).First();
+                                        ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                        // sucks that this is super expensive
+                                        target.Invalidate();
+                                        target.UpdateImage();
+                                    }
+                                }
+                                else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
                             }
                         }
                         if (target != null)
