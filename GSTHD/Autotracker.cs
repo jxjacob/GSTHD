@@ -126,7 +126,7 @@ namespace GSTHD
             {
                 if (ta.group != "")
                 {
-                    TrackedGroup result = trackedGroups.Find(x => x.name.Equals(ta.group));
+                    TrackedGroup result = trackedGroups.Find(x => x.name == ta.group);
                     if (result.targetControl != null)
                     {
                         //Debug.WriteLine("group " + result.name + " already has a targetcontrol, skipping");

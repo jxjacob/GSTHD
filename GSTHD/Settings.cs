@@ -1,14 +1,22 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms.VisualStyles;
 
 namespace GSTHD
 {
+    public class AltSettings
+    {
+        public string LayoutName { get; set; }
+        public Dictionary<string, string> Changes { get; set; } = new Dictionary<string, string>();
+    }
     public class Settings
     {
         private const string SettingsFileName = @"settings.json";
@@ -138,6 +146,8 @@ namespace GSTHD
         public KnownColor SpoilerWOTHColour { get; set; } = KnownColor.ForestGreen;
         public KnownColor SpoilerEmptyColour { get; set; } = KnownColor.Teal;
         public KnownColor SpoilerKindaEmptyColour { get; set; } = KnownColor.GreenYellow;
+        public List<AltSettings> AlternateSettings { get; set; } = new List<AltSettings>();
+
 
         public MedallionLabel DefaultDungeonNames { get; set; } = new MedallionLabel()
         {
@@ -167,6 +177,40 @@ namespace GSTHD
                 settings.Write();
                 return settings;
             }
+        }
+
+        public void AddAltSetting(string groupname, string settingname, bool check)
+        {
+            if (!AlternateSettings.Where(x => x.LayoutName == ActiveLayout).Any())
+            {
+                // there isnt a setting for this layout yet, go add it
+                AlternateSettings.Add(new AltSettings { LayoutName = ActiveLayout });
+            }
+            AltSettings thealt = AlternateSettings.Where(x => x.LayoutName == ActiveLayout).First();
+            if (groupname == string.Empty || groupname == null)
+            {
+                // add as SETTINGNAME : CHECK
+                if (thealt.Changes.ContainsKey(settingname))
+                {
+                    if (check) thealt.Changes[settingname] = check.ToString();
+                    else thealt.Changes.Remove(settingname);
+                } else
+                {
+                    if (check) thealt.Changes.Add(settingname, check.ToString());
+                }
+            } else
+            {
+                // add as GROUPNAME : SETTINGNAME
+                if (thealt.Changes.ContainsKey(groupname))
+                {
+                    thealt.Changes[groupname] = settingname;
+                }
+                else
+                {
+                    thealt.Changes.Add(groupname, settingname);
+                }
+            }
+            Write();
         }
 
         public void Write()

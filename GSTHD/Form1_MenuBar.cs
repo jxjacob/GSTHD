@@ -733,7 +733,7 @@ namespace GSTHD
                 // clicking the already enabled option is pointless, ignore
                 if (choice.Checked) return;
                 usedtag = choice.Tag.ToString();
-                foreach (ToolStripMenuItem x in ((ToolStripMenuItem)(choice.OwnerItem)).DropDownItems)
+                foreach (ToolStripMenuItem x in ((ToolStripMenuItem)choice.OwnerItem).DropDownItems)
                 {
                     if (x == choice)
                     {
@@ -751,9 +751,30 @@ namespace GSTHD
             }
 
             Debug.WriteLine(choice.Text + " :: " + choice.Tag + " :: " + choice.Checked.ToString());
-            //Settings.Write();
+            Settings.AddAltSetting(choice.Tag?.ToString(), choice.Text, choice.Checked);
             Form.CurrentLayout.ApplyAlternates(choice.Text, usedtag, choice.Checked, LastUsed);
         }
+
+        public void CheckmarkAlternateOption(string groupname, string name)
+        {
+            //((ToolStripMenuItem)((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Find(name, true).First()).Checked = true;
+            bool superbreak = false;
+            foreach (ToolStripMenuItem x in ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems)
+            {
+                if (superbreak) break;
+                if (x.HasDropDownItems)
+                {
+                    foreach (ToolStripMenuItem y in x.DropDownItems)
+                    {
+                        if (y.Tag?.ToString() != groupname && groupname != string.Empty) { break; }
+                        if (y.Text == name) { y.Checked = true; superbreak = true; break; }
+                    }
+                } else
+                {
+                    if (x.Text == name) { x.Checked = true; break; }
+                }
+            }
+        } 
 
         public void menuBar_OpenLayout(object sender, EventArgs e)
         {

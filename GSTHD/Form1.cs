@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using GSTHD.Properties;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -222,6 +223,30 @@ namespace GSTHD
             Controls.Add(LayoutContent);
             MenuBar.Dock = DockStyle.Top;
             Controls.Add(MenuBar);
+            ApplyAltsFromSettings();
+        }
+
+        private void ApplyAltsFromSettings()
+        {
+            if (Settings.AlternateSettings.Count > 0)
+            {
+                //Settings lookups to see if they are checked or not
+                AltSettings thealt = Settings.AlternateSettings.Where(x => x.LayoutName == Settings.ActiveLayout).First();
+                foreach (var alt in thealt.Changes)
+                {
+                    if (alt.Value == "True")
+                    {
+                        MenuBar.CheckmarkAlternateOption(string.Empty, alt.Key);
+                        CurrentLayout.ApplyAlternates(alt.Key, null, true, string.Empty);
+                    }
+                    else if (alt.Value != "False")
+                    {
+                        MenuBar.CheckmarkAlternateOption(alt.Key, alt.Value);
+                        CurrentLayout.ApplyAlternates(alt.Value, alt.Key, true, string.Empty);
+                    }
+                }
+
+            }
         }
 
         public void UpdateLayoutFromSettings()

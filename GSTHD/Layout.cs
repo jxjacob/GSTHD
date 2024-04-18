@@ -357,10 +357,6 @@ namespace GSTHD
                         settings.DefaultDungeonNames.FontStyle = App_Settings.DefaultDungeonNames.FontStyle;
                 }
 
-
-                //TODO: somewhere in this declaration, i will need to do Settings lookups to see if they are checked or not
-                    //and then later, actually apply the stuff
-
                 if (!isOnBroadcast)
                 {
                     var theMenu = ((Form1)hostForm).MenuBar;
