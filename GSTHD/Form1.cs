@@ -231,7 +231,9 @@ namespace GSTHD
             if (Settings.AlternateSettings.Count > 0)
             {
                 //Settings lookups to see if they are checked or not
-                AltSettings thealt = Settings.AlternateSettings.Where(x => x.LayoutName == Settings.ActiveLayout).First();
+                var altlists = Settings.AlternateSettings.Where(x => x.LayoutName == Settings.ActiveLayout);
+                if (!altlists.Any()) return;
+                AltSettings thealt = altlists.First();
                 foreach (var alt in thealt.Changes)
                 {
                     if (alt.Value == "True")
