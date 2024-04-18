@@ -1122,12 +1122,16 @@ namespace GSTHD
                         {
                             if (z.Name == "Width")
                             {
+                                hostForm.LayoutContent.Size = new Size(hostForm.Size.Width + int.Parse(z.Value.ToString()) * mult, hostForm.Size.Height);
                                 hostForm.Size = new Size(hostForm.Size.Width + int.Parse(z.Value.ToString()) * mult, hostForm.Size.Height);
+                                
                             } else if (z.Name == "Height")
                             {
+                                hostForm.LayoutContent.Size = new Size(hostForm.Size.Width, hostForm.Size.Height + int.Parse(z.Value.ToString()) * mult);
                                 hostForm.Size = new Size(hostForm.Size.Width, hostForm.Size.Height + int.Parse(z.Value.ToString()) * mult);
                             }
                         }
+                        //hostForm.Refresh();
                     }
                     // keys is collecteditems, grids, etc
 
@@ -1222,7 +1226,27 @@ namespace GSTHD
                     {
                         target.GetType().GetProperty(translatedname).SetValue(target, (PictureBoxSizeMode)(int.Parse(value.ToString())));
                     }
-
+                    break;
+                case Color _:
+                    if (mult < 0)
+                    {
+                        object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                        if (((Color)ogValue).Name == "Transparent")
+                        {
+                            target.GetType().GetProperty(translatedname).SetValue(target, null);
+                        } else
+                        {
+                            target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
+                        }
+                    }
+                    else
+                    {
+                        // format: `1,2,3`
+                        var newrgb = value?.ToString().Split(',');
+                        // if there isnt more than 1 response, assume its a word and not rgb
+                        if (newrgb.Length > 1) target.GetType().GetProperty(translatedname).SetValue(target, Color.FromArgb(int.Parse(newrgb[0]), int.Parse(newrgb[1]), int.Parse(newrgb[2])));
+                        else target.GetType().GetProperty(translatedname).SetValue(target, Color.FromName(value.ToString()));
+                    }
                     break;
                 default:
                     throw new NotImplementedException($"Data type {targetType.GetType()} (used for {name}) has not yet been implemented. Go pester JXJacob to go fix it.");

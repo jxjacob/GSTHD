@@ -18,8 +18,8 @@ namespace GSTHD
         Dictionary<string, string> ListKeycodesWithTag = new Dictionary<string, string>();
         SortedSet<string> ListSometimesHintsSuggestions = new SortedSet<string>();
 
-        public Layout CurrentLayout;
-        public Panel LayoutContent;
+        public Layout CurrentLayout { get; set; }
+        public Panel LayoutContent { get; set; }
 
         Settings Settings;
         

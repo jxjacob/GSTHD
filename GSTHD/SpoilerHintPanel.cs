@@ -368,23 +368,16 @@ namespace GSTHD
 
             for (int i = 0; i < helmOrder.Count; i++)
             {
-                Item temp;
-                try
-                {
-                    temp = (Item)f.Controls[0].Controls.Find($"HelmOrder{i}", false)[0];
-                    temp.SetState(helmOrder[i] + 1);
-                } catch { }
+                var temp = f.Controls[0].Controls.Find($"HelmOrder{i}", false);
+                if (temp.Length > 0) { ((Item)temp.First()).SetState(helmOrder[i] + 1); }
+                else { break; }
             }
 
             for (int i = 0; i < kroolOrder.Count; i++)
             {
-                Item temp;
-                try
-                {
-                    temp = (Item)f.Controls[0].Controls.Find($"KroolOrder{i}", false)[0];
-                    temp.SetState(kroolOrder[i] + 1);
-                }
-                catch { }
+                var temp = f.Controls[0].Controls.Find($"KroolOrder{i}", false);
+                if (temp.Length > 0) { ((Item)temp.First()).SetState(kroolOrder[i] + 1); }
+                else { break; }
             }
 
             this.BackColor = storedBackColor;

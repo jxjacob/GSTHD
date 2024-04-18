@@ -185,8 +185,10 @@ namespace GSTHD
         {
             MenuStrip = new MenuStrip();
             Items = new MenuItems();
+            MenuStrip.CanOverflow = true;
+            MenuStrip.OverflowButton.Enabled = true;
 
-            var layoutMenu = new ToolStripMenuItem("File");
+            var layoutMenu = new ToolStripMenuItem("File") { Overflow = ToolStripItemOverflow.AsNeeded};
             {
                 Items.OpenLayout = new ToolStripMenuItem("Open Layout", null, new EventHandler(menuBar_OpenLayout))
                 {
@@ -280,7 +282,7 @@ namespace GSTHD
             }
             MenuStrip.Items.Add(layoutMenu);
 
-            var optionMenu = new ToolStripMenuItem("Global Options");
+            var optionMenu = new ToolStripMenuItem("Global Options") { Overflow = ToolStripItemOverflow.AsNeeded };
             {
 
                 var dragDropSubMenu = new ToolStripMenuItem("Mouse Controls");
@@ -545,9 +547,9 @@ namespace GSTHD
             }
             MenuStrip.Items.Add(optionMenu);
 
-            MenuStrip.Items.Add(new ToolStripMenuItem("Layout Options"));
+            MenuStrip.Items.Add(new ToolStripMenuItem("Layout Options") { Overflow = ToolStripItemOverflow.AsNeeded });
 
-            var MemoryMenu = new ToolStripMenuItem("Autotracker");
+            var MemoryMenu = new ToolStripMenuItem("Autotracker") { Overflow = ToolStripItemOverflow.AsNeeded };
             {
                 SelectEmulatorOptions = new Dictionary<Settings.SelectEmulatorOption, ToolStripMenuItem>();
 
@@ -574,6 +576,8 @@ namespace GSTHD
                 MemoryMenu.DropDownItems.Add(Items.ConnectToEmulator);
             }
             MenuStrip.Items.Add(MemoryMenu);
+
+            //var OverflowMenu = new ToolStripOverflowButton(">");
 
             
         }

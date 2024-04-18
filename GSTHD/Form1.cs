@@ -21,6 +21,7 @@ namespace GSTHD
         Color BackColor { get; set; }
         String Name { get; set; }
         Size Size { get; set; }
+        Panel LayoutContent { get; set; }
 
         Control.ControlCollection Controls { get; }
 
@@ -33,8 +34,8 @@ namespace GSTHD
         SortedSet<string> ListSometimesHintsSuggestions = new SortedSet<string>();
 
         public Form1_MenuBar MenuBar;
-        public Layout CurrentLayout;
-        Panel LayoutContent;
+        public Layout CurrentLayout { get; set; }
+        public Panel LayoutContent { get; set; }
         public Autotracker TheAutotracker;
         public System.Timers.Timer StoneCyclingTimer;
         private int cyclecount = 0;
@@ -665,6 +666,7 @@ namespace GSTHD
 
         public void UpdateAll()
         {
+            //TODO: push all alternates
             foreach (Item x in this.Controls[0].Controls.OfType<Item>())
             {
                 x.UpdateImage();
