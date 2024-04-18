@@ -226,7 +226,7 @@ namespace GSTHD
             ApplyAltsFromSettings();
         }
 
-        private void ApplyAltsFromSettings()
+        private void ApplyAltsFromSettings(bool broadcast = false)
         {
             if (Settings.AlternateSettings.Count > 0)
             {
@@ -234,20 +234,36 @@ namespace GSTHD
                 var altlists = Settings.AlternateSettings.Where(x => x.LayoutName == Settings.ActiveLayout);
                 if (!altlists.Any()) return;
                 AltSettings thealt = altlists.First();
-                foreach (var alt in thealt.Changes)
+                if (broadcast)
                 {
-                    if (alt.Value == "True")
+                    Form2 f2 = (Form2)Application.OpenForms["GSTHD_DK64 Broadcast View"];
+                    foreach (var alt in thealt.Changes)
                     {
-                        MenuBar.CheckmarkAlternateOption(string.Empty, alt.Key);
-                        CurrentLayout.ApplyAlternates(alt.Key, null, true, string.Empty);
+                        if (alt.Value == "True")
+                        {
+                            f2.CurrentLayout.ApplyAlternates(alt.Key, null, true, string.Empty);
+                        }
+                        else if (alt.Value != "False")
+                        {
+                            f2.CurrentLayout.ApplyAlternates(alt.Value, alt.Key, true, string.Empty);
+                        }
                     }
-                    else if (alt.Value != "False")
+                } else
+                {
+                    foreach (var alt in thealt.Changes)
                     {
-                        MenuBar.CheckmarkAlternateOption(alt.Key, alt.Value);
-                        CurrentLayout.ApplyAlternates(alt.Value, alt.Key, true, string.Empty);
+                        if (alt.Value == "True")
+                        {
+                            MenuBar.CheckmarkAlternateOption(string.Empty, alt.Key);
+                            CurrentLayout.ApplyAlternates(alt.Key, null, true, string.Empty);
+                        }
+                        else if (alt.Value != "False")
+                        {
+                            MenuBar.CheckmarkAlternateOption(alt.Key, alt.Value);
+                            CurrentLayout.ApplyAlternates(alt.Value, alt.Key, true, string.Empty);
+                        }
                     }
                 }
-
             }
         }
 
@@ -733,6 +749,7 @@ namespace GSTHD
             {
                 x.Push();
             }
+            ApplyAltsFromSettings(true);
         }
     }
 }
