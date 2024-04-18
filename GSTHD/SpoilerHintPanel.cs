@@ -393,6 +393,12 @@ namespace GSTHD
             spoilerLoaded = true;
         }
 
+        public void RecalcCells()
+        {
+            // recalculate width and height and apply them if theres a json loaded
+            ReorderCells();
+        }
+
         public void ReorderCells()
         {
             Debug.WriteLine("reordering");

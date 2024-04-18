@@ -302,6 +302,7 @@ namespace GSTHD
                     SizeMode = PictureBoxSizeMode.Zoom,
                     X = 0,
                     Y = 0,
+                    Visible = true,
                     isBroadcastable = this.isBroadcastable
                 };
                 levelNumberImage = new GuaranteedHint(temp1, settings, isOnBroadcast);
@@ -313,6 +314,7 @@ namespace GSTHD
                 {
                     Name = $"{name}_unknownLevel",
                     X = 0, Y = 0,
+                    Visible = true,
                     Size = new Size(WorldNumWidth, WorldNumHeight),
                     ImageCollection = new string[] { "dk64/unknownnum.png", "dk64/1.png", "dk64/2.png", "dk64/3.png", "dk64/4.png", "dk64/5.png", "dk64/6.png", "dk64/7.png" },
                     isBroadcastable = this.isBroadcastable,
@@ -329,6 +331,7 @@ namespace GSTHD
                 SizeMode = PictureBoxSizeMode.Zoom,
                 X = (!MinimalMode && levelOrder == 9) ? -6 : WorldNumWidth,
                 Y = 1,
+                Visible = true,
                 isBroadcastable = this.isBroadcastable,
             };
             levelImage = new GuaranteedHint(temp3, settings, isOnBroadcast);

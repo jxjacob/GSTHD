@@ -792,7 +792,7 @@ namespace GSTHD
                                 } else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
                             }
                         }
-                        if (target != null && names != null)
+                        if (target != null && names == null)
                         {
                             target.Invalidate();
                             target.UpdateImage();
@@ -962,7 +962,7 @@ namespace GSTHD
                                 else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
                             }
                         }
-                        if (target != null)
+                        if (target != null && names == null)
                         {
                             target.Invalidate();
                             target.UpdateImage();
@@ -1011,7 +1011,7 @@ namespace GSTHD
                                 else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
                             }
                         }
-                        if (target != null)
+                        if (target != null && names == null)
                         {
                             target.Invalidate();
                             target.UpdateCount();
@@ -1060,10 +1060,59 @@ namespace GSTHD
                                 else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
                             }
                         }
-                        if (target != null)
+                        if (target != null && names == null)
                         {
                             target.Invalidate();
                             target.UpdateImage();
+                        }
+                    }
+                    else if (x.Key == "PanelSpoiler")
+                    {
+                        SpoilerPanel target = null;
+                        ObjectPanelSpoiler ogPoint = null;
+                        string[] names = null;
+                        foreach (JProperty z in y)
+                        {
+                            try
+                            {
+                                if (z.Name == "Name")
+                                {
+                                    if (z.Value.Count() > 1)
+                                    {
+                                        names = ((JArray)z.Value).ToObject<string[]>();
+                                    }
+                                    else
+                                    {
+                                        target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as SpoilerPanel;
+                                        ogPoint = ListPanelSpoiler.Where(g => g.Name == target.Name).First();
+                                    }
+                                }
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                //ignore
+                            }
+                            if ((target != null || names != null) && z.Name != "Name")
+                            {
+                                if (names != null)
+                                {
+                                    foreach (string zname in names)
+                                    {
+                                        target = hostForm.Controls.Find(zname, true)[0] as SpoilerPanel;
+                                        ogPoint = ListPanelSpoiler.Where(g => g.Name == target.Name).First();
+                                        ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                        // sucks that this is super expensive
+                                        //target.Invalidate();
+                                        //target.UpdateImage();
+                                    }
+                                }
+                                else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                            }
+                        }
+                        if (target != null && names == null)
+                        {
+                            //target.Invalidate();
+                            //target.UpdateImage();
                         }
                     }
                     else if (x.Key == "AppSize")
@@ -1132,6 +1181,7 @@ namespace GSTHD
                     target.GetType().GetProperty(translatedname).SetValue(target, i + int.Parse(value.ToString())*mult);
                     break;
                 case bool _:
+                    // TODO: figure out how to make the false of one setting override the other? idk, spoiler + shopkeeper issue
                     if (mult < 0)
                     {
                         object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
@@ -1175,7 +1225,7 @@ namespace GSTHD
 
                     break;
                 default:
-                    throw new NotImplementedException(targetType.GetType().ToString());
+                    throw new NotImplementedException($"Data type {targetType.GetType()} (used for {name}) has not yet been implemented. Go pester JXJacob to go fix it.");
             }
         }
 
