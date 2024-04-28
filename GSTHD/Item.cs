@@ -15,7 +15,7 @@ namespace GSTHD
         public bool isMarked;
 
     }
-    public class Item : OrganicImage, ProgressibleElement<ItemState>, DraggableAutocheckElement<ItemState>
+    public class Item : OrganicImage, IAlternatableObject, ProgressibleElement<ItemState>, DraggableAutocheckElement<ItemState>
     {
         private readonly Settings Settings;
         private readonly ProgressibleElementBehaviour<ItemState> ProgressBehaviour;
@@ -240,5 +240,22 @@ namespace GSTHD
 
         public void SaveChanges() { }
         public void CancelChanges() { }
+
+        public void SetVisible(bool visible)
+        {
+            Visible = visible;
+        }
+
+        public void SpecialtyImport(object ogPoint, string name, object value, int mult)
+        {
+            var point = (ObjectPoint)ogPoint;
+            switch (name)
+            {
+                case "":
+                    break;
+                default:
+                    throw new NotImplementedException($"Could not perform Item Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");
+            }
+        }
     }
 }

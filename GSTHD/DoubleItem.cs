@@ -14,7 +14,7 @@ namespace GSTHD
         public int ImageIndex;
         public bool isMarked;
     }
-    public class DoubleItem : OrganicImage, ProgressibleElement<DoubleItemState>
+    public class DoubleItem : OrganicImage, IAlternatableObject, ProgressibleElement<DoubleItemState>
     {
         private readonly Settings Settings;
         private readonly ProgressibleElementBehaviour<DoubleItemState> ProgressBehaviour;
@@ -236,6 +236,21 @@ namespace GSTHD
 
         }
 
+        public void SetVisible(bool visible)
+        {
+            Visible = visible;
+        }
 
+        public void SpecialtyImport(object ogPoint, string name, object value, int mult)
+        {
+            var point = (ObjectPointCollectedItem)ogPoint;
+            switch (name)
+            {
+                case "":
+                    break;
+                default:
+                    throw new NotImplementedException($"Could not perform DoubleItem Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");
+            }
+        }
     }
 }

@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace GSTHD
 {
-    internal class TextBoxPlus : TextBox
+    internal class TextBoxPlus : TextBox, IAlternatableObject
     {
         Settings settings;
 
@@ -50,6 +50,23 @@ namespace GSTHD
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {
                 ((Label)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).Text = this.Text;
+            }
+        }
+
+        public void SetVisible(bool visible)
+        {
+            Visible = visible;
+        }
+
+        public void SpecialtyImport(object ogPoint, string name, object value, int mult)
+        {
+            var point = (ObjectPointTextbox)ogPoint;
+            switch (name)
+            {
+                case "":
+                    break;
+                default:
+                    throw new NotImplementedException($"Could not perform Textbox Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");
             }
         }
     }

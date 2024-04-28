@@ -14,7 +14,7 @@ using System.Text.RegularExpressions;
 
 namespace GSTHD
 {
-    class SpoilerPanel : Panel, UpdatableFromSettings
+    class SpoilerPanel : Panel, UpdatableFromSettings, IAlternatableObject
     {
         Settings Settings;
 
@@ -539,6 +539,23 @@ namespace GSTHD
                 cell.UpdateFromSettings();
             }
 
+        }
+
+        public void SetVisible(bool visible)
+        {
+            Visible = visible;
+        }
+
+        public void SpecialtyImport(object ogPoint, string name, object value, int mult)
+        {
+            var point = (ObjectPanelSpoiler)ogPoint;
+            switch (name)
+            {
+                case "":
+                    break;
+                default:
+                    throw new NotImplementedException($"Could not perform PanelSpoiler Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");
+            }
         }
     }
 }

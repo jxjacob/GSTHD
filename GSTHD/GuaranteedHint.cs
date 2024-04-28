@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
 namespace GSTHD
 {
-    class GuaranteedHint : OrganicImage, ProgressibleElement<int>
+    class GuaranteedHint : OrganicImage, IAlternatableObject, ProgressibleElement<int>
     {
         private readonly Settings Settings;
         private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
@@ -72,6 +73,23 @@ namespace GSTHD
         {
             isMarked = !isMarked;
             UpdateImage();
+        }
+
+        public void SetVisible(bool visible)
+        {
+            Visible = visible;
+        }
+
+        public void SpecialtyImport(object ogPoint, string name, object value, int mult)
+        {
+            var point = (ObjectPoint)ogPoint;
+            switch (name)
+            {
+                case "":
+                    break;
+                default:
+                    throw new NotImplementedException($"Could not perform GuaranteedHint Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");
+            }
         }
     }
 }

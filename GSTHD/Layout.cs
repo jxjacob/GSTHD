@@ -1160,120 +1160,118 @@ namespace GSTHD
         private void ApplyAlternatesChanges(Control target, object ogPoint, string name, object value, int mult)
         {
             string translatedname = TranslationLayer(name);
-            var targetType = target.GetType().GetProperty(translatedname).GetValue(target, null);
-            switch (targetType)
+            var targetType = target.GetType().GetProperty(translatedname);
+            if (targetType == null)
             {
-                case Size si:
+                ((IAlternatableObject)target).SpecialtyImport(ogPoint, name, value, mult);
+            } else
+            {
+                switch (targetType.GetValue(target, null))
+                {
+                    case Size si:
                     
-                    // format: `1,2`
-                    var newvalues = value.ToString().Split(',');
-                    target.GetType().GetProperty(translatedname).SetValue(target, new Size(si.Width + int.Parse(newvalues[0]) * mult, si.Height + int.Parse(newvalues[1]) * mult));
-                    break;
-                case Point po:
-                    if (name == "X")
-                    {
-                        target.GetType().GetProperty(translatedname).SetValue(target, new Point(po.X + int.Parse(value.ToString()) * mult, po.Y));
-                    } else if (name == "Y")
-                    {
-                        target.GetType().GetProperty(translatedname).SetValue(target, new Point(po.X, po.Y + int.Parse(value.ToString()) * mult));
-                    }
-                    break;
-                case int i:
-                    target.GetType().GetProperty(translatedname).SetValue(target, i + int.Parse(value.ToString())*mult);
-                    break;
-                case bool _:
-                    // TODO: figure out how to make the false of one setting override the other? idk, spoiler + shopkeeper issue
-                    if (mult < 0)
-                    {
-                        object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
-                        target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
-                        if (name == "Visible")
+                        // format: `1,2`
+                        var newvalues = value.ToString().Split(',');
+                        target.GetType().GetProperty(translatedname).SetValue(target, new Size(si.Width + int.Parse(newvalues[0]) * mult, si.Height + int.Parse(newvalues[1]) * mult));
+                        break;
+                    case Point po:
+                        if (name == "X")
                         {
-                            if (target is CollectedItem ci)
+                            target.GetType().GetProperty(translatedname).SetValue(target, new Point(po.X + int.Parse(value.ToString()) * mult, po.Y));
+                        } else if (name == "Y")
+                        {
+                            target.GetType().GetProperty(translatedname).SetValue(target, new Point(po.X, po.Y + int.Parse(value.ToString()) * mult));
+                        }
+                        break;
+                    case int i:
+                        target.GetType().GetProperty(translatedname).SetValue(target, i + int.Parse(value.ToString())*mult);
+                        break;
+                    case bool _:
+                        if (mult < 0)
+                        {
+                            object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                            if (name == "Visible")
                             {
-                                ci.ItemCount.Visible = (bool)ogValue;
-                            }
-                            else if (target is Medallion me)
+                                //visibiliyu is handled differently, due to the possibility of sub-objects
+                                ((IAlternatableObject)target).SetVisible((bool)ogValue);
+                            } else
                             {
-                                me.SelectedDungeon.Visible = (bool)ogValue;
+                                target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
                             }
                         }
-                    }
-                    else
-                    {
-                        target.GetType().GetProperty(translatedname).SetValue(target, bool.Parse(value.ToString()));
-                        //TODO: figure out if theres a less stupid way to do this (since i'll need to do multiple things for the labels)
-                        if (name == "Visible")
+                        else
                         {
-                            if (target is CollectedItem ci)
+                            if (name == "Visible")
                             {
-                                ci.ItemCount.Visible = bool.Parse(value.ToString());
-                            } else if (target is Medallion me)
+                                ((IAlternatableObject)target).SetVisible(bool.Parse(value.ToString()));
+                            } else
                             {
-                                me.SelectedDungeon.Visible = bool.Parse(value.ToString());
+                                target.GetType().GetProperty(translatedname).SetValue(target, bool.Parse(value.ToString()));
                             }
                         }
-                    }
-                    break;
-                case string _:
-                    if (mult < 0)
-                    {
-                        object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
-                        target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
-                    } else
-                    {
-                        if (value.ToString() == "null") target.GetType().GetProperty(translatedname).SetValue(target, string.Empty);
-                        else target.GetType().GetProperty(translatedname).SetValue(target, value.ToString());
-                    }
-                    break;
-                case string[] _:
-                    if (mult < 0)
-                    {
-                        object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
-                        target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
-                    } else
-                    {
-                        target.GetType().GetProperty(translatedname).SetValue(target, ((JArray)value).ToObject<string[]>());
-                    }
-                    break;
-                case PictureBoxSizeMode _:
-                    if (mult < 0)
-                    {
-                        object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
-                        target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
-                    } else
-                    {
-                        target.GetType().GetProperty(translatedname).SetValue(target, (PictureBoxSizeMode)(int.Parse(value.ToString())));
-                    }
-                    break;
-                case Color _:
-                    if (mult < 0)
-                    {
-                        object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
-                        if (((Color)ogValue).Name == "Transparent")
+                        break;
+                    case string _:
+                        if (mult < 0)
                         {
-                            target.GetType().GetProperty(translatedname).SetValue(target, null);
+                            object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                            target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
                         } else
                         {
-                            target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
+                            if (value.ToString() == "null") target.GetType().GetProperty(translatedname).SetValue(target, string.Empty);
+                            else target.GetType().GetProperty(translatedname).SetValue(target, value.ToString());
                         }
-                    }
-                    else
-                    {
-                        // format: `1,2,3`
-                        var newrgb = value?.ToString().Split(',');
-                        // if there isnt more than 1 response, assume its a word and not rgb
-                        if (newrgb.Length > 1) target.GetType().GetProperty(translatedname).SetValue(target, Color.FromArgb(int.Parse(newrgb[0]), int.Parse(newrgb[1]), int.Parse(newrgb[2])));
-                        else target.GetType().GetProperty(translatedname).SetValue(target, Color.FromName(value.ToString()));
-                    }
-                    break;
-                default:
-                    throw new NotImplementedException($"Data type {targetType.GetType()} (used for {name}) has not yet been implemented. Go pester JXJacob to go fix it.");
+                        break;
+                    case string[] _:
+                        if (mult < 0)
+                        {
+                            object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                            target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
+                        } else
+                        {
+                            target.GetType().GetProperty(translatedname).SetValue(target, ((JArray)value).ToObject<string[]>());
+                        }
+                        break;
+                    case PictureBoxSizeMode _:
+                        if (mult < 0)
+                        {
+                            object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                            target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
+                        } else
+                        {
+                            target.GetType().GetProperty(translatedname).SetValue(target, (PictureBoxSizeMode)(int.Parse(value.ToString())));
+                        }
+                        break;
+                    case Color _:
+                        if (mult < 0)
+                        {
+                            object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                            if (((Color)ogValue).Name == "Transparent")
+                            {
+                                target.GetType().GetProperty(translatedname).SetValue(target, null);
+                            } else
+                            {
+                                target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
+                            }
+                        }
+                        else
+                        {
+                            // format: `1,2,3`
+                            var newrgb = value?.ToString().Split(',');
+                            // if there isnt more than 1 response, assume its a word and not rgb
+                            if (newrgb.Length > 1) target.GetType().GetProperty(translatedname).SetValue(target, Color.FromArgb(int.Parse(newrgb[0]), int.Parse(newrgb[1]), int.Parse(newrgb[2])));
+                            else target.GetType().GetProperty(translatedname).SetValue(target, Color.FromName(value.ToString()));
+                        }
+                        break;
+                    default:
+                        throw new NotImplementedException($"Data type {targetType.GetValue(target, null).GetType()} (used for {name}) has not yet been implemented. Go pester JXJacob to go fix it.");
+
+                }
             }
         }
 
         private string TranslationLayer(string input)
         {
+            //only accounts for Properties, not for attributes that are only used for calculations or subobjects
             // why did i not make the names 1 to 1 aaaaaaaaaaaaaa
             switch (input)
             {
@@ -1287,6 +1285,12 @@ namespace GSTHD
             }
         }
 
+    }
+
+    public interface IAlternatableObject
+    {
+        void SetVisible(bool visible);
+        void SpecialtyImport(object ogPoint, string name, object value, int mult);
     }
 
     public class GenericLabel
