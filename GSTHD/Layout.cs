@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Activities;
 using System.Activities.Expressions;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -1186,10 +1187,32 @@ namespace GSTHD
                     {
                         object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
                         target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
+                        if (name == "Visible")
+                        {
+                            if (target is CollectedItem ci)
+                            {
+                                ci.ItemCount.Visible = (bool)ogValue;
+                            }
+                            else if (target is Medallion me)
+                            {
+                                me.SelectedDungeon.Visible = (bool)ogValue;
+                            }
+                        }
                     }
                     else
                     {
                         target.GetType().GetProperty(translatedname).SetValue(target, bool.Parse(value.ToString()));
+                        //TODO: figure out if theres a less stupid way to do this (since i'll need to do multiple things for the labels)
+                        if (name == "Visible")
+                        {
+                            if (target is CollectedItem ci)
+                            {
+                                ci.ItemCount.Visible = bool.Parse(value.ToString());
+                            } else if (target is Medallion me)
+                            {
+                                me.SelectedDungeon.Visible = bool.Parse(value.ToString());
+                            }
+                        }
                     }
                     break;
                 case string _:
@@ -1617,11 +1640,18 @@ namespace GSTHD
         public string AutotrackingGame { get; set; } = null;
     }
 
+    public class SubAltSettings
+    {
+        public string[] Names { get; set; } = null;
+        public Dictionary<string, dynamic[]> Changes { get; set; } = null;
+    }
+
     public class AlternateSettings
     {
         public string Name { get; set; }
         public string Group { get; set; } = string.Empty;
         public string Collection { get; set; } = string.Empty;
         public Dictionary<string, dynamic[]> Changes { get; set; } = null;
+        public SubAltSettings[] ConditionalChanges { get; set; } = null;
     }
 }

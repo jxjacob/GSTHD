@@ -113,7 +113,7 @@ namespace GSTHD
 
         }
 
-        public void tryToKill()
+        public void TryToKill()
         {
             if (isCyling && HeldImages.Count > 1)
             {
@@ -343,7 +343,6 @@ namespace GSTHD
             // when hovering over an image, using middle click will delete that entry in the list
             if (HeldImages.Count > 1 && hoveredOver)
             {
-                var temp = HeldImages[CycleIndex];
                 HeldImages.Remove(HeldImages[CycleIndex]);
                 if (CycleIndex >= HeldImages.Count)
                 {

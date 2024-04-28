@@ -512,7 +512,7 @@ namespace GSTHD
             this.Controls.Remove(woth.LabelPlace);
             foreach (var gossipStone in woth.listGossipStone)
             {
-                gossipStone.tryToKill();
+                gossipStone.TryToKill();
                 this.Controls.Remove(gossipStone);
             }
 

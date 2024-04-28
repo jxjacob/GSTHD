@@ -84,6 +84,7 @@ namespace GSTHD
 
             ItemCount = new Label
             {
+                Visible = data.Visible,
                 BackColor = data.BackColor,
                 BorderStyle = BorderStyle.None,
                 Text = CollectedItems.ToString(),

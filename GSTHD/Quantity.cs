@@ -71,28 +71,34 @@ namespace GSTHD
 
 
 
-            ObjectPointCollectedItem tempOPCI = new ObjectPointCollectedItem();
-            tempOPCI.Size = gossipStoneSize;
-            tempOPCI.LabelFontSize = counterFontSize;
-            tempOPCI.ImageCollection = new[] { counterImageName };
-            tempOPCI.CountPosition =  new Size(6, 10);
-            tempOPCI.LabelFontName = LabelPlace.Font.Name;
-            tempOPCI.LabelColor = Color.White;
-            tempOPCI.hasSlash = true;
-            tempOPCI.BackColor = subBackColor;
-            tempOPCI.BackGroundColor = subBackColor;
+            ObjectPointCollectedItem tempOPCI = new ObjectPointCollectedItem
+            {
+                Size = gossipStoneSize,
+                LabelFontSize = counterFontSize,
+                ImageCollection = new[] { counterImageName },
+                CountPosition = new Size(6, 10),
+                LabelFontName = LabelPlace.Font.Name,
+                LabelColor = Color.White,
+                hasSlash = true,
+                BackColor = subBackColor,
+                BackGroundColor = subBackColor,
+                // note: quantity/woth/barren are NOT controls, so visibility might need to be passed from somewhere else
+                Visible = true,
+            };
 
             //Debug.WriteLine("making left CI");
-            leftCounterCI = new CollectedItem(tempOPCI, Settings, isBroadcastable);
-            leftCounterCI.Location =
-                new Point(gossipStoneStartX + (leftCounterCI.Width + counterSpacing)*0, LabelPlace.Location.Y);
+            leftCounterCI = new CollectedItem(tempOPCI, Settings, isBroadcastable)
+            {
+                Location =new Point(gossipStoneStartX + (leftCounterCI.Width + counterSpacing)*0, LabelPlace.Location.Y)
+            };
             //Debug.WriteLine(leftCounterCI.Location);
 
            // Debug.WriteLine("rmaking right CI");
             tempOPCI.hasSlash = false;
-            rightCounterCI = new CollectedItem(tempOPCI, Settings, isBroadcastable);
-            rightCounterCI.Location =
-                new Point(gossipStoneStartX + (leftCounterCI.Width + counterSpacing), LabelPlace.Location.Y);
+            rightCounterCI = new CollectedItem(tempOPCI, Settings, isBroadcastable)
+            {
+                Location = new Point(gossipStoneStartX + (leftCounterCI.Width + counterSpacing), LabelPlace.Location.Y)
+            };
             //Debug.WriteLine(rightCounterCI.Location);
 
 

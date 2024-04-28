@@ -302,7 +302,7 @@ namespace GSTHD
 
                 if ((string)parseddata["level_name"] == "Cranky's Lab")
                 {
-                    // add jetpac numbers to Isles
+                    // add jetpac numbers to Isles (legacy feature)
                     cells.Last().AddCrankys((int)parseddata["points"], (int)parseddata["woth_count"], ParsePotions(parseddata["vial_colors"]));
                 }
                 else

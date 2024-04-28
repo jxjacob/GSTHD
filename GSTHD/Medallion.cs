@@ -95,7 +95,7 @@ namespace GSTHD
                 MouseMove += DragBehaviour.Mouse_Move_WithAutocheck;
                 MouseWheel += DragBehaviour.Mouse_Wheel;
             }
-            
+
 
             SelectedDungeon = new Label
             {
@@ -104,9 +104,9 @@ namespace GSTHD
                 BackColor = Color.Transparent,
                 ForeColor = Color.White,
                 AutoSize = true,
+                Visible = data.Visible,
+                Location = new Point(Location.X + Size.Width / 2, (int)(Location.Y + Size.Height * 0.75))
             };
-
-            SelectedDungeon.Location = new Point(Location.X + Size.Width / 2, (int)(Location.Y + Size.Height * 0.75));
 
             if (!isBroadcast)
             {

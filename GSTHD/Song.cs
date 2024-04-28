@@ -318,7 +318,7 @@ namespace GSTHD
             isOnBroadcast = isBroadcast;
             AutoName = data.AutoName;
             
-            BackColor = Color.Transparent;
+            //BackColor = Color.Transparent;
             Location = new Point(data.X, data.Y);
             TabStop = false;
             AllowDrop = true;
@@ -336,7 +336,7 @@ namespace GSTHD
 
             SongMarker = new SongMarker(this, settings, data.TinyImageCollection, isBroadcast)
             {
-                BackColor = Color.Transparent,
+                //BackColor = Color.Transparent,
                 TabStop = false,
                 AllowDrop = false,
             };

@@ -477,7 +477,7 @@ namespace GSTHD
                     Items.CycleLength = new ToolStripMenuItem("Cycle Delay", null, GossipeCycleLengthOptions.Values.ToArray());
                     gossipSubMenu.DropDownItems.Add(Items.CycleLength);
 
-                    Items.ForceGossipCycles = new ToolStripMenuItem("Force All Stones to Cycle", null, new EventHandler(menuBar_ToggleForceGossipCycles))
+                    Items.ForceGossipCycles = new ToolStripMenuItem("Allow All Stones to Cycle", null, new EventHandler(menuBar_ToggleForceGossipCycles))
                     {
                         CheckOnClick = true,
                     };
