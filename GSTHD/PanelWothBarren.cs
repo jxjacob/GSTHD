@@ -30,9 +30,6 @@ namespace GSTHD
         private int CounterSpacing;
         private string CounterImage;
         private Size subBoxSize;
-        private int subFontSize;
-        private Color subBackColor;
-        private Color subFontColor;
         private Size GossipStoneSize;
         int GossipStoneSpacing;
         int PathGoalSpacing;
@@ -100,9 +97,6 @@ namespace GSTHD
             this.GossipStoneSize = data.CounterSize;
             this.CounterImage = data.CounterImage;
             this.subBoxSize = data.SubTextBoxSize;
-            this.subFontSize = data.SubTextBoxFontSize;
-            this.subBackColor = data.SubTextBoxBackColor;
-            this.subFontColor = data.SubTextBoxFontColor;
             this.isWotH = 2;
             if (data.IsScrollable)
                 this.MouseWheel += Panel_MouseWheel;
@@ -454,8 +448,8 @@ namespace GSTHD
                 var newlocation = (ListQuantity.Count <= 0) ? new Point(2, -LabelSettings.Height) : ListQuantity.Last().LabelPlace.Location;
                 Quantity newQuan = new Quantity(Settings, selectedPlace,
                         CounterFontSize, CounterSpacing, CounterImage,
-                        subBoxSize, subFontSize, subBackColor, subFontColor,
-                        newlocation, LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling);
+                        subBoxSize, LabelSettings.BackColor,
+                        newlocation, LabelSettings, GossipStoneSize, this.isBroadcastable);
             
                 ListQuantity.Add(newQuan);
                 this.Controls.Add(newQuan.LabelPlace);

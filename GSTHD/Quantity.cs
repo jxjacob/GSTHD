@@ -41,8 +41,8 @@ namespace GSTHD
         public Quantity(Settings settings,
             string selectedPlace,
             int counterFontSize, int counterSpacing, string counterImageName,
-            Size subBoxSize, int subFontSize, Color subBackColor, Color subFontColor,
-            Point lastLabelLocation, Label labelSettings, Size gossipStoneSize, bool isScrollable, PictureBoxSizeMode SizeMode, bool isBroadcastable, bool PathCycling)
+            Size subBoxSize, Color subBackColor, 
+            Point lastLabelLocation, Label labelSettings, Size gossipStoneSize, bool isBroadcastable)
         {
             Settings = settings;
             Name = selectedPlace;
@@ -78,7 +78,7 @@ namespace GSTHD
                 ImageCollection = new[] { counterImageName },
                 CountPosition = new Size(6, 10),
                 LabelFontName = LabelPlace.Font.Name,
-                LabelColor = Color.White,
+                LabelColor = labelSettings.ForeColor,
                 hasSlash = true,
                 BackColor = subBackColor,
                 BackGroundColor = subBackColor,
@@ -89,16 +89,18 @@ namespace GSTHD
             //Debug.WriteLine("making left CI");
             leftCounterCI = new CollectedItem(tempOPCI, Settings, isBroadcastable)
             {
-                Location =new Point(gossipStoneStartX + (leftCounterCI.Width + counterSpacing)*0, LabelPlace.Location.Y)
+                Location = new Point(gossipStoneStartX, LabelPlace.Location.Y)
             };
+
             //Debug.WriteLine(leftCounterCI.Location);
 
-           // Debug.WriteLine("rmaking right CI");
+            // Debug.WriteLine("rmaking right CI");
             tempOPCI.hasSlash = false;
             rightCounterCI = new CollectedItem(tempOPCI, Settings, isBroadcastable)
             {
                 Location = new Point(gossipStoneStartX + (leftCounterCI.Width + counterSpacing), LabelPlace.Location.Y)
             };
+
             //Debug.WriteLine(rightCounterCI.Location);
 
 

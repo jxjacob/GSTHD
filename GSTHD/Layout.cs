@@ -1549,9 +1549,6 @@ namespace GSTHD
         public string CounterImage { get; set; }
 
         public Size SubTextBoxSize { get; set; }
-        public int SubTextBoxFontSize { get; set; }
-        public Color SubTextBoxBackColor { get; set; }
-        public Color SubTextBoxFontColor { get; set; }
 
         public bool isBroadcastable { get; set; } = false;
     }
