@@ -450,7 +450,7 @@ namespace GSTHD
                 {
                     // use this previously read address to find the game verification data
                     var wherethefuck = Memory.ReadInt32(target.Handle, (readAddress + gameInfo.Item1));
-                    if (wherethefuck != 0 && wherethefuck != -954194860) Debug.WriteLine($"{wherethefuck} -- {potOff}");
+                    //if (wherethefuck != 0 && wherethefuck != -954194860) Debug.WriteLine($"{wherethefuck} -- {potOff}");
                     if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, readAddress);
