@@ -389,7 +389,7 @@ namespace GSTHD
 
             var gameInfo = getGameVerificationInfo(baseForm.CurrentLayout.App_Settings.AutotrackingGame);
 
-
+            bool ismp64p = false;
             ulong addressDLL = 0;
             foreach (ProcessModule mo in target.Modules)
             {
@@ -397,12 +397,17 @@ namespace GSTHD
                 {
                     addressDLL = (ulong)mo.BaseAddress.ToInt64();
                     break;
+                } else if (mo.ModuleName.ToLower() == "mupen64plus_next_libretro.dll")
+                {
+                    addressDLL = (ulong)mo.BaseAddress.ToInt64();
+                    ismp64p |= true;
+                    break;
                 }
             }
 
             if (addressDLL == 0)
             {
-                MessageBox.Show("Could not find mupen64plus loaded within Parallel.\nPlease reinstall Parallel Launcher or reset it to its default settings.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Could not find either the ParaLLel or muper64plus plugins loaded within Parallel Launcher.\nPlease switch to either ParaLLel or GLideN64 graphics plugins to resolve this issue.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
             Debug.WriteLine("found dll at 0x" + addressDLL.ToString("X"));
@@ -414,6 +419,12 @@ namespace GSTHD
 
                 // read the address to find the address of the starting point in the rom
                 ulong readAddress = Memory.ReadInt64(target.Handle, (romAddrStart));
+                if (ismp64p)
+                {
+                    // why is retroarch like this
+                    readAddress = Memory.ReadInt64(target.Handle, (readAddress + 4) & readAddress);
+                    readAddress += 0x80000000;
+                }
 
                 if (gameInfo.Item2 == 8)
                 {
@@ -421,7 +432,7 @@ namespace GSTHD
                     var wherethefuck = Memory.ReadInt8(target.Handle, addr);
                     if ((wherethefuck & 0xff) == gameInfo.Item3)
                     {
-                        return Tuple.Create(target, (readAddress + 0x11A5EC));
+                        return Tuple.Create(target, readAddress);
 
                     }
                 }
@@ -439,6 +450,7 @@ namespace GSTHD
                 {
                     // use this previously read address to find the game verification data
                     var wherethefuck = Memory.ReadInt32(target.Handle, (readAddress + gameInfo.Item1));
+                    if (wherethefuck != 0 && wherethefuck != -954194860) Debug.WriteLine($"{wherethefuck} -- {potOff}");
                     if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, readAddress);
@@ -456,7 +468,6 @@ namespace GSTHD
 
             }
 
-            //MessageBox.Show("Could not find the correct RMG offset\nJXJacob hasn't figured out how to solve this one so you might be out of luck.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
         }
     }
