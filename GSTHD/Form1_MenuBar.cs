@@ -135,7 +135,8 @@ namespace GSTHD
             { Settings.SelectEmulatorOption.Project64, "Project64 3.0.1" },
             { Settings.SelectEmulatorOption.Bizhawk, "Bizhawk-DK64" },
             { Settings.SelectEmulatorOption.RMG, "Rosalie's Mupen GUI" },
-            { Settings.SelectEmulatorOption.simple64, "simple64" }
+            { Settings.SelectEmulatorOption.simple64, "simple64" },
+            { Settings.SelectEmulatorOption.parallel, "Parallel Launcher" }
         };
 
         private readonly Dictionary<Settings.SpoilerOrderOption, string> SpoilerOrderNames = new Dictionary<Settings.SpoilerOrderOption, string>
@@ -1220,6 +1221,21 @@ namespace GSTHD
                         else
                         {
                             MessageBox.Show("Could not connect to simple64\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        break;
+                    case "parallel":
+                        var resultpar = AttachToEmulators.attachToParallel(Form);
+                        if (resultpar != null)
+                        {
+                            if (resultpar.Item1 != null)
+                            {
+                                Form.SetAutotracker(resultpar.Item1, resultpar.Item2);
+                                MessageBox.Show("Connection to Parallel Launcher sucessful\nTracking will begin once you enter the main game mode (not the title screen or main menu)");
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("Could not connect to Parallel Launcher\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                         break;
                     default:

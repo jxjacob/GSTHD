@@ -190,10 +190,6 @@ namespace GSTHD
 
             }
 
-
-
-
-            //MessageBox.Show("Could not find the correct Bizhawk-DK64 offset\nJXJacob hasn't figured out how to solve this one so you might be out of luck.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
         }
 
@@ -358,6 +354,94 @@ namespace GSTHD
                     if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress));
+
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Incorrect bytes set for verification.\nMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
+                }
+
+
+
+
+            }
+
+            return null;
+        }
+
+
+
+        public static Tuple<Process, ulong> attachToParallel(Form1 baseForm)
+        {
+            Process target = null;
+            try
+            {
+                target = Process.GetProcessesByName("retroarch")[0];
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message + "\nCould not find process \"retroarch\" on your machine.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+            Debug.WriteLine("fuck retroarch tbh");
+
+            var gameInfo = getGameVerificationInfo(baseForm.CurrentLayout.App_Settings.AutotrackingGame);
+
+
+            ulong addressDLL = 0;
+            foreach (ProcessModule mo in target.Modules)
+            {
+                if (mo.ModuleName.ToLower() == "parallel_n64_next_libretro.dll")
+                {
+                    addressDLL = (ulong)mo.BaseAddress.ToInt64();
+                    break;
+                }
+            }
+
+            if (addressDLL == 0)
+            {
+                MessageBox.Show("Could not find mupen64plus loaded within Parallel.\nPlease reinstall Parallel Launcher or reset it to its default settings.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+            Debug.WriteLine("found dll at 0x" + addressDLL.ToString("X"));
+
+            for (uint potOff = 0x845000; potOff < 0xD56000; potOff += 16)
+            {
+                ulong romAddrStart = addressDLL + potOff;
+
+
+                // read the address to find the address of the starting point in the rom
+                ulong readAddress = Memory.ReadInt64(target.Handle, (romAddrStart));
+
+                if (gameInfo.Item2 == 8)
+                {
+                    var addr = Memory.Int8AddrFix(readAddress + gameInfo.Item1);
+                    var wherethefuck = Memory.ReadInt8(target.Handle, addr);
+                    if ((wherethefuck & 0xff) == gameInfo.Item3)
+                    {
+                        return Tuple.Create(target, (readAddress + 0x11A5EC));
+
+                    }
+                }
+                else if (gameInfo.Item2 == 16)
+                {
+                    var addr = Memory.Int16AddrFix(readAddress + gameInfo.Item1);
+                    var wherethefuck = Memory.ReadInt16(target.Handle, addr);
+                    if ((wherethefuck & 0xffff) == gameInfo.Item3)
+                    {
+                        return Tuple.Create(target, readAddress);
+
+                    }
+                }
+                else if (gameInfo.Item2 == 32)
+                {
+                    // use this previously read address to find the game verification data
+                    var wherethefuck = Memory.ReadInt32(target.Handle, (readAddress + gameInfo.Item1));
+                    if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
+                    {
+                        return Tuple.Create(target, readAddress);
 
                     }
                 }
