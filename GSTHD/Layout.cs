@@ -82,21 +82,35 @@ namespace GSTHD
                     }
                 } catch (JsonReaderException)
                 {
-                    MessageBox.Show("File " + settings.ActiveLayout.ToString() + " does not appear to be a proper json file.\nReverting to dk64.json.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    // set settings to dk64.json
-                    settings.ActiveLayout = "layouts\\dk64.json";
-                    settings.Write();
-                    // force reload
-                    form.Reset(null);
+                    if (isOnBroadcast)
+                    {
+                        MessageBox.Show("File " + settings.ActiveLayoutBroadcastFile.ToString() + " appears to contian incorrect JSON formatting.\nClosing broadcast view.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        ((Form2)form).Close();
+                    }
+                    else
+                    {
+                        MessageBox.Show("File " + settings.ActiveLayout.ToString() + " appears to contian incorrect JSON formatting.\nReverting to dk64.json.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        // if this IS dk64.json and its having issues, force close so it doesnt loop
+                        if (settings.ActiveLayout == "layouts\\dk64.json") Application.Exit();
+                        // set settings to dk64.json
+                        settings.ActiveLayout = "layouts\\dk64.json";
+                        settings.Write();
+                    }
                     return;
                 } catch (FileNotFoundException)
                 {
-                    MessageBox.Show("File " + settings.ActiveLayout.ToString() + " could not be found.\nReverting to dk64.json.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    // set settings to dk64.json
-                    settings.ActiveLayout = "layouts\\dk64.json";
-                    settings.Write();
-                    // force reload
-                    form.Reset(null);
+                    if (isOnBroadcast)
+                    {
+                        MessageBox.Show("File " + settings.ActiveLayoutBroadcastFile.ToString() + " could not be found.\nClosing broadcast view.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        ((Form2)form).Close();
+                    }
+                    else
+                    {
+                        MessageBox.Show("File " + settings.ActiveLayout.ToString() + " could not be found.\nReverting to dk64.json.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        // set settings to dk64.json
+                        settings.ActiveLayout = "layouts\\dk64.json";
+                        settings.Write();
+                    }
                     return;
                 }
                 
