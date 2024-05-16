@@ -565,7 +565,7 @@ namespace GSTHD
                         }
                     }
 
-                    displayList = displayList.OrderByDescending(i => i.item_id > 0).ThenBy(i => i.potionType).ToList();
+                    displayList = displayList.OrderByDescending(i => i.item_id >= 0).ThenBy(i => i.potionType).ToList();
 
                     int usedPotWidth = PotionWidth;
                     int usedPotHeight = PotionHeight;

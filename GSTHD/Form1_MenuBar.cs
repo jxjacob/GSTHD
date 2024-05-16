@@ -166,6 +166,8 @@ namespace GSTHD
         Dictionary<double, ToolStripMenuItem> GossipeCycleLengthOptions;
         Size SavedSize;
 
+        delegate void ATCheckCallback(bool enabled);
+
         public Form1_MenuBar(Form1 form, Settings settings)
         {
             Form = form;
@@ -780,26 +782,24 @@ namespace GSTHD
             
         }
 
+        public void menuBar_AutotrackerCheck(bool enabled)
+        {
+            if (this.InvokeRequired)
+            {
+                Invoke(new ATCheckCallback(menuBar_AutotrackerCheck), new object[] { enabled });
+                return;
+            }
+            else
+            {
+                Items.ConnectToEmulator.Checked = enabled;
+            }
+        }
+
         public void menuBar_toggleBroadcast()
         {
             if (Items.BroadcastView.Checked) {
                Items.BroadcastView.Checked = false;
              } else { Items.BroadcastView.Checked = true;}
-        }
-
-        public void menuBar_ZoomIn(object sender, EventArgs e)
-        {
-            Form.ZoomIn();
-        }
-
-        public void menuBar_ZoomOut(object sender, EventArgs e)
-        {
-            Form.ZoomOut();
-        }
-
-        public void menuBar_ZoomReset(object sender, EventArgs e)
-        {
-            Form.ZoomReset();
         }
 
         public void menuBar_Show()
@@ -1176,6 +1176,7 @@ namespace GSTHD
                         else
                         {
                             MessageBox.Show("Could not connect to PJ64\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
                         }
                         break;
                     case "Bizhawk":
@@ -1191,6 +1192,7 @@ namespace GSTHD
                         else
                         {
                             MessageBox.Show("Could not connect to Bizhawk-DK64\nMake sure the game you want to track is loaded in the emulator before connecting.\nIf you are experiencing persistent issues, try switching to the _32 exe of GSTHD instead.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
                         }
                         break;
                     case "RMG":
@@ -1206,6 +1208,7 @@ namespace GSTHD
                         else
                         {
                             MessageBox.Show("Could not connect to RMG\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
                         }
                         break;
                     case "simple64":
@@ -1221,6 +1224,7 @@ namespace GSTHD
                         else
                         {
                             MessageBox.Show("Could not connect to simple64\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
                         }
                         break;
                     case "parallel":
@@ -1236,16 +1240,19 @@ namespace GSTHD
                         else
                         {
                             MessageBox.Show("Could not connect to Parallel Launcher\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
                         }
                         break;
                     default:
                         MessageBox.Show("No supported emulator selected.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        break;
+                        return;
 
                 }
+                menuBar_AutotrackerCheck(true);
             } else
             {
                 MessageBox.Show("Current layout does not support autotracking.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
             
             

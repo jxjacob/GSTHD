@@ -37,8 +37,6 @@ namespace GSTHD
         public System.Timers.Timer StoneCyclingTimer;
         private int cyclecount = 0;
 
-        private float GlobalScale = 1;
-
         public List<GossipStone> currentlyCycling = new List<GossipStone>();
 
         public Settings Settings;
@@ -217,7 +215,6 @@ namespace GSTHD
             CurrentLayout = new Layout();
             CurrentLayout.LoadLayout(LayoutContent, Settings, ListSometimesHintsSuggestions, ListPlacesWithTag, ListKeycodesWithTag, this);
             Size = new Size(LayoutContent.Size.Width, LayoutContent.Size.Height + MenuBar.Size.Height);
-            GlobalScale = 1;
             LayoutContent.Dock = DockStyle.Top;
             Controls.Add(LayoutContent);
             MenuBar.Dock = DockStyle.Top;
@@ -312,27 +309,6 @@ namespace GSTHD
                 TheAutotracker.NukeTimer();
             }
             TheAutotracker = null;
-        }
-
-        public void ZoomIn()
-        {
-            this.Scale(new SizeF((GlobalScale + 0.1f)/GlobalScale, (GlobalScale + 0.1f) / GlobalScale));
-            GlobalScale += 0.1f;
-            Debug.WriteLine(GlobalScale);
-        }
-
-        public void ZoomOut()
-        {
-            this.Scale(new SizeF((GlobalScale - 0.1f) / GlobalScale, (GlobalScale - 0.1f) / GlobalScale));
-            GlobalScale -= 0.1f;
-            Debug.WriteLine(GlobalScale);
-        }
-
-        public void ZoomReset()
-        {
-            this.Scale(new SizeF((1f) / GlobalScale, (1f) / GlobalScale));
-            Debug.WriteLine(1f/GlobalScale);
-            GlobalScale = 1;
         }
 
         public void AddCycling(GossipStone gs) 
@@ -683,6 +659,11 @@ namespace GSTHD
         public void ToggleMenuBroadcast()
         {
             MenuBar.menuBar_toggleBroadcast();
+        }
+
+        public void SetMenuAutotrackerCheck(bool enabled)
+        {
+            MenuBar.menuBar_AutotrackerCheck(enabled);
         }
 
         public void UpdateAll()

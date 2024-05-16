@@ -156,12 +156,12 @@ namespace GSTHD
                     if (gameInfo.Item2 == 8)
                     {
                         uint addr = Memory.Int8AddrFix(gameInfo.Item1);
-                        gamecheck = Memory.ReadInt8(target.Handle, romAddrStart + addr);
+                        gamecheck = Memory.ReadInt8(target.Handle, (uint)(addressDLL + romAddrStart + addr));
                     }
                     else if (gameInfo.Item2 == 16)
                     {
                         uint addr = Memory.Int16AddrFix(gameInfo.Item1);
-                        gamecheck = Memory.ReadInt16(target.Handle, romAddrStart + addr);
+                        gamecheck = Memory.ReadInt16(target.Handle, (uint)(addressDLL + romAddrStart + addr));
                     }
                     else if (gameInfo.Item2 == 32)
                     {
