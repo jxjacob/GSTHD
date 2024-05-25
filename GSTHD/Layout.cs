@@ -94,7 +94,7 @@ namespace GSTHD
                 {
                     if (isOnBroadcast)
                     {
-                        MessageBox.Show("File " + settings.ActiveLayoutBroadcastFile.ToString() + " appears to contian incorrect JSON formatting.\nClosing broadcast and reloading.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("File " + settings.ActiveLayoutBroadcastFile.ToString() + " appears to contian incorrect JSON formatting.\nClosing broadcast view.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         ((Form2)hostForm).Close();
                     } else
                     {
@@ -112,7 +112,7 @@ namespace GSTHD
                 {
                     if (isOnBroadcast)
                     {
-                        MessageBox.Show("File " + settings.ActiveLayoutBroadcastFile.ToString() + " could not be found.\nClosing broadcast and reloading.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("File " + settings.ActiveLayoutBroadcastFile.ToString() + " could not be found.\nClosing broadcast view.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         ((Form2)hostForm).Close();
                     }
                     else

@@ -707,6 +707,11 @@ namespace GSTHD
             MenuBar.menuBar_toggleBroadcast();
         }
 
+        public void SetMenuAutotrackerCheck(bool enabled)
+        {
+            MenuBar.menuBar_AutotrackerCheck(enabled);
+        }
+
         public void UpdateAll()
         {
             //TODO: push all alternates

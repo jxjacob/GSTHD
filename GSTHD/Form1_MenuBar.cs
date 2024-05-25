@@ -136,7 +136,8 @@ namespace GSTHD
             { Settings.SelectEmulatorOption.Project64, "Project64 3.0.1" },
             { Settings.SelectEmulatorOption.Bizhawk, "Bizhawk-DK64" },
             { Settings.SelectEmulatorOption.RMG, "Rosalie's Mupen GUI" },
-            { Settings.SelectEmulatorOption.simple64, "simple64" }
+            { Settings.SelectEmulatorOption.simple64, "simple64" },
+            { Settings.SelectEmulatorOption.parallel, "Parallel Launcher" }
         };
 
         private readonly Dictionary<Settings.SpoilerOrderOption, string> SpoilerOrderNames = new Dictionary<Settings.SpoilerOrderOption, string>
@@ -165,6 +166,8 @@ namespace GSTHD
         Dictionary<KnownColor, ToolStripMenuItem> SpoilerKindaEmptyColorOptions;
         Dictionary<double, ToolStripMenuItem> GossipeCycleLengthOptions;
         Size SavedSize;
+
+        delegate void ATCheckCallback(bool enabled);
 
         public Form1_MenuBar(Form1 form, Settings settings)
         {
@@ -904,6 +907,19 @@ namespace GSTHD
             
         }
 
+        public void menuBar_AutotrackerCheck(bool enabled)
+        {
+            if (this.InvokeRequired)
+            {
+                Invoke(new ATCheckCallback(menuBar_AutotrackerCheck), new object[] { enabled });
+                return;
+            }
+            else
+            {
+                Items.ConnectToEmulator.Checked = enabled;
+            }
+        }
+
         public void menuBar_toggleBroadcast()
         {
             if (Items.BroadcastView.Checked) {
@@ -1285,6 +1301,7 @@ namespace GSTHD
                         else
                         {
                             MessageBox.Show("Could not connect to PJ64\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
                         }
                         break;
                     case "Bizhawk":
@@ -1300,6 +1317,7 @@ namespace GSTHD
                         else
                         {
                             MessageBox.Show("Could not connect to Bizhawk-DK64\nMake sure the game you want to track is loaded in the emulator before connecting.\nIf you are experiencing persistent issues, try switching to the _32 exe of GSTHD instead.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
                         }
                         break;
                     case "RMG":
@@ -1315,6 +1333,7 @@ namespace GSTHD
                         else
                         {
                             MessageBox.Show("Could not connect to RMG\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
                         }
                         break;
                     case "simple64":
@@ -1330,16 +1349,35 @@ namespace GSTHD
                         else
                         {
                             MessageBox.Show("Could not connect to simple64\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                        break;
+                    case "parallel":
+                        var resultpar = AttachToEmulators.attachToParallel(Form);
+                        if (resultpar != null)
+                        {
+                            if (resultpar.Item1 != null)
+                            {
+                                Form.SetAutotracker(resultpar.Item1, resultpar.Item2);
+                                MessageBox.Show("Connection to Parallel Launcher sucessful\nTracking will begin once you enter the main game mode (not the title screen or main menu)");
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("Could not connect to Parallel Launcher\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
                         }
                         break;
                     default:
                         MessageBox.Show("No supported emulator selected.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        break;
+                        return;
 
                 }
+                menuBar_AutotrackerCheck(true);
             } else
             {
                 MessageBox.Show("Current layout does not support autotracking.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
             
             

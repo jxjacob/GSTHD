@@ -710,9 +710,9 @@ namespace GSTHD
                 timer.Elapsed -= MainTracker;
                 timer.Stop();
                 timer.Close();
-                timer = null;
             }
             timer = null;
+            form.SetMenuAutotrackerCheck(false);
         }
 
         public void UpdateFromSettings()

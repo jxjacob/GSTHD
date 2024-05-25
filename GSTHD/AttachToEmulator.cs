@@ -156,12 +156,12 @@ namespace GSTHD
                     if (gameInfo.Item2 == 8)
                     {
                         uint addr = Memory.Int8AddrFix(gameInfo.Item1);
-                        gamecheck = Memory.ReadInt8(target.Handle, romAddrStart + addr);
+                        gamecheck = Memory.ReadInt8(target.Handle, (uint)(addressDLL + romAddrStart + addr));
                     }
                     else if (gameInfo.Item2 == 16)
                     {
                         uint addr = Memory.Int16AddrFix(gameInfo.Item1);
-                        gamecheck = Memory.ReadInt16(target.Handle, romAddrStart + addr);
+                        gamecheck = Memory.ReadInt16(target.Handle, (uint)(addressDLL + romAddrStart + addr));
                     }
                     else if (gameInfo.Item2 == 32)
                     {
@@ -190,10 +190,6 @@ namespace GSTHD
 
             }
 
-
-
-
-            //MessageBox.Show("Could not find the correct Bizhawk-DK64 offset\nJXJacob hasn't figured out how to solve this one so you might be out of luck.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
         }
 
@@ -372,7 +368,106 @@ namespace GSTHD
 
             }
 
-            //MessageBox.Show("Could not find the correct RMG offset\nJXJacob hasn't figured out how to solve this one so you might be out of luck.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return null;
+        }
+
+
+
+        public static Tuple<Process, ulong> attachToParallel(Form1 baseForm)
+        {
+            Process target = null;
+            try
+            {
+                target = Process.GetProcessesByName("retroarch")[0];
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message + "\nCould not find process \"retroarch\" on your machine.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+            Debug.WriteLine("fuck retroarch tbh");
+
+            var gameInfo = getGameVerificationInfo(baseForm.CurrentLayout.App_Settings.AutotrackingGame);
+
+            bool ismp64p = false;
+            ulong addressDLL = 0;
+            foreach (ProcessModule mo in target.Modules)
+            {
+                if (mo.ModuleName.ToLower() == "parallel_n64_next_libretro.dll")
+                {
+                    addressDLL = (ulong)mo.BaseAddress.ToInt64();
+                    break;
+                } else if (mo.ModuleName.ToLower() == "mupen64plus_next_libretro.dll")
+                {
+                    addressDLL = (ulong)mo.BaseAddress.ToInt64();
+                    ismp64p |= true;
+                    break;
+                }
+            }
+
+            if (addressDLL == 0)
+            {
+                MessageBox.Show("Could not find either the ParaLLel or muper64plus plugins loaded within Parallel Launcher.\nPlease switch to either ParaLLel or GLideN64 graphics plugins to resolve this issue.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+            Debug.WriteLine("found dll at 0x" + addressDLL.ToString("X"));
+
+            for (uint potOff = 0x845000; potOff < 0xD56000; potOff += 16)
+            {
+                ulong romAddrStart = addressDLL + potOff;
+
+
+                // read the address to find the address of the starting point in the rom
+                ulong readAddress = Memory.ReadInt64(target.Handle, (romAddrStart));
+                if (ismp64p)
+                {
+                    // why is retroarch like this
+                    readAddress = Memory.ReadInt64(target.Handle, (readAddress + 4) & readAddress);
+                    readAddress += 0x80000000;
+                }
+
+                if (gameInfo.Item2 == 8)
+                {
+                    var addr = Memory.Int8AddrFix(readAddress + gameInfo.Item1);
+                    var wherethefuck = Memory.ReadInt8(target.Handle, addr);
+                    if ((wherethefuck & 0xff) == gameInfo.Item3)
+                    {
+                        return Tuple.Create(target, readAddress);
+
+                    }
+                }
+                else if (gameInfo.Item2 == 16)
+                {
+                    var addr = Memory.Int16AddrFix(readAddress + gameInfo.Item1);
+                    var wherethefuck = Memory.ReadInt16(target.Handle, addr);
+                    if ((wherethefuck & 0xffff) == gameInfo.Item3)
+                    {
+                        return Tuple.Create(target, readAddress);
+
+                    }
+                }
+                else if (gameInfo.Item2 == 32)
+                {
+                    // use this previously read address to find the game verification data
+                    var wherethefuck = Memory.ReadInt32(target.Handle, (readAddress + gameInfo.Item1));
+                    //if (wherethefuck != 0 && wherethefuck != -954194860) Debug.WriteLine($"{wherethefuck} -- {potOff}");
+                    if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
+                    {
+                        return Tuple.Create(target, readAddress);
+
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Incorrect bytes set for verification.\nMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
+                }
+
+
+
+
+            }
+
             return null;
         }
     }
