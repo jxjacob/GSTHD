@@ -404,7 +404,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListLabels)
                     {
-                        panelLayout.Controls.Add(new Label()
+                        panelLayout.Controls.Add(new LabelExtended()
                         {
                             Name = item.Name,
                             Visible = item.Visible,
@@ -442,7 +442,7 @@ namespace GSTHD
                                     ca = ContentAlignment.TopLeft;
                                     break;
                             }
-                            panelLayout.Controls.Add(new Label()
+                            panelLayout.Controls.Add(new LabelExtended()
                             {
                                 Name = box.Name,
                                 Visible= box.Visible,
@@ -916,6 +916,47 @@ namespace GSTHD
                             }
                         }
                     }
+                    else if (x.Key == "Labels")
+                    {
+                        LabelExtended target = null;
+                        GenericLabel ogPoint = null;
+                        string[] names = null;
+                        foreach (JProperty z in y)
+                        {
+                            try
+                            {
+                                if (z.Name == "Name")
+                                {
+                                    if (z.Value.Count() > 1)
+                                    {
+                                        names = ((JArray)z.Value).ToObject<string[]>();
+                                    }
+                                    else
+                                    {
+                                        target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as LabelExtended;
+                                        ogPoint = ListLabels.Where(g => g.Name == target.Name).First();
+                                    }
+                                }
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                //ignore
+                            }
+                            if ((target != null || names != null) && z.Name != "Name")
+                            {
+                                if (names != null)
+                                {
+                                    foreach (string zname in names)
+                                    {
+                                        target = hostForm.Controls.Find(zname, true)[0] as LabelExtended;
+                                        ogPoint = ListLabels.Where(g => g.Name == target.Name).First();
+                                        ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                    }
+                                }
+                                else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                            }
+                        }
+                    }
                     else if (x.Key == "DoubleItems")
                     {
                         DoubleItem target = null;
@@ -1108,8 +1149,7 @@ namespace GSTHD
                         }
                         if (target != null && names == null)
                         {
-                            //target.Invalidate();
-                            //target.UpdateImage();
+                            target.RefreshCells();
                         }
                     }
                     else if (x.Key == "AppSize")
@@ -1159,7 +1199,7 @@ namespace GSTHD
 
         private void ApplyAlternatesChanges(Control target, object ogPoint, string name, object value, int mult)
         {
-            string translatedname = TranslationLayer(name);
+            string translatedname = TranslationLayer(name, target.GetType());
             var targetType = target.GetType().GetProperty(translatedname);
             if (targetType == null)
             {
@@ -1245,12 +1285,18 @@ namespace GSTHD
                         if (mult < 0)
                         {
                             object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
-                            if (((Color)ogValue).Name == "Transparent")
+                            Color tempcolor;
+                            // format: `1,2,3`
+                            var newrgb = value?.ToString().Split(',');
+                            // if there isnt more than 1 response, assume its a word and not rgb
+                            if (newrgb.Length > 1) tempcolor =  Color.FromArgb(int.Parse(newrgb[0]), int.Parse(newrgb[1]), int.Parse(newrgb[2]));
+                            else tempcolor = Color.FromName(value.ToString());
+                            if (tempcolor.Name == "Transparent")
                             {
                                 target.GetType().GetProperty(translatedname).SetValue(target, null);
                             } else
                             {
-                                target.GetType().GetProperty(translatedname).SetValue(target, ogValue);
+                                target.GetType().GetProperty(translatedname).SetValue(target, tempcolor);
                             }
                         }
                         else
@@ -1269,14 +1315,23 @@ namespace GSTHD
             }
         }
 
-        private string TranslationLayer(string input)
+        private string TranslationLayer(string input, Type targettype)
         {
             //only accounts for Properties, not for attributes that are only used for calculations or subobjects
             // why did i not make the names 1 to 1 aaaaaaaaaaaaaa
             switch (input)
             {
+                case "BackColor":
+                    if (targettype == typeof(SpoilerPanel)) { return "storedBackColor"; }
+                    else { return input; }
+                case "CountPosition":
+                    return "CollectedItemCountPosition";
+                case "Color":
+                    return "ForeColor";
                 case "ImageCollection":
                     return "ImageNames";
+                case "isMinimal":
+                    return "MinimalMode";
                 case "X":
                 case "Y":
                     return "Location";

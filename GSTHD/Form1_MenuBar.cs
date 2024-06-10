@@ -754,8 +754,8 @@ namespace GSTHD
             }
 
             Debug.WriteLine(choice.Text + " :: " + choice.Tag + " :: " + choice.Checked.ToString());
-            Settings.AddAltSetting(choice.Tag?.ToString(), choice.Text, choice.Checked);
             Form.CurrentLayout.ApplyAlternates(choice.Text, usedtag, choice.Checked, LastUsed);
+            Settings.AddAltSetting(choice.Tag?.ToString(), choice.Text, choice.Checked);
         }
 
         public void CheckmarkAlternateOption(string groupname, string name)
@@ -782,11 +782,13 @@ namespace GSTHD
         public void menuBar_OpenLayout(object sender, EventArgs e)
         {
             // open file dialog for jsons
-            OpenFileDialog filedia = new OpenFileDialog();
-            filedia.Title = "Open GST Layout file";
-            filedia.InitialDirectory= Application.StartupPath + "\\Layouts";
-            filedia.Filter = "json files (*.json)|*.json|All files (*.*)|*.*";
-            filedia.Multiselect = false;
+            OpenFileDialog filedia = new OpenFileDialog
+            {
+                Title = "Open GST Layout file",
+                InitialDirectory = Application.StartupPath + "\\Layouts",
+                Filter = "json files (*.json)|*.json|All files (*.*)|*.*",
+                Multiselect = false
+            };
             // put that filename into settings' ActiveLayout
             if (filedia.ShowDialog() == DialogResult.OK)
             {
@@ -806,11 +808,13 @@ namespace GSTHD
         public void menuBar_OpenPlaces(object sender, EventArgs e)
         {
             // open file dialog for jsons
-            OpenFileDialog filedia = new OpenFileDialog();
-            filedia.Title = "Open GST Places file";
-            filedia.InitialDirectory = Application.StartupPath;
-            filedia.Filter = "json files (*.json)|*.json|All files (*.*)|*.*";
-            filedia.Multiselect = false;
+            OpenFileDialog filedia = new OpenFileDialog
+            {
+                Title = "Open GST Places file",
+                InitialDirectory = Application.StartupPath,
+                Filter = "json files (*.json)|*.json|All files (*.*)|*.*",
+                Multiselect = false
+            };
             // put that filename into settings' ActivePlaces
             if (filedia.ShowDialog() == DialogResult.OK)
             {

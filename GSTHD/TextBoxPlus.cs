@@ -60,10 +60,23 @@ namespace GSTHD
 
         public void SpecialtyImport(object ogPoint, string name, object value, int mult)
         {
-            var point = (ObjectPointTextbox)ogPoint;
             switch (name)
             {
-                case "":
+                case "FontName":
+                    if (mult > 0) Font = new Font(value.ToString(), Font.Size, Font.Style);
+                    else Font = new Font((string)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), Font.Size, Font.Style);
+                    break;
+                case "FontSize":
+                    if (mult > 0) Font = new Font(Font.Name, int.Parse(value.ToString()), Font.Style);
+                    else Font = new Font(Font.Name, (int)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), Font.Style);
+                    break;
+                case "FontStyle":
+                    if (mult > 0) Font = new Font(Font.FontFamily, Font.Size, (FontStyle)Enum.Parse(typeof(FontStyle), value.ToString()));
+                    else Font = new Font(Font.FontFamily, Font.Size, (FontStyle)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null));
+                    break;
+                case "FontColor":
+                    if (mult > 0) ForeColor = Color.FromName(value.ToString());
+                    else ForeColor = (Color)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
                     break;
                 default:
                     throw new NotImplementedException($"Could not perform Textbox Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");

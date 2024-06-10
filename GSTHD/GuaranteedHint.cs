@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -85,7 +86,8 @@ namespace GSTHD
             var point = (ObjectPoint)ogPoint;
             switch (name)
             {
-                case "":
+                case "ImageCollection":
+                    ListImageName = ((JArray)value).ToObject<string[]>().ToList();
                     break;
                 default:
                     throw new NotImplementedException($"Could not perform GuaranteedHint Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");

@@ -530,7 +530,7 @@ namespace GSTHD
                 int pointMeasure = TextRenderer.MeasureText(pointLabel.Text, pointLabel.Font).Width;
                 pointLabel.Width = System.Math.Max(labelWidth, pointMeasure);
                 pointWidth = pointLabel.Width;
-                pointLabel.Location = new Point(this.Size.Width - (System.Math.Max(labelSpacing, pointWidth)) - 1 - this.topRowPadding, pointLabel.Location.Y);
+                pointLabel.Location = new Point(this.Size.Width - (System.Math.Max(labelSpacing, pointWidth)) - 1 - this.topRowPadding, -1);
                 //Debug.WriteLine($"point -- loc: {pointLabel.Location}   width: {pointLabel.Width}    pm: {pointMeasure}    ls: {labelSpacing}");
             }
 
@@ -538,7 +538,7 @@ namespace GSTHD
             {
                 int pointVis = (pointLabel != null) ? 1 : 0;
                 wothLabel.Width = System.Math.Max(labelWidth, TextRenderer.MeasureText(wothLabel.Text, wothLabel.Font).Width);
-                wothLabel.Location = new Point(this.Size.Width - (labelSpacing) - pointVis*(pointWidth) - 1 - this.topRowPadding, wothLabel.Location.Y);
+                wothLabel.Location = new Point(this.Size.Width - (labelSpacing) - pointVis*(pointWidth) - 1 - this.topRowPadding, -1);
                 //Debug.WriteLine($"woth -- loc: {wothLabel.Location}   width: {wothLabel.Width}");
             }
         }
@@ -686,6 +686,42 @@ namespace GSTHD
             UpdateVisuals();
         }
 
+        public void RefreshVisuals(int cellWidth, int cellHeight,
+                        int topRowHeight, int topRowPadding,
+                        int WorldNumWidth, int WorldNumHeight, int WorldLabelWidth,
+                        int PotionWidth, int PotionHeight,
+                        string CellFontName, int CellFontSize, FontStyle CellFontStyle,
+                        int CellLabelSpacing, int CellLabelWidth, Color CellBackColor,
+                        bool MinimalMode)
+        {
+            this.Width = cellWidth;
+            this.Height = cellHeight;
+            this.topRowHeight = topRowHeight;
+            this.topRowPadding = topRowPadding;
+            this.WorldNumWidth = WorldNumWidth;
+            this.WorldNumHeight = WorldNumHeight;
+            this.WorldLabelWidth = WorldLabelWidth;
+            this.PotionWidth = PotionWidth;
+            this.PotionHeight = PotionHeight;
+            this.labelSpacing = CellLabelSpacing;
+            this.labelWidth = CellLabelWidth;
+            this.BackColor = CellBackColor;
+            this.MinimalMode = MinimalMode;
+            Font tempfont = new Font(new FontFamily(CellFontName), CellFontSize, CellFontStyle);
+            if (pointLabel != null)
+            {
+                pointLabel.Font = tempfont;
+                pointLabel.Width = labelWidth;
+                pointLabel.Height = WorldNumHeight;
+            }
+            if (wothLabel != null)
+            {
+                wothLabel.Font = tempfont;
+                wothLabel.Width = labelWidth;
+                wothLabel.Height = WorldNumHeight;
+            }
+            UpdateVisuals();
+        }
 
         public SpoilerCellState GetState()
         {

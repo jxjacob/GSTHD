@@ -36,29 +36,29 @@ namespace GSTHD
         public List<int> kroolOrder = new List<int>();
         public List<int> helmOrder = new List<int>();
 
-        private Color cellBackColor;
-        private Color storedBackColor;
+        private Color CellBackColor;
+        public Color storedBackColor { get; set; }
 
         public int cellWidth;
         public int cellHeight;
 
         public int numRows;
-        public int rowPadding;
+        public int RowPadding { get; set; }
         public int numCols;
-        public int colPadding;
+        public int ColPadding { get; set; }
 
-        public int topRowHeight = 20;
-        public int topRowPadding;
-        public int WorldNumWidth;
-        public int WorldNumHeight;
-        public int WorldLabelWidth;
-        public int PotionWidth;
-        public int PotionHeight;
-        public string CellFontName;
-        public int CellFontSize;
-        public FontStyle CellFontStyle;
-        public int CellLabelSpacing;
-        public int CellLabelWidth;
+        public int DataRowHeight { get; set; } = 20;
+        public int topRowPadding { get; set; }
+        public int WorldNumWidth { get; set; }
+        public int WorldNumHeight { get; set; }
+        public int WorldLabelWidth { get; set; }
+        public int PotionWidth { get; set; }
+        public int PotionHeight { get; set; }
+        public string CellFontName { get; set; }
+        public int CellFontSize { get; set; }
+        public FontStyle CellFontStyle { get; set; }
+        public int LabelSpacing { get; set; }
+        public int CellLabelWidth { get; set; }
 
         public bool writeByRow;
         public bool pointsMode;
@@ -66,10 +66,10 @@ namespace GSTHD
         public int lastKnownMap = -1;
         public int howManySlams = 0;
 
-        public bool ExtendFinal = false;
-        public bool MinimalMode = false;
+        public bool ExtendFinal { get; set; } = false;
+        public bool MinimalMode { get; set; } = false;
         public bool spoilerLoaded = false;
-        public bool isBroadcastable;
+        public bool isBroadcastable { get; set; }
 
         private bool isOnBroadcast = false;
 
@@ -83,7 +83,7 @@ namespace GSTHD
             Visible = data.Visible;
 
             // just concerns defining the shape of the panel
-            cellBackColor = data.CellBackColor;
+            CellBackColor = data.CellBackColor;
             storedBackColor = data.BackColor;
             this.BackColor = data.DefaultColor;
             this.Location = new Point(data.X, data.Y);
@@ -91,9 +91,9 @@ namespace GSTHD
             this.Size = new Size(data.Width, data.Height);
             this.writeByRow = data.WriteByRow;
             this.numRows = data.Rows;
-            this.rowPadding = data.RowPadding;
+            this.RowPadding = data.RowPadding;
             this.numCols = data.Columns;
-            this.colPadding = data.ColPadding;
+            this.ColPadding = data.ColPadding;
 
             this.topRowPadding = data.DataRowPadding;
             this.WorldNumWidth = data.WorldNumWidth;
@@ -104,7 +104,7 @@ namespace GSTHD
             this.CellFontName = data.FontName;
             this.CellFontSize = data.FontSize;
             this.CellFontStyle = data.FontStyle;
-            this.CellLabelSpacing = data.LabelSpacing;
+            this.LabelSpacing = data.LabelSpacing;
             this.CellLabelWidth = data.LabelWidth;
 
             this.ExtendFinal = data.ExtendFinalCell;
@@ -112,7 +112,7 @@ namespace GSTHD
             this.MinimalMode = data.isMinimal;
             if (!MinimalMode)
             {
-                topRowHeight = data.DataRowHeight;
+                DataRowHeight = data.DataRowHeight;
             }
             this.isBroadcastable = data.isBroadcastable && !isOnBroadcast;
             this.isOnBroadcast = isOnBroadcast;
@@ -292,8 +292,8 @@ namespace GSTHD
         {
             DK64Items = DK64_Items.GenerateDK64Items();
             DK64Maps = DK64_Items.GenerateDK64Maps();
-            cellWidth = ((Width - (rowPadding * System.Math.Max(numRows - 1, 1))) / numRows);
-            cellHeight = ((Height - (colPadding * System.Math.Max(numCols - 1, 1))) / numCols);
+            cellWidth = ((Width - (RowPadding * System.Math.Max(numRows - 1, 1))) / numRows);
+            cellHeight = ((Height - (ColPadding * System.Math.Max(numCols - 1, 1))) / numCols);
             //Debug.WriteLine($"w: {cellWidth} -- h: {cellHeight}");
 
             foreach (var level in spoilerData)
@@ -330,8 +330,8 @@ namespace GSTHD
                     int xmod = (writeByRow) ? (placement / numRows) : (placement % numRows);
                     int ymod = (writeByRow) ? (placement % numRows) : (placement / numRows);
 
-                    int newX = xmod * (cellWidth) + (xmod * rowPadding);
-                    int newY = ymod * (cellHeight) + (ymod * colPadding);
+                    int newX = xmod * (cellWidth) + (xmod * RowPadding);
+                    int newY = ymod * (cellHeight) + (ymod * ColPadding);
                     //Debug.WriteLine($"p: {placement} l: {(string)parseddata["level_name"]} x: {newX} -- y: {newY}");
 
 
@@ -341,18 +341,18 @@ namespace GSTHD
                     if (ExtendFinal && placement == 8)
                     {
                         Debug.WriteLine($"xm: {xmod} ym: {ymod}");
-                        finalWidth = cellWidth * (numRows-xmod) + rowPadding*(numRows - xmod - 1);
+                        finalWidth = cellWidth * (numRows-xmod) + RowPadding*(numRows - xmod - 1);
                         Debug.WriteLine($"fw: {finalWidth}");
                     }
 
                     SpoilerCell tempcell = new SpoilerCell(Settings, finalWidth, cellHeight,
                         newX, newY,
                         (int)parseddata["points"], (int)parseddata["woth_count"], newpotions,
-                        topRowHeight, topRowPadding, WorldNumWidth, WorldNumHeight, WorldLabelWidth, PotionWidth, PotionHeight,
+                        DataRowHeight, topRowPadding, WorldNumWidth, WorldNumHeight, WorldLabelWidth, PotionWidth, PotionHeight,
                         Name + "_" + Unspace((string)parseddata["level_name"]), (string)parseddata["level_name"],
                         int.Parse(level.Key), theNum,
-                        CellFontName, CellFontSize, CellFontStyle, CellLabelSpacing, CellLabelWidth,
-                        cellBackColor, MinimalMode, pointspread, DK64Items, isBroadcastable, isOnBroadcast);
+                        CellFontName, CellFontSize, CellFontStyle, LabelSpacing, CellLabelWidth,
+                        CellBackColor, MinimalMode, pointspread, DK64Items, isBroadcastable, isOnBroadcast);
                     cells.Add(tempcell);
 
                 }
@@ -386,12 +386,6 @@ namespace GSTHD
             spoilerLoaded = true;
         }
 
-        public void RecalcCells()
-        {
-            // recalculate width and height and apply them if theres a json loaded
-            ReorderCells();
-        }
-
         public void ReorderCells()
         {
             Debug.WriteLine("reordering");
@@ -414,8 +408,8 @@ namespace GSTHD
                 {
                     placement = cell.levelID;
                 }
-                int newX = (placement / numRows) * (cellWidth) + ((placement / numRows) * rowPadding);
-                int newY = (placement % numRows) * (cellHeight) + ((placement % numRows) * colPadding);
+                int newX = (placement / numRows) * (cellWidth) + ((placement / numRows) * RowPadding);
+                int newY = (placement % numRows) * (cellHeight) + ((placement % numRows) * ColPadding);
                 cell.Location = new Point(newX, newY);
             }
         }
@@ -551,11 +545,81 @@ namespace GSTHD
             var point = (ObjectPanelSpoiler)ogPoint;
             switch (name)
             {
-                case "":
+                case "DefaultColor":
+                    if (!spoilerLoaded)
+                    {
+                        if (mult > 0) {
+                            // format: `1,2,3`
+                            var newrgb = value?.ToString().Split(',');
+                            Color tempColor;
+                            // if there isnt more than 1 response, assume its a word and not rgb
+                            if (newrgb.Length > 1) tempColor = Color.FromArgb(int.Parse(newrgb[0]), int.Parse(newrgb[1]), int.Parse(newrgb[2]));
+                            else tempColor = Color.FromName(value.ToString());
+                            BackColor = tempColor; 
+                        }
+                        else BackColor = (Color)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                    }
+                    break;
+                case "CellBackColor":
+                    if (mult > 0)
+                    {
+                        // format: `1,2,3`
+                        var newrgb = value?.ToString().Split(',');
+                        Color tempColor;
+                        // if there isnt more than 1 response, assume its a word and not rgb
+                        if (newrgb.Length > 1) tempColor = Color.FromArgb(int.Parse(newrgb[0]), int.Parse(newrgb[1]), int.Parse(newrgb[2]));
+                        else tempColor = Color.FromName(value.ToString());
+                        CellBackColor = tempColor;
+                    }
+                    else CellBackColor = (Color)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                    break;
+                case "Rows":
+                    numRows += int.Parse(value.ToString()) * mult;
+                    break;
+                case "Columns":
+                    numCols += int.Parse(value.ToString()) * mult;
+                    break;
+                case "FontName":
+                    if (mult > 0) CellFontName = value.ToString();
+                    else CellFontName = (string)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                    break;
+                case "FontSize":
+                    if (mult > 0) CellFontSize = int.Parse(value.ToString());
+                    else CellFontSize = (int)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                    break;
+                case "FontStyle":
+                    if (mult > 0) CellFontStyle = (FontStyle)Enum.Parse(typeof(FontStyle), value.ToString());
+                    else CellFontStyle = (FontStyle)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                    break;
+                case "LabelWidth":
+                    CellLabelWidth += int.Parse(value.ToString()) * mult;
                     break;
                 default:
                     throw new NotImplementedException($"Could not perform PanelSpoiler Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");
             }
+        }
+        
+        public void RefreshCells()
+        {
+            if (spoilerLoaded)
+            {
+                BackColor = storedBackColor;
+                // a place where i will go through each cell, and re-set their colours and dimensions and etc
+                cellWidth = ((Width - (RowPadding * System.Math.Max(numRows - 1, 1))) / numRows);
+                cellHeight = ((Height - (ColPadding * System.Math.Max(numCols - 1, 1))) / numCols);
+                foreach (SpoilerCell cell in cells)
+                {
+                    cell.RefreshVisuals(cellWidth, cellHeight,
+                        DataRowHeight, topRowPadding,
+                        WorldNumWidth, WorldNumHeight, WorldLabelWidth,
+                        PotionWidth, PotionHeight,
+                        CellFontName, CellFontSize, CellFontStyle,
+                        LabelSpacing, CellLabelWidth, CellBackColor,
+                        MinimalMode);
+                }
+                ReorderCells();
+            }
+
         }
     }
 }

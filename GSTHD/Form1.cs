@@ -415,7 +415,7 @@ namespace GSTHD
                 if (x.Name != "")
                 {
                     CollectedItemState state = x.GetState();
-                    if (state.CollectedItems != x.CollectedItemDefault || state.isMarked != false)
+                    if (state.CollectedItems != x.DefaultValue || state.isMarked != false)
                     {
                         thejson.Add(x.Name, $"{state.CollectedItems},{state.isMarked}");
                     }

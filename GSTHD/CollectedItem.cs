@@ -25,9 +25,9 @@ namespace GSTHD
         public Label ItemCount { get; set; }
         public Size CollectedItemSize { get; set; }
         public Size CollectedItemCountPosition { get; set; }
-        public int CollectedItemMin { get; set; }
-        public int CollectedItemMax { get; set; }
-        public int CollectedItemDefault { get; set; }
+        public int CountMin { get; set; }
+        public int CountMax { get; set; }
+        public int DefaultValue { get; set; }
         public int CollectedItems { get; set; }
         public int Step { get; set; }
 
@@ -53,10 +53,10 @@ namespace GSTHD
 
             Name = data.Name;
 
-            CollectedItemMin = data.CountMin;
-            CollectedItemMax = data.CountMax.HasValue ? data.CountMax.Value : 100;
-            CollectedItemDefault = data.DefaultValue;
-            CollectedItems = Math.Clamp(CollectedItemDefault, CollectedItemMin, CollectedItemMax);
+            CountMin = data.CountMin;
+            CountMax = data.CountMax.HasValue ? data.CountMax.Value : 100;
+            DefaultValue = data.DefaultValue;
+            CollectedItems = Math.Clamp(DefaultValue, CountMin, CountMax);
             Step = data.Step == 0 ? 1 : data.Step;
             CollectedItemSize = data.Size;
             isBroadcastable = data.isBroadcastable && !isBroadcast;
@@ -202,22 +202,22 @@ namespace GSTHD
         public void IncrementState()
         {
             CollectedItems += Step;
-            if (CollectedItems > CollectedItemMax) CollectedItems = (this.Settings.WraparoundItems) ? CollectedItemMin : CollectedItemMax;
-            else if (CollectedItems < CollectedItemMin) CollectedItems = (this.Settings.WraparoundItems) ? CollectedItemMax : CollectedItemMin;
+            if (CollectedItems > CountMax) CollectedItems = (this.Settings.WraparoundItems) ? CountMin : CountMax;
+            else if (CollectedItems < CountMin) CollectedItems = (this.Settings.WraparoundItems) ? CountMax : CountMin;
             UpdateCount();
         }
 
         public void DecrementState()
         {
             CollectedItems -= Step;
-            if (CollectedItems < CollectedItemMin) CollectedItems = (this.Settings.WraparoundItems) ? CollectedItemMax : CollectedItemMin;
-            else if (CollectedItems > CollectedItemMax) CollectedItems = (this.Settings.WraparoundItems) ? CollectedItemMin : CollectedItemMax;
+            if (CollectedItems < CountMin) CollectedItems = (this.Settings.WraparoundItems) ? CountMax : CountMin;
+            else if (CollectedItems > CountMax) CollectedItems = (this.Settings.WraparoundItems) ? CountMin : CountMax;
             UpdateCount();
         }
 
         public void ResetState()
         {
-            CollectedItems = CollectedItemDefault;
+            CollectedItems = DefaultValue;
             isMarked = false;
             UpdateCount();
         }
@@ -264,7 +264,21 @@ namespace GSTHD
             var point = (ObjectPointCollectedItem)ogPoint;
             switch (name)
             {
-                case "":
+                case "LabelFontName":
+                    if (mult > 0) ItemCount.Font = new Font(value.ToString(), ItemCount.Font.Size, ItemCount.Font.Style);
+                    else ItemCount.Font = new Font((string)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), ItemCount.Font.Size, ItemCount.Font.Style);
+                    break;
+                case "LabelFontSize":
+                    if (mult > 0) ItemCount.Font = new Font(ItemCount.Font.Name, int.Parse(value.ToString()), ItemCount.Font.Style);
+                    else ItemCount.Font = new Font(ItemCount.Font.Name, (int)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), ItemCount.Font.Style);
+                    break;
+                case "LabelFontStyle":
+                    if (mult > 0) ItemCount.Font = new Font(ItemCount.Font.FontFamily, ItemCount.Font.Size, (FontStyle)Enum.Parse(typeof(FontStyle), value.ToString()));
+                    else ItemCount.Font = new Font(ItemCount.Font.FontFamily, ItemCount.Font.Size, (FontStyle)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null));
+                    break;
+                case "LabelColor":
+                    if (mult > 0) ItemCount.ForeColor = Color.FromName(value.ToString());
+                    else ItemCount.ForeColor = (Color)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
                     break;
                 default:
                     throw new NotImplementedException($"Could not perform CollectedItem Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");
