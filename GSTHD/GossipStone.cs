@@ -33,7 +33,7 @@ namespace GSTHD
             }
             // put in the name and then |
             // write that new string to the line below
-            return $"{HoldsImage},{exported},{ImageIndex},{isMarked}"; 
+            return $"{HoldsImage},{exported},{ImageIndex},{(int)isMarked}"; 
         }
     }
 

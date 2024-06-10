@@ -58,7 +58,7 @@ namespace GSTHD
                 }
                 displaystring += item.ToString();
             }
-            return $"{currentPoints},{currentWOTHS},{levelNumIndex},{levelNumMarked},{levelLabelMarked}\n{itemstring}\n{displaystring}";
+            return $"{currentPoints},{currentWOTHS},{levelNumIndex},{(int)levelNumMarked},{(int)levelLabelMarked}\n{itemstring}\n{displaystring}";
         }
     }
 
@@ -132,7 +132,7 @@ namespace GSTHD
 
         public override string ToString()
         {
-            return $"{potionType}\t{item_id}\t{isStarting}\t{isFaded}\t{isMarked}";
+            return $"{potionType}\t{item_id}\t{isStarting}\t{isFaded}\t{(int)isMarked}";
         }
     }
 

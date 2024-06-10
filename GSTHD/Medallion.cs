@@ -14,7 +14,7 @@ namespace GSTHD
         public int ImageIndex;
         public MarkedImageIndex isMarked;
 
-        public override string ToString() => $"{DungeonIndex},{ImageIndex},{isMarked}";
+        public override string ToString() => $"{DungeonIndex},{ImageIndex},{(int)isMarked}";
     }
 
     public class Medallion : OrganicImage, UpdatableFromSettings, ProgressibleElement<MedallionState>, DraggableAutocheckElement<MedallionState>

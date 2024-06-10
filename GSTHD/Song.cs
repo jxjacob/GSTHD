@@ -22,7 +22,7 @@ namespace GSTHD
         public MarkedImageIndex isMarked;
         public SongMarkerState MarkerState;
 
-        public override string ToString() => $"{ImageIndex},{isMarked},{MarkerState.HoldsImage},{MarkerState.HeldImageName},{MarkerState.ImageIndex},{MarkerState.isMarked}";
+        public override string ToString() => $"{ImageIndex},{(int)isMarked},{MarkerState.HoldsImage},{MarkerState.HeldImageName},{MarkerState.ImageIndex},{(int)MarkerState.isMarked}";
     }
 
     public class SongMarker : OrganicImage, UpdatableFromSettings, ProgressibleElement<SongMarkerState>, DraggableElement<SongMarkerState>

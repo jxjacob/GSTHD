@@ -406,7 +406,7 @@ namespace GSTHD
                     ItemState state = x.GetState();
                     if (state.ImageIndex != x.DefaultIndex || state.isMarked != 0)
                     {
-                        thejson.Add(x.Name, $"{state.ImageIndex},{state.isMarked}");
+                        thejson.Add(x.Name, $"{state.ImageIndex},{(int)state.isMarked}");
                     }
                 }
             }
@@ -417,7 +417,7 @@ namespace GSTHD
                     CollectedItemState state = x.GetState();
                     if (state.CollectedItems != x.DefaultValue || state.isMarked != 0)
                     {
-                        thejson.Add(x.Name, $"{state.CollectedItems},{state.isMarked}");
+                        thejson.Add(x.Name, $"{state.CollectedItems},{(int)state.isMarked}");
                     }
                 }
             }
@@ -428,7 +428,7 @@ namespace GSTHD
                     DoubleItemState state = x.GetState();
                     if (state.ImageIndex != 0 || state.isMarked != 0)
                     {
-                        thejson.Add(x.Name, $"{state.ImageIndex},{state.isMarked}");
+                        thejson.Add(x.Name, $"{state.ImageIndex},{(int)state.isMarked}");
                     }
                 }
             }
@@ -445,7 +445,7 @@ namespace GSTHD
                 {
                     GossipStoneState state = x.GetState();
                     string conv = state.ToString();
-                    if (conv != "False,,0,False")
+                    if (conv != "False,,0,0")
                     {
                         thejson.Add(x.Name, conv);
                     }
@@ -457,7 +457,7 @@ namespace GSTHD
                 {
                     MedallionState state = x.GetState();
                     string conv = state.ToString();
-                    if (conv != "0,0,False")
+                    if (conv != "0,0,0")
                     {
                         thejson.Add(x.Name, conv);
                     }
@@ -469,7 +469,7 @@ namespace GSTHD
                 {
                     SongState state = x.GetWholeState();
                     string conv = state.ToString();
-                    if (conv != "0,False,False,,0,False")
+                    if (conv != "0,0,False,,0,0")
                     {
                         thejson.Add(x.Name, conv);
                     }
