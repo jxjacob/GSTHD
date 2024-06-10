@@ -11,17 +11,21 @@ using System.Windows.Forms.VisualStyles;
 
 namespace GSTHD
 {
+    public enum MarkedImageIndex
+    {
+        none,
+        mark_check,
+        mark_x
+    }
     public class OrganicImage : Control
     {
         public bool isFaded = false;
 
-        public Graphics imgGra = null;
         public Image Image = null;
 
-        public bool isMarked = false;
+        public MarkedImageIndex isMarked = 0;
         public Image markedImage = null;
 
-        //TODO: make this actually work
         public PictureBoxSizeMode SizeMode { get; set; } = PictureBoxSizeMode.Zoom;
 
         public delegate void UpdateImageCallback(PaintEventArgs state);
@@ -29,12 +33,18 @@ namespace GSTHD
         public OrganicImage()
         {
             this.DoubleBuffered = true;
+            this.SetStyle(ControlStyles.SupportsTransparentBackColor, true);
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
             DisplayImage(e);
             base.OnPaint(e);
+        }
+
+        public void IncrementMarked()
+        {
+            isMarked = (MarkedImageIndex)((((int)isMarked)+1) % (Enum.GetNames(typeof(MarkedImageIndex)).Length));
         }
 
         public int[] GetSizeDims()
@@ -92,18 +102,17 @@ namespace GSTHD
 
                 var results = GetSizeDims();
 
+                
                 e.Graphics.DrawImage(Image,
                     new Rectangle(results[0], results[1], results[2], results[3]),
                     results[4], results[5], results[6], results[7], GraphicsUnit.Pixel,
                     ia);
 
+
                 // hide check if too dang small (if checkmark is over half of the visible image area)
-                if (isMarked && (8*8 < (results[2] * results[3]/2)))
+                if (isMarked > 0 && (8*8 < (results[2] * results[3]/2)))
                 {
-                    if (markedImage == null)
-                    {
-                        markedImage = Image.FromFile(@"Resources/checkmark.png");
-                    }
+                    markedImage = Image.FromFile($@"Resources/{isMarked}.png");
                     e.Graphics.DrawImage(markedImage,
                     new Rectangle(Width-8, 0, 8, 8),
                         0, 0, markedImage.Width, markedImage.Height, GraphicsUnit.Pixel);

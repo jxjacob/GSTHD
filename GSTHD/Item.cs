@@ -12,7 +12,7 @@ namespace GSTHD
     public struct ItemState
     {
         public int ImageIndex;
-        public bool isMarked;
+        public MarkedImageIndex isMarked;
 
     }
     public class Item : OrganicImage, IAlternatableObject, ProgressibleElement<ItemState>, DraggableAutocheckElement<ItemState>
@@ -49,7 +49,7 @@ namespace GSTHD
                 ImageNames = data.ImageCollection;
 
             Name = data.Name;
-            if (data.BackColor != Color.Transparent) BackColor = data.BackColor;
+            BackColor = data.BackColor;
             this.isBroadcastable = data.isBroadcastable && !isBroadcast;
 
             this.isDraggable = data.isDraggable;
@@ -216,13 +216,13 @@ namespace GSTHD
         public void ResetState()
         {
             ImageIndex = 0;
-            isMarked = false;
+            isMarked = 0;
             UpdateImage();
         }
 
         public void ToggleCheck()
         {
-            isMarked = !isMarked;
+            IncrementMarked();
             UpdateImage();
         }
 

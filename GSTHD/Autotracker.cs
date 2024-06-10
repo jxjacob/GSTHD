@@ -321,11 +321,11 @@ namespace GSTHD
             }
         }
 
-        public void AttemptSpoilerUpdate(int dk_id, bool isOGMarked, int readValue=1)
+        public void AttemptSpoilerUpdate(int dk_id, MarkedImageIndex OGMarkedIndex, int readValue=1)
         {
             if (LZTracking && dk_id != -1)
             {
-                spoilerPanel.AddFromAT(currentMapValue, dk_id, readValue, isOGMarked);
+                spoilerPanel.AddFromAT(currentMapValue, dk_id, readValue, OGMarkedIndex);
             }
         }
 
@@ -437,7 +437,7 @@ namespace GSTHD
                     {
                         //Debug.WriteLine("umuh and cv mismatch, should be a real item");
                         theItem.SetState(1 + ta.offset);
-                        AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
+                        AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : 0);
                     }
                 } else if (theumuh == 0)
                 {
@@ -447,7 +447,7 @@ namespace GSTHD
             else
             {
                 theItem.SetState(theRead + ta.offset);
-                AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false, theRead);
+                AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : 0, theRead);
             }
         }
 
@@ -466,14 +466,14 @@ namespace GSTHD
                     // have a funny feeling that this is supposed to be umuh and not 1
                     int goingIn = 1 + ta.offset;
                     theItem.SetState(goingIn);
-                    AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
+                    AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : 0);
                 }
             }
             else
             {
                 int goingIn = theRead + ta.offset;
                 theItem.SetState(goingIn);
-                AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
+                AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : 0);
             }
         }
 
@@ -488,14 +488,14 @@ namespace GSTHD
                     // have a funny feeling that this is supposed to be umuh and not 1
                     int goingIn = 1 + ta.offset - theSub;
                     theItem.SetState(goingIn);
-                    AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
+                    AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : 0);
                 }
             }
             else
             {
                 int goingIn = theRead + ta.offset - theSub;
                 theItem.SetState(goingIn);
-                AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
+                AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : 0);
             }
         }
 
@@ -512,7 +512,7 @@ namespace GSTHD
                 if (theumuh == ta.bitmask)
                 {
                     theItem.SetImageState(1 + ta.offset);
-                    AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
+                    AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : 0);
                 }
                 else if (theumuh == 0)
                 {
@@ -522,7 +522,7 @@ namespace GSTHD
             else
             {
                 theItem.SetImageState(theRead + ta.offset);
-                AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
+                AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : 0);
             }
         }
 
@@ -534,7 +534,7 @@ namespace GSTHD
                 if (theumuh == ta.bitmask)
                 {
                     theItem.SetState(1 + ta.offset);
-                    AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
+                    AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : 0);
                 }
                 else if (theumuh == 0)
                 {
@@ -544,7 +544,7 @@ namespace GSTHD
             else
             {
                 theItem.SetState(theRead + ta.offset);
-                AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : false);
+                AttemptSpoilerUpdate(ta.dk64_id, (ta.targetControl != null) ? ta.targetControl.isMarked : 0);
             }
         }
 

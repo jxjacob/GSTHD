@@ -15,7 +15,7 @@ namespace GSTHD
         public bool HoldsImage;
         public List<string> HeldImages;
         public int ImageIndex;
-        public bool isMarked;
+        public MarkedImageIndex isMarked;
 
         public override string ToString() {
             // for thing in heldimage
@@ -177,14 +177,14 @@ namespace GSTHD
                 if (!HeldImages.Contains(dropContent.ImageName))
                 {
                     HeldImages.Add(dropContent.ImageName);
-                    isMarked = (!Settings.StoneOverrideCheckMark) ? dropContent.isMarked || isMarked : isMarked;
+                    isMarked = (!Settings.StoneOverrideCheckMark) ? (MarkedImageIndex)System.Math.Max((int)dropContent.isMarked, (int)isMarked) : isMarked;
                 }
             }
             else
             {
                 HeldImages.Clear();
                 HeldImages.Add(dropContent.ImageName);
-                isMarked = (!Settings.StoneOverrideCheckMark) ? dropContent.isMarked || isMarked : isMarked;
+                isMarked = (!Settings.StoneOverrideCheckMark) ? (MarkedImageIndex)System.Math.Max((int)dropContent.isMarked, (int)isMarked) : isMarked;
             }
             UpdateImage();
             DragBehaviour.SaveChanges();
@@ -359,13 +359,13 @@ namespace GSTHD
                 RemoveImage = true;
                 HeldImages.Clear();
                 HoldsImage = false;
-                isMarked = false;
+                isMarked = 0;
                 if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
                     var remotewindow = ((GossipStone)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]);
                     remotewindow.RemoveImage = true;
                     remotewindow.HeldImages.Clear();
-                    remotewindow.isMarked = false;
+                    remotewindow.isMarked = 0;
                     remotewindow.HoldsImage = false;
                 }
                 ImageIndex = 0;
@@ -375,7 +375,7 @@ namespace GSTHD
 
         public void ToggleCheck()
         {
-            isMarked = !isMarked;
+            IncrementMarked();
             UpdateImage();
         }
 

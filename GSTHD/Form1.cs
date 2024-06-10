@@ -404,7 +404,7 @@ namespace GSTHD
                 if (x.Name != "")
                 {
                     ItemState state = x.GetState();
-                    if (state.ImageIndex != x.DefaultIndex || state.isMarked != false)
+                    if (state.ImageIndex != x.DefaultIndex || state.isMarked != 0)
                     {
                         thejson.Add(x.Name, $"{state.ImageIndex},{state.isMarked}");
                     }
@@ -415,7 +415,7 @@ namespace GSTHD
                 if (x.Name != "")
                 {
                     CollectedItemState state = x.GetState();
-                    if (state.CollectedItems != x.DefaultValue || state.isMarked != false)
+                    if (state.CollectedItems != x.DefaultValue || state.isMarked != 0)
                     {
                         thejson.Add(x.Name, $"{state.CollectedItems},{state.isMarked}");
                     }
@@ -426,7 +426,7 @@ namespace GSTHD
                 if (x.Name != "")
                 {
                     DoubleItemState state = x.GetState();
-                    if (state.ImageIndex != 0 || state.isMarked != false)
+                    if (state.ImageIndex != 0 || state.isMarked != 0)
                     {
                         thejson.Add(x.Name, $"{state.ImageIndex},{state.isMarked}");
                     }
@@ -551,9 +551,9 @@ namespace GSTHD
             }
             foreach (GuaranteedHint x in this.Controls[0].Controls.OfType<GuaranteedHint>())
             {
-                if (x.Name != "" && x.isMarked != false)
+                if (x.Name != "" && x.isMarked != 0)
                 {
-                    thejson.Add(x.Name, x.isMarked);
+                    thejson.Add(x.Name, (int)x.isMarked);
                 }
             }
 
@@ -615,16 +615,16 @@ namespace GSTHD
                     if (found is Item i)
                     {
                         string[] words = ((string)x.Value).Split(',');
-                        i.SetState(new ItemState { ImageIndex =  int.Parse(words[0]), isMarked = bool.Parse(words[1]) });
+                        i.SetState(new ItemState { ImageIndex =  int.Parse(words[0]), isMarked = (MarkedImageIndex)int.Parse(words[1]) });
                     } else if (found is DoubleItem di)
                     {
                         string[] words = ((string)x.Value).Split(',');
-                        di.SetState(new DoubleItemState { ImageIndex = int.Parse(words[0]), isMarked = bool.Parse(words[1]) });
+                        di.SetState(new DoubleItemState { ImageIndex = int.Parse(words[0]), isMarked = (MarkedImageIndex)int.Parse(words[1]) });
                     }
                     else if (found is CollectedItem ci)
                     {
                         string[] words = ((string)x.Value).Split(',');
-                        ci.SetState(new CollectedItemState { CollectedItems = int.Parse(words[0]), isMarked = bool.Parse(words[1]) });
+                        ci.SetState(new CollectedItemState { CollectedItems = int.Parse(words[0]), isMarked = (MarkedImageIndex)int.Parse(words[1]) });
                     } 
                     else if (found is TextBox tb)
                     {
@@ -640,7 +640,7 @@ namespace GSTHD
                             HoldsImage = Boolean.Parse(words[0]),
                             HeldImages = hi.ToList(),
                             ImageIndex = int.Parse(words[2]),
-                            isMarked = bool.Parse(words[3]),
+                            isMarked = (MarkedImageIndex)int.Parse(words[3]),
                         };
                         gs.SetState(newstate);
                     }
@@ -651,7 +651,7 @@ namespace GSTHD
                         {
                             DungeonIndex = int.Parse(words[0]),
                             ImageIndex = int.Parse(words[1]),
-                            isMarked = bool.Parse(words[2])
+                            isMarked = (MarkedImageIndex)int.Parse(words[2])
                         };
                         md.SetState(newstate);
                     }
@@ -661,13 +661,13 @@ namespace GSTHD
                         SongState newstate = new SongState()
                         {
                             ImageIndex = int.Parse(words[0]),
-                            isMarked = bool.Parse(words[1]),
+                            isMarked = (MarkedImageIndex)int.Parse(words[1]),
                             MarkerState = new SongMarkerState()
                             {
                                 HoldsImage = Boolean.Parse(words[2]),
                                 HeldImageName = words[3],
                                 ImageIndex = int.Parse(words[4]),
-                                isMarked = bool.Parse(words[5])
+                                isMarked = (MarkedImageIndex)int.Parse(words[5])
                             },
                         };
                         s.SetWholeState(newstate);
@@ -691,7 +691,7 @@ namespace GSTHD
                         sp.SetCells(words[3]);
                     } else if (found is GuaranteedHint gh)
                     {
-                        gh.isMarked = bool.Parse((string)x.Value);
+                        gh.isMarked = (MarkedImageIndex)int.Parse((string)x.Value);
                     }
                 }
                 if (missingItems > 0)

@@ -28,9 +28,9 @@ namespace GSTHD
         public int totalWOTHS;
         public int currentWOTHS;
 
-        public bool levelNumMarked;
+        public MarkedImageIndex levelNumMarked;
         public int levelNumIndex;
-        public bool levelLabelMarked;
+        public MarkedImageIndex levelLabelMarked;
 
         public List<int> foundItems;
         public List<PotionTypes> potionsList;
@@ -99,7 +99,7 @@ namespace GSTHD
 
         public void ToggleCheck()
         {
-            isMarked = !isMarked;
+            isMarked = (MarkedImageIndex)((int)isMarked++ % Enum.GetNames(typeof(MarkedImageIndex)).Length);
             hostCell.TellMarked(dk_id, isMarked);
             Invalidate();
         }
@@ -128,7 +128,7 @@ namespace GSTHD
         public int item_id;
         public bool isStarting;
         public bool isFaded = false;
-        public bool isMarked = false;
+        public MarkedImageIndex isMarked = 0;
 
         public override string ToString()
         {
@@ -397,7 +397,7 @@ namespace GSTHD
             }
         }
 
-        public bool AddToDisplayList(DK64_Item item, bool starting, bool faded, bool marked)
+        public bool AddToDisplayList(DK64_Item item, bool starting, bool faded, MarkedImageIndex marked)
         {
             for (int i = 0; i < displayList.Count; i++)
             {
@@ -457,11 +457,11 @@ namespace GSTHD
             }
         }
 
-        public void TellMarked(int dk_id, bool isMarked)
+        public void TellMarked(int dk_id, MarkedImageIndex isMarked)
         {
             foreach (CellDisplay display in displayList)
             {
-                if (display.item_id == dk_id && display.isMarked == !isMarked)
+                if (display.item_id == dk_id && display.isMarked != isMarked)
                 {
                     display.isMarked = isMarked;
                     UpdateVisuals();
@@ -641,13 +641,13 @@ namespace GSTHD
             }
         }
 
-        public void AddNewItem(DK64_Item dk_id, int pointValue, bool isStarting, int howMany, bool isFaded = false, bool isMarked = false)
+        public void AddNewItem(DK64_Item dk_id, int pointValue, bool isStarting, int howMany, bool isFaded = false, MarkedImageIndex MarkedIndex = 0)
         {
             
             for (int i = 0; i < howMany; i++)
             {
                 if (!isFaded) foundItems.Add(dk_id.item_id);
-                bool result = AddToDisplayList(dk_id, isStarting, isFaded, isMarked && !Settings.CellOverrideCheckMark);
+                bool result = AddToDisplayList(dk_id, isStarting, isFaded, (!Settings.CellOverrideCheckMark) ? MarkedIndex : 0 );
                 if (result && pointValue != -1) currentPoints += pointValue;
                 UpdateVisuals();
             }
@@ -735,7 +735,7 @@ namespace GSTHD
                 potionsList = potionsList,
                 displayList = displayList,
                 levelLabelMarked = levelImage.isMarked,
-                levelNumMarked = (levelNumberImage != null) ? levelNumberImage.isMarked : (unknownLevelNumberImage != null) ? unknownLevelNumberImage.isMarked : false,
+                levelNumMarked = (levelNumberImage != null) ? levelNumberImage.isMarked : (unknownLevelNumberImage != null) ? unknownLevelNumberImage.isMarked : 0,
                 levelNumIndex = (unknownLevelNumberImage != null) ? unknownLevelNumberImage.GetState().ImageIndex : 0
             };
         }
@@ -784,13 +784,13 @@ namespace GSTHD
             currentWOTHS = int.Parse(firstPart[1]);
             if (levelNumberImage != null)
             {
-                levelNumberImage.isMarked = bool.Parse(firstPart[3]);
+                levelNumberImage.isMarked = (MarkedImageIndex)int.Parse(firstPart[3]);
             } else if (unknownLevelNumberImage != null)
             {
-                unknownLevelNumberImage.isMarked = bool.Parse(firstPart[3]);
+                unknownLevelNumberImage.isMarked = (MarkedImageIndex)int.Parse(firstPart[3]);
                 unknownLevelNumberImage.SetState(int.Parse(firstPart[2]));
             }
-            levelImage.isMarked = bool.Parse(firstPart[4]);
+            levelImage.isMarked = (MarkedImageIndex)int.Parse(firstPart[4]);
 
             //p1 = founditems
             if (parts[1].Length > 0)
@@ -811,7 +811,7 @@ namespace GSTHD
                     //i2 = isstarting (bool
                     //i3 = fiaded (bool
                     //i4 = marked (bool
-                    newdl.Add(new CellDisplay() { potionType = int.Parse(inner[0]) , item_id = int.Parse(inner[1]) , isStarting = bool.Parse(inner[2]), isFaded = bool.Parse(inner[3]), isMarked = bool.Parse(inner[4]) });
+                    newdl.Add(new CellDisplay() { potionType = int.Parse(inner[0]) , item_id = int.Parse(inner[1]) , isStarting = bool.Parse(inner[2]), isFaded = bool.Parse(inner[3]), isMarked = (MarkedImageIndex)int.Parse(inner[4]) });
                 }
                 displayList = newdl;
             }

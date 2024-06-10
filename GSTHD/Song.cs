@@ -1,4 +1,5 @@
 using GSTHD;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -12,13 +13,13 @@ namespace GSTHD
         public bool HoldsImage;
         public string HeldImageName;
         public int ImageIndex;
-        public bool isMarked;
+        public MarkedImageIndex isMarked;
     }
 
     public struct SongState
     {
         public int ImageIndex;
-        public bool isMarked;
+        public MarkedImageIndex isMarked;
         public SongMarkerState MarkerState;
 
         public override string ToString() => $"{ImageIndex},{isMarked},{MarkerState.HoldsImage},{MarkerState.HeldImageName},{MarkerState.ImageIndex},{MarkerState.isMarked}";
@@ -244,13 +245,13 @@ namespace GSTHD
         {
             RemoveImage = true;
             ImageIndex = 0;
-            isMarked = false;
+            isMarked = 0;
             UpdateImage();
         }
 
         public void ToggleCheck()
         {
-            isMarked = !isMarked;
+            IncrementMarked();
             UpdateImage();
         }
 
@@ -318,7 +319,7 @@ namespace GSTHD
             isOnBroadcast = isBroadcast;
             AutoName = data.AutoName;
             
-            //BackColor = Color.Transparent;
+            BackColor = Color.Transparent;
             Location = new Point(data.X, data.Y);
             TabStop = false;
             AllowDrop = true;
@@ -336,7 +337,7 @@ namespace GSTHD
 
             SongMarker = new SongMarker(this, settings, data.TinyImageCollection, isBroadcast)
             {
-                //BackColor = Color.Transparent,
+                BackColor = Color.Transparent,
                 TabStop = false,
                 AllowDrop = false,
             };
@@ -522,13 +523,13 @@ namespace GSTHD
         public void ResetState()
         {
             ImageIndex = 0;
-            isMarked = false;
+            isMarked = 0;
             UpdateImage();
         }
 
         public void ToggleCheck()
         {
-            isMarked = !isMarked;
+            IncrementMarked();
             UpdateImage();
         }
 

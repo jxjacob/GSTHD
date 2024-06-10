@@ -75,7 +75,7 @@ namespace GSTHD
 
         private static readonly Regex unspacer = new Regex(@"\s+");
 
-        delegate void AddFromATCallback(int currentMap, int dk_id, int howMany, bool marked);
+        delegate void AddFromATCallback(int currentMap, int dk_id, int howMany, MarkedImageIndex marked);
 
         public SpoilerPanel(ObjectPanelSpoiler data, Settings settings, bool isOnBroadcast=false)
         {
@@ -431,7 +431,7 @@ namespace GSTHD
             }
         }
 
-        public void AddFromAT(int currentMap, int dk_id, int howMany, bool marked)
+        public void AddFromAT(int currentMap, int dk_id, int howMany, MarkedImageIndex marked)
         {
             if (this.InvokeRequired)
             {
@@ -482,7 +482,7 @@ namespace GSTHD
                         // dupe slams are handled seperately and skip the queue
                         if (dk_id != 36) foundATItems.Add(dk_id);
                         Debug.WriteLine($"adding {howMany} copy of {dk_id} to map {lastKnownMap}, valued at {addedpoints} points");
-                        cells[lastKnownMap].AddNewItem(dkitem, addedpoints, isStarting, howMany, isMarked:marked);
+                        cells[lastKnownMap].AddNewItem(dkitem, addedpoints, isStarting, howMany, MarkedIndex:marked);
                     }
                 } else
                 {

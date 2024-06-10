@@ -12,7 +12,7 @@ namespace GSTHD
     public struct DoubleItemState
     {
         public int ImageIndex;
-        public bool isMarked;
+        public MarkedImageIndex isMarked;
     }
     public class DoubleItem : OrganicImage, IAlternatableObject, ProgressibleElement<DoubleItemState>
     {
@@ -30,8 +30,8 @@ namespace GSTHD
         public Size DoubleItemSize { get; set; }
 
         // purely used for handling broadcast marking logic
-        public bool leftMark { get; set; } = false;
-        public bool rightMark { get; set; } = false;
+        public MarkedImageIndex leftMark { get; set; } = 0;
+        public MarkedImageIndex rightMark { get; set; } = 0;
 
         public bool isBroadcastable { get; set; }
         public string AutoName { get; set; } = null;
@@ -149,10 +149,10 @@ namespace GSTHD
             if (isColoredLeft) DecrementLeftState(); else IncrementLeftState();
         }
 
-        public void SetLeftMark(bool mark)
+        public void SetLeftMark(MarkedImageIndex mark)
         {
             leftMark = mark;
-            isMarked = (leftMark || rightMark);
+            isMarked = (MarkedImageIndex)System.Math.Max((int)leftMark, (int)rightMark);
         }
 
 
@@ -180,16 +180,16 @@ namespace GSTHD
             if (isColoredRight) DecrementRightState(); else IncrementRightState();
         }
 
-        public void SetRightMark(bool mark)
+        public void SetRightMark(MarkedImageIndex mark)
         {
             rightMark = mark;
-            isMarked = (leftMark || rightMark);
+            isMarked = (MarkedImageIndex)System.Math.Max((int)leftMark, (int)rightMark);
         }
 
 
         public void ToggleCheck()
         {
-            isMarked = !isMarked;
+            isMarked = (MarkedImageIndex)((int)isMarked++ % Enum.GetNames(typeof(MarkedImageIndex)).Length);
             UpdateImage();
         }
 
@@ -229,7 +229,7 @@ namespace GSTHD
         public void ResetState()
         {
             ImageIndex = 0;
-            isMarked = false;
+            isMarked = 0;
             isColoredRight = false;
             isColoredLeft = false;
             UpdateImage();

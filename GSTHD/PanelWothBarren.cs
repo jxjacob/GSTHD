@@ -622,7 +622,7 @@ namespace GSTHD
                         {
                             // 4th is 
                             // also we have all 4 so go and set the state
-                            foundStone.SetState(new GossipStoneState() { HoldsImage = storedHoldsImage, HeldImages = storedHeldImageName, ImageIndex = storedImageIndex, isMarked = bool.Parse(secondPart[i]) });
+                            foundStone.SetState(new GossipStoneState() { HoldsImage = storedHoldsImage, HeldImages = storedHeldImageName, ImageIndex = storedImageIndex, isMarked = (MarkedImageIndex)int.Parse(secondPart[i]) });
                         }
                     }
                 }

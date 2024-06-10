@@ -28,7 +28,7 @@ namespace GSTHD
 
             GuaranteddHintSize = data.Size;
 
-            if (data.BackColor != Color.Transparent) BackColor = data.BackColor;
+            BackColor = data.BackColor;
             if (ListImageName.Count > 0)
             {
                 this.Image = Image.FromFile(@"Resources/" + ListImageName[0]);
@@ -72,7 +72,7 @@ namespace GSTHD
         }
         public void ToggleCheck()
         {
-            isMarked = !isMarked;
+            IncrementMarked();
             UpdateImage();
         }
 

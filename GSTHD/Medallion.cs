@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace GSTHD
     {
         public int DungeonIndex;
         public int ImageIndex;
-        public bool isMarked;
+        public MarkedImageIndex isMarked;
 
         public override string ToString() => $"{DungeonIndex},{ImageIndex},{isMarked}";
     }
@@ -253,7 +254,7 @@ namespace GSTHD
         public void ResetState()
         {
             ImageIndex = 0;
-            isMarked = false;
+            isMarked = 0;
             UpdateImage();
             DungeonIndex = DefaultDungeonIndex;
             SelectedDungeon.Text = DungeonNames[DungeonIndex];
@@ -267,7 +268,7 @@ namespace GSTHD
 
         public void ToggleCheck()
         {
-            isMarked = !isMarked;
+            IncrementMarked();
             UpdateImage();
         }
 

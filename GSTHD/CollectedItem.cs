@@ -12,7 +12,7 @@ namespace GSTHD
     public struct CollectedItemState
     {
         public int CollectedItems;
-        public bool isMarked;
+        public MarkedImageIndex isMarked;
 
     }
     class CollectedItem : OrganicImage, IAlternatableObject, ProgressibleElement<CollectedItemState>, DraggableAutocheckElement<CollectedItemState>
@@ -78,7 +78,7 @@ namespace GSTHD
             Location = new Point(data.X, data.Y);
             CollectedItemCountPosition = data.CountPosition.IsEmpty ? new Size(0, -7) : data.CountPosition;
 
-            if (data.BackGroundColor != Color.Transparent) BackColor = data.BackGroundColor;
+            BackColor = data.BackGroundColor;
             TabStop = false;
 
 
@@ -218,12 +218,13 @@ namespace GSTHD
         public void ResetState()
         {
             CollectedItems = DefaultValue;
-            isMarked = false;
+            isMarked = 0;
             UpdateCount();
         }
+
         public void ToggleCheck()
         {
-            isMarked = !isMarked;
+            IncrementMarked();
             UpdateCount();
         }
         public void SetColor(Color color)

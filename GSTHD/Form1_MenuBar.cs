@@ -323,7 +323,7 @@ namespace GSTHD
                     {
                         ExtraButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetExtraButton)));
                     }
-                    Items.ExtraButton = new ToolStripMenuItem("\"Checkmark Item\" Button", null, ExtraButtonOptions.Values.ToArray());
+                    Items.ExtraButton = new ToolStripMenuItem("\"Mark Item\" Button", null, ExtraButtonOptions.Values.ToArray());
                     dragDropSubMenu.DropDownItems.Add(Items.ExtraButton);
 
 
