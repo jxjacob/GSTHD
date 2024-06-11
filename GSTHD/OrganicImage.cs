@@ -17,6 +17,7 @@ namespace GSTHD
         mark_check,
         mark_x
     }
+
     public class OrganicImage : Control
     {
         public bool isFaded = false;
@@ -24,6 +25,7 @@ namespace GSTHD
         public Image Image = null;
 
         public MarkedImageIndex isMarked = 0;
+        public int MarkedMax = Enum.GetNames(typeof(MarkedImageIndex)).Length;
         public Image markedImage = null;
 
         public PictureBoxSizeMode SizeMode { get; set; } = PictureBoxSizeMode.Zoom;
@@ -44,7 +46,7 @@ namespace GSTHD
 
         public void IncrementMarked()
         {
-            isMarked = (MarkedImageIndex)((((int)isMarked)+1) % (Enum.GetNames(typeof(MarkedImageIndex)).Length));
+            isMarked = (MarkedImageIndex)((((int)isMarked)+1) % MarkedMax);
         }
 
         public int[] GetSizeDims()

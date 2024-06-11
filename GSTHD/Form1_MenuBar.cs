@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using static GSTHD.Settings;
 using System.Xml.Linq;
+using System.Collections;
+using System.Text.RegularExpressions;
 
 namespace GSTHD
 {
@@ -288,13 +290,13 @@ namespace GSTHD
             var optionMenu = new ToolStripMenuItem("Global Options") { Overflow = ToolStripItemOverflow.AsNeeded };
             {
 
-                var dragDropSubMenu = new ToolStripMenuItem("Mouse Controls");
+                var mouseControlsSubMenu = new ToolStripMenuItem("Mouse Controls");
                 {
                     Items.IncrementWraparound = new ToolStripMenuItem("Increment/Decrement Wraparound", null, new EventHandler(menuBar_ToggleIncrementWraparound))
                     {
                         CheckOnClick = true,
                     };
-                    dragDropSubMenu.DropDownItems.Add(Items.IncrementWraparound);
+                    mouseControlsSubMenu.DropDownItems.Add(Items.IncrementWraparound);
 
                     IncrementButtonOptions = new Dictionary<Settings.BasicActionButtonOption, ToolStripMenuItem>();
                     DecrementButtonOptions = new Dictionary<Settings.BasicActionButtonOption, ToolStripMenuItem>();
@@ -306,13 +308,13 @@ namespace GSTHD
                         ResetButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetResetButton)));
                     }
                     Items.IncrementButton = new ToolStripMenuItem("\"Increment Item\" Button", null, IncrementButtonOptions.Values.ToArray());
-                    dragDropSubMenu.DropDownItems.Add(Items.IncrementButton);
+                    mouseControlsSubMenu.DropDownItems.Add(Items.IncrementButton);
 
                     Items.DecrementButton = new ToolStripMenuItem("\"Decrement Item\" Button", null, DecrementButtonOptions.Values.ToArray());
-                    dragDropSubMenu.DropDownItems.Add(Items.DecrementButton);
+                    mouseControlsSubMenu.DropDownItems.Add(Items.DecrementButton);
 
                     Items.ResetButton = new ToolStripMenuItem("\"Reset Item\" Button", null, ResetButtonOptions.Values.ToArray());
-                    dragDropSubMenu.DropDownItems.Add(Items.ResetButton);
+                    mouseControlsSubMenu.DropDownItems.Add(Items.ResetButton);
 
 
 
@@ -324,7 +326,7 @@ namespace GSTHD
                         ExtraButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetExtraButton)));
                     }
                     Items.ExtraButton = new ToolStripMenuItem("\"Mark Item\" Button", null, ExtraButtonOptions.Values.ToArray());
-                    dragDropSubMenu.DropDownItems.Add(Items.ExtraButton);
+                    mouseControlsSubMenu.DropDownItems.Add(Items.ExtraButton);
 
 
 
@@ -338,10 +340,10 @@ namespace GSTHD
                     }
                     
                     Items.DragButton = new ToolStripMenuItem("Drag Button", null, DragButtonOptions.Values.ToArray());
-                    dragDropSubMenu.DropDownItems.Add(Items.DragButton);
+                    mouseControlsSubMenu.DropDownItems.Add(Items.DragButton);
 
                     Items.AutocheckDragButton = new ToolStripMenuItem("Autocheck Drag Button", null, AutocheckDragButtonOptions.Values.ToArray());
-                    dragDropSubMenu.DropDownItems.Add(Items.AutocheckDragButton);
+                    mouseControlsSubMenu.DropDownItems.Add(Items.AutocheckDragButton);
 
                     
 
@@ -361,11 +363,11 @@ namespace GSTHD
                         };
                         scrollWheelSubMenu.DropDownItems.Add(Items.Wraparound);
                     }
-                    dragDropSubMenu.DropDownItems.Add(scrollWheelSubMenu);
+                    mouseControlsSubMenu.DropDownItems.Add(scrollWheelSubMenu);
 
 
                 }
-                optionMenu.DropDownItems.Add(dragDropSubMenu);
+                optionMenu.DropDownItems.Add(mouseControlsSubMenu);
 
                 var songMarkersSubMenu = new ToolStripMenuItem("Song Markers");
                 {
@@ -675,9 +677,21 @@ namespace GSTHD
             ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Add(new ToolStripMenuItem("None Available") { Enabled = false });
         }
 
-        public bool CheckAlternatesForSubmenu(string name)
+        public bool CheckAlternatesForSubmenu(string name, string collectionname=null)
         {
-            return ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.ContainsKey(name);
+            if (collectionname != null)
+            {
+                if (((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.ContainsKey(collectionname))
+                {
+                    int temp = ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.IndexOfKey(collectionname);
+                    if (((ToolStripMenuItem)((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems[temp]).DropDownItems.ContainsKey(name))
+                    {
+                        //Debug.WriteLine($"found group {name} within colleciton {collectionname}");
+                        return true;
+                    }
+                }
+                return false;
+            } else return ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.ContainsKey(name);
         }
 
         //TODO: might also wanna be careful about toolstrip names with spaces instead of underscores
@@ -688,29 +702,47 @@ namespace GSTHD
             ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Add(name, null, new EventHandler(Alternates_GenericFunction));
         }
 
-        public void AddGroupToAlternates(string groupname)
+        public void AddGroupToAlternates(string groupname, string collectionname = null)
         {
             //Debug.WriteLine("adding group " + name);
-            ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Add(new ToolStripMenuItem(groupname) { Name = groupname });
+            if (collectionname != null)
+            {
+                int temp = ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.IndexOfKey(collectionname);
+                ((ToolStripMenuItem)((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems[temp]).DropDownItems.Add(new ToolStripMenuItem(groupname) { Name = groupname });
+            } else ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Add(new ToolStripMenuItem(groupname) { Name = groupname });
         }
 
         public void AddToAlternatesGroup(string groupname, string name)
         {
             //Debug.WriteLine("adding " + name + " to group " + groupname);
+            var item = ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Find(groupname, false)[0];
             if (name == string.Empty)
             {
-                var item = ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Find(groupname, false)[0];
                 ((ToolStripDropDownItem)item).DropDownItems.Add(new ToolStripMenuItem("Disabled", null, new EventHandler(Alternates_GenericFunction)) { Tag = groupname} );
             } else
             {
-                var item = ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Find(groupname, false)[0];
                 ((ToolStripDropDownItem)item).DropDownItems.Add(new ToolStripMenuItem(name, null, new EventHandler(Alternates_GenericFunction)) { Tag = groupname });
             }
         }
 
+        public void AddToAlternatesGroupInCollection(string collectionname, string groupname, string name)
+        {
+            //Debug.WriteLine($"adding {name} to group {groupname} within colleciton {collectionname}");
+            ToolStripDropDownItem temp = (ToolStripDropDownItem)((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Find(groupname, true)[0];  
+            if (name == string.Empty)
+            {
+                temp.DropDownItems.Add(new ToolStripMenuItem("Disabled", null, new EventHandler(Alternates_GenericFunction)) { Tag = $"{collectionname}_:_{groupname}" });
+            } else
+            {
+                temp.DropDownItems.Add(new ToolStripMenuItem(name, null, new EventHandler(Alternates_GenericFunction)) { Tag = $"{collectionname}_:_{groupname}" });
+            }
+
+
+        }
+
         public void AddCollectionToAlternates(string groupname)
         {
-            //Debug.WriteLine("adding group " + name);
+            //Debug.WriteLine("adding group " + groupname);
             ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Add(new ToolStripMenuItem(groupname) { Name = groupname });
         }
 
@@ -718,7 +750,7 @@ namespace GSTHD
         {
             //Debug.WriteLine("adding " + name + " to group " + groupname);
             var item = ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Find(Collectionname, false)[0];
-            ((ToolStripDropDownItem)item).DropDownItems.Add(new ToolStripMenuItem(name, null, new EventHandler(Alternates_GenericFunction)));
+            ((ToolStripDropDownItem)item).DropDownItems.Add(new ToolStripMenuItem(name, null, new EventHandler(Alternates_GenericFunction)) { Tag = $"{Collectionname}_::_" } );
         }
 
         private void Alternates_GenericFunction(object sender, EventArgs e)
@@ -726,6 +758,10 @@ namespace GSTHD
             ToolStripMenuItem choice = (ToolStripMenuItem)sender;
             string usedtag;
             string LastUsed = string.Empty;
+            List<string> words = new List<string>();
+
+            if (choice.Tag != null) words = Regex.Split(choice.Tag?.ToString(), @"_\:_").ToList();
+            if (words?.Count == 1) words.Add("");
 
             if (choice.Tag == null)
             {
@@ -733,23 +769,31 @@ namespace GSTHD
                 usedtag = null;
             } else
             {
-                // clicking the already enabled option is pointless, ignore
-                if (choice.Checked) return;
-                usedtag = choice.Tag.ToString();
-                foreach (ToolStripMenuItem x in ((ToolStripMenuItem)choice.OwnerItem).DropDownItems)
+                if (((words[1] == "" && !choice.Tag.ToString().Contains("_:_")) || ((words[1] != "" && choice.Tag.ToString().Contains("_:_")))) && !choice.Tag.ToString().Contains("_::_"))
                 {
-                    if (x == choice)
+                    // clicking the already enabled option is pointless, ignore
+                    if (choice.Checked) return;
+                    usedtag = choice.Tag.ToString();
+                    foreach (ToolStripMenuItem x in ((ToolStripMenuItem)choice.OwnerItem).DropDownItems)
                     {
-                        x.Checked = true;
-                    } else
-                    {
-                        if (x.Checked == true)
+                        if (x == choice)
                         {
-                            LastUsed = x.Text;
-                            x.Checked = false;
+                            x.Checked = true;
+                        } else
+                        {
+                            if (x.Checked == true)
+                            {
+                                LastUsed = x.Text;
+                                x.Checked = false;
+                            }
                         }
-                    }
                     
+                    }
+
+                } else
+                {
+                    usedtag = "";
+                    choice.Checked = !choice.Checked;
                 }
             }
 
@@ -761,6 +805,13 @@ namespace GSTHD
         public void CheckmarkAlternateOption(string groupname, string name)
         {
             //((ToolStripMenuItem)((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems.Find(name, true).First()).Checked = true;
+
+            // [0] = collection         [1] = group
+            var words = Regex.Split(groupname, @"_\:_").ToList();
+
+            // for normal toggles
+            if (words.Count == 1) words.Add("");
+
             bool superbreak = false;
             foreach (ToolStripMenuItem x in ((ToolStripDropDownItem)MenuStrip.Items[2]).DropDownItems)
             {
@@ -769,7 +820,16 @@ namespace GSTHD
                 {
                     foreach (ToolStripMenuItem y in x.DropDownItems)
                     {
-                        if (y.Tag?.ToString() != groupname && groupname != string.Empty) { break; }
+                        if (superbreak) break;
+                        if (y.Tag?.ToString() != groupname && words[1] != string.Empty) { 
+                            if (y.HasDropDownItems && words[1] != string.Empty)
+                            {
+                                foreach (ToolStripMenuItem z in y.DropDownItems)
+                                {
+                                    if (z.Tag?.ToString() == groupname && z.Text == name) { z.Checked = true; superbreak = true; break; }
+                                }
+                            } else break;
+                        }
                         if (y.Text == name) { y.Checked = true; superbreak = true; break; }
                     }
                 } else

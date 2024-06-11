@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Timers;
 using System.Windows.Forms;
 
@@ -243,7 +244,7 @@ namespace GSTHD
                         {
                             f2.CurrentLayout.ApplyAlternates(alt.Key, null, true, string.Empty);
                         }
-                        else if (alt.Value != "False")
+                        else if (alt.Value != "False" || alt.Value != "Disabled")
                         {
                             f2.CurrentLayout.ApplyAlternates(alt.Value, alt.Key, true, string.Empty);
                         }
@@ -254,10 +255,18 @@ namespace GSTHD
                     {
                         if (alt.Value == "True")
                         {
-                            MenuBar.CheckmarkAlternateOption(string.Empty, alt.Key);
-                            CurrentLayout.ApplyAlternates(alt.Key, null, true, string.Empty);
+                            if (alt.Key.Contains("_::_"))
+                            {
+                                var words = Regex.Split(alt.Key, @"_\:\:_").ToList();
+                                MenuBar.CheckmarkAlternateOption(words[0], words[1]);
+                                CurrentLayout.ApplyAlternates(words[1], words[0], true, string.Empty);
+                            } else
+                            {
+                                MenuBar.CheckmarkAlternateOption(string.Empty, alt.Key);
+                                CurrentLayout.ApplyAlternates(alt.Key, null, true, string.Empty);
+                            }
                         }
-                        else if (alt.Value != "False")
+                        else if (alt.Value != "False" || alt.Value != "Disabled")
                         {
                             MenuBar.CheckmarkAlternateOption(alt.Key, alt.Value);
                             CurrentLayout.ApplyAlternates(alt.Value, alt.Key, true, string.Empty);

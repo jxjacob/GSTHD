@@ -7,6 +7,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
 
@@ -187,28 +188,48 @@ namespace GSTHD
                 // there isnt a setting for this layout yet, go add it
                 AlternateSettings.Add(new AltSettings { LayoutName = ActiveLayout });
             }
+            var words = Regex.Split((groupname != null) ? groupname : "", @"_\:_").ToList();
+            if (words.Count == 1) words.Add("");
             AltSettings thealt = AlternateSettings.Where(x => x.LayoutName == ActiveLayout).First();
-            if (groupname == string.Empty || groupname == null)
+            if (words[1] == string.Empty && (groupname?.Contains("_:_") == true || groupname?.Contains("_::_") == true) || words[0] == "")
             {
                 // add as SETTINGNAME : CHECK
-                if (thealt.Changes.ContainsKey(settingname))
+                if (groupname?.Contains("_::_") == true)
                 {
-                    if (check) thealt.Changes[settingname] = check.ToString();
-                    else thealt.Changes.Remove(settingname);
+                    // toggles in collection
+                    if (thealt.Changes.ContainsKey(groupname + settingname))
+                    {
+                        if (check) thealt.Changes[groupname + settingname] = check.ToString();
+                        else thealt.Changes.Remove(groupname + settingname);
+                    } else
+                    {
+                        if (check) thealt.Changes.Add(groupname + settingname, check.ToString());
+                    }
                 } else
                 {
-                    if (check) thealt.Changes.Add(settingname, check.ToString());
+                    //plain old toggles
+                    if (thealt.Changes.ContainsKey(settingname))
+                    {
+                        if (check) thealt.Changes[settingname] = check.ToString();
+                        else thealt.Changes.Remove(settingname);
+                    } else
+                    {
+                        if (check) thealt.Changes.Add(settingname, check.ToString());
+                    }
+
                 }
+
             } else
             {
                 // add as GROUPNAME : SETTINGNAME
                 if (thealt.Changes.ContainsKey(groupname))
                 {
-                    thealt.Changes[groupname] = settingname;
+                    if (check) thealt.Changes[groupname] = settingname;
+                    else thealt.Changes.Remove(groupname);
                 }
                 else
                 {
-                    thealt.Changes.Add(groupname, settingname);
+                    if (check) thealt.Changes.Add(groupname, settingname);
                 }
             }
             Write();

@@ -4,6 +4,7 @@ using System;
 using System.Activities;
 using System.Activities.Expressions;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -11,6 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
@@ -367,7 +369,28 @@ namespace GSTHD
                         foreach(var item in ListAlternates)
                         {
                             //Debug.WriteLine(item.Name);
-                            if (item.Group != string.Empty)
+                            if (item.Group != string.Empty && item.Collection != string.Empty)
+                            {
+                                // if theres no collection, make that first
+                                if (!theMenu.CheckAlternatesForSubmenu(item.Collection))
+                                {
+                                    theMenu.AddCollectionToAlternates(item.Collection);
+
+                                }
+                                // if that collection is missing the group, then add that
+                                if (!theMenu.CheckAlternatesForSubmenu(item.Group, item.Collection))
+                                {
+
+                                    // add group into collection
+                                    theMenu.AddGroupToAlternates(item.Group, item.Collection);
+
+                                    // add "Disabled" to menugroup first
+                                    theMenu.AddToAlternatesGroupInCollection(item.Collection, item.Group, string.Empty);
+                                }
+                                // add the group item into the colleciton
+                                theMenu.AddToAlternatesGroupInCollection(item.Collection, item.Group, item.Name);
+
+                            } else if (item.Group != string.Empty)
                             {
                                 // add mutually-exclusive toggles
                                 if (!theMenu.CheckAlternatesForSubmenu(item.Group))
@@ -717,7 +740,20 @@ namespace GSTHD
                 IterateAlternateChanges(targetAlt, mult);
             } else
             {
-                AlternateSettings targetAlt = ListAlternates.Find(item => (item.Name == lastUsed) && (item.Group == groupname));
+                AlternateSettings targetAlt = null;
+                string[] words = null;
+                // if this is a subgroup within a subcollection
+                if (groupname.Contains("_:_")) {
+                    words = Regex.Split(groupname, @"_\:_");
+                    targetAlt = ListAlternates.Find(item => (item.Name == lastUsed) && (item.Group == words[1]) && (item.Collection == words[0]));
+                } else if (groupname.Contains("_::_"))
+                {
+                    words = Regex.Split(groupname, @"_\::_");
+                    targetAlt = ListAlternates.Find(item => (item.Name == lastUsed) && (item.Group == words[1]) && (item.Collection == words[0]));
+                } else
+                {
+                    targetAlt = ListAlternates.Find(item => (item.Name == lastUsed) && (item.Group == groupname));
+                }
                 // if theres no previosly checked value
                 if (targetAlt != null)
                 {
@@ -726,7 +762,14 @@ namespace GSTHD
 
                 }
 
-                targetAlt = ListAlternates.Find(item => (item.Name == name) && (item.Group == groupname));
+                if (words != null)
+                {
+                    targetAlt = ListAlternates.Find(item => (item.Name == name) && (item.Group == words[1]) && (item.Collection == words[0]));
+                } else
+                {
+                    targetAlt = ListAlternates.Find(item => (item.Name == name) && (item.Group == groupname));
+                    if (targetAlt == null) targetAlt = ListAlternates.Find(item => (item.Name == name) && (item.Collection == groupname));
+                }
                 // if this is not disabled
                 if (targetAlt != null)
                 {

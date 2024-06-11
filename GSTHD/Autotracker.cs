@@ -244,6 +244,7 @@ namespace GSTHD
                     {
                         LZTracking = true;
                         spoilerPanel = panel;
+                        break;
                     }
                 }
             }
