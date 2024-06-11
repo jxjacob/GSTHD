@@ -1327,13 +1327,13 @@ namespace GSTHD
                     case Color _:
                         if (mult < 0)
                         {
-                            object ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                            var ogValue = ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
                             Color tempcolor;
                             // format: `1,2,3`
-                            var newrgb = value?.ToString().Split(',');
+                            var newrgb = ogValue?.ToString().Split(',');
                             // if there isnt more than 1 response, assume its a word and not rgb
-                            if (newrgb.Length > 1) tempcolor =  Color.FromArgb(int.Parse(newrgb[0]), int.Parse(newrgb[1]), int.Parse(newrgb[2]));
-                            else tempcolor = Color.FromName(value.ToString());
+                            if (newrgb.Length > 1) tempcolor =  Color.FromArgb(int.Parse(newrgb[1].Substring(3)), int.Parse(newrgb[2].Substring(3)), int.Parse(newrgb[3].Substring(3).Split(']')[0]));
+                            else tempcolor = Color.FromName(ogValue.ToString());
                             if (tempcolor.Name == "Transparent")
                             {
                                 target.GetType().GetProperty(translatedname).SetValue(target, null);
