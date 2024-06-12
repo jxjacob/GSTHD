@@ -79,13 +79,6 @@ namespace GSTHD
             }
         }
 
-        //private void DoubleItem_LoadCompleted(Object sender, AsyncCompletedEventArgs e)
-        //{
-        //    if (e.Error != null)
-        //    {
-        //        File.WriteAllText(@"red_X_" + DateTime.Now.ToString("MM-dd-yyyy-HH:mm:ss") + ".txt", e.Error.Message.ToString());
-        //    }
-        //}
         private void Click_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Clicks != 1)
@@ -99,12 +92,14 @@ namespace GSTHD
             {
                 // TODO change that bool to DragBehaviour.AutocheckDragDrop
                 var dropContent = new DragDropContent(false, ImageNames[4], left_id, isMarked);
+                DecrementLeftState();
                 this.DoDragDrop(dropContent, DragDropEffects.Copy);
                 isMouseDown = false;
             }
             if (MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton) && isMouseDown)
             {
                 var dropContent = new DragDropContent(false, ImageNames[5], right_id, isMarked);
+                DecrementRightState();
                 this.DoDragDrop(dropContent, DragDropEffects.Copy);
                 isMouseDown = false;
             }
