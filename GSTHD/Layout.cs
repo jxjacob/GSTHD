@@ -368,6 +368,8 @@ namespace GSTHD
                     {
                         foreach(var item in ListAlternates)
                         {
+                            // just in case anyone gets cheeky and sets it in here
+                            item.Enabled = false;
                             //Debug.WriteLine(item.Name);
                             if (item.Group != string.Empty && item.Collection != string.Empty)
                             {
@@ -413,6 +415,33 @@ namespace GSTHD
                                 theMenu.AddToggleToAlternates(item.Name);
                             }
 
+
+
+                            // yes, this is gonna add several duplicate copies of conditional data, but at this point I dont care
+                            // check if it has a Conditional
+                            if (item.ConditionalChanges != null)
+                            {
+                                // if it does, give the Alts its conditioining with a copy of its conditionals with the names revsered and isOrganic set to FALSE
+                                foreach (SubAltSettings cond in item.ConditionalChanges){
+                                    if (!cond.isOrganic) continue;
+
+                                    foreach (string name in cond.Names)
+                                    {
+                                        // find Alt with name
+                                        AlternateSettings targetAlt = ListAlternates.Find(newitem => newitem.Name == name);
+                                        // make new string[] with all names, but with THIS name taken out and item.name swapped in
+                                        string[] namecopy = (string[])cond.Names.Clone();
+                                        for (var i = 0; i < namecopy.Length; i++)
+                                        {
+                                            if (namecopy[i] == name) { namecopy[i] = item.Name; break; }
+                                        }
+                                        // give it the copy condtional with isOrganic false 
+                                        if (targetAlt.ConditionalChanges == null) targetAlt.ConditionalChanges = new List<SubAltSettings>();
+                                        targetAlt.ConditionalChanges.Add(new SubAltSettings() { Names = namecopy, Changes = cond.Changes, isOrganic = false });
+                                    }
+                                }
+
+                            }
                         }
 
                     }
@@ -737,7 +766,9 @@ namespace GSTHD
             if (groupname == null)
             {
                 AlternateSettings targetAlt = ListAlternates.Find(item => item.Name == name);
-                IterateAlternateChanges(targetAlt, mult);
+                IterateAlternateChanges(targetAlt.Changes, mult);
+                targetAlt.Enabled = check;
+                if (targetAlt.ConditionalChanges != null) IterateConditionalChanges(targetAlt, mult);
             } else
             {
                 AlternateSettings targetAlt = null;
@@ -758,8 +789,9 @@ namespace GSTHD
                 if (targetAlt != null)
                 {
                     // get the previously marked setting, undo those
-                    IterateAlternateChanges(targetAlt, -1);
-
+                    IterateAlternateChanges(targetAlt.Changes, -1);
+                    targetAlt.Enabled = false;
+                    if (targetAlt.ConditionalChanges != null) IterateConditionalChanges(targetAlt, -1);
                 }
 
                 if (words != null)
@@ -773,7 +805,9 @@ namespace GSTHD
                 // if this is not disabled
                 if (targetAlt != null)
                 {
-                    IterateAlternateChanges(targetAlt, mult);
+                    IterateAlternateChanges(targetAlt.Changes, mult);
+                    targetAlt.Enabled = check;
+                    if (targetAlt.ConditionalChanges != null) IterateConditionalChanges(targetAlt, mult);
                 }
             }
             // push to broadcast
@@ -787,10 +821,30 @@ namespace GSTHD
             }
         }
 
-        private void IterateAlternateChanges(AlternateSettings targetAlt, int mult)
+        private void IterateConditionalChanges(AlternateSettings targetAlt, int mult)
         {
-            if (targetAlt == null) return;
-            foreach (var x in targetAlt.Changes)
+            foreach (SubAltSettings cond in targetAlt.ConditionalChanges)
+            {
+                bool EveryoneElseEnabled = true;
+                foreach (string name in cond.Names)
+                {
+                    // if name's Alt is NOT enabled, set allGood to false and break
+                    var tempAlt = ListAlternates.Find(item => item.Name == name);
+                    if (!tempAlt.Enabled) { EveryoneElseEnabled = false; break; }
+                }
+
+                if (EveryoneElseEnabled)
+                {
+                    // something something at the end
+                    IterateAlternateChanges(cond.Changes, mult);
+                }
+            }
+        }
+
+        private void IterateAlternateChanges(Dictionary<string, dynamic[]> Changes, int mult)
+        {
+            if (Changes == null) return;
+            foreach (var x in Changes)
             {
                 foreach (var y in x.Value)
                 {
@@ -1744,6 +1798,7 @@ namespace GSTHD
     {
         public string[] Names { get; set; } = null;
         public Dictionary<string, dynamic[]> Changes { get; set; } = null;
+        public bool isOrganic { get; set; } = true;
     }
 
     public class AlternateSettings
@@ -1752,6 +1807,7 @@ namespace GSTHD
         public string Group { get; set; } = string.Empty;
         public string Collection { get; set; } = string.Empty;
         public Dictionary<string, dynamic[]> Changes { get; set; } = null;
-        public SubAltSettings[] ConditionalChanges { get; set; } = null;
+        public List<SubAltSettings> ConditionalChanges { get; set; } = null;
+        public bool Enabled { get; set; } = false;
     }
 }
