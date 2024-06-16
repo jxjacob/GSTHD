@@ -44,9 +44,9 @@ namespace GSTHD
             base.OnPaint(e);
         }
 
-        public void IncrementMarked()
+        public void IncrementMarked(bool MarkModeCycle)
         {
-            isMarked = (MarkedImageIndex)((((int)isMarked)+1) % MarkedMax);
+            isMarked = (MarkedImageIndex)((((int)isMarked)+1) % ( (MarkModeCycle) ? MarkedMax : 2));
         }
 
         public int[] GetSizeDims()

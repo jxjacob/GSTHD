@@ -29,6 +29,7 @@ namespace GSTHD
         public string group;
         public OrganicImage targetControl;
         public int dk64_id = -1;
+        public bool enabled = false;
     }
     public class TrackedGroup
     {
@@ -115,7 +116,7 @@ namespace GSTHD
             }
         }
 
-        private void CalibrateTracks()
+        public void CalibrateTracks()
         {
             // go through each address or group and store the controls that they are going to update so i can skip that godawful foreach controls for every single damn update
             // also removes addresses without a counterpart on the layout
@@ -130,6 +131,7 @@ namespace GSTHD
                     if (result.targetControl != null)
                     {
                         //Debug.WriteLine("group " + result.name + " already has a targetcontrol, skipping");
+                        ta.enabled = result.targetControl.Visible;
                         continue;
                     }
                     foreach (Control thing in form.Controls[0].Controls)
@@ -139,11 +141,13 @@ namespace GSTHD
                             if (ci.AutoName == result.name)
                             {
                                 result.targetControl = (OrganicImage)thing;
+                                ta.enabled = thing.Visible;
                                 break;
                             }
                             else if (ci.AutoSubName == result.name && form.Settings.SubtractItems)
                             {
                                 result.targetControl = (OrganicImage)thing;
+                                ta.enabled = thing.Visible;
                                 break;
                             }
 
@@ -153,6 +157,7 @@ namespace GSTHD
                             if (di.AutoName == result.name)
                             {
                                 result.targetControl = (OrganicImage)thing;
+                                ta.enabled = thing.Visible;
                                 break;
                             }
                         }
@@ -161,6 +166,7 @@ namespace GSTHD
                             if (it.AutoName == result.name)
                             {
                                 result.targetControl = (OrganicImage)thing;
+                                ta.enabled = thing.Visible;
                                 break;
                             }
 
@@ -180,6 +186,7 @@ namespace GSTHD
                             if (it.AutoName == ta.name)
                             {
                                 ta.targetControl = (OrganicImage)thing;
+                                ta.enabled = thing.Visible;
                                 break;
                             }
 
@@ -189,6 +196,7 @@ namespace GSTHD
                             if (md.AutoName == ta.name)
                             {
                                 ta.targetControl = (OrganicImage)thing;
+                                ta.enabled = thing.Visible;
                                 break;
                             }
 
@@ -198,6 +206,7 @@ namespace GSTHD
                             if (sg.AutoName == ta.name)
                             {
                                 ta.targetControl = (OrganicImage)thing;
+                                ta.enabled = thing.Visible;
                                 break;
                             }
 
@@ -207,6 +216,7 @@ namespace GSTHD
                             if (ci.AutoName == ta.name)
                             {
                                 ta.targetControl = (OrganicImage)thing;
+                                ta.enabled = thing.Visible;
                                 break;
                             }
 
@@ -216,6 +226,7 @@ namespace GSTHD
                             if (it2.AutoName == ta.name)
                             {
                                 ta.targetControl = (OrganicImage)thing;
+                                ta.enabled = thing.Visible;
                                 break;
                             }
 
@@ -271,6 +282,7 @@ namespace GSTHD
             {
                 if (VerifyGameState())
                 {
+                    if (!ta.enabled) continue;
                     if (ta.group != "")
                     {
                         TrackedGroup result = trackedGroups.Find(x => x.name.Equals(ta.group));

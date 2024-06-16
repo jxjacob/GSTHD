@@ -28,9 +28,6 @@ namespace GSTHD
             public ToolStripMenuItem LoadState;
             public ToolStripMenuItem ShowMenuBar;
             public ToolStripMenuItem BroadcastView;
-            //public ToolStripMenuItem ZoomIn;
-            //public ToolStripMenuItem ZoomOut;
-            //public ToolStripMenuItem ZoomReset;
 
             // Options
             // Mouse Controls
@@ -48,6 +45,9 @@ namespace GSTHD
             public ToolStripMenuItem MoveLocation;
             // public ToolStripMenuItem Autocheck;
             public ToolStripMenuItem Behaviour;
+
+            public ToolStripMenuItem WothSubheader;
+            public ToolStripMenuItem BarrenSubheader;
 
             // WotH
             public ToolStripMenuItem EnableLastWoth;
@@ -148,6 +148,12 @@ namespace GSTHD
             { Settings.SpoilerOrderOption.Chronological, "Chronological (Japes-Castle)" },
         };
 
+        private readonly Dictionary<Settings.MarkModeOption, string> MarkModeNames = new Dictionary<Settings.MarkModeOption, string>
+        {
+            { Settings.MarkModeOption.Toggle, "Toggle Checkmark Only" },
+            { Settings.MarkModeOption.Cycle, "Cycle Checkmark and X" },
+        };
+
         Form1 Form;
         Settings Settings;
         MenuStrip MenuStrip;
@@ -161,6 +167,7 @@ namespace GSTHD
         Dictionary<Settings.SongMarkerBehaviourOption, ToolStripMenuItem> SongMarkerBehaviourOptions;
         Dictionary<Settings.SelectEmulatorOption, ToolStripMenuItem> SelectEmulatorOptions;
         Dictionary<Settings.SpoilerOrderOption, ToolStripMenuItem> SpoilerOrderOptions;
+        Dictionary<Settings.MarkModeOption, ToolStripMenuItem> MarkModeOptions;
         Dictionary<KnownColor, ToolStripMenuItem> LastWothColorOptions;
         Dictionary<KnownColor, ToolStripMenuItem> SpoilerPointColorOptions;
         Dictionary<KnownColor, ToolStripMenuItem> SpoilerWothColorOptions;
@@ -326,6 +333,15 @@ namespace GSTHD
                         ExtraButtonOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetExtraButton)));
                     }
                     Items.ExtraButton = new ToolStripMenuItem("\"Mark Item\" Button", null, ExtraButtonOptions.Values.ToArray());
+                    Items.ExtraButton.DropDownItems.Add("-");
+                    // add the two options
+                    MarkModeOptions = new Dictionary<Settings.MarkModeOption, ToolStripMenuItem>();
+                    foreach (var button in MarkModeNames)
+                    {
+                        MarkModeOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetMarkMode)));
+                    }
+                    var MarkModeOrder = new ToolStripMenuItem("Mode", null, MarkModeOptions.Values.ToArray());
+                    Items.ExtraButton.DropDownItems.Add(MarkModeOrder);
                     mouseControlsSubMenu.DropDownItems.Add(Items.ExtraButton);
 
 
@@ -397,66 +413,7 @@ namespace GSTHD
                 }
                 optionMenu.DropDownItems.Add(songMarkersSubMenu);
 
-                ToolStripMenuItem wothSubMenu = new ToolStripMenuItem("WotH/Path");
-                {
-                    Items.EnableLastWoth = new ToolStripMenuItem("Enable Last WotH", null, new EventHandler(menuBar_ToggleEnableLastWotH))
-                    {
-                        CheckOnClick = true,
-                    };
-                    wothSubMenu.DropDownItems.Add(Items.EnableLastWoth);
 
-
-                    LastWothColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
-                    SpoilerPointColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
-                    SpoilerWothColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
-                    SpoilerEmptyColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
-                    SpoilerKindaEmptyColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
-
-                    var firstColorId = 28;
-                    var lastColorId = 167;
-
-                    for (int i = firstColorId; i <= lastColorId; i++)
-                    {
-                        var color = (KnownColor)i;
-                        LastWothColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetLastWothColor)));
-                        SpoilerPointColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerPointColor)));
-                        SpoilerWothColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerWothColor)));
-                        SpoilerEmptyColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerEmptyColor)));
-                        SpoilerKindaEmptyColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerKindaEmptyColor)));
-                        i++;
-                    }
-
-                    Items.LastWothColor = new ToolStripMenuItem("Last WotH Color", null, LastWothColorOptions.Values.ToArray());
-                    wothSubMenu.DropDownItems.Add(Items.LastWothColor);
-
-                    Items.EnableDuplicateWoth = new ToolStripMenuItem("Allow Duplicate WotH Entries", null, new EventHandler(menuBar_ToggleEnableDuplicateWotH))
-                    {
-                        CheckOnClick = true,
-                    };
-                    wothSubMenu.DropDownItems.Add(Items.EnableDuplicateWoth);
-
-                    Items.EnableHintPathAutofill = new ToolStripMenuItem("Path Goal Autofill (Experimental)", null, new EventHandler(menuBar_ToggleEnableHintPathAutofill))
-                    {
-                        CheckOnClick = true,
-                    };
-                    wothSubMenu.DropDownItems.Add(Items.EnableHintPathAutofill);
-                    Items.EnableHintPathAutofillAggressive = new ToolStripMenuItem("Ignore Invalid Autofill Keycodes", null, new EventHandler(menuBar_ToggleEnableHintPathAutofillAggressive))
-                    {
-                        CheckOnClick = true,
-                    };
-                    wothSubMenu.DropDownItems.Add(Items.EnableHintPathAutofillAggressive);
-                }
-                optionMenu.DropDownItems.Add(wothSubMenu);
-
-                ToolStripMenuItem barrenSubMenu = new ToolStripMenuItem("Barren");
-                {
-                    Items.EnableBarrenColors = new ToolStripMenuItem("Enable Barren Colors", null, new EventHandler(menuBar_ToggleEnableBarrenColors))
-                    {
-                        CheckOnClick = true,
-                    };
-                    barrenSubMenu.DropDownItems.Add(Items.EnableBarrenColors);
-                }
-                optionMenu.DropDownItems.Add(barrenSubMenu);
                 //-------------------
                 ToolStripMenuItem gossipSubMenu = new ToolStripMenuItem("Gossip Stones");
                 {
@@ -466,17 +423,17 @@ namespace GSTHD
                     };
                     gossipSubMenu.DropDownItems.Add(Items.OverrideHeldImage);
 
-                    Items.StoneOverrideCheckMark = new ToolStripMenuItem("Ignore Incoming Checkmarks", null, new EventHandler(menuBar_ToggleOverrideStoneCheckmark))
+                    Items.StoneOverrideCheckMark = new ToolStripMenuItem("Ignore Incoming Marks", null, new EventHandler(menuBar_ToggleOverrideStoneCheckmark))
                     {
                         CheckOnClick = true,
                     };
                     gossipSubMenu.DropDownItems.Add(Items.StoneOverrideCheckMark);
 
                     GossipeCycleLengthOptions = new Dictionary<double, ToolStripMenuItem>();
-                    
-                    for (double i = 0.25; i <= 2.0; i+=0.25)
+
+                    for (double i = 0.25; i <= 2.0; i += 0.25)
                     {
-                        GossipeCycleLengthOptions.Add(i, new ToolStripMenuItem(i.ToString()+" sec", null, new EventHandler(menuBar_SetGossipCycleLength)));
+                        GossipeCycleLengthOptions.Add(i, new ToolStripMenuItem(i.ToString() + " sec", null, new EventHandler(menuBar_SetGossipCycleLength)));
                     }
 
                     Items.CycleLength = new ToolStripMenuItem("Cycle Delay", null, GossipeCycleLengthOptions.Values.ToArray());
@@ -489,17 +446,93 @@ namespace GSTHD
                     gossipSubMenu.DropDownItems.Add(Items.ForceGossipCycles);
                 }
                 optionMenu.DropDownItems.Add(gossipSubMenu);
+
+
+                ToolStripMenuItem hintPanelSubMenu = new ToolStripMenuItem("Hint Panels");
+                {
+                    Items.WothSubheader = new ToolStripMenuItem("WotH");
+                    {
+
+                        Items.EnableLastWoth = new ToolStripMenuItem("Enable Last WotH", null, new EventHandler(menuBar_ToggleEnableLastWotH))
+                        {
+                            CheckOnClick = true,
+                        };
+                        Items.WothSubheader.DropDownItems.Add(Items.EnableLastWoth);
+
+
+                        LastWothColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
+                        SpoilerPointColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
+                        SpoilerWothColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
+                        SpoilerEmptyColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
+                        SpoilerKindaEmptyColorOptions = new Dictionary<KnownColor, ToolStripMenuItem>();
+
+                        var firstColorId = 28;
+                        var lastColorId = 167;
+
+                        for (int i = firstColorId; i <= lastColorId; i++)
+                        {
+                            var color = (KnownColor)i;
+                            LastWothColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetLastWothColor)));
+                            SpoilerPointColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerPointColor)));
+                            SpoilerWothColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerWothColor)));
+                            SpoilerEmptyColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerEmptyColor)));
+                            SpoilerKindaEmptyColorOptions.Add(color, new ToolStripMenuItem(color.ToString(), null, new EventHandler(menuBar_SetSpoilerKindaEmptyColor)));
+                            i++;
+                        }
+
+                        Items.LastWothColor = new ToolStripMenuItem("Last WotH Color", null, LastWothColorOptions.Values.ToArray());
+                        Items.WothSubheader.DropDownItems.Add(Items.LastWothColor);
+
+                        Items.EnableDuplicateWoth = new ToolStripMenuItem("Allow Duplicate WotH Entries", null, new EventHandler(menuBar_ToggleEnableDuplicateWotH))
+                        {
+                            CheckOnClick = true,
+                        };
+                        Items.WothSubheader.DropDownItems.Add(Items.EnableDuplicateWoth);
+                        
+                    }
+                    hintPanelSubMenu.DropDownItems.Add(Items.WothSubheader);
+
+                    Items.BarrenSubheader = new ToolStripMenuItem("Barren");
+                    {
+                        Items.EnableBarrenColors = new ToolStripMenuItem("Enable Barren Colors", null, new EventHandler(menuBar_ToggleEnableBarrenColors))
+                        {
+                            CheckOnClick = true,
+                        };
+                        Items.BarrenSubheader.DropDownItems.Add(Items.EnableBarrenColors);
+                    }
+                    hintPanelSubMenu.DropDownItems.Add(Items.BarrenSubheader);
+
+
+                    hintPanelSubMenu.DropDownItems.Add("-");
+
+                    Items.EnableHintPathAutofill = new ToolStripMenuItem("Path Goal Autofill (Experimental)", null, new EventHandler(menuBar_ToggleEnableHintPathAutofill))
+                    {
+                        CheckOnClick = true,
+                    };
+                    hintPanelSubMenu.DropDownItems.Add(Items.EnableHintPathAutofill);
+                    Items.EnableHintPathAutofillAggressive = new ToolStripMenuItem("Ignore Invalid Autofill Keycodes", null, new EventHandler(menuBar_ToggleEnableHintPathAutofillAggressive))
+                    {
+                        CheckOnClick = true,
+                    };
+                    hintPanelSubMenu.DropDownItems.Add(Items.EnableHintPathAutofillAggressive);
+
+
+
+
+                }
+                optionMenu.DropDownItems.Add(hintPanelSubMenu);
+                
+
+                
                 //-------------
                 ToolStripMenuItem spoilerSubMenu = new ToolStripMenuItem("DK64 Spoiler Hints");
                 {
 
                     // level order
                     SpoilerOrderOptions = new Dictionary<Settings.SpoilerOrderOption, ToolStripMenuItem>();
-                    int i = 0;
                     foreach (var button in SpoilerOrderNames)
                     {
                         SpoilerOrderOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetSpoilerLevelOrder)));
-                        i++;
                     }
                     Items.SpoilerLevelOrder = new ToolStripMenuItem("Level Order", null, SpoilerOrderOptions.Values.ToArray());
                     spoilerSubMenu.DropDownItems.Add(Items.SpoilerLevelOrder);
@@ -510,7 +543,7 @@ namespace GSTHD
                     };
                     spoilerSubMenu.DropDownItems.Add(Items.SpoilerHideStarting);
 
-                    Items.CellOverrideCheckMark = new ToolStripMenuItem("Ignore Incoming Checkmarks", null, new EventHandler(menuBar_ToggleOverrideCellCheckmark))
+                    Items.CellOverrideCheckMark = new ToolStripMenuItem("Ignore Incoming Marks", null, new EventHandler(menuBar_ToggleOverrideCellCheckmark))
                     {
                         CheckOnClick = true,
                     };
@@ -635,6 +668,7 @@ namespace GSTHD
             }
 
             SpoilerOrderOptions[Settings.SpoilerOrder].Checked = true;
+            MarkModeOptions[Settings.MarkMode].Checked = true;
             Items.SpoilerHideStarting.Checked = Settings.HideStarting;
             SpoilerPointColorOptions[Settings.SpoilerPointColour].Checked = true;
             SpoilerWothColorOptions[Settings.SpoilerWOTHColour].Checked = true;
@@ -1122,6 +1156,20 @@ namespace GSTHD
             var option = SpoilerOrderOptions.FirstOrDefault((x) => x.Value == choice);
             if (option.Value == null) throw new NotImplementedException();
             Settings.SpoilerOrder = option.Key;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
+        private void menuBar_SetMarkMode(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            MarkModeOptions[Settings.MarkMode].Checked = false;
+            choice.Checked = true;
+
+            var option = MarkModeOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.MarkMode = option.Key;
             Settings.Write();
             Form.UpdateLayoutFromSettings();
         }

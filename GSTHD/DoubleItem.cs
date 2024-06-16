@@ -66,8 +66,6 @@ namespace GSTHD
             this.Location = new Point(data.X, data.Y);
             this.TabStop = false;
             this.AllowDrop = false;
-            //this.WaitOnLoad = false;
-            //this.LoadCompleted += this.DoubleItem_LoadCompleted;
 
             ProgressBehaviour = new ProgressibleElementBehaviour<DoubleItemState>(this, Settings);
 
@@ -184,7 +182,7 @@ namespace GSTHD
 
         public void ToggleCheck()
         {
-            isMarked = (MarkedImageIndex)((int)isMarked++ % Enum.GetNames(typeof(MarkedImageIndex)).Length);
+            IncrementMarked(Settings.MarkMode == Settings.MarkModeOption.Cycle);
             UpdateImage();
         }
 

@@ -783,6 +783,7 @@ namespace GSTHD
                 {
                     ((Form2)Application.OpenForms["GSTHD_DK64 Broadcast View"]).CurrentLayout.ApplyAlternates(name, groupname, check, lastUsed);
                 }
+                f1.TheAutotracker?.CalibrateTracks();
             }
         }
 

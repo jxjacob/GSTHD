@@ -251,7 +251,7 @@ namespace GSTHD
 
         public void ToggleCheck()
         {
-            IncrementMarked();
+            IncrementMarked(Settings.MarkMode == Settings.MarkModeOption.Cycle);
             UpdateImage();
         }
 
@@ -529,7 +529,7 @@ namespace GSTHD
 
         public void ToggleCheck()
         {
-            IncrementMarked();
+            IncrementMarked(Settings.MarkMode == Settings.MarkModeOption.Cycle);
             UpdateImage();
         }
 
