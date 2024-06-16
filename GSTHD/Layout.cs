@@ -829,8 +829,7 @@ namespace GSTHD
                 foreach (string name in cond.Names)
                 {
                     // if name's Alt is NOT enabled, set allGood to false and break
-                    var tempAlt = ListAlternates.Find(item => item.Name == name);
-                    if (!tempAlt.Enabled) { EveryoneElseEnabled = false; break; }
+                    if (!ListAlternates.Find(item => item.Name == name).Enabled) { EveryoneElseEnabled = false; break; }
                 }
 
                 if (EveryoneElseEnabled)
@@ -1652,7 +1651,6 @@ namespace GSTHD
         public string TextBoxFontName { get; set; }
         public int TextBoxFontSize { get; set; }
         public FontStyle TextBoxFontStyle { get; set; }
-        public int TextBoxWidth { get; set; }
         public int TextBoxHeight { get; set; }
         public string TextBoxText { get; set; }
 
@@ -1661,7 +1659,6 @@ namespace GSTHD
         public string LabelFontName { get; set; }
         public int LabelFontSize { get; set; }
         public FontStyle LabelFontStyle { get; set; }
-        public int LabelWidth { get; set; }
         public int LabelHeight { get; set; }
 
         public bool isBroadcastable { get; set; } = false;
@@ -1684,7 +1681,6 @@ namespace GSTHD
         public string TextBoxFontName { get; set; }
         public int TextBoxFontSize { get; set; }
         public FontStyle TextBoxFontStyle { get; set; }
-        public int TextBoxWidth { get; set; }
         public int TextBoxHeight { get; set; }
         public string TextBoxText { get; set; }
 
@@ -1693,7 +1689,6 @@ namespace GSTHD
         public string LabelFontName { get; set; }
         public int LabelFontSize { get; set; }
         public FontStyle LabelFontStyle { get; set; }
-        public int LabelWidth { get; set; }
         public int LabelHeight { get; set; }
 
         public int CounterFontSize { get; set; }

@@ -193,7 +193,7 @@ namespace GSTHD
                 ForeColor = data.LabelColor,
                 BackColor = data.LabelBackColor,
                 Font = new Font(data.LabelFontName, data.LabelFontSize, data.LabelFontStyle),
-                Width = data.LabelWidth,
+                Width = data.Width,
                 Height = data.LabelHeight
             };
 
@@ -205,7 +205,7 @@ namespace GSTHD
                     data.TextBoxBackColor,
                     new Font(data.TextBoxFontName, data.TextBoxFontSize, data.TextBoxFontStyle),
                     data.TextBoxName,
-                    new Size(data.TextBoxWidth, data.TextBoxHeight),
+                    new Size(data.Width, data.TextBoxHeight),
                     data.TextBoxText
                 );
             textBoxCustom.TextBoxField.KeyDown += textBoxCustom_KeyDown_Barren;
@@ -222,7 +222,7 @@ namespace GSTHD
                 ForeColor = data.LabelColor,
                 BackColor = data.LabelBackColor,
                 Font = new Font(data.LabelFontName, data.LabelFontSize, data.LabelFontStyle),
-                Width = data.LabelWidth,
+                Width = data.Width,
                 Height = data.LabelHeight
             };
 
@@ -234,7 +234,7 @@ namespace GSTHD
                     data.TextBoxBackColor,
                     new Font(data.TextBoxFontName, data.TextBoxFontSize, data.TextBoxFontStyle),
                     data.TextBoxName,
-                    new Size(data.TextBoxWidth, data.TextBoxHeight),
+                    new Size(data.Width, data.TextBoxHeight),
                     data.TextBoxText,
                     true
                 );
