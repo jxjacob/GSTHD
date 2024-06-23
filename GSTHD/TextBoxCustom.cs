@@ -53,7 +53,7 @@ namespace GSTHD
                 Location = new Point(TextBoxField.Location.X, TextBoxField.Location.Y + TextBoxField.Height + 5),
                 IntegralHeight = false,
                 Width = 155,
-                Sorted = true
+                Sorted = false
             };
             SuggestionContainer.Items.AddRange(listSuggestion.Keys.ToArray());
             SuggestionContainer.KeyUp += SuggestionContainer_KeyUp;

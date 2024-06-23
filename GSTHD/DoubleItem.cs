@@ -38,6 +38,8 @@ namespace GSTHD
 
         delegate void SetStateCallback(DoubleItemState state);
 
+        private DoubleItemState LastState { get; set; }
+
         public DoubleItem(ObjectPoint data, Settings settings, bool isBroadcast = false)
         {
             Settings = settings;
@@ -90,14 +92,14 @@ namespace GSTHD
             {
                 // TODO change that bool to DragBehaviour.AutocheckDragDrop
                 var dropContent = new DragDropContent(false, ImageNames[4], left_id, isMarked);
-                DecrementLeftState();
+                SetState(LastState);
                 this.DoDragDrop(dropContent, DragDropEffects.Copy);
                 isMouseDown = false;
             }
             if (MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton) && isMouseDown)
             {
                 var dropContent = new DragDropContent(false, ImageNames[5], right_id, isMarked);
-                DecrementRightState();
+                SetState(LastState);
                 this.DoDragDrop(dropContent, DragDropEffects.Copy);
                 isMouseDown = false;
             }
@@ -139,6 +141,7 @@ namespace GSTHD
         }
         public void IncrementState()
         {
+            LastState = this.GetState();
             if (isColoredLeft) DecrementLeftState(); else IncrementLeftState();
         }
 
@@ -170,6 +173,7 @@ namespace GSTHD
         }
         public void DecrementState()
         {
+            LastState = this.GetState();
             if (isColoredRight) DecrementRightState(); else IncrementRightState();
         }
 
@@ -214,8 +218,8 @@ namespace GSTHD
             } else
             {
                 isMarked = state.isMarked;
-                if ((state.ImageIndex & 1) == 1) { IncrementLeftState(); }
-                if ((state.ImageIndex & 2) == 2) { IncrementRightState(); }
+                if ((state.ImageIndex & 1) == 1) { IncrementLeftState(); } else { DecrementLeftState(); }
+                if ((state.ImageIndex & 2) == 2) { IncrementRightState(); } else { DecrementRightState(); }
             }
         }
 

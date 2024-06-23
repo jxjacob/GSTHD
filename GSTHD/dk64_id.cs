@@ -9,6 +9,8 @@ using System.Windows.Forms;
 
 namespace GSTHD
 {
+    
+
     public enum PotionTypes
     {
         Colourless,
@@ -37,6 +39,21 @@ namespace GSTHD
 
     public static class DK64_Items
     {
+        public static Dictionary<int, int> BossRooms { get; } = new Dictionary<int, int>()
+        {
+            {203, 1},
+            {204, 2},
+            {205, 3},
+            {206, 4},
+            {207, 5},
+            {8, 6},
+            {197, 7},
+            {154, 8},
+            {111, 9},
+            {83, 10},
+            {196, 11},
+            {199, 12},
+        };
         public static Dictionary<int, DK64_Item> GenerateDK64Items()
         {
             // bigass list of every spoilerhintable object, their ID, their potion enum

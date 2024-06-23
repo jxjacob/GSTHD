@@ -35,6 +35,7 @@ namespace GSTHD
         public List<int> levelOrder = new List<int>();
         public List<int> kroolOrder = new List<int>();
         public List<int> helmOrder = new List<int>();
+        public string randoVersion = string.Empty;
 
         private Color CellBackColor;
         public Color storedBackColor { get; set; }
@@ -251,6 +252,14 @@ namespace GSTHD
                 startingItems.Add(35);
             }
 
+            if (loadedjson.ContainsKey("Randomizer Version"))
+            {
+                randoVersion = loadedjson.GetValue("Randomizer Version").ToString();
+            } else
+            {
+                randoVersion = "3.1.9";
+            }
+
             if (parsedStartingInfo.ContainsKey("level_order"))
             {
                 levelOrder = parsedStartingInfo["level_order"].ToObject<List<int>>();
@@ -366,6 +375,7 @@ namespace GSTHD
 
             GSTForms f = (GSTForms)this.FindForm();
 
+            
             for (int i = 0; i < helmOrder.Count; i++)
             {
                 var temp = f.Controls[0].Controls.Find($"HelmOrder{i}", false);
@@ -373,12 +383,27 @@ namespace GSTHD
                 else { break; }
             }
 
-            for (int i = 0; i < kroolOrder.Count; i++)
+            if (randoVersion.Substring(0,1) == "3")
             {
-                var temp = f.Controls[0].Controls.Find($"KroolOrder{i}", false);
-                if (temp.Length > 0) { ((Item)temp.First()).SetState(kroolOrder[i] + 1); }
-                else { break; }
+                // 3.x era of krool phases
+                for (int i = 0; i < kroolOrder.Count; i++)
+                {
+                    var temp = f.Controls[0].Controls.Find($"KroolOrder{i}", false);
+                    if (temp.Length > 0) { ((Item)temp.First()).SetState(kroolOrder[i] + 1); }
+                    else { break; }
+                }
+
             }
+            else
+            {
+                for (int i = 0; i < kroolOrder.Count; i++)
+                {
+                    var temp = f.Controls[0].Controls.Find($"KroolOrder{i}", false);
+                    if (temp.Length > 0) { ((Item)temp.First()).SetState(DK64_Items.BossRooms[kroolOrder[i]] ); }
+                    else { break; }
+                }
+            }
+
 
             this.BackColor = storedBackColor;
             DefaultLabel.Dispose();
