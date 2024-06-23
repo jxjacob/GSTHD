@@ -82,6 +82,8 @@ namespace GSTHD
             public ToolStripMenuItem SelectEmulator;
             public ToolStripMenuItem ConnectToEmulator;
             public ToolStripMenuItem SubtractItem;
+            public ToolStripMenuItem EnableSongTracking;
+            public ToolStripMenuItem WriteSongDataToFile;
         }
 
         private readonly Dictionary<Settings.DragButtonOption, string> DragButtonNames = new Dictionary<Settings.DragButtonOption, string>
@@ -154,6 +156,13 @@ namespace GSTHD
             { Settings.MarkModeOption.Cycle, "Cycle Checkmark and X" },
         };
 
+        private readonly Dictionary<Settings.SongFileWriteOption, string> SongFileWriteNames = new Dictionary<Settings.SongFileWriteOption, string>
+        {
+            {Settings.SongFileWriteOption.Disabled, "Disabled" },
+            {Settings.SongFileWriteOption.Single, "Single TXT File" },
+            {Settings.SongFileWriteOption.Multi, "Multiple TXT Files" },
+        };
+
         Form1 Form;
         Settings Settings;
         MenuStrip MenuStrip;
@@ -168,6 +177,7 @@ namespace GSTHD
         Dictionary<Settings.SelectEmulatorOption, ToolStripMenuItem> SelectEmulatorOptions;
         Dictionary<Settings.SpoilerOrderOption, ToolStripMenuItem> SpoilerOrderOptions;
         Dictionary<Settings.MarkModeOption, ToolStripMenuItem> MarkModeOptions;
+        Dictionary<Settings.SongFileWriteOption, ToolStripMenuItem> SongFileOptions;
         Dictionary<KnownColor, ToolStripMenuItem> LastWothColorOptions;
         Dictionary<KnownColor, ToolStripMenuItem> SpoilerPointColorOptions;
         Dictionary<KnownColor, ToolStripMenuItem> SpoilerWothColorOptions;
@@ -612,11 +622,28 @@ namespace GSTHD
                     
                 };
                 MemoryMenu.DropDownItems.Add(Items.ConnectToEmulator);
+
+                var SongTrackerSubmenu = new ToolStripMenuItem("Song Tracking");
+                {
+                    Items.EnableSongTracking = new ToolStripMenuItem("Enable (DK64R 4.0+ only)", null, new EventHandler(menuBar_ToggleEnableSongTracking))
+                    {
+                        CheckOnClick = true,
+                    };
+                    SongTrackerSubmenu.DropDownItems.Add(Items.EnableSongTracking);
+
+                    SongFileOptions = new Dictionary<Settings.SongFileWriteOption, ToolStripMenuItem>();
+                    foreach (var button in SongFileWriteNames)
+                    {
+                        SongFileOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetWriteSongFile)));
+                    }
+                    Items.WriteSongDataToFile = new ToolStripMenuItem("Write Song Data to File", null, SongFileOptions.Values.ToArray());
+                    SongTrackerSubmenu.DropDownItems.Add(Items.WriteSongDataToFile);
+                }
+                MemoryMenu.DropDownItems.Add(SongTrackerSubmenu);
             }
             MenuStrip.Items.Add(MemoryMenu);
 
             //var OverflowMenu = new ToolStripOverflowButton(">");
-
             
         }
 
@@ -677,6 +704,8 @@ namespace GSTHD
 
             SelectEmulatorOptions[Settings.SelectEmulator].Checked = true;
             Items.SubtractItem.Checked = Settings.SubtractItems;
+            Items.EnableSongTracking.Checked = Settings.EnableSongTracking;
+            SongFileOptions[Settings.WriteSongDataToFile].Checked = true;
         }
 
         public void SetRenderer()
@@ -1174,6 +1203,19 @@ namespace GSTHD
             Form.UpdateLayoutFromSettings();
         }
 
+        private void menuBar_SetWriteSongFile(object sender, EventArgs e)
+        {
+            var choice = (ToolStripMenuItem)sender;
+
+            SongFileOptions[Settings.WriteSongDataToFile].Checked = false;
+            choice.Checked = true;
+
+            var option = SongFileOptions.FirstOrDefault((x) => x.Value == choice);
+            if (option.Value == null) throw new NotImplementedException();
+            Settings.WriteSongDataToFile = option.Key;
+            Settings.Write();
+        }
+
         //private void menuBar_ToggleAutocheckSongs(object sender, EventArgs e)
         //{
         //    Items.Autocheck.Checked = !Items.Autocheck.Checked;
@@ -1300,6 +1342,13 @@ namespace GSTHD
         private void menuBar_ToggleDeleteOldAutosaves(object sender, EventArgs e)
         {
             Settings.DeleteOldAutosaves = Items.DeleteOldAutosaves.Checked;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
+        private void menuBar_ToggleEnableSongTracking(object sender, EventArgs e)
+        {
+            Settings.EnableSongTracking = Items.EnableSongTracking.Checked;
             Settings.Write();
             Form.UpdateLayoutFromSettings();
         }

@@ -185,6 +185,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="MouseDetermination.cs" />
+    <Compile Include="NowPlayingPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="OrganicImage.cs">
       <SubType>Component</SubType>
     </Compile>

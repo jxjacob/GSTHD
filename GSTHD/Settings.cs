@@ -98,6 +98,14 @@ namespace GSTHD
             Cycle
         }
 
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum SongFileWriteOption
+        {
+            Disabled,
+            Single,
+            Multi
+        }
+
         private const SongMarkerBehaviourOption DefaultSongMarkerBehaviour = SongMarkerBehaviourOption.DropAndCheck;
 
         public bool ShowMenuBar { get; set; } = true;
@@ -150,6 +158,8 @@ namespace GSTHD
         public double GossipCycleTime { get; set; } = 1;
         public bool EnableAutosave { get; set; } = true;
         public bool DeleteOldAutosaves { get; set; } = true;
+        public bool EnableSongTracking { get; set; } = false;
+        public SongFileWriteOption WriteSongDataToFile { get; set; } = SongFileWriteOption.Disabled;
         public bool SubtractItems { get; set; } = true;
         public bool HideStarting {  get; set; } = false;
         public KnownColor LastWothColor { get; set; } = KnownColor.BlueViolet;

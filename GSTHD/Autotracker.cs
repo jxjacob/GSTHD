@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 using System.Net.NetworkInformation;
 using System.Timers;
+using System.IO;
 
 namespace GSTHD
 {
@@ -64,12 +65,18 @@ namespace GSTHD
         private int currentMapValue;
         private SpoilerPanel spoilerPanel;
 
+        private uint currentSongAddr;
+        private int currentSongBytes;
+        private NowPlayingPanel songPanel;
+        private uint currentMapTimerAddr;
+
         private System.Timers.Timer timer;
         private Form1 form;
 
         private int timeout;
         private bool is64 = false;
         private bool LZTracking = false;
+        private bool SongTracking = false;
 
         //32-bit version
         public Autotracker(Process theProgram, uint foundOffset, ref Form1 theForm)
@@ -259,6 +266,19 @@ namespace GSTHD
                     }
                 }
             }
+
+            if (currentSongAddr != 0 && currentMapTimerAddr != 0)
+            {
+                foreach (Control thing in form.Controls[0].Controls)
+                {
+                    if (thing is NowPlayingPanel panel)
+                    {
+                        SongTracking = true;
+                        songPanel = panel;
+                        break;
+                    }
+                }
+            }
         }
 
         private void UpdateCurrentMap()
@@ -274,10 +294,67 @@ namespace GSTHD
 
         }
 
+        private void UpdateNowPlaying()
+        {
+            // if maptimer is below 0, then we're gonna get garbage data lmao
+            if (GoRead(currentMapTimerAddr, 32) <= 0) return;
+
+            // read text pointer address
+            int pointer = GoRead(currentSongAddr, currentSongBytes);
+            List<byte> songGame = new List<byte>();
+            List<byte> songTitle = new List<byte>();
+            uint readbytes = 0;
+            int stage = 0;
+
+            while (stage < 2)
+            {
+                // read value at pointer (subtracting 0x80000000, since that is implicity added in the GoRead Function
+                int rv = GoRead((uint)pointer - 0x80000000 + readbytes, currentSongBytes);
+                // convert data to bytes, then flip it (it comes up backwards)
+                byte[] cr = BitConverter.GetBytes(rv);
+                Array.Reverse(cr);
+                foreach(byte b in cr)
+                {
+                    // the format is song game, a single 0x00 byte, then the song title, then another 0x00
+                    // therefore, read until we find a 0x00, advance the stage, read until another 0x00, then stop looking
+                    if (b == 0) stage++;
+                    if (b != 0)
+                    {
+                        if (stage == 0) songGame.Add(b);
+                        if (stage == 1) songTitle.Add(b);
+                    }
+                }
+                // look 4 bytes over on next loop
+                readbytes += 4;
+            }
+            string gamename = Encoding.ASCII.GetString(songGame.ToArray());
+            string titlename = Encoding.ASCII.GetString(songTitle.ToArray());
+            // send data to tracker object
+            // also dont send blanks lol
+            if (songGame.Count > 0 && songTitle.Count > 0)
+            {
+                songPanel.SetNames(gamename, titlename);
+                if (form.Settings.WriteSongDataToFile != Settings.SongFileWriteOption.Disabled) WriteSongData(gamename, titlename);
+            }
+        }
+
+        private void WriteSongData(string game, string title)
+        {
+            if (form.Settings.WriteSongDataToFile == Settings.SongFileWriteOption.Multi)
+            {
+                File.WriteAllText(@"autotrack_song_title.txt", $"{title}");
+                File.WriteAllText(@"autotrack_song_game.txt", $"{game}");
+            } else
+            {
+                File.WriteAllText(@"autotrack_songs.txt", $"{game}\n{title}");
+            }
+        }
+
         private void MainTracker(object state, ElapsedEventArgs e)
         {
             FlushGroups();
             if (LZTracking) UpdateCurrentMap();
+            if (SongTracking && form.Settings.EnableSongTracking) UpdateNowPlaying();
             foreach (var ta in trackedAddresses)
             {
                 if (VerifyGameState())
@@ -631,6 +708,18 @@ namespace GSTHD
                 {
                     currentMapAddr = (uint)Convert.ToInt32(parts[1], 16);
                     currentMapBytes = int.Parse(parts[2]);
+                    continue;
+                }
+                else if (parts[0] == "game_current_song_pointer")
+                {
+                    currentSongAddr = (uint)Convert.ToInt32(parts[1], 16);
+                    currentSongBytes = int.Parse(parts[2]);
+                    continue;
+                }
+                else if (parts[0] == "game_map_timer")
+                {
+                    // used for song display
+                    currentMapTimerAddr = (uint)Convert.ToInt32(parts[1], 16);
                     continue;
                 }
 

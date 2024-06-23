@@ -45,6 +45,7 @@ namespace GSTHD
         public List<ObjectPanelBarren> ListPanelBarren { get; } = new List<ObjectPanelBarren>();
         public List<ObjectPanelQuantity> ListPanelQuantity { get; } = new List<ObjectPanelQuantity>();
         public List<ObjectPanelSpoiler> ListPanelSpoiler { get; } = new List<ObjectPanelSpoiler>();
+        public List<ObjectPanelNowPlaying> ListPanelNowPlaying { get; } = new List<ObjectPanelNowPlaying>();
         public List<ObjectPointGoMode> ListGoMode { get; } = new List<ObjectPointGoMode>();
 
         public List<AlternateSettings> ListAlternates { get; } = new List<AlternateSettings>();
@@ -285,6 +286,14 @@ namespace GSTHD
                         foreach (var element in category.Value)
                         {
                             ListPanelSpoiler.Add(JsonConvert.DeserializeObject<ObjectPanelSpoiler>(element.ToString()));
+                        }
+                    }
+
+                    if (category.Key.ToString() == "PanelNowPlaying")
+                    {
+                        foreach (var element in category.Value)
+                        {
+                            ListPanelNowPlaying.Add(JsonConvert.DeserializeObject<ObjectPanelNowPlaying>(element.ToString()));
                         }
                     }
 
@@ -744,6 +753,15 @@ namespace GSTHD
                         var panel = new SpoilerPanel(item, settings, isOnBroadcast);
                         panelLayout.Controls.Add(panel);
                         ListUpdatables.Add(panel);
+                    }
+                }
+
+                if (ListPanelNowPlaying.Count > 0)
+                {
+                    foreach (var item in ListPanelNowPlaying)
+                    {
+                        var panel = new NowPlayingPanel(item, isOnBroadcast);
+                        panelLayout.Controls.Add(panel);
                     }
                 }
 
@@ -1732,6 +1750,32 @@ namespace GSTHD
         public int LabelSpacing { get; set; }
         public int LabelWidth { get; set; }
         public bool isBroadcastable { get; set; } = false;
+    }
+
+    public class ObjectPanelNowPlaying
+    {
+        public string Name { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public bool Visible { get; set; }
+        public Color BackColor { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public bool isBroadcastable { get; set; } = false;
+
+        public int GamePositionX { get; set; }
+        public int GamePositionY { get; set; }
+        public int GameFontSize { get; set; }
+        public string GameFontName { get; set; }
+        public FontStyle GameFontStyle { get; set; }
+        public Color GameFontColor { get; set; }
+
+        public int TitlePositionX { get; set; }
+        public int TitlePositionY { get; set; }
+        public int TitleFontSize { get; set; }
+        public string TitleFontName { get; set; }
+        public FontStyle TitleFontStyle { get; set; }
+        public Color TitleFontColor { get; set; }
     }
 
     public class ObjectPointGoMode
