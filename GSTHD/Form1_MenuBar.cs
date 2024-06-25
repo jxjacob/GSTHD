@@ -617,11 +617,6 @@ namespace GSTHD
                 };
                 MemoryMenu.DropDownItems.Add(Items.SubtractItem);
 
-                Items.ConnectToEmulator = new ToolStripMenuItem("Connect to Emulator", null, new EventHandler(menuBar_ConnectToEmulator))
-                {
-                    
-                };
-                MemoryMenu.DropDownItems.Add(Items.ConnectToEmulator);
 
                 var SongTrackerSubmenu = new ToolStripMenuItem("Song Tracking");
                 {
@@ -640,6 +635,14 @@ namespace GSTHD
                     SongTrackerSubmenu.DropDownItems.Add(Items.WriteSongDataToFile);
                 }
                 MemoryMenu.DropDownItems.Add(SongTrackerSubmenu);
+                
+                
+                
+                Items.ConnectToEmulator = new ToolStripMenuItem("Connect to Emulator", null, new EventHandler(menuBar_ConnectToEmulator))
+                {
+                    
+                };
+                MemoryMenu.DropDownItems.Add(Items.ConnectToEmulator);
             }
             MenuStrip.Items.Add(MemoryMenu);
 

@@ -71,8 +71,9 @@ namespace GSTHD
         public int dk_id;
 
 
-        public CellPictureBox(Settings settings, bool isOnBroadcast)
+        public CellPictureBox(Settings settings, bool isOnBroadcast, bool isMarkable)
         {
+            this.isMarkable = isMarkable;
             ProgressBehaviour = new ProgressibleElementBehaviour<int>(this, settings);
             if (!isOnBroadcast) MouseDown += ProgressBehaviour.Mouse_ClickDown;
         }
@@ -190,6 +191,7 @@ namespace GSTHD
         public bool MinimalMode = false;
         public bool isBroadcastable = false;
         private bool isOnBroadcast = false;
+        public bool isMarkable = true;
 
         public string[] levelList = { "japes", "aztec", "factory", "galleon", "forest", "caves", "castle", "helm", "isles" };
         public string[] potionImageList = { "dk64/potion_shared.png", "dk64/potion_dk.png", "dk64/potion_diddy.png", "dk64/potion_lanky.png", "dk64/potion_tiny.png", "dk64/potion_chunky.png", "dk64/ButWhereWasDK.png", "dk64/key_unknown.png" };
@@ -199,7 +201,7 @@ namespace GSTHD
         delegate void SetStateCallback(SpoilerCellState state);
 
 
-        public SpoilerCell(Settings settings, int width, int height, int x, int y, int points, int woths, List<PotionTypes> potions, int topRowHeight, int topRowPadding, int WorldNumWidth, int WorldNumHeight, int WorldLabelWidth, int PotionWidth, int PotionHeight, string name, string levelname, int levelnum, int levelorder, string cellFontName, int cellFontSize, FontStyle cellFontStyle, int labelSpacing, int labelWidth, Color backColor, bool isMinimal, Dictionary<string, int> spread, Dictionary<int, DK64_Item> dkitems, bool isBroadcastable=false, bool isOnBroadcast=false)
+        public SpoilerCell(Settings settings, int width, int height, int x, int y, int points, int woths, List<PotionTypes> potions, int topRowHeight, int topRowPadding, int WorldNumWidth, int WorldNumHeight, int WorldLabelWidth, int PotionWidth, int PotionHeight, string name, string levelname, int levelnum, int levelorder, string cellFontName, int cellFontSize, FontStyle cellFontStyle, int labelSpacing, int labelWidth, Color backColor, bool isMinimal, Dictionary<string, int> spread, Dictionary<int, DK64_Item> dkitems, bool isBroadcastable = false, bool isOnBroadcast = false, bool isMarkable = true)
         {
             // when getting created, get the spoiler numebrs from the parent panel
             Settings = settings;
@@ -245,6 +247,7 @@ namespace GSTHD
 
             this.isBroadcastable = isBroadcastable && !isOnBroadcast;
             this.isOnBroadcast = isOnBroadcast;
+            this.isMarkable = isMarkable;
 
             this.DragEnter += Mouse_DragEnter;
             this.DragDrop += Mouse_DragDrop;
@@ -616,7 +619,7 @@ namespace GSTHD
                         string toDisplay = (pot.item_id != -1) ? DK64Items[pot.item_id].image : potionImageList[(int)pot.potionType];
                         //Debug.WriteLineIf((pot.item_id != -1), $"todisplay = {toDisplay}");
 
-                        CellPictureBox newPot = new CellPictureBox(Settings, isOnBroadcast)
+                        CellPictureBox newPot = new CellPictureBox(Settings, isOnBroadcast, isMarkable)
                         {
                             Size = new Size(usedPotWidth, usedPotHeight),
                             //SizeMode = PictureBoxSizeMode.Zoom,

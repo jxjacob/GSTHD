@@ -27,6 +27,7 @@ namespace GSTHD
         public MarkedImageIndex isMarked = 0;
         public int MarkedMax = Enum.GetNames(typeof(MarkedImageIndex)).Length;
         public Image markedImage = null;
+        public bool isMarkable = true;
 
         public PictureBoxSizeMode SizeMode { get; set; } = PictureBoxSizeMode.Zoom;
 
@@ -46,7 +47,7 @@ namespace GSTHD
 
         public void IncrementMarked(bool MarkModeCycle)
         {
-            isMarked = (MarkedImageIndex)((((int)isMarked)+1) % ( (MarkModeCycle) ? MarkedMax : 2));
+            if (isMarkable) isMarked = (MarkedImageIndex)((((int)isMarked)+1) % ( (MarkModeCycle) ? MarkedMax : 2));
         }
 
         public int[] GetSizeDims()

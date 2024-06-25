@@ -68,6 +68,7 @@ namespace GSTHD
             this.Location = new Point(data.X, data.Y);
             this.TabStop = false;
             this.AllowDrop = false;
+            this.isMarkable = data.isMarkable;
 
             ProgressBehaviour = new ProgressibleElementBehaviour<DoubleItemState>(this, Settings);
 

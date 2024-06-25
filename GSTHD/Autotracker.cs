@@ -69,6 +69,8 @@ namespace GSTHD
         private int currentSongBytes;
         private NowPlayingPanel songPanel;
         private uint currentMapTimerAddr;
+        private string currentSongGame;
+        private string currentSongTitle;
 
         private System.Timers.Timer timer;
         private Form1 form;
@@ -326,15 +328,21 @@ namespace GSTHD
                 }
                 // look 4 bytes over on next loop
                 readbytes += 4;
+                // infinite loop safeguard; max displayed characters for each is 32-ish
+                if (readbytes > 260) stage = 2;
             }
             string gamename = Encoding.ASCII.GetString(songGame.ToArray());
             string titlename = Encoding.ASCII.GetString(songTitle.ToArray());
             // send data to tracker object
             // also dont send blanks lol
-            if (songGame.Count > 0 && songTitle.Count > 0)
+            if (songGame.Count > 0 || songTitle.Count > 0)
             {
-                songPanel.SetNames(gamename, titlename);
+                // if its the same stuff as before, skip writing the stuff
+                if (gamename == currentSongGame && currentSongTitle == titlename) return;
+                if (songPanel.Visible) songPanel.SetNames(gamename, titlename);
                 if (form.Settings.WriteSongDataToFile != Settings.SongFileWriteOption.Disabled) WriteSongData(gamename, titlename);
+                currentSongGame = gamename;
+                currentSongTitle = titlename;
             }
         }
 

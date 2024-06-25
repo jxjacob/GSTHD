@@ -59,6 +59,7 @@ namespace GSTHD
             this.DragImage = data.DragImage;
             this.DK64_ID = data.DK64_ID;
             this.OuterPathID = data.OuterPathID;
+            this.isMarkable = data.isMarkable;
 
             this.DefaultIndex = data.DefaultIndex;
             ImageIndex = DefaultIndex;

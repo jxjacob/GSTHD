@@ -593,6 +593,7 @@ namespace GSTHD
                                     AutoName = item.AutoName,
                                     BackColor = item.BackColor,
                                     OuterPathID = (item.OuterPathID != null) ? $"{namenum}{item.OuterPathID}" : null,
+                                    isMarkable = item.isMarkable,
                                 };
                                 panelLayout.Controls.Add(new Item(gs, settings, isOnBroadcast));
                                 namenum++;
@@ -678,7 +679,8 @@ namespace GSTHD
                                     TinyImageCollection = item.TinyImageCollection,
                                     Visible = item.Visible,
                                     SizeMode = item.SizeMode,
-                                    isBroadcastable = item.isBroadcastable
+                                    isBroadcastable = item.isBroadcastable,
+                                    isMarkable = item.isMarkable,
                                 };
                                 var g = new GossipStone(gs, settings, isOnBroadcast);
                                 panelLayout.Controls.Add(g);
@@ -784,6 +786,7 @@ namespace GSTHD
             if (groupname == null)
             {
                 AlternateSettings targetAlt = ListAlternates.Find(item => item.Name == name);
+                if (targetAlt == null) { return; }
                 IterateAlternateChanges(targetAlt.Changes, mult);
                 targetAlt.Enabled = check;
                 if (targetAlt.ConditionalChanges != null) IterateConditionalChanges(targetAlt, mult);
@@ -1267,6 +1270,47 @@ namespace GSTHD
                             target.RefreshCells();
                         }
                     }
+                    else if (x.Key == "PanelNowPlaying")
+                    {
+                        NowPlayingPanel target = null;
+                        ObjectPanelNowPlaying ogPoint = null;
+                        string[] names = null;
+                        foreach (JProperty z in y)
+                        {
+                            try
+                            {
+                                if (z.Name == "Name")
+                                {
+                                    if (z.Value.Count() > 1)
+                                    {
+                                        names = ((JArray)z.Value).ToObject<string[]>();
+                                    }
+                                    else
+                                    {
+                                        target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as NowPlayingPanel;
+                                        ogPoint = ListPanelNowPlaying.Where(g => g.Name == target.Name).First();
+                                    }
+                                }
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                //ignore
+                            }
+                            if ((target != null || names != null) && z.Name != "Name")
+                            {
+                                if (names != null)
+                                {
+                                    foreach (string zname in names)
+                                    {
+                                        target = hostForm.Controls.Find(zname, true)[0] as NowPlayingPanel;
+                                        ogPoint = ListPanelNowPlaying.Where(g => g.Name == target.Name).First();
+                                        ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                    }
+                                }
+                                else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                            }
+                        }
+                    }
                     else if (x.Key == "AppSize")
                     {
                         // HACKY AF
@@ -1502,6 +1546,7 @@ namespace GSTHD
     {
         public string Name { get; set; }
         public int DK64_ID { get; set; } = -1;
+        public bool isMarkable { get; set; } = true;
         public int X { get; set; }
         public int Y { get; set; }
         public Size Size { get; set; }
@@ -1538,6 +1583,7 @@ namespace GSTHD
         public string ActiveTinySongImage { get; set; }
         public bool isBroadcastable { get; set; } = false;
         public string AutoName { get; set; } = null;
+        public bool isMarkable { get; set; } = true;
     }
 
     public class MedallionLabel
@@ -1561,6 +1607,7 @@ namespace GSTHD
         public MedallionLabel Label { get; set; }
         public bool isBroadcastable { get; set; } = false;
         public string AutoName { get; set; } = null;
+        public bool isMarkable { get; set; } = true;
     }
 
     public class ObjectPointGrid
@@ -1592,6 +1639,7 @@ namespace GSTHD
         public bool isDraggable { get; set; } = true;
         public bool CanCycle { get; set; } = false;
         public BorderStyle BorderStyle { get; set; } = BorderStyle.FixedSingle;
+        public bool isMarkable { get; set; } = true;
     }
 
     public class AutoFillTextBox
@@ -1650,6 +1698,7 @@ namespace GSTHD
         public PictureBoxSizeMode SizeMode { get; set; } = PictureBoxSizeMode.Zoom;
         public bool isBroadcastable { get; set; } = false;
         public bool isWotH { get; set; } = true;
+        public bool isMarkable { get; set; } = true;
     }
 
     public class ObjectPanelBarren
@@ -1750,6 +1799,7 @@ namespace GSTHD
         public int LabelSpacing { get; set; }
         public int LabelWidth { get; set; }
         public bool isBroadcastable { get; set; } = false;
+        public bool isMarkable { get; set; } = true;
     }
 
     public class ObjectPanelNowPlaying
@@ -1812,6 +1862,7 @@ namespace GSTHD
         public bool hasSlash { get; set; } = false;
         public Color BackColor { get; set; } = Color.Black;
         public Color BackGroundColor { get; set; } = Color.Transparent;
+        public bool isMarkable { get; set; } = true;
     }
 
     public class AppSettings

@@ -63,9 +63,9 @@ namespace GSTHD
         delegate void IncrementCallbacK();
 
         public GossipStone(ObjectPoint data, Settings settings, bool isOnBroadcast = false)
-            : this(settings, data.Visible, data.Name, data.X, data.Y, data.ImageCollection, data.Size, data.isScrollable, data.SizeMode, data.isBroadcastable, data.CanCycle, isOnBroadcast) { }
+            : this(settings, data.Visible, data.Name, data.X, data.Y, data.ImageCollection, data.Size, data.isScrollable, data.SizeMode, data.isBroadcastable, data.CanCycle, isOnBroadcast, data.isMarkable) { }
 
-        public GossipStone(Settings settings, bool visible, string name, int x, int y, string[] imageCollection, Size imageSize, bool isScrollable, PictureBoxSizeMode SizeMode, bool isBroadcastable, bool CanCycle = false, bool isOnBroadcast = false)
+        public GossipStone(Settings settings, bool visible, string name, int x, int y, string[] imageCollection, Size imageSize, bool isScrollable, PictureBoxSizeMode SizeMode, bool isBroadcastable, bool CanCycle = false, bool isOnBroadcast = false, bool isMarkable = true)
         {
             Settings = settings;
             Visible = visible;

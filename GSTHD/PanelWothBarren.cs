@@ -37,6 +37,7 @@ namespace GSTHD
         bool isScrollable;
         bool isBroadcastable;
         bool PathCycling = false;
+        bool isMarkable = true;
         string OuterPathID;
         // 0 = WotH, 1 = Barren, 2 = Quantity
         public int isWotH;
@@ -63,6 +64,7 @@ namespace GSTHD
             this.PathCycling = data.PathCycling;
             this.isBroadcastable = data.isBroadcastable;
             this.isWotH = 0;
+            this.isMarkable = data.isMarkable;
             if (data.IsScrollable)
                 this.MouseWheel += Panel_MouseWheel;
 
@@ -354,7 +356,7 @@ namespace GSTHD
                 WotH newWotH = new WotH(Settings, selectedPlace,
                         GossipStoneCount, ListImage_WothItemsOption, GossipStoneSpacing,
                         PathGoalCount, ListImage_GoalsOption, PathGoalSpacing,
-                        newlocation, LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling);
+                        newlocation, LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling, this.isMarkable);
                 
                 ListWotH.Add(newWotH);
                 this.Controls.Add(newWotH.LabelPlace);

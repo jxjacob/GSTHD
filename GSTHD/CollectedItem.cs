@@ -64,6 +64,7 @@ namespace GSTHD
 
             this.AutoName = data.AutoName;
             this.AutoSubName = data.AutoSubName;
+            this.isMarkable = data.isMarkable;
 
             if (ImageNames.Length > 0)
             {

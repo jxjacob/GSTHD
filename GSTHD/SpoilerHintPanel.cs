@@ -73,6 +73,7 @@ namespace GSTHD
         public bool isBroadcastable { get; set; }
 
         private bool isOnBroadcast = false;
+        public bool isMarkable = true;
 
         private static readonly Regex unspacer = new Regex(@"\s+");
 
@@ -117,6 +118,7 @@ namespace GSTHD
             }
             this.isBroadcastable = data.isBroadcastable && !isOnBroadcast;
             this.isOnBroadcast = isOnBroadcast;
+            this.isMarkable = data.isMarkable;
 
             // label for when a spoiler isnt loaded yet
             DefaultLabel = new Label
@@ -292,6 +294,7 @@ namespace GSTHD
                 ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).levelOrder = levelOrder;
                 ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).spoilerData = spoilerData;
                 ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).mainSettings = mainSettings;
+                ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).randoVersion = randoVersion;
                 ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).Settings = Settings;
                 ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).InitializeCells();
             }
@@ -361,7 +364,7 @@ namespace GSTHD
                         Name + "_" + Unspace((string)parseddata["level_name"]), (string)parseddata["level_name"],
                         int.Parse(level.Key), theNum,
                         CellFontName, CellFontSize, CellFontStyle, LabelSpacing, CellLabelWidth,
-                        CellBackColor, MinimalMode, pointspread, DK64Items, isBroadcastable, isOnBroadcast);
+                        CellBackColor, MinimalMode, pointspread, DK64Items, isBroadcastable, isOnBroadcast, isMarkable);
                     cells.Add(tempcell);
 
                 }
@@ -531,6 +534,7 @@ namespace GSTHD
                 ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).levelOrder = levelOrder;
                 ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).spoilerData = spoilerData;
                 ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).mainSettings = mainSettings;
+                ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).randoVersion = randoVersion;
                 ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).InitializeCells();
                 foreach (SpoilerCell cell in cells)
                 {

@@ -72,6 +72,7 @@ namespace GSTHD
             Wraparound = data.Label.Wraparound.Value;
             isBroadcastable = data.isBroadcastable && !isBroadcast;
             AutoName = data.AutoName;
+            isMarkable = data.isMarkable;
 
             Name = data.Name;
 

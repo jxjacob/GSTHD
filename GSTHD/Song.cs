@@ -323,6 +323,7 @@ namespace GSTHD
             Location = new Point(data.X, data.Y);
             TabStop = false;
             AllowDrop = true;
+            isMarkable = data.isMarkable;
 
             if (ImageNames.Length > 0)
             {

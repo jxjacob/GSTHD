@@ -35,7 +35,7 @@ namespace GSTHD
                 Text = "Please Autotrack a DK64R 4.0+ Seed".ToUpper(),
                 Font = new Font(data.TitleFontName, data.TitleFontSize, data.TitleFontStyle),
                 ForeColor = data.TitleFontColor,
-                Width = data.Width,
+                Width = data.Width - data.TitlePositionX,
                 Height = (int)(data.TitleFontSize*1.3),
                 TextAlign = ContentAlignment.MiddleLeft,
                 Location = new Point(data.TitlePositionX, data.TitlePositionY),
@@ -47,10 +47,10 @@ namespace GSTHD
             displayedSongGame = new Label()
             {
                 Name = Guid.NewGuid().ToString(),
-                Text = "To begin song tracking".ToUpper(),
+                Text = "To begin song tracking:".ToUpper(),
                 Font = new Font(data.GameFontName, data.GameFontSize, data.GameFontStyle),
                 ForeColor = data.GameFontColor,
-                Width = data.Width,
+                Width = data.Width - data.GamePositionX,
                 Height = (int)(data.GameFontSize * 1.3),
                 TextAlign = ContentAlignment.MiddleLeft,
                 Location = new Point(data.GamePositionX, data.GamePositionY),
@@ -98,10 +98,53 @@ namespace GSTHD
 
         public void SpecialtyImport(object ogPoint, string name, object value, int mult)
         {
-            var point = (ObjectPoint)ogPoint;
             switch (name)
             {
-                case "":
+                case "TitlePositionX":
+                    displayedSongTitle.Location = new Point(displayedSongTitle.Location.X + (mult*(int)value), displayedSongTitle.Location.Y);
+                    displayedSongTitle.Width = this.Width - displayedSongTitle.Location.X;
+                    break;
+                case "TitlePositionY":
+                    displayedSongTitle.Location = new Point(displayedSongTitle.Location.X, displayedSongTitle.Location.Y + (mult * (int)value));
+                    break;
+                case "TitleFontName":
+                    if (mult > 0) displayedSongTitle.Font = new Font(value.ToString(), displayedSongTitle.Font.Size, displayedSongTitle.Font.Style);
+                    else displayedSongTitle.Font = new Font((string)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), displayedSongTitle.Font.Size, displayedSongTitle.Font.Style);
+                    break;
+                case "TitleFontSize":
+                    if (mult > 0) displayedSongTitle.Font = new Font(displayedSongTitle.Font.Name, int.Parse(value.ToString()), displayedSongTitle.Font.Style);
+                    else displayedSongTitle.Font = new Font(displayedSongTitle.Font.Name, (int)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), displayedSongTitle.Font.Style);
+                    break;
+                case "TitleFontStyle":
+                    if (mult > 0) displayedSongTitle.Font = new Font(displayedSongTitle.Font.FontFamily, displayedSongTitle.Font.Size, (FontStyle)Enum.Parse(typeof(FontStyle), value.ToString()));
+                    else displayedSongTitle.Font = new Font(displayedSongTitle.Font.FontFamily, displayedSongTitle.Font.Size, (FontStyle)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null));
+                    break;
+                case "TitleFontColor":
+                    if (mult > 0) displayedSongTitle.ForeColor = Color.FromName(value.ToString());
+                    else displayedSongTitle.ForeColor = (Color)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                    break;
+                case "GamePositionX":
+                    displayedSongGame.Location = new Point(displayedSongGame.Location.X + (mult * (int)value), displayedSongGame.Location.Y);
+                    displayedSongGame.Width = this.Width - displayedSongGame.Location.X;
+                    break;
+                case "GamePositionY":
+                    displayedSongGame.Location = new Point(displayedSongGame.Location.X, displayedSongGame.Location.Y + (mult * (int)value));
+                    break;
+                case "GameFontName":
+                    if (mult > 0) displayedSongGame.Font = new Font(value.ToString(), displayedSongGame.Font.Size, displayedSongGame.Font.Style);
+                    else displayedSongGame.Font = new Font((string)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), displayedSongGame.Font.Size, displayedSongGame.Font.Style);
+                    break;
+                case "GameFontSize":
+                    if (mult > 0) displayedSongGame.Font = new Font(displayedSongGame.Font.Name, int.Parse(value.ToString()), displayedSongGame.Font.Style);
+                    else displayedSongGame.Font = new Font(displayedSongGame.Font.Name, (int)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), displayedSongGame.Font.Style);
+                    break;
+                case "GameFontStyle":
+                    if (mult > 0) displayedSongGame.Font = new Font(displayedSongGame.Font.FontFamily, displayedSongGame.Font.Size, (FontStyle)Enum.Parse(typeof(FontStyle), value.ToString()));
+                    else displayedSongGame.Font = new Font(displayedSongGame.Font.FontFamily, displayedSongGame.Font.Size, (FontStyle)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null));
+                    break;
+                case "GameFontColor":
+                    if (mult > 0) displayedSongGame.ForeColor = Color.FromName(value.ToString());
+                    else displayedSongGame.ForeColor = (Color)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
                     break;
                 default:
                     throw new NotImplementedException($"Could not perform NowPlayingPanel Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");

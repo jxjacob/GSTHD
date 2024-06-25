@@ -50,7 +50,7 @@ namespace GSTHD
             string selectedPlace,
             int gossipStoneCount, string[] wothItemImageList, int gossipStoneSpacing,
             int pathGoalCount, string[] pathGoalImageList, int pathGoalSpacing,
-            Point lastLabelLocation, Label labelSettings, Size gossipStoneSize, bool isScrollable, PictureBoxSizeMode SizeMode, bool isBroadcastable, bool PathCycling)
+            Point lastLabelLocation, Label labelSettings, Size gossipStoneSize, bool isScrollable, PictureBoxSizeMode SizeMode, bool isBroadcastable, bool PathCycling, bool isMarkable)
         {
             Settings = settings;
             Name = selectedPlace;
@@ -85,7 +85,7 @@ namespace GSTHD
             {
                 for (int i = 0; i < gossipStoneCount; i++)
                 {
-                    GossipStone newGossipStone = new GossipStone(Settings, true, Name + "_GossipStone" + i, 0, 0, wothItemImageList, gossipStoneSize, isScrollable, SizeMode, isBroadcastable);
+                    GossipStone newGossipStone = new GossipStone(Settings, true, Name + "_GossipStone" + i, 0, 0, wothItemImageList, gossipStoneSize, isScrollable, SizeMode, isBroadcastable, isMarkable:isMarkable);
                     newGossipStone.Location =
                         new Point(gossipStoneStartX + (newGossipStone.Width + gossipStoneSpacing) * i, LabelPlace.Location.Y);
                     listGossipStone.Add(newGossipStone);
@@ -96,7 +96,7 @@ namespace GSTHD
             {
                 for (int i = 0; i < pathGoalCount; i++)
                 {
-                    GossipStone newGossipStone = new GossipStone(Settings, true, Name + "_GoalGossipStone" + i, 0, 0, pathGoalImageList, gossipStoneSize, isScrollable, SizeMode, isBroadcastable, PathCycling);
+                    GossipStone newGossipStone = new GossipStone(Settings, true, Name + "_GoalGossipStone" + i, 0, 0, pathGoalImageList, gossipStoneSize, isScrollable, SizeMode, isBroadcastable, PathCycling, isMarkable:isMarkable);
                     newGossipStone.Location =
                         new Point((newGossipStone.Width + pathGoalSpacing) * i, LabelPlace.Location.Y);
                     listGossipStone.Add(newGossipStone);
