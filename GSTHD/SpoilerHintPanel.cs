@@ -254,6 +254,16 @@ namespace GSTHD
                 startingItems.Add(35);
             }
 
+            // adds certian shopkeeps as starting items for seeds that dont have them in the pool, so they arent erroneously added to Isles upon tracking
+            if (loadedjson.ContainsKey("Item Pool"))
+            {
+                var itempool = loadedjson.GetValue("Item Pool").ToObject<List<string>>();
+                if (!itempool.Contains("Cranky")) startingItems.Add(250);
+                if (!itempool.Contains("Funky")) startingItems.Add(251);
+                if (!itempool.Contains("Candy")) startingItems.Add(252);
+                if (!itempool.Contains("Snide")) startingItems.Add(253);
+            }
+
             if (loadedjson.ContainsKey("Randomizer Version"))
             {
                 randoVersion = loadedjson.GetValue("Randomizer Version").ToString();

@@ -314,6 +314,12 @@ namespace GSTHD
                 {
                     if (!isOnBroadcast) settings.ActiveLayoutBroadcastFile = null;
                 }
+
+                if (settings.EnabledMarks == null)
+                {
+                    settings.EnabledMarks = new List<Settings.MarkModeOption> { Settings.MarkModeOption.Checkmark };
+                }
+
                 settings.Write();
 
                 panelLayout.Size = new Size(App_Settings.Width, App_Settings.Height);

@@ -152,8 +152,10 @@ namespace GSTHD
 
         private readonly Dictionary<Settings.MarkModeOption, string> MarkModeNames = new Dictionary<Settings.MarkModeOption, string>
         {
-            { Settings.MarkModeOption.Toggle, "Toggle Checkmark Only" },
-            { Settings.MarkModeOption.Cycle, "Cycle Checkmark and X" },
+            { Settings.MarkModeOption.Checkmark, "Green Checkmark" },
+            { Settings.MarkModeOption.X, "Red X" },
+            { Settings.MarkModeOption.Question, "Blue ?" },
+            { Settings.MarkModeOption.Star, "Yellow Star" },
         };
 
         private readonly Dictionary<Settings.SongFileWriteOption, string> SongFileWriteNames = new Dictionary<Settings.SongFileWriteOption, string>
@@ -350,7 +352,7 @@ namespace GSTHD
                     {
                         MarkModeOptions.Add(button.Key, new ToolStripMenuItem(button.Value, null, new EventHandler(menuBar_SetMarkMode)));
                     }
-                    var MarkModeOrder = new ToolStripMenuItem("Mode", null, MarkModeOptions.Values.ToArray());
+                    var MarkModeOrder = new ToolStripMenuItem("Enabled Marks", null, MarkModeOptions.Values.ToArray());
                     Items.ExtraButton.DropDownItems.Add(MarkModeOrder);
                     mouseControlsSubMenu.DropDownItems.Add(Items.ExtraButton);
 
@@ -698,7 +700,17 @@ namespace GSTHD
             }
 
             SpoilerOrderOptions[Settings.SpoilerOrder].Checked = true;
-            MarkModeOptions[Settings.MarkMode].Checked = true;
+            if (Settings.EnabledMarks != null)
+            {
+                foreach (var mark in Settings.EnabledMarks)
+                {
+                    MarkModeOptions[mark].Checked = true;
+                }
+            } else
+            {
+                // this is the first time EnabledMarks is being set, so its gonna have checkmark set later
+                MarkModeOptions[MarkModeOption.Checkmark].Checked = true;
+            }
             Items.SpoilerHideStarting.Checked = Settings.HideStarting;
             SpoilerPointColorOptions[Settings.SpoilerPointColour].Checked = true;
             SpoilerWothColorOptions[Settings.SpoilerWOTHColour].Checked = true;
@@ -1196,12 +1208,13 @@ namespace GSTHD
         {
             var choice = (ToolStripMenuItem)sender;
 
-            MarkModeOptions[Settings.MarkMode].Checked = false;
-            choice.Checked = true;
+            //MarkModeOptions[Settings.EnabledMarks].Checked = false;
+            choice.Checked = !choice.Checked;
 
             var option = MarkModeOptions.FirstOrDefault((x) => x.Value == choice);
             if (option.Value == null) throw new NotImplementedException();
-            Settings.MarkMode = option.Key;
+            if (Settings.EnabledMarks.Contains(option.Key)) Settings.EnabledMarks.Remove(option.Key);
+            else Settings.EnabledMarks.Add(option.Key);
             Settings.Write();
             Form.UpdateLayoutFromSettings();
         }

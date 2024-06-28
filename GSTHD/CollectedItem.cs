@@ -225,7 +225,7 @@ namespace GSTHD
 
         public void ToggleCheck()
         {
-            IncrementMarked(Settings.MarkMode == Settings.MarkModeOption.Cycle);
+            IncrementMarked(Settings.EnabledMarks);
             UpdateCount();
         }
         public void SetColor(Color color)

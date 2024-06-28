@@ -15,7 +15,9 @@ namespace GSTHD
     {
         none,
         mark_check,
-        mark_x
+        mark_x,
+        mark_question,
+        mark_star
     }
 
     public class OrganicImage : Control
@@ -45,9 +47,20 @@ namespace GSTHD
             base.OnPaint(e);
         }
 
-        public void IncrementMarked(bool MarkModeCycle)
+        public void IncrementMarked(List<Settings.MarkModeOption> enabledOptions)
         {
-            if (isMarkable) isMarked = (MarkedImageIndex)((((int)isMarked)+1) % ( (MarkModeCycle) ? MarkedMax : 2));
+            if (isMarkable) {
+                int tempMark = (int)isMarked;
+                int runningMark = tempMark;
+                while (true)
+                {
+                    runningMark = (runningMark + 1) % MarkedMax;
+                    if (runningMark == 0) { isMarked = MarkedImageIndex.none; break; }
+                    if (runningMark == tempMark) break;
+                    if (enabledOptions.Contains((Settings.MarkModeOption)runningMark)) { isMarked = (MarkedImageIndex)runningMark; break; }
+                }
+
+            }
         }
 
         public int[] GetSizeDims()

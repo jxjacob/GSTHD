@@ -91,11 +91,15 @@ namespace GSTHD
             Chronological
         }
 
+
         [JsonConverter(typeof(StringEnumConverter))]
         public enum MarkModeOption
         {
-            Toggle,
-            Cycle
+            None,
+            Checkmark,
+            X,
+            Question,
+            Star
         }
 
         [JsonConverter(typeof(StringEnumConverter))]
@@ -126,7 +130,7 @@ namespace GSTHD
         public ExtraActionModButton ExtraActionButton { get; set; } = ExtraActionModButton.Shift;
         public SelectEmulatorOption SelectEmulator { get; set; } = SelectEmulatorOption.Project64;
         public SpoilerOrderOption SpoilerOrder { get; set; } = SpoilerOrderOption.Numerical;
-        public MarkModeOption MarkMode { get; set; } = MarkModeOption.Cycle;
+        public List<MarkModeOption> EnabledMarks { get; set; }
         public int MinDragThreshold { get; set; } = 6;
         public bool MoveLocationToSong { get; set; } = false;
         // public bool AutoCheckSongs { get; set; } = false;
