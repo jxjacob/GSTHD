@@ -40,6 +40,8 @@ namespace GSTHD
 
         private DoubleItemState LastState { get; set; }
 
+        protected Point DragStartPoint;
+
         public DoubleItem(ObjectPoint data, Settings settings, bool isBroadcast = false)
         {
             Settings = settings;
@@ -84,11 +86,17 @@ namespace GSTHD
         {
             if (e.Clicks != 1)
                 isMouseDown = false;
-            else isMouseDown = true;
+            else
+            {
+                isMouseDown = true;
+                DragStartPoint = Cursor.Position;
+            }
         }
 
         private void Click_MouseMove(object sender, MouseEventArgs e)
         {
+            if (System.Math.Abs(DragStartPoint.X - Cursor.Position.X) >= Settings.MinDragThreshold
+                || System.Math.Abs(DragStartPoint.Y - Cursor.Position.Y) >= Settings.MinDragThreshold)
             if (MouseDetermination.DetermineBasicMouseInput(e, Settings.IncrementActionButton) && isMouseDown)
             {
                 // TODO change that bool to DragBehaviour.AutocheckDragDrop

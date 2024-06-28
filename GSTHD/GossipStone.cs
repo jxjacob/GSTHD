@@ -37,22 +37,22 @@ namespace GSTHD
         }
     }
 
-    public class GossipStone : OrganicImage, ProgressibleElement<GossipStoneState>, DraggableElement<GossipStoneState>, UpdatableFromSettings
+    public class GossipStone : OrganicImage, ProgressibleElement<GossipStoneState>, DraggableElement<GossipStoneState>, UpdatableFromSettings, IAlternatableObject
     {
         private readonly Settings Settings;
         private Form1 f1;
         private readonly ProgressibleElementBehaviour<GossipStoneState> ProgressBehaviour;
         private readonly DraggableElementBehaviour<GossipStoneState> DragBehaviour;
 
-        private string[] ImageNames;
+        public string[] ImageNames { get; set; }
         public bool HoldsImage;
-        public List<string> HeldImages = new List<string>();
-        private int CycleIndex = 0;
-        private bool canCycle = false;
+        public List<string> HeldImages { get; set; } = new List<string>();
+        private int CycleIndex { get; set; } = 0;
+        private bool canCycle { get; set; } = false;
         private int ImageIndex = 0;
         private bool RemoveImage;
-        private bool isScrollable;
-        bool isBroadcastable;
+        public bool isScrollable;
+        public bool isBroadcastable { get; set; }
         public bool hoveredOver;
 
         private bool isCyling = false;
@@ -406,5 +406,22 @@ namespace GSTHD
         }
 
         public void CancelChanges() { }
+
+        public void SetVisible(bool visible)
+        {
+            Visible = visible;
+        }
+
+        public void SpecialtyImport(object ogPoint, string name, object value, int mult)
+        {
+            //var point = (ObjectPoint)ogPoint;
+            switch (name)
+            {
+                case "":
+                    break;
+                default:
+                    throw new NotImplementedException($"Could not perform Gossip Stone Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");
+            }
+        }
     }
 }

@@ -1,4 +1,5 @@
 using GSTHD;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -31,7 +32,7 @@ namespace GSTHD
         private readonly ProgressibleElementBehaviour<SongMarkerState> ProgressBehaviour;
         private readonly DraggableElementBehaviour<SongMarkerState> DragBehaviour;
 
-        private string[] ImageNames;
+        public string[] ImageNames;
         private bool HoldsImage;
         private string HeldImageName;
         private int ImageIndex = 0;
@@ -277,7 +278,7 @@ namespace GSTHD
         public void CancelChanges() { }
     }
 
-    public class Song : OrganicImage, UpdatableFromSettings, ProgressibleElement<int>, DraggableAutocheckElement<int>
+    public class Song : OrganicImage, UpdatableFromSettings, ProgressibleElement<int>, DraggableAutocheckElement<int>, IAlternatableObject
     {
         private readonly Settings Settings;
         private readonly ProgressibleElementBehaviour<int> ProgressBehaviour;
@@ -285,11 +286,11 @@ namespace GSTHD
 
         private readonly string DragPictureName;
 
-        public string[] ImageNames;
+        public string[] ImageNames { get; set; }
         string ActiveImageName;
-        public bool isBroadcastable;
+        public bool isBroadcastable { get; set; }
         private bool isOnBroadcast;
-        public string AutoName = null;
+        public string AutoName { get; set; } = null;
 
         private int ImageIndex = 0;
 
@@ -435,6 +436,14 @@ namespace GSTHD
             if (IsHandleCreated) { Invalidate(); }
         }
 
+        public void SetMarkerLocation()
+        {
+            SongMarker.Location = new Point(
+                        (SongSize.Width - SongMarker.Width) / 2,
+                        SongSize.Height - SongMarker.Height / 6
+                    );
+        }
+
         private void Mouse_Move(object sender, MouseEventArgs e)
         {
             DragBehaviour.Mouse_Move_WithAutocheck(sender, e);
@@ -542,5 +551,34 @@ namespace GSTHD
 
         public void SaveChanges() { }
         public void CancelChanges() { }
+
+        public void SetVisible(bool visible)
+        {
+            Visible = visible;
+        }
+
+        public void SpecialtyImport(object ogPoint, string name, object value, int mult)
+        {
+            //var point = (ObjectPoint)ogPoint;
+            switch (name)
+            {
+                case "Size":
+                    // size is handled differently and is done here instead of in the main file
+                    // format: `1,2`
+                    var newvalues = value.ToString().Split(',');
+                    SongSize = new Size(this.SongSize.Width + int.Parse(newvalues[0]) * mult, this.SongSize.Height + int.Parse(newvalues[1]) * mult);
+                    Size = new Size(SongSize.Width, SongSize.Height + SongMarker.Height * 5 / 6);
+                    break;
+                case "DragAndDropImageName":
+                    //this thing does nothing, ignore it
+                    break;
+                case "TinyImageCollection":
+                    if (mult > 0) SongMarker.ImageNames = ((JArray)value).ToObject<string[]>();
+                    else SongMarker.ImageNames = (string[])ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                    break;
+                default:
+                    throw new NotImplementedException($"Could not perform Song Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");
+            }
+        }
     }
 }

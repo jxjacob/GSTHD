@@ -149,6 +149,11 @@ namespace GSTHD
             if (IsHandleCreated) { Invalidate(); }
         }
 
+        public void SetCounterPosition()
+        {
+            ItemCount.Location = new Point(0, (CollectedItemSize.Height) - CollectedItemCountPosition.Height * 2);
+        }
+
         public void UpdateCount()
         {
             if (this.InvokeRequired)

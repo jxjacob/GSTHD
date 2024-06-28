@@ -98,5 +98,16 @@ namespace GSTHD
                ColourIndex = ColorIndex,
             };
         }
+
+        public void RefreshLocation(int LabelLastHeight, Label labelSettings)
+        {
+            LabelPlace.ForeColor = labelSettings.ForeColor;
+            LabelPlace.BackColor = labelSettings.BackColor;
+            LabelPlace.Font = labelSettings.Font;
+            LabelPlace.Width = labelSettings.Width;
+            LabelPlace.Height = labelSettings.Height;
+
+            LabelPlace.Location = new Point(0, LabelLastHeight);
+        }
     }
 }

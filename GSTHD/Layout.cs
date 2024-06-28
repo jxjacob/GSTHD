@@ -1177,6 +1177,7 @@ namespace GSTHD
                         {
                             target.Invalidate();
                             target.UpdateCount();
+                            target.SetCounterPosition();
                         }
                     }
                     else if (x.Key == "GuaranteedHints")
@@ -1228,6 +1229,197 @@ namespace GSTHD
                             target.UpdateImage();
                         }
                     }
+                    else if (x.Key == "GossipStones")
+                    {
+                        GossipStone target = null;
+                        ObjectPoint ogPoint = null;
+                        string[] names = null;
+                        foreach (JProperty z in y)
+                        {
+                            try
+                            {
+                                if (z.Name == "Name")
+                                {
+                                    if (z.Value.Count() > 1)
+                                    {
+                                        names = ((JArray)z.Value).ToObject<string[]>();
+                                    }
+                                    else
+                                    {
+                                        target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as GossipStone;
+                                        ogPoint = ListGossipStones.Where(g => g.Name == target.Name).First();
+                                    }
+                                }
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                //ignore
+                            }
+                            if ((target != null || names != null) && z.Name != "Name")
+                            {
+                                if (names != null)
+                                {
+                                    foreach (string zname in names)
+                                    {
+                                        target = hostForm.Controls.Find(zname, true)[0] as GossipStone;
+                                        ogPoint = ListGossipStones.Where(g => g.Name == target.Name).First();
+                                        ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                        // sucks that this is super expensive
+                                        target.Invalidate();
+                                        target.UpdateImage();
+                                    }
+                                }
+                                else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                            }
+                        }
+                        if (target != null && names == null)
+                        {
+                            target.Invalidate();
+                            target.UpdateImage();
+                        }
+                    }
+                    else if (x.Key == "GossipStoneGrids")
+                    {
+                        ObjectPointGrid ogGrid = null;
+                        foreach (JProperty z in y)
+                        {
+                            try
+                            {
+                                // find original entry in grids
+                                if (z.Name == "Name") ogGrid = ListGossipStoneGrids.Where(g => g.Name == z.Value.ToString()).First();
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                //ignore
+                            }
+                            // we ignore cols and rows (for now)
+                            int namenum = 0;
+                            if (ogGrid != null && z.Name != "Name" && z.Name != "Columns" && z.Name != "Rows")
+                            {
+                                for (int j = 0; j < ogGrid.Rows; j++)
+                                {
+                                    for (int i = 0; i < ogGrid.Columns; i++)
+                                    {
+                                        GossipStone target = hostForm.Controls.Find(ogGrid.Name + namenum.ToString(), true)[0] as GossipStone;
+                                        if (z.Name == "Spacing")
+                                        {
+                                            var newvalues = z.Value.ToString().Split(',');
+                                            ApplyAlternatesChanges(target, ogGrid, "X", i * int.Parse(newvalues[0]), mult);
+                                            ApplyAlternatesChanges(target, ogGrid, "Y", j * int.Parse(newvalues[1]), mult);
+                                        }
+                                        else
+                                        {
+                                            ApplyAlternatesChanges(target, ogGrid, z.Name, z.Value, mult);
+                                        }
+                                        namenum++;
+
+                                        target.Invalidate();
+                                        target.UpdateImage();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (x.Key == "Medallions")
+                    {
+                        Medallion target = null;
+                        ObjectPointMedallion ogPoint = null;
+                        string[] names = null;
+                        foreach (JProperty z in y)
+                        {
+                            try
+                            {
+                                if (z.Name == "Name")
+                                {
+                                    if (z.Value.Count() > 1)
+                                    {
+                                        names = ((JArray)z.Value).ToObject<string[]>();
+                                    }
+                                    else
+                                    {
+                                        target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as Medallion;
+                                        ogPoint = ListMedallions.Where(g => g.Name == target.Name).First();
+                                    }
+                                }
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                //ignore
+                            }
+                            if ((target != null || names != null) && z.Name != "Name")
+                            {
+                                if (names != null)
+                                {
+                                    foreach (string zname in names)
+                                    {
+                                        target = hostForm.Controls.Find(zname, true)[0] as Medallion;
+                                        ogPoint = ListMedallions.Where(g => g.Name == target.Name).First();
+                                        ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                        // sucks that this is super expensive
+                                        target.Invalidate();
+                                        target.UpdateImage();
+                                    }
+                                }
+                                else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                            }
+                        }
+                        if (target != null && names == null)
+                        {
+                            target.Invalidate();
+                            target.UpdateImage();
+                            target.SetSelectedDungeonLocation();
+                        }
+                    }
+                    else if (x.Key == "Songs")
+                    {
+                        Song target = null;
+                        ObjectPointSong ogPoint = null;
+                        string[] names = null;
+                        foreach (JProperty z in y)
+                        {
+                            try
+                            {
+                                if (z.Name == "Name")
+                                {
+                                    if (z.Value.Count() > 1)
+                                    {
+                                        names = ((JArray)z.Value).ToObject<string[]>();
+                                    }
+                                    else
+                                    {
+                                        target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as Song;
+                                        ogPoint = ListSongs.Where(g => g.Name == target.Name).First();
+                                    }
+                                }
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                //ignore
+                            }
+                            if ((target != null || names != null) && z.Name != "Name")
+                            {
+                                if (names != null)
+                                {
+                                    foreach (string zname in names)
+                                    {
+                                        target = hostForm.Controls.Find(zname, true)[0] as Song;
+                                        ogPoint = ListSongs.Where(g => g.Name == target.Name).First();
+                                        ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                        // sucks that this is super expensive
+                                        target.Invalidate();
+                                        target.UpdateImage();
+                                    }
+                                }
+                                else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                            }
+                        }
+                        if (target != null && names == null)
+                        {
+                            target.Invalidate();
+                            target.UpdateImage();
+                            target.SetMarkerLocation();
+                        }
+                    }
                     else if (x.Key == "PanelSpoiler")
                     {
                         SpoilerPanel target = null;
@@ -1263,9 +1455,141 @@ namespace GSTHD
                                         target = hostForm.Controls.Find(zname, true)[0] as SpoilerPanel;
                                         ogPoint = ListPanelSpoiler.Where(g => g.Name == target.Name).First();
                                         ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
-                                        // sucks that this is super expensive
-                                        //target.Invalidate();
-                                        //target.UpdateImage();
+                                    }
+                                }
+                                else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                            }
+                        }
+                        if (target != null && names == null)
+                        {
+                            target.RefreshCells();
+                        }
+                    }
+                    else if (x.Key == "PanelWoth")
+                    {
+                        PanelWothBarren target = null;
+                        ObjectPanelWotH ogPoint = null;
+                        string[] names = null;
+                        foreach (JProperty z in y)
+                        {
+                            try
+                            {
+                                if (z.Name == "Name")
+                                {
+                                    if (z.Value.Count() > 1)
+                                    {
+                                        names = ((JArray)z.Value).ToObject<string[]>();
+                                    }
+                                    else
+                                    {
+                                        target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as PanelWothBarren;
+                                        ogPoint = ListPanelWotH.Where(g => g.Name == target.Name).First();
+                                    }
+                                }
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                //ignore
+                            }
+                            if ((target != null || names != null) && z.Name != "Name")
+                            {
+                                if (names != null)
+                                {
+                                    foreach (string zname in names)
+                                    {
+                                        target = hostForm.Controls.Find(zname, true)[0] as PanelWothBarren;
+                                        ogPoint = ListPanelWotH.Where(g => g.Name == target.Name).First();
+                                        ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                    }
+                                }
+                                else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                            }
+                        }
+                        if (target != null && names == null)
+                        {
+                            target.RefreshCells();
+                        }
+                    }
+                    else if (x.Key == "PanelQuantity")
+                    {
+                        PanelWothBarren target = null;
+                        ObjectPanelQuantity ogPoint = null;
+                        string[] names = null;
+                        foreach (JProperty z in y)
+                        {
+                            try
+                            {
+                                if (z.Name == "Name")
+                                {
+                                    if (z.Value.Count() > 1)
+                                    {
+                                        names = ((JArray)z.Value).ToObject<string[]>();
+                                    }
+                                    else
+                                    {
+                                        target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as PanelWothBarren;
+                                        ogPoint = ListPanelQuantity.Where(g => g.Name == target.Name).First();
+                                    }
+                                }
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                //ignore
+                            }
+                            if ((target != null || names != null) && z.Name != "Name")
+                            {
+                                if (names != null)
+                                {
+                                    foreach (string zname in names)
+                                    {
+                                        target = hostForm.Controls.Find(zname, true)[0] as PanelWothBarren;
+                                        ogPoint = ListPanelQuantity.Where(g => g.Name == target.Name).First();
+                                        ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                    }
+                                }
+                                else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                            }
+                        }
+                        if (target != null && names == null)
+                        {
+                            target.RefreshCells();
+                        }
+                    }
+                    else if (x.Key == "PanelBarren")
+                    {
+                        PanelWothBarren target = null;
+                        ObjectPanelBarren ogPoint = null;
+                        string[] names = null;
+                        foreach (JProperty z in y)
+                        {
+                            try
+                            {
+                                if (z.Name == "Name")
+                                {
+                                    if (z.Value.Count() > 1)
+                                    {
+                                        names = ((JArray)z.Value).ToObject<string[]>();
+                                    }
+                                    else
+                                    {
+                                        target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as PanelWothBarren;
+                                        ogPoint = ListPanelBarren.Where(g => g.Name == target.Name).First();
+                                    }
+                                }
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                //ignore
+                            }
+                            if ((target != null || names != null) && z.Name != "Name")
+                            {
+                                if (names != null)
+                                {
+                                    foreach (string zname in names)
+                                    {
+                                        target = hostForm.Controls.Find(zname, true)[0] as PanelWothBarren;
+                                        ogPoint = ListPanelBarren.Where(g => g.Name == target.Name).First();
+                                        ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
                                     }
                                 }
                                 else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
@@ -1489,14 +1813,30 @@ namespace GSTHD
                 case "BackColor":
                     if (targettype == typeof(SpoilerPanel)) { return "storedBackColor"; }
                     else { return input; }
+                case "CounterSize":
+                    return "GossipStoneSize";
                 case "CountPosition":
                     return "CollectedItemCountPosition";
                 case "Color":
                     return "ForeColor";
+                case "GossipStoneImageCollection":
+                    return "ListImage_WothItemsOption";
                 case "ImageCollection":
                     return "ImageNames";
                 case "isMinimal":
                     return "MinimalMode";
+                case "IsScrollable":
+                    return "isScrollable";
+                case "PathGoalImageCollection":
+                    return "ListImage_GoalsOption";
+                case "Size":
+                    if (targettype == typeof(Song)) { return "forciblyfail"; }
+                    else { return input; }
+                case "SubTextBoxSize":
+                    return "subBoxSize";
+                case "Width":
+                    if (targettype == typeof(PanelWothBarren)) { return "forciblyfail"; }
+                    else { return input; }
                 case "X":
                 case "Y":
                     return "Location";
@@ -1767,7 +2107,6 @@ namespace GSTHD
         public int CounterFontSize { get; set; }
         public int CounterSpacing { get; set; }
         public Size CounterSize { get; set; }
-        public string CounterImage { get; set; }
 
         public Size SubTextBoxSize { get; set; }
 

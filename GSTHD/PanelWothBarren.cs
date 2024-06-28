@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace GSTHD
 {
-    class PanelWothBarren : Panel, UpdatableFromSettings
+    class PanelWothBarren : Panel, UpdatableFromSettings, IAlternatableObject
     {
         Settings Settings;
 
@@ -22,23 +22,23 @@ namespace GSTHD
         public List<Quantity> ListQuantity = new List<Quantity>();
 
         public TextBoxCustom textBoxCustom;
-        private int GossipStoneCount;
-        private string[] ListImage_WothItemsOption;
-        private int PathGoalCount;
-        private string[] ListImage_GoalsOption;
-        private int CounterFontSize;
-        private int CounterSpacing;
+        public int GossipStoneCount { get; set; }
+        public string[] ListImage_WothItemsOption { get; set; }
+        public int PathGoalCount { get; set; }
+        public string[] ListImage_GoalsOption { get; set; }
+        public int CounterFontSize { get; set; }
+        public int CounterSpacing { get; set; }
         private string CounterImage;
-        private Size subBoxSize;
-        private Size GossipStoneSize;
-        int GossipStoneSpacing;
-        int PathGoalSpacing;
-        int NbMaxRows;
-        bool isScrollable;
-        bool isBroadcastable;
-        bool PathCycling = false;
-        bool isMarkable = true;
-        string OuterPathID;
+        public  Size subBoxSize { get; set; }
+        public Size GossipStoneSize { get; set; }
+        public int GossipStoneSpacing { get; set; }
+        public int PathGoalSpacing { get; set; }
+        public int NbMaxRows { get; set; }
+        public bool isScrollable { get; set; }
+        public bool isBroadcastable { get; set; }
+        public bool PathCycling { get; set; } = false;
+        public bool isMarkable { get; set; } = true;
+        public string OuterPathID { get; set; }
         // 0 = WotH, 1 = Barren, 2 = Quantity
         public int isWotH;
         PictureBoxSizeMode SizeMode;
@@ -97,7 +97,7 @@ namespace GSTHD
             this.CounterFontSize = data.CounterFontSize;
             this.CounterSpacing = data.CounterSpacing;
             this.GossipStoneSize = data.CounterSize;
-            this.CounterImage = data.CounterImage;
+            this.CounterImage = "dk64/blank.png";
             this.subBoxSize = data.SubTextBoxSize;
             this.isWotH = 2;
             if (data.IsScrollable)
@@ -697,6 +697,160 @@ namespace GSTHD
 
 
             }
+        }
+
+
+
+
+        public void SetVisible(bool visible)
+        {
+            Visible = visible;
+        }
+
+        public void SpecialtyImport(object ogPoint, string name, object value, int mult)
+        {
+            //var point = (ObjectPoint)ogPoint;
+            switch (name)
+            {
+                case "TextBoxName":
+                    if (mult > 0) textBoxCustom.Name = value.ToString();
+                    else textBoxCustom.Name = (string)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                    break;
+                case "TextBoxBackColor":
+                    if (mult > 0)
+                    {
+                        // format: `1,2,3`
+                        var newrgb = value?.ToString().Split(',');
+                        Color tempColor;
+                        // if there isnt more than 1 response, assume its a word and not rgb
+                        if (newrgb.Length > 1) tempColor = Color.FromArgb(int.Parse(newrgb[0]), int.Parse(newrgb[1]), int.Parse(newrgb[2]));
+                        else tempColor = Color.FromName(value.ToString());
+                        textBoxCustom.BackColor = tempColor;
+                    }
+                    else textBoxCustom.BackColor = (Color)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                    break;
+                case "TextBoxFontName":
+                    if (mult > 0) textBoxCustom.Font = new Font(value.ToString(), textBoxCustom.Font.Size, textBoxCustom.Font.Style);
+                    else textBoxCustom.Font = new Font((string)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), textBoxCustom.Font.Size, textBoxCustom.Font.Style);
+                    break;
+                case "TextBoxFontSize":
+                    if (mult > 0) textBoxCustom.Font = new Font(textBoxCustom.Font.Name, int.Parse(value.ToString()), textBoxCustom.Font.Style);
+                    else textBoxCustom.Font = new Font(textBoxCustom.Font.Name, (int)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), textBoxCustom.Font.Style);
+                    break;
+                case "TextBoxFontStyle":
+                    if (mult > 0) textBoxCustom.Font = new Font(textBoxCustom.Font.FontFamily, textBoxCustom.Font.Size, (FontStyle)Enum.Parse(typeof(FontStyle), value.ToString()));
+                    else textBoxCustom.Font = new Font(textBoxCustom.Font.FontFamily, textBoxCustom.Font.Size, (FontStyle)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null));
+                    break;
+                case "TextBoxHeight":
+                    textBoxCustom.TextBoxField.Size = new Size(textBoxCustom.TextBoxField.Size.Width, textBoxCustom.TextBoxField.Size.Height + (mult * int.Parse(value.ToString())));
+                    break;
+                case "TextBoxText":
+                    if (mult > 0) textBoxCustom.Text = value.ToString();
+                    else textBoxCustom.Text = (string)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                    break;
+
+                case "LabelColor":
+                    if (mult > 0)
+                    {
+                        // format: `1,2,3`
+                        var newrgb = value?.ToString().Split(',');
+                        Color tempColor;
+                        // if there isnt more than 1 response, assume its a word and not rgb
+                        if (newrgb.Length > 1) tempColor = Color.FromArgb(int.Parse(newrgb[0]), int.Parse(newrgb[1]), int.Parse(newrgb[2]));
+                        else tempColor = Color.FromName(value.ToString());
+                        LabelSettings.ForeColor = tempColor;
+                    }
+                    else LabelSettings.ForeColor = (Color)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                    break;
+                case "LabelBackColor":
+                    if (mult > 0)
+                    {
+                        // format: `1,2,3`
+                        var newrgb = value?.ToString().Split(',');
+                        Color tempColor;
+                        // if there isnt more than 1 response, assume its a word and not rgb
+                        if (newrgb.Length > 1) tempColor = Color.FromArgb(int.Parse(newrgb[0]), int.Parse(newrgb[1]), int.Parse(newrgb[2]));
+                        else tempColor = Color.FromName(value.ToString());
+                        LabelSettings.BackColor = tempColor;
+                    }
+                    else LabelSettings.BackColor = (Color)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
+                    break;
+                case "LabelFontName":
+                    if (mult > 0) LabelSettings.Font = new Font(value.ToString(), LabelSettings.Font.Size, LabelSettings.Font.Style);
+                    else LabelSettings.Font = new Font((string)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), LabelSettings.Font.Size, LabelSettings.Font.Style);
+                    break;
+                case "LabelFontSize":
+                    LabelSettings.Font = new Font(LabelSettings.Font.Name, LabelSettings.Font.Size + (mult* int.Parse(value.ToString())), LabelSettings.Font.Style);
+                    break;
+                case "LabelFontStyle":
+                    if (mult > 0) LabelSettings.Font = new Font(LabelSettings.Font.FontFamily, LabelSettings.Font.Size, (FontStyle)Enum.Parse(typeof(FontStyle), value.ToString()));
+                    else LabelSettings.Font = new Font(LabelSettings.Font.FontFamily, LabelSettings.Font.Size, (FontStyle)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null));
+                    break;
+                case "LabelHeight":
+                    LabelSettings.Size = new Size(LabelSettings.Size.Width, LabelSettings.Size.Height + (mult * int.Parse(value.ToString())));
+                    break;
+                case "LabelWidth":
+                case "TextBoxWidth":
+                case "PathGoalSize":
+                case "CounterImage":
+                    // not a real property
+                    break;
+                case "Width":
+                    // handled differently
+                    this.Width = this.Width + (mult * int.Parse(value.ToString()));
+                    LabelSettings.Size = new Size(this.Width, LabelSettings.Size.Height);
+                    textBoxCustom.Size = new Size(this.Width, textBoxCustom.Size.Height);
+                    textBoxCustom.TextBoxField.Size = new Size(this.Width, textBoxCustom.TextBoxField.Size.Height);
+                    break;
+                default:
+                    throw new NotImplementedException($"Could not perform Hint Panel Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");
+            }
+        }
+
+
+
+        public void RefreshCells()
+        {
+            // TODO: copy this for the other two types
+            int tempcount = 0;
+            if (isWotH == 0)
+            {
+                foreach (var woth in ListWotH)
+                {
+                    woth.RefreshLocation(GossipStoneCount, ListImage_WothItemsOption, GossipStoneSpacing,
+                            PathGoalCount, ListImage_GoalsOption, PathGoalSpacing,
+                            tempcount*LabelSettings.Size.Height, LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling, this.isMarkable);
+                    tempcount++;
+                    foreach (var stone in woth.listGossipStone)
+                    {
+                        if (!this.Controls.Contains(stone)) this.Controls.Add(stone);
+                    }
+                }
+                if (ListWotH.Any()) textBoxCustom.newLocation(new Point(0, ListWotH.Last().LabelPlace.Location.Y + ListWotH.Last().LabelPlace.Height), this.Location);
+            }
+
+            if (isWotH == 1)
+            {
+                foreach (var barr in ListBarren)
+                {
+                    barr.RefreshLocation(tempcount * LabelSettings.Size.Height, LabelSettings);
+                    tempcount++;
+                }
+                if (ListBarren.Any()) textBoxCustom.newLocation(new Point(0, ListBarren.Last().LabelPlace.Location.Y + ListBarren.Last().LabelPlace.Height), this.Location);
+            }
+
+            if (isWotH == 2)
+            {
+                foreach (var quan in ListQuantity)
+                {
+                    quan.RefreshLocation(CounterFontSize, CounterSpacing, CounterImage,
+                        subBoxSize, LabelSettings.BackColor,
+                        tempcount * LabelSettings.Size.Height, LabelSettings, GossipStoneSize);
+                    tempcount++;
+                }
+                if (ListQuantity.Any()) textBoxCustom.newLocation(new Point(0, ListQuantity.Last().LabelPlace.Location.Y + ListQuantity.Last().LabelPlace.Height), this.Location);
+            }
+
         }
     }
 }

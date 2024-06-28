@@ -555,7 +555,7 @@ namespace GSTHD
 
         public void UpdateFromSettings()
         {
-            Debug.WriteLine("spoiler hint being updated");
+            //Debug.WriteLine("spoiler hint being updated");
             if (spoilerLoaded)
             {
                 ReorderCells();

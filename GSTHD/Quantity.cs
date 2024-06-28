@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.ImageList;
 
 
 namespace GSTHD
@@ -76,7 +77,7 @@ namespace GSTHD
                 Size = gossipStoneSize,
                 LabelFontSize = counterFontSize,
                 ImageCollection = new[] { counterImageName },
-                CountPosition = new Size(6, 10),
+                CountPosition = new Size(6, counterFontSize - (counterFontSize/10)),
                 LabelFontName = LabelPlace.Font.Name,
                 LabelColor = labelSettings.ForeColor,
                 hasSlash = true,
@@ -157,6 +158,49 @@ namespace GSTHD
                 CILCount = leftCounterCI.CollectedItems,
                 CIRCount = rightCounterCI.CollectedItems
             };
+        }
+
+        public void RefreshLocation(int counterFontSize, int counterSpacing, string counterImage,
+                        Size subBoxSize, Color ackColor,
+                        int LabelLastHeight, Label labelSettings, Size gossipStoneSize)
+        {
+
+
+            var labelStartX = 0;
+
+            int panelWidth = labelSettings.Width;
+            int labelWidth = panelWidth - labelStartX - (gossipStoneSize.Width + counterSpacing + subBoxSize.Width) + counterSpacing;
+
+            var gossipStoneStartX = panelWidth - (gossipStoneSize.Width + counterSpacing + subBoxSize.Width) + counterSpacing;
+
+
+            LabelPlace.ForeColor = labelSettings.ForeColor;
+            LabelPlace.BackColor = labelSettings.BackColor;
+            LabelPlace.Font = labelSettings.Font;
+            LabelPlace.Width = labelWidth;
+            LabelPlace.Height = labelSettings.Height;
+
+            LabelPlace.Location = new Point(labelStartX, LabelLastHeight);
+
+
+            leftCounterCI.Size = gossipStoneSize;
+            leftCounterCI.ItemCount.Font = new Font(LabelPlace.Font.Name, counterFontSize);
+            leftCounterCI.ItemCount.ForeColor = labelSettings.ForeColor;
+            leftCounterCI.ImageNames = new[] { counterImage };
+            leftCounterCI.BackColor = ackColor;
+            leftCounterCI.ItemCount.BackColor = ackColor;
+            leftCounterCI.Location = new Point(gossipStoneStartX, LabelPlace.Location.Y);
+
+
+            rightCounterCI.Size = gossipStoneSize;
+            rightCounterCI.ItemCount.Font = new Font(LabelPlace.Font.Name, counterFontSize);
+            rightCounterCI.ItemCount.ForeColor = labelSettings.ForeColor;
+            rightCounterCI.ImageNames = new[] { counterImage };
+            rightCounterCI.BackColor = ackColor;
+            rightCounterCI.ItemCount.BackColor = ackColor;
+            rightCounterCI.Location = new Point(gossipStoneStartX + (leftCounterCI.Width + counterSpacing), LabelPlace.Location.Y);
+
+
         }
     }
 }

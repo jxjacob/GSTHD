@@ -17,13 +17,13 @@ namespace GSTHD
         public override string ToString() => $"{DungeonIndex},{ImageIndex},{(int)isMarked}";
     }
 
-    public class Medallion : OrganicImage, UpdatableFromSettings, ProgressibleElement<MedallionState>, DraggableAutocheckElement<MedallionState>
+    public class Medallion : OrganicImage, UpdatableFromSettings, ProgressibleElement<MedallionState>, DraggableAutocheckElement<MedallionState>, IAlternatableObject
     {
         private readonly Settings Settings;
         private readonly ProgressibleElementBehaviour<MedallionState> ProgressBehaviour;
         private readonly DraggableAutocheckElementBehaviour<MedallionState> DragBehaviour;
 
-        private string[] ImageNames;
+        public string[] ImageNames {  get; set; }
         private string[] DungeonNames;
         private bool Wraparound;
         private int ImageIndex = 0;
@@ -33,7 +33,7 @@ namespace GSTHD
 
         public Label SelectedDungeon;
 
-        private bool isBroadcastable;
+        public bool isBroadcastable { get; set; }
         public string AutoName = null;
 
         delegate void SetStateCallback(MedallionState state);
@@ -281,5 +281,22 @@ namespace GSTHD
 
         public void SaveChanges() { }
         public void CancelChanges() { }
+
+        public void SetVisible(bool visible)
+        {
+            Visible = visible;
+        }
+
+        public void SpecialtyImport(object ogPoint, string name, object value, int mult)
+        {
+            //var point = (ObjectPoint)ogPoint;
+            switch (name)
+            {
+                case "":
+                    break;
+                default:
+                    throw new NotImplementedException($"Could not perform Medallion Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");
+            }
+        }
     }
 }
