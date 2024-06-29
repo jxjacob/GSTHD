@@ -30,8 +30,7 @@ namespace GSTHD
                     else Font = new Font((string)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), Font.Size, Font.Style);
                     break;
                 case "FontSize":
-                    if (mult > 0) Font = new Font(Font.Name, int.Parse(value.ToString()), Font.Style);
-                    else Font = new Font(Font.Name, (int)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), Font.Style);
+                    Font = new Font(Font.Name, Font.Size + (mult * int.Parse(value.ToString())), Font.Style);
                     break;
                 case "FontStyle":
                     if (mult > 0) Font = new Font(Font.FontFamily, Font.Size, (FontStyle)Enum.Parse(typeof(FontStyle), value.ToString()));

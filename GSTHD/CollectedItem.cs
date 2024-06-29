@@ -276,8 +276,7 @@ namespace GSTHD
                     else ItemCount.Font = new Font((string)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), ItemCount.Font.Size, ItemCount.Font.Style);
                     break;
                 case "LabelFontSize":
-                    if (mult > 0) ItemCount.Font = new Font(ItemCount.Font.Name, int.Parse(value.ToString()), ItemCount.Font.Style);
-                    else ItemCount.Font = new Font(ItemCount.Font.Name, (int)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), ItemCount.Font.Style);
+                    ItemCount.Font = new Font(ItemCount.Font.Name, ItemCount.Font.Size + (mult * int.Parse(value.ToString())), ItemCount.Font.Style);
                     break;
                 case "LabelFontStyle":
                     if (mult > 0) ItemCount.Font = new Font(ItemCount.Font.FontFamily, ItemCount.Font.Size, (FontStyle)Enum.Parse(typeof(FontStyle), value.ToString()));

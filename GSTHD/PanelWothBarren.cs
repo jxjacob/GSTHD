@@ -734,8 +734,7 @@ namespace GSTHD
                     else textBoxCustom.Font = new Font((string)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), textBoxCustom.Font.Size, textBoxCustom.Font.Style);
                     break;
                 case "TextBoxFontSize":
-                    if (mult > 0) textBoxCustom.Font = new Font(textBoxCustom.Font.Name, int.Parse(value.ToString()), textBoxCustom.Font.Style);
-                    else textBoxCustom.Font = new Font(textBoxCustom.Font.Name, (int)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), textBoxCustom.Font.Style);
+                    textBoxCustom.Font = new Font(textBoxCustom.Font.Name, textBoxCustom.Font.Size + (mult * int.Parse(value.ToString())), textBoxCustom.Font.Style);
                     break;
                 case "TextBoxFontStyle":
                     if (mult > 0) textBoxCustom.Font = new Font(textBoxCustom.Font.FontFamily, textBoxCustom.Font.Size, (FontStyle)Enum.Parse(typeof(FontStyle), value.ToString()));

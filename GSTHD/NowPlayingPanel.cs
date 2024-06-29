@@ -112,8 +112,7 @@ namespace GSTHD
                     else displayedSongTitle.Font = new Font((string)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), displayedSongTitle.Font.Size, displayedSongTitle.Font.Style);
                     break;
                 case "TitleFontSize":
-                    if (mult > 0) displayedSongTitle.Font = new Font(displayedSongTitle.Font.Name, int.Parse(value.ToString()), displayedSongTitle.Font.Style);
-                    else displayedSongTitle.Font = new Font(displayedSongTitle.Font.Name, (int)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), displayedSongTitle.Font.Style);
+                    displayedSongTitle.Font = new Font(displayedSongTitle.Font.Name, displayedSongTitle.Font.Size + (mult * int.Parse(value.ToString())), displayedSongTitle.Font.Style);
                     break;
                 case "TitleFontStyle":
                     if (mult > 0) displayedSongTitle.Font = new Font(displayedSongTitle.Font.FontFamily, displayedSongTitle.Font.Size, (FontStyle)Enum.Parse(typeof(FontStyle), value.ToString()));
@@ -135,8 +134,7 @@ namespace GSTHD
                     else displayedSongGame.Font = new Font((string)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), displayedSongGame.Font.Size, displayedSongGame.Font.Style);
                     break;
                 case "GameFontSize":
-                    if (mult > 0) displayedSongGame.Font = new Font(displayedSongGame.Font.Name, int.Parse(value.ToString()), displayedSongGame.Font.Style);
-                    else displayedSongGame.Font = new Font(displayedSongGame.Font.Name, (int)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null), displayedSongGame.Font.Style);
+                    displayedSongGame.Font = new Font(displayedSongGame.Font.Name, displayedSongGame.Font.Size + (mult * int.Parse(value.ToString())), displayedSongGame.Font.Style);
                     break;
                 case "GameFontStyle":
                     if (mult > 0) displayedSongGame.Font = new Font(displayedSongGame.Font.FontFamily, displayedSongGame.Font.Size, (FontStyle)Enum.Parse(typeof(FontStyle), value.ToString()));
