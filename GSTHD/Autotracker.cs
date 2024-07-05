@@ -795,9 +795,9 @@ namespace GSTHD
                     if (parts[9] != "")
                     {
                         // prevent new address from being tracked on older versions
-                        int anothertemp = int.Parse(parts[9]);
+                        int requiredversion = int.Parse(parts[9]);
                         //Debug.WriteLine($"{temp.name} - {anothertemp} - {internalRandoVersion}");
-                        if (anothertemp >= internalRandoVersion) continue;
+                        if (requiredversion > internalRandoVersion) continue;
                     }
                     trackedAddresses.Add(temp);
                 }
