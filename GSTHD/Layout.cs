@@ -791,13 +791,27 @@ namespace GSTHD
             int mult = (check) ? 1 : -1;
             if (groupname == null)
             {
-                AlternateSettings targetAlt = ListAlternates.Find(item => item.Name == name);
-                if (targetAlt == null) { return; }
-                IterateAlternateChanges(targetAlt.Changes, mult);
-                targetAlt.Enabled = check;
-                if (targetAlt.ConditionalChanges != null) IterateConditionalChanges(targetAlt, mult);
-            } else
-            {
+                if (name.Contains("_:_"))
+                {
+                    string[] words = Regex.Split(name, @"_\:_");
+                    name = words[1];
+                    groupname = words[0] + "_:_";
+                } else if (name.Contains("_::_"))
+                {
+                    string[] words = Regex.Split(name, @"_\::_");
+                    name = words[1];
+                    groupname = words[0] + "_::_";
+                }
+                else
+                {
+                    AlternateSettings targetAlt = ListAlternates.Find(item => item.Name == name);
+                    if (targetAlt == null) { return; }
+                    IterateAlternateChanges(targetAlt.Changes, mult);
+                    targetAlt.Enabled = check;
+                    if (targetAlt.ConditionalChanges != null) IterateConditionalChanges(targetAlt, mult);
+                }
+            } 
+            if (groupname != null) {
                 AlternateSettings targetAlt = null;
                 string[] words = null;
                 // if this is a subgroup within a subcollection
