@@ -725,13 +725,17 @@ namespace GSTHD
                     currentSongAddr = (uint)Convert.ToInt32(parts[1], 16);
                     currentSongBytes = int.Parse(parts[2]);
 
-                    internalRandoVersion = GoRead(0x7FFFF4, 8);
                     continue;
                 }
                 else if (parts[0] == "game_map_timer")
                 {
                     // used for song display
                     currentMapTimerAddr = (uint)Convert.ToInt32(parts[1], 16);
+                    continue;
+                }
+                else if (parts[0] == "game_rando_version")
+                {
+                    internalRandoVersion = GoRead((uint)Convert.ToInt32(parts[1], 16), int.Parse(parts[2]));
                     continue;
                 }
 
