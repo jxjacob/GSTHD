@@ -80,6 +80,8 @@ namespace GSTHD
         private bool LZTracking = false;
         private bool SongTracking = false;
 
+        private int internalRandoVersion = 0;
+
         //32-bit version
         public Autotracker(Process theProgram, uint foundOffset, ref Form1 theForm)
         {
@@ -153,7 +155,7 @@ namespace GSTHD
                                 ta.enabled = thing.Visible;
                                 break;
                             }
-                            else if (ci.AutoSubName == result.name && form.Settings.SubtractItems)
+                            else if (ci.AutoSubName == result.name)
                             {
                                 result.targetControl = (OrganicImage)thing;
                                 ta.enabled = thing.Visible;
@@ -722,6 +724,8 @@ namespace GSTHD
                 {
                     currentSongAddr = (uint)Convert.ToInt32(parts[1], 16);
                     currentSongBytes = int.Parse(parts[2]);
+
+                    internalRandoVersion = GoRead(0x7FFFF4, 8);
                     continue;
                 }
                 else if (parts[0] == "game_map_timer")
@@ -787,6 +791,13 @@ namespace GSTHD
                     } else
                     {
                         temp.dk64_id = -1;
+                    }
+                    if (parts[9] != "")
+                    {
+                        // prevent new address from being tracked on older versions
+                        int anothertemp = int.Parse(parts[9]);
+                        //Debug.WriteLine($"{temp.name} - {anothertemp} - {internalRandoVersion}");
+                        if (anothertemp >= internalRandoVersion) continue;
                     }
                     trackedAddresses.Add(temp);
                 }

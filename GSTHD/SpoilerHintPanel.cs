@@ -253,6 +253,14 @@ namespace GSTHD
                 startingItems.Add(34);
                 startingItems.Add(35);
             }
+            if (loadedjson.ContainsKey("Randomizer Version"))
+            {
+                randoVersion = loadedjson.GetValue("Randomizer Version").ToString();
+            } else
+            {
+                randoVersion = "3.x";
+            }
+
 
             // adds certian shopkeeps as starting items for seeds that dont have them in the pool, so they arent erroneously added to Isles upon tracking
             if (loadedjson.ContainsKey("Item Pool"))
@@ -263,14 +271,15 @@ namespace GSTHD
                 if (!itempool.Contains("Candy")) startingItems.Add(252);
                 if (!itempool.Contains("Snide")) startingItems.Add(253);
             }
-
-            if (loadedjson.ContainsKey("Randomizer Version"))
+            else if (randoVersion.StartsWith("3"))
             {
-                randoVersion = loadedjson.GetValue("Randomizer Version").ToString();
-            } else
-            {
-                randoVersion = "3.1.9";
+                // preventing false positives with 3.x seeds
+                startingItems.Add(250);
+                startingItems.Add(251);
+                startingItems.Add(252);
+                startingItems.Add(253);
             }
+
 
             if (parsedStartingInfo.ContainsKey("level_order"))
             {
@@ -396,7 +405,7 @@ namespace GSTHD
                 else { break; }
             }
 
-            if (randoVersion.Substring(0,1) == "3")
+            if (randoVersion.StartsWith("3"))
             {
                 // 3.x era of krool phases
                 for (int i = 0; i < kroolOrder.Count; i++)
