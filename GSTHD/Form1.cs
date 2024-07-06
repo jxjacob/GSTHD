@@ -13,6 +13,7 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Timers;
 using System.Windows.Forms;
+using AutoUpdaterDotNET;
 
 namespace GSTHD
 {
@@ -84,6 +85,10 @@ namespace GSTHD
             this.Text = $"{Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyTitleAttribute>().Title} v{assembly.Version.Major}.{assembly.Version.Minor}.{assembly.Version.Build} {((!Environment.Is64BitProcess) ? "(32-bit)" : string.Empty)}";
             this.AcceptButton = null;
             this.MaximizeBox = false;
+
+            AutoUpdater.UpdateFormSize = new Size(500, 500);
+
+            AutoUpdater.Start("https://raw.githubusercontent.com/jxjacob/GSTHD/master/GSTHD/AutoUpdateInfo.xml");
 
             LoadSettings();
             

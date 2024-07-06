@@ -273,11 +273,11 @@ namespace GSTHD
 
             if (currentSongAddr != 0 && currentMapTimerAddr != 0)
             {
+                SongTracking = true;
                 foreach (Control thing in form.Controls[0].Controls)
                 {
                     if (thing is NowPlayingPanel panel)
                     {
-                        SongTracking = true;
                         songPanel = panel;
                         break;
                     }
@@ -309,6 +309,7 @@ namespace GSTHD
             List<byte> songTitle = new List<byte>();
             uint readbytes = 0;
             int stage = 0;
+            bool needoverwrite = false;
 
             while (stage < 2)
             {
@@ -322,6 +323,13 @@ namespace GSTHD
                     // the format is song game, a single 0x00 byte, then the song title, then another 0x00
                     // therefore, read until we find a 0x00, advance the stage, read until another 0x00, then stop looking
                     if (b == 0) stage++;
+                    if (b > 127)
+                    {
+                        //broken characters
+                        if (stage == 0) { songGame.Clear(); songTitle.Clear(); needoverwrite = true; }
+                        if (stage == 1) { songTitle = songGame; needoverwrite = true; }
+                        stage = 2; break;
+                    }
                     if (b != 0)
                     {
                         if (stage == 0) songGame.Add(b);
@@ -335,6 +343,8 @@ namespace GSTHD
             }
             string gamename = Encoding.ASCII.GetString(songGame.ToArray());
             string titlename = Encoding.ASCII.GetString(songTitle.ToArray());
+
+            if (needoverwrite) gamename = "if you can read this, please tell the strimmer";
             // send data to tracker object
             // also dont send blanks lol
             if (songGame.Count > 0 || songTitle.Count > 0)
