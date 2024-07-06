@@ -86,7 +86,8 @@ namespace GSTHD
             this.AcceptButton = null;
             this.MaximizeBox = false;
 
-            AutoUpdater.UpdateFormSize = new Size(500, 500);
+            AutoUpdater.UpdateFormSize = new Size(800, 500);
+            AutoUpdater.Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location).ToBitmap();
 
             AutoUpdater.Start("https://raw.githubusercontent.com/jxjacob/GSTHD/master/GSTHD/AutoUpdateInfo.xml");
 
