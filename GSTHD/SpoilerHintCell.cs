@@ -343,7 +343,6 @@ namespace GSTHD
             InitializeDisplayList();
             UpdateVisuals();
 
-            //Debug.WriteLine(levelOrder + " " + Name + " " + Location + " " + totalPoints + " " + totalWOTHS + " -- " + string.Join(", ", potionsList.ToArray()));
         }
 
         private void Mouse_DragEnter(object sender, DragEventArgs e)
@@ -534,7 +533,6 @@ namespace GSTHD
                 pointLabel.Width = System.Math.Max(labelWidth, pointMeasure);
                 pointWidth = pointLabel.Width;
                 pointLabel.Location = new Point(this.Size.Width - (System.Math.Max(labelSpacing, pointWidth)) - 1 - this.topRowPadding, -1);
-                //Debug.WriteLine($"point -- loc: {pointLabel.Location}   width: {pointLabel.Width}    pm: {pointMeasure}    ls: {labelSpacing}");
             }
 
             if (wothLabel != null)
@@ -542,7 +540,6 @@ namespace GSTHD
                 int pointVis = (pointLabel != null) ? 1 : 0;
                 wothLabel.Width = System.Math.Max(labelWidth, TextRenderer.MeasureText(wothLabel.Text, wothLabel.Font).Width);
                 wothLabel.Location = new Point(this.Size.Width - (labelSpacing) - pointVis*(pointWidth) - 1 - this.topRowPadding, -1);
-                //Debug.WriteLine($"woth -- loc: {wothLabel.Location}   width: {wothLabel.Width}");
             }
         }
 
@@ -700,7 +697,6 @@ namespace GSTHD
             this.Width = cellWidth;
             this.Height = cellHeight;
             this.topRowHeight = topRowHeight;
-            this.topRowPadding = topRowPadding;
             this.WorldNumWidth = WorldNumWidth;
             this.WorldNumHeight = WorldNumHeight;
             this.WorldLabelWidth = WorldLabelWidth;
@@ -710,6 +706,7 @@ namespace GSTHD
             this.labelWidth = CellLabelWidth;
             this.BackColor = CellBackColor;
             this.MinimalMode = MinimalMode;
+            this.topRowPadding = (levelOrder == 9 && !MinimalMode) ? 0 : topRowPadding;
             Font tempfont = new Font(new FontFamily(CellFontName), CellFontSize, CellFontStyle);
             if (pointLabel != null)
             {

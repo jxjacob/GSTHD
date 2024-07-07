@@ -344,7 +344,11 @@ namespace GSTHD
             string gamename = Encoding.ASCII.GetString(songGame.ToArray());
             string titlename = Encoding.ASCII.GetString(songTitle.ToArray());
 
-            if (needoverwrite) gamename = "if you can read this, please tell the strimmer";
+            if (needoverwrite) gamename = "DONKEY KONG 64";
+            if (gamename.Length > 0 && titlename.Length == 0){
+                titlename = gamename;
+                gamename = "DONKEY KONG 64";
+            }
             // send data to tracker object
             // also dont send blanks lol
             if (songGame.Count > 0 || songTitle.Count > 0)
@@ -746,6 +750,7 @@ namespace GSTHD
                 else if (parts[0] == "game_rando_version")
                 {
                     internalRandoVersion = GoRead((uint)Convert.ToInt32(parts[1], 16), int.Parse(parts[2]));
+                    Debug.WriteLine($"rando v{internalRandoVersion}");
                     continue;
                 }
 
