@@ -355,7 +355,10 @@ namespace GSTHD
             {
                 // if its the same stuff as before, skip writing the stuff
                 if (gamename == currentSongGame && currentSongTitle == titlename) return;
-                if (songPanel.Visible) songPanel.SetNames(gamename, titlename);
+                if (songPanel != null)
+                {
+                    if (songPanel.Visible) songPanel.SetNames(gamename, titlename);
+                }
                 if (form.Settings.WriteSongDataToFile != Settings.SongFileWriteOption.Disabled) WriteSongData(gamename, titlename);
                 currentSongGame = gamename;
                 currentSongTitle = titlename;
@@ -761,6 +764,14 @@ namespace GSTHD
                 if (parts[1] != "")
                 {
                     TrackedAddress temp = new TrackedAddress();
+                    // doing this part first to prevent groups from getting the wrong numbers
+                    if (parts[9] != "")
+                    {
+                        // prevent new address from being tracked on older versions
+                        int requiredversion = int.Parse(parts[9]);
+                        //Debug.WriteLine($"{temp.name} - {requiredversion} - {internalRandoVersion}");
+                        if (requiredversion > internalRandoVersion) continue;
+                    }
                     temp.name = parts[0];
                     temp.address = (uint)Convert.ToInt32(parts[1], 16);
                     temp.numBytes = int.Parse(parts[2]);
@@ -810,13 +821,6 @@ namespace GSTHD
                     } else
                     {
                         temp.dk64_id = -1;
-                    }
-                    if (parts[9] != "")
-                    {
-                        // prevent new address from being tracked on older versions
-                        int requiredversion = int.Parse(parts[9]);
-                        //Debug.WriteLine($"{temp.name} - {anothertemp} - {internalRandoVersion}");
-                        if (requiredversion > internalRandoVersion) continue;
                     }
                     trackedAddresses.Add(temp);
                 }
