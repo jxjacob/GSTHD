@@ -636,6 +636,13 @@ namespace GSTHD
                     }
 
                     // no need to do a broadcast view check, as updatepoints does a setstate
+                } else
+                {
+                    for (int i = 0; i < displayedPotions.Count; i++)
+                    {
+                        displayedPotions[i].Dispose();
+                    }
+                    displayedPotions.Clear();
                 }
 
             }
@@ -669,20 +676,6 @@ namespace GSTHD
             totalWOTHS += crWOTHS;
             potionsList = potionsList.Concat(crPotions).ToList();
             potionsList.Sort();
-            if (crPoints > 0 || crPotions.Count > 0) { }
-            //{
-            //    ayoJetpac = true;
-            //    // put in the static image
-            //    levelNumberImage = new PictureBox
-            //    {
-            //        Image = Image.FromFile($"Resources/dk64/rwsprite.png"),
-            //        Height = 18,
-            //        Width = this.Height,
-            //        SizeMode = PictureBoxSizeMode.Zoom,
-            //        Location = new Point(-1, 0),
-            //    };
-            //    Controls.Add(levelNumberImage);
-            //}
             UpdateVisuals();
         }
 
@@ -706,6 +699,7 @@ namespace GSTHD
             this.labelWidth = CellLabelWidth;
             this.BackColor = CellBackColor;
             this.MinimalMode = MinimalMode;
+            this.bottomRowHeight = cellHeight - topRowHeight;
             this.topRowPadding = (levelOrder == 9 && !MinimalMode) ? 0 : topRowPadding;
             Font tempfont = new Font(new FontFamily(CellFontName), CellFontSize, CellFontStyle);
             if (pointLabel != null)
