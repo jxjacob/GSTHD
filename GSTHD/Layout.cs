@@ -52,6 +52,9 @@ namespace GSTHD
 
         public List<UpdatableFromSettings> ListUpdatables = new List<UpdatableFromSettings>();
 
+
+        List<IAlternatableObject> ControlsToBeUpdated = new List<IAlternatableObject>();
+
         public AppSettings App_Settings = new AppSettings();
 
         private GSTForms hostForm;
@@ -429,34 +432,6 @@ namespace GSTHD
                                 // make single toggle
                                 theMenu.AddToggleToAlternates(item.Name);
                             }
-
-
-
-                            // yes, this is gonna add several duplicate copies of conditional data, but at this point I dont care
-                            // check if it has a Conditional
-                            if (item.ConditionalChanges != null)
-                            {
-                                // if it does, give the Alts its conditioining with a copy of its conditionals with the names revsered and isOrganic set to FALSE
-                                foreach (SubAltSettings cond in item.ConditionalChanges){
-                                    if (!cond.isOrganic) continue;
-
-                                    foreach (string name in cond.Names)
-                                    {
-                                        // find Alt with name
-                                        AlternateSettings targetAlt = ListAlternates.Find(newitem => newitem.Name == name);
-                                        // make new string[] with all names, but with THIS name taken out and item.name swapped in
-                                        string[] namecopy = (string[])cond.Names.Clone();
-                                        for (var i = 0; i < namecopy.Length; i++)
-                                        {
-                                            if (namecopy[i] == name) { namecopy[i] = item.Name; break; }
-                                        }
-                                        // give it the copy condtional with isOrganic false 
-                                        if (targetAlt.ConditionalChanges == null) targetAlt.ConditionalChanges = new List<SubAltSettings>();
-                                        targetAlt.ConditionalChanges.Add(new SubAltSettings() { Names = namecopy, Changes = cond.Changes, isOrganic = false });
-                                    }
-                                }
-
-                            }
                         }
 
                     }
@@ -464,7 +439,40 @@ namespace GSTHD
                     {
                         theMenu.AddEmptyAlternatesOption();
                     }
-                } 
+                }
+                
+                if (ListAlternates.Count > 0)
+                {
+                    foreach (var item in ListAlternates)
+                    {
+                        // yes, this is gonna add several duplicate copies of conditional data, but at this point I dont care
+                        // check if it has a Conditional
+                        if (item.ConditionalChanges != null)
+                        {
+                            // if it does, give the Alts its conditioining with a copy of its conditionals with the names revsered and isOrganic set to FALSE
+                            foreach (SubAltSettings cond in item.ConditionalChanges)
+                            {
+                                if (!cond.isOrganic) continue;
+
+                                foreach (string name in cond.Names)
+                                {
+                                    // find Alt with name
+                                    AlternateSettings targetAlt = ListAlternates.Find(newitem => newitem.Name == name);
+                                    // make new string[] with all names, but with THIS name taken out and item.name swapped in
+                                    string[] namecopy = (string[])cond.Names.Clone();
+                                    for (var i = 0; i < namecopy.Length; i++)
+                                    {
+                                        if (namecopy[i] == name) { namecopy[i] = item.Name; break; }
+                                    }
+                                    // give it the copy condtional with isOrganic false 
+                                    if (targetAlt.ConditionalChanges == null) targetAlt.ConditionalChanges = new List<SubAltSettings>();
+                                    targetAlt.ConditionalChanges.Add(new SubAltSettings() { Names = namecopy, Changes = cond.Changes, isOrganic = false });
+                                }
+                            }
+
+                        }
+                    }
+                }
 
 
                 if (ListLabels.Count > 0)
@@ -786,8 +794,9 @@ namespace GSTHD
         }
 
 
-        public void ApplyAlternates(string name, string groupname, bool check, string lastUsed)
+        public void ApplyAlternates(string name, string groupname, bool check, string lastUsed, bool initialSetup)
         {
+            if (!initialSetup) ControlsToBeUpdated.Clear();
             int mult = (check) ? 1 : -1;
             if (groupname == null)
             {
@@ -851,15 +860,28 @@ namespace GSTHD
                     if (targetAlt.ConditionalChanges != null) IterateConditionalChanges(targetAlt, mult);
                 }
             }
+
+            
+            if (!initialSetup) ConfirmAllAlternates();
+
             // push to broadcast
             if (hostForm is Form1 f1)
             {
                 if (App_Settings.EnableBroadcast && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
-                    ((Form2)Application.OpenForms["GSTHD_DK64 Broadcast View"]).CurrentLayout.ApplyAlternates(name, groupname, check, lastUsed);
+                    ((Form2)Application.OpenForms["GSTHD_DK64 Broadcast View"]).CurrentLayout.ApplyAlternates(name, groupname, check, lastUsed, initialSetup);
                 }
                 f1.TheAutotracker?.CalibrateTracks();
             }
+        }
+
+        public void ConfirmAllAlternates()
+        {
+            foreach (var y in ControlsToBeUpdated)
+            {
+                y.ConfirmAlternates();
+            }
+            ControlsToBeUpdated.Clear();
         }
 
         private void IterateConditionalChanges(AlternateSettings targetAlt, int mult)
@@ -920,17 +942,14 @@ namespace GSTHD
                                         target = hostForm.Controls.Find(zname, true)[0] as Item;
                                         ogPoint = ListItems.Where(g => g.Name == target.Name).First();
                                         ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
-                                        // sucks that this is super expensive
-                                        target.Invalidate();
-                                        target.UpdateImage();
+                                        if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                                     }
                                 } else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
                             }
                         }
                         if (target != null && names == null)
                         {
-                            target.Invalidate();
-                            target.UpdateImage();
+                            if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                         }
                     }
                     else if (x.Key == "ItemGrids")
@@ -965,9 +984,7 @@ namespace GSTHD
                                             ApplyAlternatesChanges(target, ogGrid, z.Name, z.Value, mult);
                                         }
                                         namenum++;
-                                        // sucks that this is super expensive
-                                        target.Invalidate();
-                                        target.UpdateImage();
+                                        if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                                     }
                                 }
                             }
@@ -1130,9 +1147,7 @@ namespace GSTHD
                                         target = hostForm.Controls.Find(zname, true)[0] as DoubleItem;
                                         ogPoint = ListDoubleItems.Where(g => g.Name == target.Name).First();
                                         ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
-                                        // sucks that this is super expensive
-                                        target.Invalidate();
-                                        target.UpdateImage();
+                                        if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                                     }
                                 }
                                 else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
@@ -1140,8 +1155,7 @@ namespace GSTHD
                         }
                         if (target != null && names == null)
                         {
-                            target.Invalidate();
-                            target.UpdateImage();
+                            if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                         }
                     }
                     else if (x.Key == "CollectedItems")
@@ -1179,9 +1193,7 @@ namespace GSTHD
                                         target = hostForm.Controls.Find(zname, true)[0] as CollectedItem;
                                         ogPoint = ListCollectedItems.Where(g => g.Name == target.Name).First();
                                         ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
-                                        // sucks that this is super expensive
-                                        target.Invalidate();
-                                        target.UpdateImage();
+                                        if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                                     }
                                 }
                                 else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
@@ -1189,9 +1201,7 @@ namespace GSTHD
                         }
                         if (target != null && names == null)
                         {
-                            target.Invalidate();
-                            target.UpdateCount();
-                            target.SetCounterPosition();
+                            if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                         }
                     }
                     else if (x.Key == "GuaranteedHints")
@@ -1229,9 +1239,7 @@ namespace GSTHD
                                         target = hostForm.Controls.Find(zname, true)[0] as GuaranteedHint;
                                         ogPoint = ListGuaranteedHints.Where(g => g.Name == target.Name).First();
                                         ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
-                                        // sucks that this is super expensive
-                                        target.Invalidate();
-                                        target.UpdateImage();
+                                        if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                                     }
                                 }
                                 else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
@@ -1239,8 +1247,7 @@ namespace GSTHD
                         }
                         if (target != null && names == null)
                         {
-                            target.Invalidate();
-                            target.UpdateImage();
+                            if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                         }
                     }
                     else if (x.Key == "GossipStones")
@@ -1278,9 +1285,7 @@ namespace GSTHD
                                         target = hostForm.Controls.Find(zname, true)[0] as GossipStone;
                                         ogPoint = ListGossipStones.Where(g => g.Name == target.Name).First();
                                         ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
-                                        // sucks that this is super expensive
-                                        target.Invalidate();
-                                        target.UpdateImage();
+                                        if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                                     }
                                 }
                                 else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
@@ -1288,8 +1293,7 @@ namespace GSTHD
                         }
                         if (target != null && names == null)
                         {
-                            target.Invalidate();
-                            target.UpdateImage();
+                            if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                         }
                     }
                     else if (x.Key == "GossipStoneGrids")
@@ -1326,9 +1330,7 @@ namespace GSTHD
                                             ApplyAlternatesChanges(target, ogGrid, z.Name, z.Value, mult);
                                         }
                                         namenum++;
-
-                                        target.Invalidate();
-                                        target.UpdateImage();
+                                        if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                                     }
                                 }
                             }
@@ -1369,9 +1371,7 @@ namespace GSTHD
                                         target = hostForm.Controls.Find(zname, true)[0] as Medallion;
                                         ogPoint = ListMedallions.Where(g => g.Name == target.Name).First();
                                         ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
-                                        // sucks that this is super expensive
-                                        target.Invalidate();
-                                        target.UpdateImage();
+                                        if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                                     }
                                 }
                                 else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
@@ -1379,9 +1379,7 @@ namespace GSTHD
                         }
                         if (target != null && names == null)
                         {
-                            target.Invalidate();
-                            target.UpdateImage();
-                            target.SetSelectedDungeonLocation();
+                            if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                         }
                     }
                     else if (x.Key == "Songs")
@@ -1419,9 +1417,7 @@ namespace GSTHD
                                         target = hostForm.Controls.Find(zname, true)[0] as Song;
                                         ogPoint = ListSongs.Where(g => g.Name == target.Name).First();
                                         ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
-                                        // sucks that this is super expensive
-                                        target.Invalidate();
-                                        target.UpdateImage();
+                                        if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                                     }
                                 }
                                 else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
@@ -1429,9 +1425,7 @@ namespace GSTHD
                         }
                         if (target != null && names == null)
                         {
-                            target.Invalidate();
-                            target.UpdateImage();
-                            target.SetMarkerLocation();
+                            if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                         }
                     }
                     else if (x.Key == "PanelSpoiler")
@@ -1469,6 +1463,7 @@ namespace GSTHD
                                         target = hostForm.Controls.Find(zname, true)[0] as SpoilerPanel;
                                         ogPoint = ListPanelSpoiler.Where(g => g.Name == target.Name).First();
                                         ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                        if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                                     }
                                 }
                                 else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
@@ -1476,7 +1471,7 @@ namespace GSTHD
                         }
                         if (target != null && names == null)
                         {
-                            target.RefreshCells();
+                            if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                         }
                     }
                     else if (x.Key == "PanelWoth")
@@ -1514,6 +1509,7 @@ namespace GSTHD
                                         target = hostForm.Controls.Find(zname, true)[0] as PanelWothBarren;
                                         ogPoint = ListPanelWotH.Where(g => g.Name == target.Name).First();
                                         ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                        if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                                     }
                                 }
                                 else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
@@ -1521,7 +1517,7 @@ namespace GSTHD
                         }
                         if (target != null && names == null)
                         {
-                            target.RefreshCells();
+                            if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                         }
                     }
                     else if (x.Key == "PanelQuantity")
@@ -1559,6 +1555,7 @@ namespace GSTHD
                                         target = hostForm.Controls.Find(zname, true)[0] as PanelWothBarren;
                                         ogPoint = ListPanelQuantity.Where(g => g.Name == target.Name).First();
                                         ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                        if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                                     }
                                 }
                                 else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
@@ -1566,7 +1563,7 @@ namespace GSTHD
                         }
                         if (target != null && names == null)
                         {
-                            target.RefreshCells();
+                            if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                         }
                     }
                     else if (x.Key == "PanelBarren")
@@ -1604,6 +1601,7 @@ namespace GSTHD
                                         target = hostForm.Controls.Find(zname, true)[0] as PanelWothBarren;
                                         ogPoint = ListPanelBarren.Where(g => g.Name == target.Name).First();
                                         ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                        if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                                     }
                                 }
                                 else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
@@ -1611,7 +1609,7 @@ namespace GSTHD
                         }
                         if (target != null && names == null)
                         {
-                            target.RefreshCells();
+                            if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                         }
                     }
                     else if (x.Key == "PanelNowPlaying")
@@ -1673,30 +1671,8 @@ namespace GSTHD
                         }
                         //hostForm.Refresh();
                     }
-                    // keys is collecteditems, grids, etc
-
-
-
-
-
-
-
                 }
             }
-
-            //keeping this around for future reference on how to dial in
-            //foreach (var x in item.Changes)
-            //{
-            //    Debug.WriteLine("    " + x.Key);
-            //    foreach (var y in x.Value)
-            //    {
-            //        foreach (JProperty z in y)
-            //        {
-            //            Debug.WriteLine("        " + z.Name + ":" + z.Value.ToString());
-            //        }
-            //        Debug.WriteLine("        ");
-            //    }
-            //}
 
         }
 
@@ -1851,7 +1827,7 @@ namespace GSTHD
                 case "SubTextBoxSize":
                     return "subBoxSize";
                 case "Width":
-                    if (targettype == typeof(PanelWothBarren)) { return "forciblyfail"; }
+                    if (targettype == typeof(PanelWothBarren) || targettype == typeof(NowPlayingPanel)) { return "forciblyfail"; }
                     else { return input; }
                 case "X":
                 case "Y":
@@ -1867,6 +1843,7 @@ namespace GSTHD
     {
         void SetVisible(bool visible);
         void SpecialtyImport(object ogPoint, string name, object value, int mult);
+        void ConfirmAlternates();
     }
 
     public class GenericLabel

@@ -298,5 +298,12 @@ namespace GSTHD
                     throw new NotImplementedException($"Could not perform Medallion Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");
             }
         }
+
+        public void ConfirmAlternates()
+        {
+            Invalidate();
+            UpdateImage();
+            SetSelectedDungeonLocation();
+        }
     }
 }

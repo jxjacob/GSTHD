@@ -248,13 +248,14 @@ namespace GSTHD
                     {
                         if (alt.Value == "True")
                         {
-                            f2.CurrentLayout.ApplyAlternates(alt.Key, null, true, string.Empty);
+                            f2.CurrentLayout.ApplyAlternates(alt.Key, null, true, string.Empty, true);
                         }
                         else if (alt.Value != "False" || alt.Value != "Disabled")
                         {
-                            f2.CurrentLayout.ApplyAlternates(alt.Value, alt.Key, true, string.Empty);
+                            f2.CurrentLayout.ApplyAlternates(alt.Value, alt.Key, true, string.Empty, true);
                         }
                     }
+                    f2.CurrentLayout.ConfirmAllAlternates();
                 } else
                 {
                     foreach (var alt in thealt.Changes)
@@ -265,19 +266,20 @@ namespace GSTHD
                             {
                                 var words = Regex.Split(alt.Key, @"_\:\:_").ToList();
                                 MenuBar.CheckmarkAlternateOption(words[0], words[1]);
-                                CurrentLayout.ApplyAlternates(words[1], words[0], true, string.Empty);
+                                CurrentLayout.ApplyAlternates(words[1], words[0], true, string.Empty, true);
                             } else
                             {
                                 MenuBar.CheckmarkAlternateOption(string.Empty, alt.Key);
-                                CurrentLayout.ApplyAlternates(alt.Key, null, true, string.Empty);
+                                CurrentLayout.ApplyAlternates(alt.Key, null, true, string.Empty, true);
                             }
                         }
                         else if (alt.Value != "False" || alt.Value != "Disabled")
                         {
                             MenuBar.CheckmarkAlternateOption(alt.Key, alt.Value);
-                            CurrentLayout.ApplyAlternates(alt.Value, alt.Key, true, string.Empty);
+                            CurrentLayout.ApplyAlternates(alt.Value, alt.Key, true, string.Empty, true);
                         }
                     }
+                    CurrentLayout.ConfirmAllAlternates();
                 }
             }
         }

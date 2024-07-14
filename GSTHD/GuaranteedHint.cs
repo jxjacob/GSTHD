@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Forms.Design;
 
 namespace GSTHD
 {
@@ -92,6 +93,12 @@ namespace GSTHD
                 default:
                     throw new NotImplementedException($"Could not perform GuaranteedHint Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");
             }
+        }
+
+        public void ConfirmAlternates()
+        {
+            Invalidate();
+            UpdateImage();
         }
     }
 }

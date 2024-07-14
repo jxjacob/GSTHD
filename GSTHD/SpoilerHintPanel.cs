@@ -61,13 +61,13 @@ namespace GSTHD
         public int LabelSpacing { get; set; }
         public int CellLabelWidth { get; set; }
 
-        public bool writeByRow;
+        public bool WriteByRow { get; set; }
         public bool pointsMode;
 
         public int lastKnownMap = -1;
         public int howManySlams = 0;
 
-        public bool ExtendFinal { get; set; } = false;
+        public bool ExtendFinalCell { get; set; } = false;
         public bool MinimalMode { get; set; } = false;
         public bool spoilerLoaded = false;
         public bool isBroadcastable { get; set; }
@@ -91,7 +91,7 @@ namespace GSTHD
             this.Location = new Point(data.X, data.Y);
             this.Name = data.Name;
             this.Size = new Size(data.Width, data.Height);
-            this.writeByRow = data.WriteByRow;
+            this.WriteByRow = data.WriteByRow;
             this.numRows = data.Rows;
             this.RowPadding = data.RowPadding;
             this.numCols = data.Columns;
@@ -109,7 +109,7 @@ namespace GSTHD
             this.LabelSpacing = data.LabelSpacing;
             this.CellLabelWidth = data.LabelWidth;
 
-            this.ExtendFinal = data.ExtendFinalCell;
+            this.ExtendFinalCell = data.ExtendFinalCell;
 
             this.MinimalMode = data.isMinimal;
             if (!MinimalMode)
@@ -323,8 +323,8 @@ namespace GSTHD
         {
             DK64Items = DK64_Items.GenerateDK64Items();
             DK64Maps = DK64_Items.GenerateDK64Maps();
-            cellWidth = ((Width - (RowPadding * System.Math.Max(numRows - 1, 1))) / numRows);
-            cellHeight = ((Height - (ColPadding * System.Math.Max(numCols - 1, 1))) / numCols);
+            cellWidth = ((Width - (RowPadding * System.Math.Max(numRows - 1, 1))) / ((numCols != 1) ? numRows : 1));
+            cellHeight = ((Height - (ColPadding * System.Math.Max(numCols - 1, 1))) / ((numCols != 1) ? numCols : numRows));
             //Debug.WriteLine($"w: {cellWidth} -- h: {cellHeight}");
 
             foreach (var level in spoilerData)
@@ -358,8 +358,8 @@ namespace GSTHD
                         placement = int.Parse(level.Key);
                         theNum = levelOrder[int.Parse(level.Key)];
                     }
-                    int xmod = (writeByRow) ? (placement / numRows) : (placement % numRows);
-                    int ymod = (writeByRow) ? (placement % numRows) : (placement / numRows);
+                    int xmod = (WriteByRow) ? (placement / numRows) : (placement % numRows);
+                    int ymod = (WriteByRow) ? (placement % numRows) : (placement / numRows);
 
                     int newX = xmod * (cellWidth) + (xmod * RowPadding);
                     int newY = ymod * (cellHeight) + (ymod * ColPadding);
@@ -369,11 +369,9 @@ namespace GSTHD
                     var newpotions = ParsePotions(parseddata["vial_colors"]);
 
                     int finalWidth = cellWidth;
-                    if (ExtendFinal && placement == 8)
+                    if (ExtendFinalCell && placement == 8)
                     {
-                        Debug.WriteLine($"xm: {xmod} ym: {ymod}");
                         finalWidth = cellWidth * (numRows-xmod) + RowPadding*(numRows - xmod - 1);
-                        Debug.WriteLine($"fw: {finalWidth}");
                     }
 
                     SpoilerCell tempcell = new SpoilerCell(Settings, finalWidth, cellHeight,
@@ -455,8 +453,15 @@ namespace GSTHD
                 {
                     placement = cell.levelID;
                 }
-                int newX = (placement / numRows) * (cellWidth) + ((placement / numRows) * RowPadding);
-                int newY = (placement % numRows) * (cellHeight) + ((placement % numRows) * ColPadding);
+
+                int xmod = (WriteByRow) ? (placement / numRows) : (placement % numRows);
+                int ymod = (WriteByRow) ? (placement % numRows) : (placement / numRows);
+
+                int newX = xmod * (cellWidth) + (xmod * RowPadding);
+                int newY = ymod * (cellHeight) + (ymod * ColPadding);
+
+                if (ExtendFinalCell && placement == 8) cell.Width = cellWidth * (numRows - xmod) + RowPadding * (numRows - xmod - 1);
+                Debug.WriteLine($"x: {newX}, y: {newY}, w: {cell.Width}, h:{cell.Height}");
                 cell.Location = new Point(newX, newY);
             }
         }
@@ -647,6 +652,11 @@ namespace GSTHD
                     throw new NotImplementedException($"Could not perform PanelSpoiler Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");
             }
         }
+
+        public void ConfirmAlternates()
+        {
+            RefreshCells();
+        }
         
         public void RefreshCells()
         {
@@ -654,8 +664,8 @@ namespace GSTHD
             {
                 BackColor = storedBackColor;
                 // a place where i will go through each cell, and re-set their colours and dimensions and etc
-                cellWidth = ((Width - (RowPadding * System.Math.Max(numRows - 1, 1))) / numRows);
-                cellHeight = ((Height - (ColPadding * System.Math.Max(numCols - 1, 1))) / numCols);
+                cellWidth = ((Width - (RowPadding * System.Math.Max(numRows - 1, 1))) / ((numCols != 1) ? numRows : 1));
+                cellHeight = ((Height - (ColPadding * System.Math.Max(numCols - 1, 1))) / ((numCols != 1) ? numCols : numRows));
                 foreach (SpoilerCell cell in cells)
                 {
                     cell.RefreshVisuals(cellWidth, cellHeight,

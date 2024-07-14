@@ -806,11 +806,15 @@ namespace GSTHD
             }
         }
 
+        public void ConfirmAlternates()
+        {
+            RefreshCells();
+        }
+
 
 
         public void RefreshCells()
         {
-            // TODO: copy this for the other two types
             int tempcount = 0;
             if (isWotH == 0)
             {

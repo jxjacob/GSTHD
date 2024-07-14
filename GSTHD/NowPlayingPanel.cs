@@ -100,12 +100,17 @@ namespace GSTHD
         {
             switch (name)
             {
+                case "Width":
+                    this.Width += (mult * int.Parse(value.ToString()));
+                    displayedSongTitle.Width = this.Width - displayedSongTitle.Location.X;
+                    displayedSongGame.Width = this.Width - displayedSongGame.Location.X;
+                    break;
                 case "TitlePositionX":
-                    displayedSongTitle.Location = new Point(displayedSongTitle.Location.X + (mult*(int)value), displayedSongTitle.Location.Y);
+                    displayedSongTitle.Location = new Point(displayedSongTitle.Location.X + (mult*int.Parse(value.ToString())), displayedSongTitle.Location.Y);
                     displayedSongTitle.Width = this.Width - displayedSongTitle.Location.X;
                     break;
                 case "TitlePositionY":
-                    displayedSongTitle.Location = new Point(displayedSongTitle.Location.X, displayedSongTitle.Location.Y + (mult * (int)value));
+                    displayedSongTitle.Location = new Point(displayedSongTitle.Location.X, displayedSongTitle.Location.Y + (mult * int.Parse(value.ToString())));
                     break;
                 case "TitleFontName":
                     if (mult > 0) displayedSongTitle.Font = new Font(value.ToString(), displayedSongTitle.Font.Size, displayedSongTitle.Font.Style);
@@ -123,11 +128,11 @@ namespace GSTHD
                     else displayedSongTitle.ForeColor = (Color)ogPoint.GetType().GetProperty(name).GetValue(ogPoint, null);
                     break;
                 case "GamePositionX":
-                    displayedSongGame.Location = new Point(displayedSongGame.Location.X + (mult * (int)value), displayedSongGame.Location.Y);
+                    displayedSongGame.Location = new Point(displayedSongGame.Location.X + (mult * int.Parse(value.ToString())), displayedSongGame.Location.Y);
                     displayedSongGame.Width = this.Width - displayedSongGame.Location.X;
                     break;
                 case "GamePositionY":
-                    displayedSongGame.Location = new Point(displayedSongGame.Location.X, displayedSongGame.Location.Y + (mult * (int)value));
+                    displayedSongGame.Location = new Point(displayedSongGame.Location.X, displayedSongGame.Location.Y + (mult * int.Parse(value.ToString())));
                     break;
                 case "GameFontName":
                     if (mult > 0) displayedSongGame.Font = new Font(value.ToString(), displayedSongGame.Font.Size, displayedSongGame.Font.Style);
@@ -148,7 +153,8 @@ namespace GSTHD
                     throw new NotImplementedException($"Could not perform NowPlayingPanel Specialty Import for property \"{name}\", as it has not yet been implemented. Go pester JXJacob to go fix it.");
             }
         }
-    }
 
-    
+        public void ConfirmAlternates() { }
+
+    }
 }

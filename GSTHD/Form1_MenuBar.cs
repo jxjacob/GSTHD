@@ -876,7 +876,7 @@ namespace GSTHD
             }
 
             Debug.WriteLine(choice.Text + " :: " + choice.Tag + " :: " + choice.Checked.ToString());
-            Form.CurrentLayout.ApplyAlternates(choice.Text, usedtag, choice.Checked, LastUsed);
+            Form.CurrentLayout.ApplyAlternates(choice.Text, usedtag, choice.Checked, LastUsed, false);
             Settings.AddAltSetting(choice.Tag?.ToString(), choice.Text, choice.Checked);
         }
 
