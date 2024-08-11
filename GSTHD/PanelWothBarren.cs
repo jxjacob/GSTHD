@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Policy;
 using System.Text;
@@ -32,6 +33,7 @@ namespace GSTHD
         public  Size subBoxSize { get; set; }
         public Size GossipStoneSize { get; set; }
         public int GossipStoneSpacing { get; set; }
+        public Color GossipStoneBackColor { get; set; }
         public int PathGoalSpacing { get; set; }
         public int NbMaxRows { get; set; }
         public bool isScrollable { get; set; }
@@ -57,6 +59,7 @@ namespace GSTHD
             this.GossipStoneCount = data.GossipStoneCount.HasValue ? data.GossipStoneCount.Value : settings.DefaultWothGossipStoneCount;
             this.PathGoalCount = data.PathGoalCount.HasValue ? data.PathGoalCount.Value : settings.DefaultPathGoalCount;
             this.GossipStoneSpacing = data.GossipStoneSpacing;
+            this.GossipStoneBackColor = (data.GossipStoneBackColor != null) ? data.GossipStoneBackColor : data.BackColor;
             this.PathGoalSpacing = data.PathGoalSpacing;
             this.TabStop = false;
             this.isScrollable = data.IsScrollable;
@@ -123,9 +126,10 @@ namespace GSTHD
 
         private void Panel_MouseWheel(object sender, MouseEventArgs e)
         {
-            var panel = (Panel)sender;
+            var panel = (PanelWothBarren)sender;
             if (e.Delta != 0)
             {
+                SuspendLayout();
                 //really wish i didnt have to go through this foreach twice but thats just the order it has to be processed, unfortunately
                 foreach (var element in panel.Controls)
                 {
@@ -136,7 +140,7 @@ namespace GSTHD
                 }
                 int moveDirection;
                 if (e.Delta < 0) moveDirection = -15; else moveDirection = +15;
-                foreach (var element in panel.Controls)
+                foreach (Control element in panel.Controls)
                 {
                     if (element is Label la)
                         la.Location = new Point(la.Location.X, la.Location.Y + moveDirection);
@@ -147,8 +151,9 @@ namespace GSTHD
                     if (element is CollectedItem ci)
                         ci.Location = new Point(ci.Location.X, ci.Location.Y + moveDirection);
                 }
+                ResumeLayout(false);
             }
-            ((PanelWothBarren)panel).SetSuggestionContainer();
+            panel.SetSuggestionContainer();
         }
 
         public void PanelWoth(Dictionary<string, string> PlacesWithTag, Dictionary<string, string> keycodesWithTag, ObjectPanelWotH data)
@@ -356,7 +361,7 @@ namespace GSTHD
                 WotH newWotH = new WotH(Settings, selectedPlace,
                         GossipStoneCount, ListImage_WothItemsOption, GossipStoneSpacing,
                         PathGoalCount, ListImage_GoalsOption, PathGoalSpacing,
-                        newlocation, LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling, this.isMarkable);
+                        newlocation, LabelSettings, GossipStoneSize, this.GossipStoneBackColor, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling, this.isMarkable);
                 
                 ListWotH.Add(newWotH);
                 this.Controls.Add(newWotH.LabelPlace);
@@ -822,7 +827,7 @@ namespace GSTHD
                 {
                     woth.RefreshLocation(GossipStoneCount, ListImage_WothItemsOption, GossipStoneSpacing,
                             PathGoalCount, ListImage_GoalsOption, PathGoalSpacing,
-                            tempcount*LabelSettings.Size.Height, LabelSettings, GossipStoneSize, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling, this.isMarkable);
+                            tempcount*LabelSettings.Size.Height, LabelSettings, GossipStoneSize, this.GossipStoneBackColor, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling, this.isMarkable);
                     tempcount++;
                     foreach (var stone in woth.listGossipStone)
                     {

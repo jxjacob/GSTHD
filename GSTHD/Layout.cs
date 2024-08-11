@@ -882,6 +882,7 @@ namespace GSTHD
                 y.ConfirmAlternates();
             }
             ControlsToBeUpdated.Clear();
+            
         }
 
         private void IterateConditionalChanges(AlternateSettings targetAlt, int mult)
@@ -2027,6 +2028,7 @@ namespace GSTHD
         public int? GossipStoneCount { get; set; }
         public string[] GossipStoneImageCollection { get; set; }
         public int GossipStoneSpacing { get; set; }
+        public Color GossipStoneBackColor { get; set; }
 
         public int? PathGoalCount { get; set; }
         public string[] PathGoalImageCollection { get; set; }

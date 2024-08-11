@@ -31,6 +31,7 @@ namespace GSTHD
         public OrganicImage targetControl;
         public int dk64_id = -1;
         public bool enabled = false;
+        public bool locked = false;
     }
     public class TrackedGroup
     {
@@ -399,24 +400,53 @@ namespace GSTHD
                             //Debug.WriteLine(" ");
                             if (ta.bitmask!= 0)
                             {
-                                if ((GoRead(ta.address, ta.numBytes) & ta.bitmask) == ta.bitmask)
+                                if (!ta.locked)
                                 {
-                                    if (result.isDouble) { 
+                                    if ((GoRead(ta.address, ta.numBytes) & ta.bitmask) == ta.bitmask)
+                                    {
+                                        if (result.isDouble)
+                                        {
+                                            if (ta.type == "doubleitem_l")
+                                            {
+                                                result.runningvalue ^= 1;
+                                            }
+                                            else
+                                            {
+                                                result.runningvalue ^= 2;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            result.runningvalue++;
+                                            ta.locked = true;
+                                        }
+                                    }
+                                } else
+                                {
+                                    if (result.isDouble)
+                                    {
                                         if (ta.type == "doubleitem_l")
                                         {
                                             result.runningvalue ^= 1;
-                                        } else
+                                        }
+                                        else
                                         {
                                             result.runningvalue ^= 2;
                                         }
-                                    } else
+                                    }
+                                    else
                                     {
                                         result.runningvalue++;
-                                    }                                    
+                                    }
                                 }
+                                
                             } else
                             {
-                                result.runningvalue += GoRead(ta.address, ta.numBytes);
+                                if (!ta.locked)
+                                {
+                                    ta.currentValue = GoRead(ta.address, ta.numBytes);
+                                }
+                                result.runningvalue += ta.currentValue;
                             }
 
                             result.count++;
@@ -427,7 +457,7 @@ namespace GSTHD
                         }
                     } else
                     {
-                        UTSingle(ta, GoRead(ta.address, ta.numBytes));
+                        if (!ta.locked) UTSingle(ta, GoRead(ta.address, ta.numBytes));
                     }
                 }
                 else
@@ -503,6 +533,7 @@ namespace GSTHD
 
                 
                 ta.currentValue = theRead;
+                if (ta.bitmask != 0 && (ta.currentValue^ta.bitmask) == ta.bitmask) ta.locked = true;
             }
         }
 
