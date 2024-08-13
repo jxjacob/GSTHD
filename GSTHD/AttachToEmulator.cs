@@ -44,6 +44,10 @@ namespace GSTHD
 
             var gameInfo = getGameVerificationInfo(baseForm.CurrentLayout.App_Settings.AutotrackingGame);
 
+
+            bool hasseennonzero = false;
+            // note to self, if you ever need Nax support, the offset is around 0x40500000
+            // and i really wish i knew why
             for (uint potOff = 0xDFD00000; potOff < 0xE01FFFFF; potOff += 16)
             {
                 int gamecheck;
@@ -75,15 +79,16 @@ namespace GSTHD
                     MessageBox.Show(e.Message, "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return null;
                 }
-                //MessageBox.Show(gamecheck.ToString("X"), "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                //return null;
+                
+                if (gamecheck != 0) hasseennonzero = true;
                 if (gamecheck == gameInfo.Item3)
                 {
-                    Debug.WriteLine("verifyably pj64");
+                    Debug.WriteLine($"verifyably pj64 at offset {potOff}");
                     return Tuple.Create(target, potOff);
                 }
 
             }
+            if (!hasseennonzero) MessageBox.Show("Could not read any data from Project64; and therefore something has probably gone horribly wrong.\nRe-install Project64, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             //MessageBox.Show("Could not find the correct PJ64 offset\nJXJacob hasn't figured out how to solve this one so you might be out of luck.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
         }
@@ -143,6 +148,7 @@ namespace GSTHD
             //            return null;
             //    }
 
+            bool hasseennonzero = false;
             //i'm too lazy to find common addresses, so i'm just gonna do a light bruteforce
             for (uint potOff = 0x5A000; potOff < 0x5658DF; potOff += 16)
             {
@@ -180,7 +186,7 @@ namespace GSTHD
                     return null;
                 }
 
-                
+                if (gamecheck != 0) hasseennonzero = true;
                 if (gamecheck == gameInfo.Item3)
                 {
                     
@@ -189,7 +195,7 @@ namespace GSTHD
                 }
 
             }
-
+            if (!hasseennonzero) MessageBox.Show("Could not read any data from Bizhawk; and therefore something has probably gone horribly wrong.\nRe-install Bizhawk, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
         }
 
@@ -228,6 +234,7 @@ namespace GSTHD
             }
             Debug.WriteLine("found dll at 0x" + addressDLL.ToString("X"));
 
+            bool hasseennonzero = false;
             for (uint potOff = 0x29C15D8; potOff < 0x2FC15D8; potOff += 16)
             {
                 ulong romAddrStart = addressDLL + potOff;
@@ -240,6 +247,7 @@ namespace GSTHD
                 {
                     var addr = Memory.Int8AddrFix(readAddress + 0x80000000 + gameInfo.Item1);
                     var wherethefuck = Memory.ReadInt8(target.Handle, addr);
+                    if (wherethefuck != 0) hasseennonzero = true;
                     if ((wherethefuck & 0xff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress + 0x80000000));
@@ -250,6 +258,7 @@ namespace GSTHD
                 {
                     var addr = Memory.Int16AddrFix(readAddress + 0x80000000 + gameInfo.Item1);
                     var wherethefuck = Memory.ReadInt16(target.Handle, addr);
+                    if (wherethefuck != 0) hasseennonzero = true;
                     if ((wherethefuck & 0xffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress + 0x80000000));
@@ -260,6 +269,7 @@ namespace GSTHD
                 {
                     // use this previously read address to find the game verification data
                     var wherethefuck = Memory.ReadInt32(target.Handle, (readAddress + 0x80000000 + gameInfo.Item1));
+                    if (wherethefuck != 0) hasseennonzero = true;
                     if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress + 0x80000000));
@@ -277,7 +287,7 @@ namespace GSTHD
 
             }
 
-            //MessageBox.Show("Could not find the correct RMG offset\nJXJacob hasn't figured out how to solve this one so you might be out of luck.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (!hasseennonzero) MessageBox.Show("Could not read any data from RMG; and therefore something has probably gone horribly wrong.\nRe-install RMG, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
         }
 
@@ -317,6 +327,7 @@ namespace GSTHD
             }
             Debug.WriteLine("found dll at 0x" + addressDLL.ToString("X"));
 
+            bool hasseennonzero = false;
             for (uint potOff = 0x1380000; potOff < 0x29C95D8; potOff += 16)
             {
                 // this is honest to christ a bruteforce. with biz and RMG i had a reference for getting them to work, this was a fuckin guess
@@ -331,6 +342,7 @@ namespace GSTHD
                 {
                     var addr = Memory.Int8AddrFix(readAddress + gameInfo.Item1);
                     var wherethefuck = Memory.ReadInt8(target.Handle, addr);
+                    if (wherethefuck != 0) hasseennonzero = true;
                     if ((wherethefuck & 0xff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress));
@@ -341,6 +353,7 @@ namespace GSTHD
                 {
                     var addr = Memory.Int16AddrFix(readAddress + gameInfo.Item1);
                     var wherethefuck = Memory.ReadInt16(target.Handle, addr);
+                    if (wherethefuck != 0) hasseennonzero = true;
                     if ((wherethefuck & 0xffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress));
@@ -351,6 +364,7 @@ namespace GSTHD
                 {
                     // use this previously read address to find the game verification data
                     var wherethefuck = Memory.ReadInt32(target.Handle, (readAddress + gameInfo.Item1));
+                    if (wherethefuck != 0) hasseennonzero = true;
                     if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress));
@@ -367,7 +381,7 @@ namespace GSTHD
 
 
             }
-
+            if (!hasseennonzero) MessageBox.Show("Could not read any data from simple64; and therefore something has probably gone horribly wrong.\nRe-install simple64, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
         }
 
@@ -412,6 +426,7 @@ namespace GSTHD
             }
             Debug.WriteLine("found dll at 0x" + addressDLL.ToString("X"));
 
+            bool hasseennonzero = false;
             for (uint potOff = 0x845000; potOff < 0xD56000; potOff += 16)
             {
                 ulong romAddrStart = addressDLL + potOff;
@@ -430,6 +445,7 @@ namespace GSTHD
                 {
                     var addr = Memory.Int8AddrFix(readAddress + gameInfo.Item1);
                     var wherethefuck = Memory.ReadInt8(target.Handle, addr);
+                    if (wherethefuck != 0) hasseennonzero = true;
                     if ((wherethefuck & 0xff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, readAddress);
@@ -440,6 +456,7 @@ namespace GSTHD
                 {
                     var addr = Memory.Int16AddrFix(readAddress + gameInfo.Item1);
                     var wherethefuck = Memory.ReadInt16(target.Handle, addr);
+                    if (wherethefuck != 0) hasseennonzero = true;
                     if ((wherethefuck & 0xffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, readAddress);
@@ -451,6 +468,7 @@ namespace GSTHD
                     // use this previously read address to find the game verification data
                     var wherethefuck = Memory.ReadInt32(target.Handle, (readAddress + gameInfo.Item1));
                     //if (wherethefuck != 0 && wherethefuck != -954194860) Debug.WriteLine($"{wherethefuck} -- {potOff}");
+                    if (wherethefuck != 0) hasseennonzero = true;
                     if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, readAddress);
@@ -467,7 +485,7 @@ namespace GSTHD
 
 
             }
-
+            if (!hasseennonzero) MessageBox.Show("Could not read any data from Parallel Launcher; and therefore something has probably gone horribly wrong.\nRe-install Parallel Launcher, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
         }
     }

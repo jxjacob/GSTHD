@@ -131,6 +131,7 @@ namespace GSTHD
         {
             Settings = Settings.Read();
 
+            ListKeycodesWithTag.Clear();
             ListPlacesWithTag.Clear();
             currentlyCycling.Clear();
             JObject json_places = JObject.Parse(File.ReadAllText(@"" + Settings.ActivePlaces));
