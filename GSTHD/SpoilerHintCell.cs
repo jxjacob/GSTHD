@@ -319,7 +319,7 @@ namespace GSTHD
                     X = 0, Y = 0,
                     Visible = true,
                     Size = new Size(WorldNumWidth, WorldNumHeight),
-                    ImageCollection = new string[] { "dk64/unknownnum.png", "dk64/1.png", "dk64/2.png", "dk64/3.png", "dk64/4.png", "dk64/5.png", "dk64/6.png", "dk64/7.png" },
+                    ImageCollection = new string[] { "dk64/unknownnum.png", "dk64/1.png", "dk64/2.png", "dk64/3.png", "dk64/4.png", "dk64/5.png", "dk64/6.png", "dk64/7.png", "dk64/8.png" },
                     isBroadcastable = this.isBroadcastable,
                 };
                 unknownLevelNumberImage = new Item(temp2, settings);

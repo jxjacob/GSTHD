@@ -285,14 +285,20 @@ namespace GSTHD
             {
                 levelOrder = parsedStartingInfo["level_order"].ToObject<List<int>>();
                 // manually add 8 for helm and 9 for isles
-                levelOrder.Add(7);
+                if (levelOrder.Count == 7) levelOrder.Add(7);
                 levelOrder.Add(8);
             }
             else
             {
                 // fill with negative values if level order isnt given (then add helm and isle's numbers)
                 for (int i = 0; i < 7; i++) { levelOrder.Add(-1); }
-                levelOrder.Add(7);
+                if (randoVersion.StartsWith("3"))
+                {
+                    levelOrder.Add(7);
+                } else
+                {
+                    levelOrder.Add(-1);
+                }
                 levelOrder.Add(8);
             }
 
