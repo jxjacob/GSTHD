@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net.Security;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace GSTHD
 {
@@ -17,7 +18,7 @@ namespace GSTHD
         public override string ToString() => $"{DungeonIndex},{ImageIndex},{(int)isMarked}";
     }
 
-    public class Medallion : OrganicImage, UpdatableFromSettings, ProgressibleElement<MedallionState>, DraggableAutocheckElement<MedallionState>, IAlternatableObject
+    public class Medallion : OrganicImage, ProgressibleElement<MedallionState>, DraggableAutocheckElement<MedallionState>, IAlternatableObject
     {
         private readonly Settings Settings;
         private readonly ProgressibleElementBehaviour<MedallionState> ProgressBehaviour;
@@ -89,15 +90,6 @@ namespace GSTHD
             Location = new Point(data.X, data.Y);
             TabStop = false;
             AllowDrop = false;
-            if (!isBroadcast)
-            {
-                MouseUp += DragBehaviour.Mouse_ClickUp;
-                MouseDown += ProgressBehaviour.Mouse_ClickDown;
-                MouseDown += DragBehaviour.Mouse_ClickDown;
-                MouseMove += DragBehaviour.Mouse_Move_WithAutocheck;
-                MouseWheel += DragBehaviour.Mouse_Wheel;
-            }
-
 
             SelectedDungeon = new Label
             {
@@ -112,11 +104,20 @@ namespace GSTHD
 
             if (!isBroadcast)
             {
+                MouseUp += DragBehaviour.Mouse_ClickUp;
+                MouseDown += ProgressBehaviour.Mouse_ClickDown;
+                MouseDown += DragBehaviour.Mouse_ClickDown;
+                MouseMove += DragBehaviour.Mouse_Move_WithAutocheck;
+                MouseWheel += DragBehaviour.Mouse_Wheel;
+                MouseWheel += Mouse_Wheel;
+
+
                 SelectedDungeon.MouseUp += DragBehaviour.Mouse_ClickUp;
-                SelectedDungeon.MouseDown += ProgressBehaviour.Mouse_ClickDown;
+                SelectedDungeon.MouseDown += DungeonLabel_MouseDown;
                 SelectedDungeon.MouseDown += DragBehaviour.Mouse_ClickDown;
                 SelectedDungeon.MouseMove += DragBehaviour.Mouse_Move_WithAutocheck;
                 SelectedDungeon.MouseWheel += DragBehaviour.Mouse_Wheel;
+                SelectedDungeon.MouseWheel += Mouse_Wheel;
 
                 UpdateFromSettings();
             }
@@ -125,21 +126,7 @@ namespace GSTHD
 
         public void UpdateFromSettings()
         {
-            MouseWheel -= Mouse_Wheel;
-            MouseWheel -= Mouse_Wheel_WithWraparound;
-            SelectedDungeon.MouseWheel -= Mouse_Wheel;
-            SelectedDungeon.MouseWheel -= Mouse_Wheel_WithWraparound;
 
-            if (Settings.WraparoundDungeonNames)
-            {
-                MouseWheel += Mouse_Wheel_WithWraparound;
-                SelectedDungeon.MouseWheel += Mouse_Wheel_WithWraparound;
-            }
-            else
-            {
-                MouseWheel += Mouse_Wheel;
-                SelectedDungeon.MouseWheel += Mouse_Wheel;
-            }
         }
 
         public void SetSelectedDungeonLocation()
@@ -152,37 +139,43 @@ namespace GSTHD
             if (e.Delta != 0)
             {
                 var scrolls = e.Delta / SystemInformation.MouseWheelScrollDelta;
-                DungeonIndex += (Settings.InvertScrollWheel ? scrolls : -scrolls);
-                if (DungeonIndex < 0) DungeonIndex = 0;
-                else if (DungeonIndex >= DungeonNames.Length) DungeonIndex = DungeonNames.Length - 1;
-                SelectedDungeon.Text = DungeonNames[DungeonIndex];
-                SetSelectedDungeonLocation();
-                DragBehaviour.SaveChanges();
-                if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
-                {
-                    ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).SelectedDungeon.Text = DungeonNames[DungeonIndex];
-                    ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).SetSelectedDungeonLocation();
-                }
+                SetDungeonName((Settings.InvertScrollWheel ? scrolls : -scrolls));
             }
         }
 
-        private void Mouse_Wheel_WithWraparound(object sender, MouseEventArgs e)
+        private void DungeonLabel_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Delta != 0)
-            {
-                var scrolls = e.Delta / SystemInformation.MouseWheelScrollDelta;
-                var newIndex = DungeonIndex + (Settings.InvertScrollWheel ? scrolls : -scrolls);
-                DungeonIndex = Math.EMod(newIndex, DungeonNames.Length);
-                SelectedDungeon.Text = DungeonNames[DungeonIndex];
-                SetSelectedDungeonLocation();
-                DragBehaviour.SaveChanges();
-                if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
-                {
-                    ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).SelectedDungeon.Text = DungeonNames[DungeonIndex];
-                    ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).SetSelectedDungeonLocation();
-                }
-            }
+            if (MouseDetermination.DetermineBasicMouseInput(e, Settings.IncrementActionButton)) SetDungeonName(1);
+            else if (MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton)) SetDungeonName(-1);
+            else if (MouseDetermination.DetermineBasicMouseInput(e, Settings.ResetActionButton)) SetDungeonName(-DungeonIndex);
         }
+
+
+        private void SetDungeonName(int direction)
+        {
+            if (Settings.WraparoundDungeonNames)
+            {
+                //EMod
+                var newIndex = DungeonIndex + direction;
+                DungeonIndex = Math.EMod(newIndex, DungeonNames.Length);
+            }
+            else
+            {
+                DungeonIndex += direction;
+                if (DungeonIndex < 0) DungeonIndex = 0;
+                else if (DungeonIndex >= DungeonNames.Length) DungeonIndex = DungeonNames.Length - 1;
+            }
+            SelectedDungeon.Text = DungeonNames[DungeonIndex];
+            SetSelectedDungeonLocation();
+            DragBehaviour.SaveChanges();
+            if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
+            {
+                ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).SelectedDungeon.Text = DungeonNames[DungeonIndex];
+                ((Medallion)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).SetSelectedDungeonLocation();
+            }
+
+        }
+
 
         public void UpdateImage()
         {

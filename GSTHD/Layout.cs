@@ -650,7 +650,6 @@ namespace GSTHD
                         var element = new Medallion(medallion, settings, isOnBroadcast);
                         panelLayout.Controls.Add(element);
                         panelLayout.Controls.Add(element.SelectedDungeon);
-                        ListUpdatables.Add(element);
                         element.SetSelectedDungeonLocation();
                         element.SelectedDungeon.BringToFront();
                     }

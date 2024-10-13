@@ -195,7 +195,17 @@ namespace GSTHD
                 }
 
             }
-            if (!hasseennonzero) MessageBox.Show("Could not read any data from Bizhawk; and therefore something has probably gone horribly wrong.\nRe-install Bizhawk, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (!hasseennonzero)
+            {
+                if (Environment.Is64BitProcess)
+                {
+                    MessageBox.Show("Could not read any data from Bizhawk; potentially due to a version mismatch between GSTHD and Bizhawk.\nSwitch to the GSTHD_32.exe program, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else
+                {
+                    MessageBox.Show("Could not read any data from Bizhawk; and therefore something has probably gone horribly wrong.\nRe-install Bizhawk, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
             return null;
         }
 
