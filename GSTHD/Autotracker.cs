@@ -324,7 +324,7 @@ namespace GSTHD
                     // the format is song game, a single 0x00 byte, then the song title, then another 0x00
                     // therefore, read until we find a 0x00, advance the stage, read until another 0x00, then stop looking
                     if (b == 0) stage++;
-                    if (b > 127 || b < 30)
+                    if (b > 127 || (b < 30 && b!=0))
                     {
                         //broken characters
                         if (stage == 0) { songGame.Clear(); songTitle.Clear(); needoverwrite = true; }
