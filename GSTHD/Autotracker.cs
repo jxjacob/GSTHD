@@ -41,6 +41,8 @@ namespace GSTHD
         public int count = 0;
         public int countMax;
         public bool isDouble = false;
+        public int left_dk64_id = -1;
+        public int right_dk64_id = -1;
         public OrganicImage targetControl;
     }
     public class Autotracker : UpdatableFromSettings
@@ -563,7 +565,7 @@ namespace GSTHD
                     }
                 } else if (tg.targetControl is DoubleItem di)
                 {
-                    UpdateTrackerDoubleItem(di, tg.runningvalue);
+                    UpdateTrackerDoubleItem(di, tg);
                 } else if (tg.targetControl is Item it)
                 {
                     UpdateTrackerItem(it, tg.runningvalue);
@@ -647,9 +649,12 @@ namespace GSTHD
             }
         }
 
-        private void UpdateTrackerDoubleItem(DoubleItem theItem, int theRead)
+        private void UpdateTrackerDoubleItem(DoubleItem theItem, TrackedGroup tg)
         {
-            theItem.SetState(theRead);
+            theItem.SetState(tg.runningvalue);
+            // honestly i'm not sure why the % arent the other way around but idc
+            if (tg.runningvalue % 2 != tg.currentValue % 2) AttemptSpoilerUpdate(tg.left_dk64_id, (tg.targetControl != null) ? tg.targetControl.isMarked : 0);
+            if (tg.runningvalue % 1 != tg.currentValue % 1) AttemptSpoilerUpdate(tg.right_dk64_id, (tg.targetControl != null) ? tg.targetControl.isMarked : 0);
         }
 
         private void UpdateTrackerMedallion(Medallion theItem, TrackedAddress ta, int theRead)
@@ -832,19 +837,6 @@ namespace GSTHD
                     }
                     temp.type = parts[6];
                     temp.group = parts[7];
-                    if (temp.group != "")
-                    {
-                        if (!foundGroups.Contains(temp.group))
-                        {
-                            bool isD = (temp.type == "doubleitem_l" || temp.type == "doubleitem_r") ;
-                            foundGroups.Add(temp.group);
-                            trackedGroups.Add(new TrackedGroup() { name = temp.group, countMax = 1, isDouble = isD });
-                        } else
-                        {
-                            TrackedGroup result = trackedGroups.Find(x => x.name.Equals(temp.group));
-                            result.countMax++;
-                        }
-                    }
                     //Debug.WriteLine(temp.name + " :: " + temp.bitmask);
                     if (parts[8] != "")
                     {
@@ -852,6 +844,29 @@ namespace GSTHD
                     } else
                     {
                         temp.dk64_id = -1;
+                    }
+
+                    if (temp.group != "")
+                    {
+                        if (!foundGroups.Contains(temp.group))
+                        {
+                            bool isD = (temp.type == "doubleitem_l" || temp.type == "doubleitem_r") ;
+                            foundGroups.Add(temp.group);
+                            if (isD)
+                            {
+                                if (temp.type == "doubleitem_l") trackedGroups.Add(new TrackedGroup() { name = temp.group, countMax = 1, isDouble = true, left_dk64_id = temp.dk64_id });
+                                if (temp.type == "doubleitem_r") trackedGroups.Add(new TrackedGroup() { name = temp.group, countMax = 1, isDouble = true, right_dk64_id = temp.dk64_id });
+                            } else
+                            {
+                                trackedGroups.Add(new TrackedGroup() { name = temp.group, countMax = 1 });
+                            }
+                        } else
+                        {
+                            TrackedGroup result = trackedGroups.Find(x => x.name.Equals(temp.group));
+                            result.countMax++;
+                            if (temp.type == "doubleitem_l") result.left_dk64_id = temp.dk64_id;
+                            if (temp.type == "doubleitem_r") result.right_dk64_id = temp.dk64_id;
+                        }
                     }
                     trackedAddresses.Add(temp);
                 }
