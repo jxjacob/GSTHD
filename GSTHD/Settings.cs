@@ -81,7 +81,8 @@ namespace GSTHD
             Bizhawk,
             RMG,
             simple64,
-            parallel
+            parallel,
+            retroarch
         }
 
         [JsonConverter(typeof(StringEnumConverter))]

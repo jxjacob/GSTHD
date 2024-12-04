@@ -365,7 +365,7 @@ namespace GSTHD
             TheAutotracker = new Autotracker(emulator, offset, this);
         }
 
-        private void StopAutotracker()
+        public void StopAutotracker()
         {
             if (TheAutotracker != null)
             {

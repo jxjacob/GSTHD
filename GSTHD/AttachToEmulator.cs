@@ -252,6 +252,7 @@ namespace GSTHD
 
                 // read the address to find the address of the starting point in the rom
                 ulong readAddress = Memory.ReadInt64(target.Handle, (romAddrStart));
+                if (readAddress != 0) hasseennonzero = true;
 
                 if (gameInfo.Item2 == 8)
                 {
@@ -347,6 +348,7 @@ namespace GSTHD
 
                 // read the address to find the address of the starting point in the rom
                 ulong readAddress = Memory.ReadInt64(target.Handle, (romAddrStart));
+                if (readAddress != 0) hasseennonzero = true;
 
                 if (gameInfo.Item2 == 8)
                 {
@@ -421,7 +423,8 @@ namespace GSTHD
                 {
                     addressDLL = (ulong)mo.BaseAddress.ToInt64();
                     break;
-                } else if (mo.ModuleName.ToLower() == "mupen64plus_next_libretro.dll")
+                }
+                else if (mo.ModuleName.ToLower() == "mupen64plus_next_libretro.dll")
                 {
                     addressDLL = (ulong)mo.BaseAddress.ToInt64();
                     ismp64p |= true;
@@ -444,12 +447,14 @@ namespace GSTHD
 
                 // read the address to find the address of the starting point in the rom
                 ulong readAddress = Memory.ReadInt64(target.Handle, (romAddrStart));
+                if (readAddress != 0) hasseennonzero = true;
                 if (ismp64p)
                 {
                     // why is retroarch like this
-                    readAddress = Memory.ReadInt64(target.Handle, (readAddress + 4) & readAddress);
+                    readAddress = Memory.ReadInt64(target.Handle, (addressDLL + potOff + 4) & readAddress);
                     readAddress += 0x80000000;
                 }
+                if (readAddress != 0) hasseennonzero = true;
 
                 if (gameInfo.Item2 == 8)
                 {
@@ -491,11 +496,140 @@ namespace GSTHD
                     return null;
                 }
 
+            }
+
+            if (!hasseennonzero) MessageBox.Show("Could not read any data from Parallel Launcher; and therefore something has probably gone horribly wrong.\nRe-install Parallel Launcher, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return null;
+        }
+
+        public static Tuple<Process, ulong> attachToRetroarch(Form1 baseForm)
+        {
+            // this suck so much
+            Process target = null;
+            try
+            {
+                target = Process.GetProcessesByName("retroarch")[0];
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message + "\nCould not find process \"retroarch\" on your machine.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+            Debug.WriteLine("fuck retroarch tbh");
+
+            var gameInfo = getGameVerificationInfo(baseForm.CurrentLayout.App_Settings.AutotrackingGame);
+
+            bool ismp64p = false;
+            ulong addressDLL = 0;
+            foreach (ProcessModule mo in target.Modules)
+            {
+                Debug.WriteLine(mo.ModuleName.ToString());
+                if (mo.ModuleName.ToLower() == "parallel_n64_next_libretro.dll")
+                {
+                    addressDLL = (ulong)mo.BaseAddress.ToInt64();
+                    break;
+                }
+                else if (mo.ModuleName.ToLower() == "mupen64plus_next_libretro.dll")
+                {
+                    addressDLL = (ulong)mo.BaseAddress.ToInt64();
+                    ismp64p |= true;
+                    break;
+                }
+            }
+
+            if (addressDLL == 0)
+            {
+                MessageBox.Show("Could not find either the muper64plus plugin loaded within Retroarch.\nPlease switch to the GLideN64 graphics plugin to resolve this issue.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+            Debug.WriteLine("found dll at 0x" + addressDLL.ToString("X"));
+
+            bool hasseennonzero = false;
+            for (int trying = 0; trying < 3; trying += 1)
+            {
+                uint potOff = 0;
+                switch (trying)
+                {
+                    case 0:
+                        if (ismp64p) potOff = 0x8E795E0;
+                        else potOff = 0x845000;
+                        break;
+                    case 1:
+                        if (ismp64p) potOff = 0x8E825D8;
+                        else potOff = 0x844000;
+                        break;
+                    case 2:
+                        if (ismp64p) potOff = 0x8E795E0;
+                        else potOff = 0xD56000;
+                        break;
+                }
+                ulong romAddrStart = addressDLL + potOff;
+
+
+                //read the address to find the address of the starting point in the rom
+                ulong readAddress = Memory.ReadInt64(target.Handle, (romAddrStart));
+                if (ismp64p)
+                {
+                    // why is retroarch like this
+                    readAddress = Memory.ReadInt64(target.Handle, (addressDLL + potOff + 4) & readAddress);
+                    readAddress += 0x80000000;
+                }
+
+                if (gameInfo.Item2 == 8)
+                {
+                    var addr = Memory.Int8AddrFix(readAddress + gameInfo.Item1);
+                    var wherethefuck = Memory.ReadInt8(target.Handle, addr);
+                    if (wherethefuck != 0) hasseennonzero = true;
+                    if ((wherethefuck & 0xff) == gameInfo.Item3)
+                    {
+                        return Tuple.Create(target, readAddress);
+
+                    }
+                }
+                else if (gameInfo.Item2 == 16)
+                {
+                    var addr = Memory.Int16AddrFix(readAddress + gameInfo.Item1);
+                    var wherethefuck = Memory.ReadInt16(target.Handle, addr);
+                    if (wherethefuck != 0) hasseennonzero = true;
+                    if ((wherethefuck & 0xffff) == gameInfo.Item3)
+                    {
+                        return Tuple.Create(target, readAddress);
+
+                    }
+                }
+                else if (gameInfo.Item2 == 32)
+                {
+                    // use this previously read address to find the game verification data
+                    var wherethefuck = Memory.ReadInt32(target.Handle, (readAddress + gameInfo.Item1));
+                    //if (wherethefuck != 0 && wherethefuck != -1136293120) Debug.WriteLine($"{wherethefuck} -- {potOff}");
+                    if (wherethefuck != 0) hasseennonzero = true;
+                    if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
+                    {
+                        return Tuple.Create(target, readAddress);
+
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Incorrect bytes set for verification.\nMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
+                }
+
 
 
 
             }
-            if (!hasseennonzero) MessageBox.Show("Could not read any data from Parallel Launcher; and therefore something has probably gone horribly wrong.\nRe-install Parallel Launcher, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (!hasseennonzero)
+            {
+                if (Environment.Is64BitProcess)
+                {
+                    MessageBox.Show("Could not read any data from Retroarch; potentially due to a version mismatch between GSTHD and Retroarch.\nSwitch to the GSTHD_32.exe program, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else
+                {
+                    MessageBox.Show("Could not read any data from Retroarch; and therefore something has probably gone horribly wrong.\nRe-install Retroarch, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
             return null;
         }
     }
