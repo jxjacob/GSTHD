@@ -539,41 +539,31 @@ namespace GSTHD
 
             if (addressDLL == 0)
             {
-                MessageBox.Show("Could not find either the muper64plus plugin loaded within Retroarch.\nPlease switch to the GLideN64 graphics plugin to resolve this issue.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Could not find the muper64plus plugin loaded within Retroarch.\nMake sure you are using that core specifically and the 64-bit version of Retroarch before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
             Debug.WriteLine("found dll at 0x" + addressDLL.ToString("X"));
 
+            progresswindow pw = new progresswindow("Connecting to RetroArch...\nAttempting to find the correct memory offset (this may take a bit)...", 0xFFFFFF);
+            pw.Show();
+            pw.Refresh();
             bool hasseennonzero = false;
-            for (int trying = 0; trying < 3; trying += 1)
+            for (uint potOff = 0; potOff < 0xFFFFFF; potOff+=4)
             {
-                uint potOff = 0;
-                switch (trying)
-                {
-                    case 0:
-                        if (ismp64p) potOff = 0x8E795E0;
-                        else potOff = 0x845000;
-                        break;
-                    case 1:
-                        if (ismp64p) potOff = 0x8E825D8;
-                        else potOff = 0x844000;
-                        break;
-                    case 2:
-                        if (ismp64p) potOff = 0x8E795E0;
-                        else potOff = 0xD56000;
-                        break;
-                }
+                pw.incBar();
                 ulong romAddrStart = addressDLL + potOff;
 
 
                 //read the address to find the address of the starting point in the rom
                 ulong readAddress = Memory.ReadInt64(target.Handle, (romAddrStart));
-                if (ismp64p)
-                {
-                    // why is retroarch like this
-                    readAddress = Memory.ReadInt64(target.Handle, (addressDLL + potOff + 4) & readAddress);
-                    readAddress += 0x80000000;
-                }
+                if (readAddress != 0) hasseennonzero = true;
+                //if (ismp64p)
+                //{
+                //    // why is retroarch like this
+                //    readAddress = Memory.ReadInt64(target.Handle, (readAddress + 4) & readAddress);
+                //    if (readAddress != 0) hasseennonzero = true;
+                //    readAddress += 0x80000000;
+                //}
 
                 if (gameInfo.Item2 == 8)
                 {
@@ -605,12 +595,13 @@ namespace GSTHD
                     if (wherethefuck != 0) hasseennonzero = true;
                     if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
                     {
+                        pw.Close();
                         return Tuple.Create(target, readAddress);
-
                     }
                 }
                 else
                 {
+                    pw.Close();
                     MessageBox.Show("Incorrect bytes set for verification.\nMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return null;
                 }
@@ -619,6 +610,7 @@ namespace GSTHD
 
 
             }
+            pw.Close();
             if (!hasseennonzero)
             {
                 if (Environment.Is64BitProcess)

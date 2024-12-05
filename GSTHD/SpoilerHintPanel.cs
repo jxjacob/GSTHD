@@ -409,9 +409,9 @@ namespace GSTHD
                 else { break; }
             }
 
-            if (randoVersion.StartsWith("3"))
+            if (randoVersion.StartsWith("3") && kroolOrder[0] < 100)
             {
-                // 3.x era of krool phases
+                // 3.x era of krool phases; the < 100 bit is for false alarms i need to patch before the kevin blitz. thanks alot, keiper
                 for (int i = 0; i < kroolOrder.Count; i++)
                 {
                     var temp = f.Controls[0].Controls.Find($"KroolOrder{i}", false);
@@ -420,7 +420,7 @@ namespace GSTHD
                 }
 
             }
-            else
+            if (!randoVersion.StartsWith("4") || kroolOrder[0] > 100)
             {
                 for (int i = 0; i < kroolOrder.Count; i++)
                 {
