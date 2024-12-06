@@ -305,6 +305,9 @@ namespace GSTHD
             kroolOrder = parsedStartingInfo["krool_order"].ToObject<List<int>>();
             helmOrder = parsedStartingInfo["helm_order"].ToObject<List<int>>();
 
+            // false 3.0 failsafe
+            if (kroolOrder[0] < 100) randoVersion = "4.x";
+
             // TODO: REMOVE
             //Debug.WriteLine(String.Join(" , ", startingItems.ToArray()));
             //Debug.WriteLine(String.Join(" , ", levelOrder.ToArray()));
@@ -408,10 +411,10 @@ namespace GSTHD
                 if (temp.Length > 0) { ((Item)temp.First()).SetState(helmOrder[i] + 1); }
                 else { break; }
             }
-
-            if (randoVersion.StartsWith("3") && kroolOrder[0] < 100)
+            
+            if (randoVersion.StartsWith("3"))
             {
-                // 3.x era of krool phases; the < 100 bit is for false alarms i need to patch before the kevin blitz. thanks alot, keiper
+                // 3.x era of krool phases
                 for (int i = 0; i < kroolOrder.Count; i++)
                 {
                     var temp = f.Controls[0].Controls.Find($"KroolOrder{i}", false);
@@ -420,7 +423,7 @@ namespace GSTHD
                 }
 
             }
-            if (!randoVersion.StartsWith("4") || kroolOrder[0] > 100)
+            else if (randoVersion.StartsWith("4"))
             {
                 for (int i = 0; i < kroolOrder.Count; i++)
                 {
