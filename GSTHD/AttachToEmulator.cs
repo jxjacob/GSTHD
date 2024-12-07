@@ -257,9 +257,9 @@ namespace GSTHD
                 if (gameInfo.Item2 == 8)
                 {
                     var addr = Memory.Int8AddrFix(readAddress + 0x80000000 + gameInfo.Item1);
-                    var wherethefuck = Memory.ReadInt8(target.Handle, addr);
-                    if (wherethefuck != 0) hasseennonzero = true;
-                    if ((wherethefuck & 0xff) == gameInfo.Item3)
+                    var testValue = Memory.ReadInt8(target.Handle, addr);
+                    if (testValue != 0) hasseennonzero = true;
+                    if ((testValue & 0xff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress + 0x80000000));
 
@@ -268,9 +268,9 @@ namespace GSTHD
                 else if (gameInfo.Item2 == 16)
                 {
                     var addr = Memory.Int16AddrFix(readAddress + 0x80000000 + gameInfo.Item1);
-                    var wherethefuck = Memory.ReadInt16(target.Handle, addr);
-                    if (wherethefuck != 0) hasseennonzero = true;
-                    if ((wherethefuck & 0xffff) == gameInfo.Item3)
+                    var testValue = Memory.ReadInt16(target.Handle, addr);
+                    if (testValue != 0) hasseennonzero = true;
+                    if ((testValue & 0xffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress + 0x80000000));
 
@@ -279,9 +279,9 @@ namespace GSTHD
                 else if (gameInfo.Item2 == 32)
                 {
                     // use this previously read address to find the game verification data
-                    var wherethefuck = Memory.ReadInt32(target.Handle, (readAddress + 0x80000000 + gameInfo.Item1));
-                    if (wherethefuck != 0) hasseennonzero = true;
-                    if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
+                    var testValue = Memory.ReadInt32(target.Handle, (readAddress + 0x80000000 + gameInfo.Item1));
+                    if (testValue != 0) hasseennonzero = true;
+                    if ((testValue & 0xffffffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress + 0x80000000));
 
@@ -353,9 +353,9 @@ namespace GSTHD
                 if (gameInfo.Item2 == 8)
                 {
                     var addr = Memory.Int8AddrFix(readAddress + gameInfo.Item1);
-                    var wherethefuck = Memory.ReadInt8(target.Handle, addr);
-                    if (wherethefuck != 0) hasseennonzero = true;
-                    if ((wherethefuck & 0xff) == gameInfo.Item3)
+                    var testValue = Memory.ReadInt8(target.Handle, addr);
+                    if (testValue != 0) hasseennonzero = true;
+                    if ((testValue & 0xff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress));
 
@@ -364,9 +364,9 @@ namespace GSTHD
                 else if (gameInfo.Item2 == 16)
                 {
                     var addr = Memory.Int16AddrFix(readAddress + gameInfo.Item1);
-                    var wherethefuck = Memory.ReadInt16(target.Handle, addr);
-                    if (wherethefuck != 0) hasseennonzero = true;
-                    if ((wherethefuck & 0xffff) == gameInfo.Item3)
+                    var testValue = Memory.ReadInt16(target.Handle, addr);
+                    if (testValue != 0) hasseennonzero = true;
+                    if ((testValue & 0xffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress));
 
@@ -375,9 +375,9 @@ namespace GSTHD
                 else if (gameInfo.Item2 == 32)
                 {
                     // use this previously read address to find the game verification data
-                    var wherethefuck = Memory.ReadInt32(target.Handle, (readAddress + gameInfo.Item1));
-                    if (wherethefuck != 0) hasseennonzero = true;
-                    if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
+                    var testValue = Memory.ReadInt32(target.Handle, (readAddress + gameInfo.Item1));
+                    if (testValue != 0) hasseennonzero = true;
+                    if ((testValue & 0xffffffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, (readAddress));
 
@@ -459,9 +459,9 @@ namespace GSTHD
                 if (gameInfo.Item2 == 8)
                 {
                     var addr = Memory.Int8AddrFix(readAddress + gameInfo.Item1);
-                    var wherethefuck = Memory.ReadInt8(target.Handle, addr);
-                    if (wherethefuck != 0) hasseennonzero = true;
-                    if ((wherethefuck & 0xff) == gameInfo.Item3)
+                    var testValue = Memory.ReadInt8(target.Handle, addr);
+                    if (testValue != 0) hasseennonzero = true;
+                    if ((testValue & 0xff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, readAddress);
 
@@ -470,9 +470,9 @@ namespace GSTHD
                 else if (gameInfo.Item2 == 16)
                 {
                     var addr = Memory.Int16AddrFix(readAddress + gameInfo.Item1);
-                    var wherethefuck = Memory.ReadInt16(target.Handle, addr);
-                    if (wherethefuck != 0) hasseennonzero = true;
-                    if ((wherethefuck & 0xffff) == gameInfo.Item3)
+                    var testValue = Memory.ReadInt16(target.Handle, addr);
+                    if (testValue != 0) hasseennonzero = true;
+                    if ((testValue & 0xffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, readAddress);
 
@@ -481,10 +481,10 @@ namespace GSTHD
                 else if (gameInfo.Item2 == 32)
                 {
                     // use this previously read address to find the game verification data
-                    var wherethefuck = Memory.ReadInt32(target.Handle, (readAddress + gameInfo.Item1));
-                    //if (wherethefuck != 0 && wherethefuck != -954194860) Debug.WriteLine($"{wherethefuck} -- {potOff}");
-                    if (wherethefuck != 0) hasseennonzero = true;
-                    if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
+                    var testValue = Memory.ReadInt32(target.Handle, (readAddress + gameInfo.Item1));
+                    //if (testValue != 0 && testValue != -954194860) Debug.WriteLine($"{testValue} -- {potOff}");
+                    if (testValue != 0) hasseennonzero = true;
+                    if ((testValue & 0xffffffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, readAddress);
 
@@ -568,9 +568,9 @@ namespace GSTHD
                 if (gameInfo.Item2 == 8)
                 {
                     var addr = Memory.Int8AddrFix(readAddress + gameInfo.Item1);
-                    var wherethefuck = Memory.ReadInt8(target.Handle, addr);
-                    if (wherethefuck != 0) hasseennonzero = true;
-                    if ((wherethefuck & 0xff) == gameInfo.Item3)
+                    var testValue = Memory.ReadInt8(target.Handle, addr);
+                    if (testValue != 0) hasseennonzero = true;
+                    if ((testValue & 0xff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, readAddress);
 
@@ -579,9 +579,9 @@ namespace GSTHD
                 else if (gameInfo.Item2 == 16)
                 {
                     var addr = Memory.Int16AddrFix(readAddress + gameInfo.Item1);
-                    var wherethefuck = Memory.ReadInt16(target.Handle, addr);
-                    if (wherethefuck != 0) hasseennonzero = true;
-                    if ((wherethefuck & 0xffff) == gameInfo.Item3)
+                    var testValue = Memory.ReadInt16(target.Handle, addr);
+                    if (testValue != 0) hasseennonzero = true;
+                    if ((testValue & 0xffff) == gameInfo.Item3)
                     {
                         return Tuple.Create(target, readAddress);
 
@@ -590,10 +590,10 @@ namespace GSTHD
                 else if (gameInfo.Item2 == 32)
                 {
                     // use this previously read address to find the game verification data
-                    var wherethefuck = Memory.ReadInt32(target.Handle, (readAddress + gameInfo.Item1));
-                    //if (wherethefuck != 0 && wherethefuck != -1136293120) Debug.WriteLine($"{wherethefuck} -- {potOff}");
-                    if (wherethefuck != 0) hasseennonzero = true;
-                    if ((wherethefuck & 0xffffffff) == gameInfo.Item3)
+                    var testValue = Memory.ReadInt32(target.Handle, (readAddress + gameInfo.Item1));
+                    //if (testValue != 0 && testValue != -1136293120) Debug.WriteLine($"{testValue} -- {potOff}");
+                    if (testValue != 0) hasseennonzero = true;
+                    if ((testValue & 0xffffffff) == gameInfo.Item3)
                     {
                         pw.Close();
                         return Tuple.Create(target, readAddress);

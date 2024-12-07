@@ -306,7 +306,7 @@ namespace GSTHD
             helmOrder = parsedStartingInfo["helm_order"].ToObject<List<int>>();
 
             // false 3.0 failsafe
-            if (kroolOrder[0] < 100) randoVersion = "4.x";
+            if (kroolOrder[0] > 6) randoVersion = "4.x";
 
             // TODO: REMOVE
             //Debug.WriteLine(String.Join(" , ", startingItems.ToArray()));
