@@ -261,6 +261,12 @@ namespace GSTHD
                 randoVersion = "3.x";
             }
 
+            kroolOrder = parsedStartingInfo["krool_order"].ToObject<List<int>>();
+            helmOrder = parsedStartingInfo["helm_order"].ToObject<List<int>>();
+
+            // false 3.0 failsafe
+            if (kroolOrder[0] > 6) randoVersion = "4.x";
+
 
             // adds certian shopkeeps as starting items for seeds that dont have them in the pool, so they arent erroneously added to Isles upon tracking
             if (loadedjson.ContainsKey("Item Pool"))
@@ -301,12 +307,6 @@ namespace GSTHD
                 }
                 levelOrder.Add(8);
             }
-
-            kroolOrder = parsedStartingInfo["krool_order"].ToObject<List<int>>();
-            helmOrder = parsedStartingInfo["helm_order"].ToObject<List<int>>();
-
-            // false 3.0 failsafe
-            if (kroolOrder[0] > 6) randoVersion = "4.x";
 
             // TODO: REMOVE
             //Debug.WriteLine(String.Join(" , ", startingItems.ToArray()));
