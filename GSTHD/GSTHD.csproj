@@ -343,6 +343,7 @@
     <Compile Include="OrganicImage.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="PanelHint.cs" />
     <Compile Include="ProgressibleElementBehaviour.cs" />
     <Compile Include="PanelWothBarren.cs">
       <SubType>Component</SubType>

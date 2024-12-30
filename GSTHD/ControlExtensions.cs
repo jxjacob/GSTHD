@@ -18,7 +18,7 @@ namespace GSTHD
             }
             if (ctrl is PanelWothBarren pw)
             {
-                foreach (WotH item in pw.ListWotH)
+                foreach (WotH item in pw.ListHints)
                 {
                     foreach (Control stone in item.listGossipStone)
                     {

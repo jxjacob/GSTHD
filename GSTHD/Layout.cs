@@ -44,6 +44,7 @@ namespace GSTHD
         public List<ObjectPanelWotH> ListPanelWotH { get; } = new List<ObjectPanelWotH>();
         public List<ObjectPanelBarren> ListPanelBarren { get; } = new List<ObjectPanelBarren>();
         public List<ObjectPanelQuantity> ListPanelQuantity { get; } = new List<ObjectPanelQuantity>();
+        public List<ObjectPanelMixed> ListPanelMixed { get; } = new List<ObjectPanelMixed>();
         public List<ObjectPanelSpoiler> ListPanelSpoiler { get; } = new List<ObjectPanelSpoiler>();
         public List<ObjectPanelNowPlaying> ListPanelNowPlaying { get; } = new List<ObjectPanelNowPlaying>();
         public List<ObjectPointGoMode> ListGoMode { get; } = new List<ObjectPointGoMode>();
@@ -281,6 +282,14 @@ namespace GSTHD
                         foreach (var element in category.Value)
                         {
                             ListPanelQuantity.Add(JsonConvert.DeserializeObject<ObjectPanelQuantity>(element.ToString()));
+                        }
+                    }
+
+                    if (category.Key.ToString() == "PanelMixed")
+                    {
+                        foreach (var element in category.Value)
+                        {
+                            ListPanelMixed.Add(JsonConvert.DeserializeObject<ObjectPanelMixed>(element.ToString()));
                         }
                     }
 
@@ -726,8 +735,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListPanelWotH)
                     {
-                        var panel = new PanelWothBarren(item, settings);
-                        panel.PanelWoth(listPlacesWithTag, listKeycodesWithTag, item);
+                        var panel = new PanelWothBarren(item, settings, listPlacesWithTag, listKeycodesWithTag);
                         panelLayout.Controls.Add(panel);
                         panelLayout.Controls.Add(panel.textBoxCustom.SuggestionContainer);
                         ListUpdatables.Add(panel);
@@ -739,8 +747,7 @@ namespace GSTHD
                 {
                     foreach (var item in ListPanelBarren)
                     {
-                        var panel = new PanelWothBarren(item, settings);
-                        panel.PanelBarren(listPlacesWithTag, item);
+                        var panel = new PanelWothBarren(item, settings, listPlacesWithTag);
                         panelLayout.Controls.Add(panel);
                         panelLayout.Controls.Add(panel.textBoxCustom.SuggestionContainer);
                         ListUpdatables.Add(panel);
@@ -752,8 +759,19 @@ namespace GSTHD
                 {
                     foreach (var item in ListPanelQuantity)
                     {
-                        var panel = new PanelWothBarren(item, settings);
-                        panel.PanelQuantity(listPlacesWithTag, item);
+                        var panel = new PanelWothBarren(item, settings, listPlacesWithTag);
+                        panelLayout.Controls.Add(panel);
+                        panelLayout.Controls.Add(panel.textBoxCustom.SuggestionContainer);
+                        ListUpdatables.Add(panel);
+                        panel.SetSuggestionContainer();
+                    }
+                }
+
+                if (ListPanelMixed.Count > 0)
+                {
+                    foreach (var item in ListPanelMixed)
+                    {
+                        var panel = new PanelWothBarren(item, settings, listPlacesWithTag, listKeycodesWithTag);
                         panelLayout.Controls.Add(panel);
                         panelLayout.Controls.Add(panel.textBoxCustom.SuggestionContainer);
                         ListUpdatables.Add(panel);
@@ -2105,6 +2123,70 @@ namespace GSTHD
         public Size SubTextBoxSize { get; set; }
 
         public bool isBroadcastable { get; set; } = false;
+    }
+
+    public class ObjectPanelMixed
+    {
+        public string Name { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public bool Visible { get; set; }
+        public Color BackColor { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public int NbMaxRows { get; set; }
+        public bool IsScrollable { get; set; }
+
+        public string DefaultTextBoxName { get; set; }
+        public Color DefaultTextBoxBackColor { get; set; }
+        public string DefaultTextBoxFontName { get; set; }
+        public int DefaultTextBoxFontSize { get; set; }
+        public FontStyle DefaultTextBoxFontStyle { get; set; }
+        public int DefaultTextBoxHeight { get; set; }
+        public string DefaultTextBoxText { get; set; }
+
+        public string LabelFontName { get; set; }
+        public int LabelFontSize { get; set; }
+        public FontStyle LabelFontStyle { get; set; }
+        public int LabelHeight { get; set; }
+
+        public MixedSubPanels[] SubPanels { get; set; }
+    }
+
+    public class MixedSubPanels
+    {
+        public string Name { get; set; }
+        public string Type { get; set; }
+        public string Keycode { get; set; }
+
+        // common
+        public Color LabelColor { get; set; }
+        public Color LabelBackColor { get; set; }
+
+        // woth-only
+        public Size GossipStoneSize { get; set; }
+        public int? GossipStoneCount { get; set; }
+        public string[] GossipStoneImageCollection { get; set; }
+        public int GossipStoneSpacing { get; set; }
+        public Color GossipStoneBackColor { get; set; }
+
+        public int? PathGoalCount { get; set; } = 0;
+        public string[] PathGoalImageCollection { get; set; }
+        public int PathGoalSpacing { get; set; }
+        public bool PathCycling { get; set; } = false;
+        public string OuterPathID { get; set; }
+
+        public PictureBoxSizeMode SizeMode { get; set; } = PictureBoxSizeMode.Zoom;
+        public bool isBroadcastable { get; set; } = false;
+        public bool isWotH { get; set; } = true;
+        public bool isMarkable { get; set; } = true;
+
+        // quantity-only
+        public int CounterFontSize { get; set; }
+        public int CounterSpacing { get; set; }
+        public Size CounterSize { get; set; }
+
+        public Size SubTextBoxSize { get; set; }
     }
 
     public class ObjectPanelSpoiler

@@ -16,12 +16,12 @@ namespace GSTHD
         public override string ToString() => $"{BarrenName},{ColourIndex}";
     }
 
-    class Barren
+    class Barren : PanelHint
     {
         public Settings Settings;
 
-        public Label LabelPlace;
-        public string Name;
+        public LabelExtended LabelPlace { get; set; }
+        public string Name { get; set; }
 
         private Color[] Colors;
         private int ColorIndex;

@@ -497,43 +497,52 @@ namespace GSTHD
             {
                 if (x.Name != "")
                 {
-                    if (x.ListBarren.Count > 0)
+                    
+                    if (x.ListHints.Count > 0)
                     {
-                        string thestring = "";
-                        foreach (BarrenState y in x.GetBarrens())
+                        if (x.isWotH == 0)
                         {
-                            if (thestring.Length > 0)
+                            string thestring = "";
+                            foreach (WotHState y in x.GetWotHs())
                             {
-                                thestring += "\n";
+                                if (thestring.Length > 0)
+                                {
+                                    thestring += "\n";
+                                }
+                                thestring += y.ToString();
                             }
-                            thestring += y.ToString();
-                        }
-                        thejson.Add(x.Name, thestring);
-                    }
-                    else if (x.ListWotH.Count > 0)
-                    {
-                        string thestring = "";
-                        foreach (WotHState y in x.GetWotHs())
+                            thejson.Add(x.Name, thestring);
+                        } 
+                        else if (x.isWotH == 1)
                         {
-                            if (thestring.Length > 0)
+                            string thestring = "";
+                            foreach (BarrenState y in x.GetBarrens())
                             {
-                                thestring += "\n";
+                                if (thestring.Length > 0)
+                                {
+                                    thestring += "\n";
+                                }
+                                thestring += y.ToString();
                             }
-                            thestring += y.ToString();
-                        }
-                        thejson.Add(x.Name, thestring);
-                    } else if (x.ListQuantity.Count > 0)
-                    {
-                        string thestring = "";
-                        foreach (QuantityState y in x.GetQuantities())
+                            thejson.Add(x.Name, thestring);
+                        } 
+                        else if (x.isWotH == 2)
                         {
-                            if (thestring.Length > 0)
+                            string thestring = "";
+                            foreach (QuantityState y in x.GetQuantities())
                             {
-                                thestring += "\n";
+                                if (thestring.Length > 0)
+                                {
+                                    thestring += "\n";
+                                }
+                                thestring += y.ToString();
                             }
-                            thestring += y.ToString();
+                            thejson.Add(x.Name, thestring);
+                        } 
+                        else if (x.isWotH == 3)
+                        {
+                            // TODO: this and the loadstate but for multipanels
                         }
-                        thejson.Add(x.Name, thestring);
                     }
                 }
             }

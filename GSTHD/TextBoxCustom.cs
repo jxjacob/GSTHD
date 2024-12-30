@@ -18,14 +18,17 @@ namespace GSTHD
         Dictionary<string, string> ListSuggestion;
         bool SuggestionContainerIsFocus = false;
         public string codestring = string.Empty;
+        public string panelstring = string.Empty;
         private bool isPath = false;
+        private bool isMixed = false;
 
-        public TextBoxCustom(Settings _settings, Dictionary<string, string> listSuggestion, Point location, Color color, Font font, string name, Size size, string text, bool _isPath=false)
+        public TextBoxCustom(Settings _settings, Dictionary<string, string> listSuggestion, Point location, Color color, Font font, string name, Size size, string text, bool _isPath=false, bool _isMixed = false)
         {
             ListSuggestion = listSuggestion;
 
             settings = _settings;
             isPath = _isPath;
+            isMixed = _isMixed;
 
             TextBoxField = new TextBox
             {
@@ -97,12 +100,16 @@ namespace GSTHD
             if (e.KeyCode == Keys.Enter)
             {
                 var textbox = (TextBox)sender;
-                if(isPath)
+                if ((isPath && !isMixed) || (!isPath && isMixed))
                 {
                     // this little .Lines shuffle is so that the event handler can take the keycode and the main text seperately in the PanelWothBarren
                     // which is the closest thing i have to multiple piece of data through a vanilla textbox
-                    if (!SuggestionContainer.Items.Contains(textbox.Text) && SuggestionContainer.Items.Count > 0) textbox.Lines = new string[] { codestring , SuggestionContainer.Items[0].ToString() };
+                    if (!SuggestionContainer.Items.Contains(textbox.Text) && SuggestionContainer.Items.Count > 0) textbox.Lines = new string[] { codestring, SuggestionContainer.Items[0].ToString() };
                     else textbox.Lines = textbox.Text.Split(new char[] { ' ' }, count: 2);
+                } else if (isPath && isMixed) {
+                    // split on 3
+                    if (!SuggestionContainer.Items.Contains(textbox.Text) && SuggestionContainer.Items.Count > 0) textbox.Lines = new string[] { panelstring, codestring, SuggestionContainer.Items[0].ToString() };
+                    else textbox.Lines = textbox.Text.Split(new char[] { ' ' }, count: 3);
                 } else if (!SuggestionContainer.Items.Contains(textbox.Text) && SuggestionContainer.Items.Count > 0)
                 {
                     textbox.Text = SuggestionContainer.Items[0].ToString();
@@ -146,17 +153,33 @@ namespace GSTHD
                 SuggestionContainer.Items.Clear();
 
                 string vartext = textbox.Text.ToLower();
-                if (settings.HintPathAutofill && isPath)
+                if (((settings.HintPathAutofill && isPath) && !isMixed) || (!(settings.HintPathAutofill && isPath) && isMixed))
                 {
                     string[] sections = vartext.Trim().Split(new char[] { ' ' }, count:2);
                     if (sections.Length > 1)
                     {
+                        panelstring = string.Empty;
                         codestring = sections[0];
                         vartext = sections[1];
                     } else
                     {
+                        panelstring = string.Empty;
                         codestring = string.Empty;
                         vartext = sections[0];
+                    }
+                } else if (settings.HintPathAutofill && isPath && isMixed)
+                {
+                    string[] sections = vartext.Trim().Split(new char[] { ' ' }, count: 3);
+                    if (sections.Length > 2)
+                    {
+                        panelstring = sections[0];
+                        codestring = sections[1];
+                        vartext = sections[2];
+                    }
+                    else
+                    {
+                        codestring = string.Empty;
+                        panelstring = string.Empty;
                     }
                 }
 

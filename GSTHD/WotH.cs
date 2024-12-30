@@ -35,13 +35,13 @@ namespace GSTHD
         }
     }
 
-    class WotH
+    class WotH : PanelHint
     {
         public Settings Settings;
 
-        public LabelExtended LabelPlace;
+        public LabelExtended LabelPlace { get; set; }
         public List<GossipStone> listGossipStone = new List<GossipStone>();
-        public string Name;
+        public string Name { get; set; }
 
         private Color[] Colors;
         private int ColorIndex;
