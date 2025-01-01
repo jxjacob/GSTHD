@@ -26,7 +26,7 @@ namespace GSTHD
         public int currentPoints;
 
         public int totalWOTHS;
-        public int currentWOTHS;
+        public int startingWOTHS;
 
         public MarkedImageIndex levelNumMarked;
         public int levelNumIndex;
@@ -58,7 +58,7 @@ namespace GSTHD
                 }
                 displaystring += item.ToString();
             }
-            return $"{currentPoints},{currentWOTHS},{levelNumIndex},{(int)levelNumMarked},{(int)levelLabelMarked}\n{itemstring}\n{displaystring}";
+            return $"{currentPoints},{startingWOTHS},{levelNumIndex},{(int)levelNumMarked},{(int)levelLabelMarked}\n{itemstring}\n{displaystring}";
         }
     }
 
@@ -163,7 +163,7 @@ namespace GSTHD
         private Label pointLabel;
 
         private int totalWOTHS;
-        public int currentWOTHS = 0;
+        public int startingWOTHS = 0;
         private Color wothColour;
         private Label wothLabel;
 
@@ -201,7 +201,7 @@ namespace GSTHD
         delegate void SetStateCallback(SpoilerCellState state);
 
 
-        public SpoilerCell(Settings settings, int width, int height, int x, int y, int points, int woths, List<PotionTypes> potions, int topRowHeight, int topRowPadding, int WorldNumWidth, int WorldNumHeight, int WorldLabelWidth, int PotionWidth, int PotionHeight, string name, string levelname, int levelnum, int levelorder, string cellFontName, int cellFontSize, FontStyle cellFontStyle, int labelSpacing, int labelWidth, Color backColor, bool isMinimal, Dictionary<string, int> spread, Dictionary<int, DK64_Item> dkitems, bool isBroadcastable = false, bool isOnBroadcast = false, bool isMarkable = true)
+        public SpoilerCell(Settings settings, int width, int height, int x, int y, int points, int woths, int startingwotths, List<PotionTypes> potions, int topRowHeight, int topRowPadding, int WorldNumWidth, int WorldNumHeight, int WorldLabelWidth, int PotionWidth, int PotionHeight, string name, string levelname, int levelnum, int levelorder, string cellFontName, int cellFontSize, FontStyle cellFontStyle, int labelSpacing, int labelWidth, Color backColor, bool isMinimal, Dictionary<string, int> spread, Dictionary<int, DK64_Item> dkitems, bool isBroadcastable = false, bool isOnBroadcast = false, bool isMarkable = true)
         {
             // when getting created, get the spoiler numebrs from the parent panel
             Settings = settings;
@@ -224,6 +224,7 @@ namespace GSTHD
             this.levelName = levelname;
             this.totalPoints = points;
             this.totalWOTHS = woths;
+            this.startingWOTHS = startingwotths;
             this.potionsList = potions;
             potionsList.Sort();
             this.pointspread = spread;
@@ -276,7 +277,7 @@ namespace GSTHD
                 shownnumbers++;
                 Controls.Add(pointLabel);
             }
-            if (totalWOTHS >= 0)
+            if (totalWOTHS >= 0 || startingWOTHS != -1)
             {
                 wothLabel = new Label
                 {
@@ -438,6 +439,8 @@ namespace GSTHD
                         return;
                     } else
                     {
+                        // if a starting move is deleted by accident, add the points back to account for it
+                        if (displayList[i].isStarting) currentPoints += (noPotions) ? pointspread[DK64Items[id].itemType] : 0;
                         displayList.RemoveAt(i);
                         //Debug.WriteLine($"removed {id}"); 
                         return;
@@ -493,9 +496,15 @@ namespace GSTHD
                     //Debug.WriteLine($"Update to {levelName}: Points={pointLabel.Text}");
                 }
                 // also update WOTHS count, which dont decrement but do need to be fixed theres a crankyadd
-                if (totalWOTHS >= 0)
+                if (totalWOTHS >= 0 || startingWOTHS != -1)
                 {
-                    wothLabel.Text = totalWOTHS.ToString();
+                    if (startingWOTHS != -1 && !Settings.HideStarting)
+                    {
+                        wothLabel.Text = totalWOTHS.ToString() + "+" + startingWOTHS.ToString();
+                    } else
+                    {
+                        wothLabel.Text = totalWOTHS.ToString();
+                    }
                     wothLabel.ForeColor = wothColour;
                 }
 
@@ -724,7 +733,7 @@ namespace GSTHD
                 totalPoints = totalPoints,
                 currentPoints = currentPoints,
                 totalWOTHS = totalWOTHS,
-                currentWOTHS = currentWOTHS,
+                startingWOTHS = startingWOTHS,
                 foundItems = foundItems,
                 potionsList = potionsList,
                 displayList = displayList,
@@ -747,7 +756,7 @@ namespace GSTHD
                 totalPoints = state.totalPoints;
                 currentPoints = state.currentPoints;
                 totalWOTHS = state.totalWOTHS;
-                currentWOTHS = state.currentWOTHS;
+                startingWOTHS = state.startingWOTHS;
                 foundItems = state.foundItems;
                 potionsList = state.potionsList;
                 displayList = state.displayList;
@@ -775,7 +784,7 @@ namespace GSTHD
             //fp0 = currentpoints
             //fp1 = currentwoths
             currentPoints = int.Parse(firstPart[0]);
-            currentWOTHS = int.Parse(firstPart[1]);
+            startingWOTHS = int.Parse(firstPart[1]);
             if (levelNumberImage != null)
             {
                 levelNumberImage.isMarked = (MarkedImageIndex)int.Parse(firstPart[3]);
