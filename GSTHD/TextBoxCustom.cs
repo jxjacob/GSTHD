@@ -108,7 +108,10 @@ namespace GSTHD
                     else textbox.Lines = textbox.Text.Split(new char[] { ' ' }, count: 2);
                 } else if (isPath && isMixed) {
                     // split on 3
-                    if (!SuggestionContainer.Items.Contains(textbox.Text) && SuggestionContainer.Items.Count > 0) textbox.Lines = new string[] { panelstring, codestring, SuggestionContainer.Items[0].ToString() };
+                    // TODO: fix when codestring is empty to move the suggestion around to be a 2-line export
+                    if (!SuggestionContainer.Items.Contains(textbox.Text) && SuggestionContainer.Items.Count > 0) {
+                        textbox.Lines = new string[] { panelstring, codestring, SuggestionContainer.Items[0].ToString() };
+                    }
                     else textbox.Lines = textbox.Text.Split(new char[] { ' ' }, count: 3);
                 } else if (!SuggestionContainer.Items.Contains(textbox.Text) && SuggestionContainer.Items.Count > 0)
                 {
@@ -176,7 +179,12 @@ namespace GSTHD
                         codestring = sections[1];
                         vartext = sections[2];
                     }
-                    else
+                    else if(sections.Length > 1)
+                    {
+                        codestring = string.Empty;
+                        panelstring = sections[0];
+                        vartext = sections[1];
+                    } else
                     {
                         codestring = string.Empty;
                         panelstring = string.Empty;

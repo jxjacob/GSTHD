@@ -50,6 +50,8 @@ namespace GSTHD
         private int stoneCount;
         private int pathCount;
 
+        public int PlacedOrder { get; set; }
+
         private Color GossipStoneBackColor;
 
         public WotH(Settings settings,

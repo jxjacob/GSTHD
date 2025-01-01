@@ -25,6 +25,7 @@ namespace GSTHD
 
         private Color[] Colors;
         private int ColorIndex;
+        public int PlacedOrder { get; set; }
 
         public Barren(Settings settings, string selectedPlace, Point lastLabelLocation, Label labelSettings)
         {

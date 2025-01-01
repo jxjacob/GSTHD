@@ -12,6 +12,7 @@ namespace GSTHD
         void UpdateFromSettings();
 
         string Name { get; set; }
+        int PlacedOrder { get; set; }
 
         LabelExtended LabelPlace { get; set; }
     }

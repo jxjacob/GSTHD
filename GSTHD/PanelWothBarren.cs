@@ -212,10 +212,6 @@ namespace GSTHD
             if (data.IsScrollable)
                 this.MouseWheel += Panel_MouseWheel;
 
-            //    public string LabelFontName { get; set; }
-            //public int LabelFontSize { get; set; }
-            //public FontStyle LabelFontStyle { get; set; }
-            //public int LabelHeight { get; set; }
             LabelSettings = new Label
             {
                 ForeColor = Color.Black,
@@ -248,9 +244,12 @@ namespace GSTHD
 
             isWotH = 3;
             // drop subs into subs
+            int badcount = 0;
             foreach (var sub in data.SubPanels)
             {
+                sub.Order = badcount;
                 ListSubs.Add(sub);
+                badcount++;
             }
         }
 
@@ -415,7 +414,7 @@ namespace GSTHD
                             if (foundsub == null)
                             {
                                 SystemSounds.Beep.Play();
-                                textbox.Text = "Missing Hint Keycode";
+                                textbox.Text = "Invalid/Missing Hint Keycode";
                                 return;
                             }
 
@@ -510,6 +509,7 @@ namespace GSTHD
                             (Sub.GossipStoneCount.HasValue ? Sub.GossipStoneCount.Value : Settings.DefaultWothGossipStoneCount), (Sub.GossipStoneImageCollection ?? Settings.DefaultGossipStoneImages), Sub.GossipStoneSpacing,
                             (Sub.PathGoalCount.HasValue ? Sub.PathGoalCount.Value : Settings.DefaultPathGoalCount), (Sub.PathGoalImageCollection ?? Settings.DefaultPathGoalImages), Sub.PathGoalSpacing,
                             newlocation, tempLabel, Sub.GossipStoneSize, Sub.GossipStoneBackColor, this.isScrollable, Sub.SizeMode, Sub.isBroadcastable, Sub.PathCycling, Sub.isMarkable);
+                    newWotH.PlacedOrder = Sub.Order;
                 } else
                 {
                     newWotH = new WotH(Settings, selectedPlace,
@@ -552,8 +552,7 @@ namespace GSTHD
                         }
                     }
                 }
-                //Move TextBoxCustom
-                textBoxCustom.newLocation(new Point(0, newWotH.LabelPlace.Location.Y + newWotH.LabelPlace.Height), this.Location);
+                SortAndReorderHints();
             }
         }
 
@@ -562,7 +561,7 @@ namespace GSTHD
             var selectedPlace = text.ToUpper().Trim().Replace(",", "");
 
             // prevent dupes
-            if (!ListHints.Any(x => x.Name == selectedPlace))
+            if ((!ListHints.Any(x => x.Name == selectedPlace)) || Sub != null)
             {
                 Barren newBarren = null;
                 if (isWotH == 3)
@@ -576,19 +575,20 @@ namespace GSTHD
                         Height = LabelSettings.Height
                     };
                     var newlocation = (ListHints.Count <= 0) ? new Point(0, -LabelSettings.Height) : ListHints.Last().LabelPlace.Location;
-                    newBarren = newBarren = new Barren(Settings, selectedPlace, newlocation, tempLabel);
+                    newBarren = new Barren(Settings, selectedPlace, newlocation, tempLabel);
+                    newBarren.PlacedOrder = Sub.Order;
                 }
                 else
                 {
                     var newlocation = (ListHints.Count <= 0) ? new Point(0, -LabelSettings.Height) : ListHints.Last().LabelPlace.Location;
-                    newBarren = newBarren = new Barren(Settings, selectedPlace, newlocation, LabelSettings);
+                    newBarren = new Barren(Settings, selectedPlace, newlocation, LabelSettings);
 
                 }
 
                 ListHints.Add(newBarren);
                 this.Controls.Add(newBarren.LabelPlace);
                 newBarren.LabelPlace.MouseClick += LabelPlace_MouseClick;
-                textBoxCustom.newLocation(new Point(0, newBarren.LabelPlace.Location.Y + newBarren.LabelPlace.Height), this.Location);
+                SortAndReorderHints();
             }
         }
 
@@ -642,6 +642,7 @@ namespace GSTHD
                             Sub.CounterFontSize, Sub.CounterSpacing, CounterImage,
                             Sub.SubTextBoxSize, tempLabel.BackColor,
                             newlocation, tempLabel, Sub.CounterSize, this.isBroadcastable);
+                    newQuan.PlacedOrder = Sub.Order;
                 } else
                 {
                     var newlocation = (ListHints.Count <= 0) ? new Point(2, -LabelSettings.Height) : ListHints.Last().LabelPlace.Location;
@@ -659,7 +660,7 @@ namespace GSTHD
                 this.Controls.Add(newQuan.leftCounterCI);
                 this.Controls.Add(newQuan.rightCounterCI);
 
-                textBoxCustom.newLocation(new Point(0, newQuan.LabelPlace.Location.Y + newQuan.LabelPlace.Height), this.Location);
+                SortAndReorderHints();
 
                 if (foundin != 0)
                 {
@@ -668,6 +669,41 @@ namespace GSTHD
 
             }
 
+        }
+
+        private void SortAndReorderHints()
+        {
+            // sort by their placedorder
+            ListHints = ListHints.OrderBy(i => i.PlacedOrder).ToList();
+            for (int i = 0; i < ListHints.Count; i++)
+            {
+                if (ListHints[i] is WotH w)
+                {
+                    var wothLabel = w.LabelPlace;
+                    var newY = i * wothLabel.Height;
+                    wothLabel.Location = new Point(wothLabel.Left, newY);
+
+                    for (int j = 0; j < w.listGossipStone.Count; j++)
+                    {
+                        var newX = w.listGossipStone[j].Location.X;
+                        w.listGossipStone[j].Location = new Point(newX, newY);
+                    }
+                }
+                else if (ListHints[i] is Quantity q)
+                {
+                    var wothLabel = q.LabelPlace;
+                    var newY = i * wothLabel.Height;
+                    wothLabel.Location = new Point(0, newY);
+                    q.leftCounterCI.Location = new Point(q.leftCounterCI.Location.X, newY);
+                    q.rightCounterCI.Location = new Point(q.rightCounterCI.Location.X, newY);
+                }
+                else if (ListHints[i] is Barren b)
+                {
+                    var wothLabel = b.LabelPlace;
+                    wothLabel.Location = new Point(0, (i * wothLabel.Height));
+                }
+            }
+            textBoxCustom.newLocation(new Point(0, ListHints.Last().LabelPlace.Location.Y + ListHints.Last().LabelPlace.Height), this.Location);
         }
 
         private void LabelPlace_MouseClick(object sender, MouseEventArgs e)

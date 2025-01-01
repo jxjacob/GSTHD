@@ -37,6 +37,7 @@ namespace GSTHD
         private Color[] Colors;
         private int ColorIndex;
         private int MinIndex;
+        public int PlacedOrder { get; set; }
 
         public Quantity(Settings settings,
             string selectedPlace,

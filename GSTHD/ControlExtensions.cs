@@ -18,11 +18,15 @@ namespace GSTHD
             }
             if (ctrl is PanelWothBarren pw)
             {
-                foreach (WotH item in pw.ListHints)
+                foreach (var item in pw.ListHints)
                 {
-                    foreach (Control stone in item.listGossipStone)
+                    if (item is WotH w)
                     {
-                        ClearAndDispose(stone);
+                        foreach (Control stone in w.listGossipStone)
+                        {
+                            ClearAndDispose(stone);
+                        }
+
                     }
                 }
             }

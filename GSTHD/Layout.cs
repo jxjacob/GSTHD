@@ -1630,6 +1630,52 @@ namespace GSTHD
                             if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
                         }
                     }
+                    else if (x.Key == "PanelMixed")
+                    {
+                        PanelWothBarren target = null;
+                        ObjectPanelMixed ogPoint = null;
+                        string[] names = null;
+                        foreach (JProperty z in y)
+                        {
+                            try
+                            {
+                                if (z.Name == "Name")
+                                {
+                                    if (z.Value.Count() > 1)
+                                    {
+                                        names = ((JArray)z.Value).ToObject<string[]>();
+                                    }
+                                    else
+                                    {
+                                        target = hostForm.Controls.Find(z.Value.ToString(), true)[0] as PanelWothBarren;
+                                        ogPoint = ListPanelMixed.Where(g => g.Name == target.Name).First();
+                                    }
+                                }
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                //ignore
+                            }
+                            if ((target != null || names != null) && z.Name != "Name")
+                            {
+                                if (names != null)
+                                {
+                                    foreach (string zname in names)
+                                    {
+                                        target = hostForm.Controls.Find(zname, true)[0] as PanelWothBarren;
+                                        ogPoint = ListPanelMixed.Where(g => g.Name == target.Name).First();
+                                        ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                                        if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
+                                    }
+                                }
+                                else ApplyAlternatesChanges(target, ogPoint, z.Name, z.Value, mult);
+                            }
+                        }
+                        if (target != null && names == null)
+                        {
+                            if (!ControlsToBeUpdated.Contains(target)) ControlsToBeUpdated.Add(target);
+                        }
+                    }
                     else if (x.Key == "PanelNowPlaying")
                     {
                         NowPlayingPanel target = null;
@@ -2158,6 +2204,7 @@ namespace GSTHD
         public string Name { get; set; }
         public string Type { get; set; }
         public string Keycode { get; set; }
+        public int Order { get; set; }
 
         // common
         public Color LabelColor { get; set; }
