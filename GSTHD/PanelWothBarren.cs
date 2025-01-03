@@ -17,6 +17,13 @@ using System.Media;
 
 namespace GSTHD
 {
+    public enum HintPanelType
+    {
+        WotH = 0,
+        Barren = 1,
+        Quantity = 2,
+        Mixed = 3
+    }
     class PanelWothBarren : Panel, UpdatableFromSettings, IAlternatableObject
     {
         Settings Settings;
@@ -45,8 +52,7 @@ namespace GSTHD
         public bool PathCycling { get; set; } = false;
         public bool isMarkable { get; set; } = true;
         public string OuterPathID { get; set; }
-        // 0 = WotH, 1 = Barren, 2 = Quantity, 3 = Mixed
-        public int isWotH;
+        public HintPanelType isWotH;
         PictureBoxSizeMode SizeMode;
         Label LabelSettings = new Label();
 
@@ -101,7 +107,9 @@ namespace GSTHD
                 data.TextBoxName,
                 new Size(data.Width, data.TextBoxHeight),
                 data.TextBoxText,
-                (PathGoalCount > 0 || OuterPathID != null)
+                isWotH,
+                (PathGoalCount > 0 || OuterPathID != null),
+                KeycodesWithTag
             );
             textBoxCustom.TextBoxField.KeyDown += textBoxCustom_KeyDown_WotH;
             textBoxCustom.TextBoxField.MouseClick += textBoxCustom_MouseClick;
@@ -118,54 +126,7 @@ namespace GSTHD
             this.Name = data.Name;
             this.Size = new Size(data.Width, data.Height);
             this.TabStop = false;
-            this.isWotH = 1;
-            if (data.IsScrollable)
-                this.MouseWheel += Panel_MouseWheel;
-
-
-            NbMaxRows = data.NbMaxRows;
-
-            LabelSettings = new Label
-            {
-                ForeColor = data.LabelColor,
-                BackColor = data.LabelBackColor,
-                Font = new Font(data.LabelFontName, data.LabelFontSize, data.LabelFontStyle),
-                Width = data.Width,
-                Height = data.LabelHeight
-            };
-
-            textBoxCustom = new TextBoxCustom
-                (
-                    Settings,
-                    PlacesWithTag,
-                    new Point(0, 0),
-                    data.TextBoxBackColor,
-                    new Font(data.TextBoxFontName, data.TextBoxFontSize, data.TextBoxFontStyle),
-                    data.TextBoxName,
-                    new Size(data.Width, data.TextBoxHeight),
-                    data.TextBoxText
-                );
-            textBoxCustom.TextBoxField.KeyDown += textBoxCustom_KeyDown_Barren;
-            textBoxCustom.TextBoxField.MouseClick += textBoxCustom_MouseClick;
-            this.Controls.Add(textBoxCustom.TextBoxField);
-        }
-
-        public PanelWothBarren(ObjectPanelQuantity data, Settings settings, Dictionary<string, string> PlacesWithTag)
-        {
-            Settings = settings;
-            Visible = data.Visible;
-
-            this.BackColor = data.BackColor;
-            this.Location = new Point(data.X, data.Y);
-            this.Name = data.Name;
-            this.Size = new Size(data.Width, data.Height);
-            this.TabStop = false;
-            this.CounterFontSize = data.CounterFontSize;
-            this.CounterSpacing = data.CounterSpacing;
-            this.GossipStoneSize = data.CounterSize;
-            this.CounterImage = "dk64/blank.png";
-            this.subBoxSize = data.SubTextBoxSize;
-            this.isWotH = 2;
+            this.isWotH = HintPanelType.Barren;
             if (data.IsScrollable)
                 this.MouseWheel += Panel_MouseWheel;
 
@@ -191,7 +152,55 @@ namespace GSTHD
                     data.TextBoxName,
                     new Size(data.Width, data.TextBoxHeight),
                     data.TextBoxText,
-                    true
+                    isWotH
+                );
+            textBoxCustom.TextBoxField.KeyDown += textBoxCustom_KeyDown_Barren;
+            textBoxCustom.TextBoxField.MouseClick += textBoxCustom_MouseClick;
+            this.Controls.Add(textBoxCustom.TextBoxField);
+        }
+
+        public PanelWothBarren(ObjectPanelQuantity data, Settings settings, Dictionary<string, string> PlacesWithTag)
+        {
+            Settings = settings;
+            Visible = data.Visible;
+
+            this.BackColor = data.BackColor;
+            this.Location = new Point(data.X, data.Y);
+            this.Name = data.Name;
+            this.Size = new Size(data.Width, data.Height);
+            this.TabStop = false;
+            this.CounterFontSize = data.CounterFontSize;
+            this.CounterSpacing = data.CounterSpacing;
+            this.GossipStoneSize = data.CounterSize;
+            this.CounterImage = "dk64/blank.png";
+            this.subBoxSize = data.SubTextBoxSize;
+            this.isWotH = HintPanelType.Quantity;
+            if (data.IsScrollable)
+                this.MouseWheel += Panel_MouseWheel;
+
+
+            NbMaxRows = data.NbMaxRows;
+
+            LabelSettings = new Label
+            {
+                ForeColor = data.LabelColor,
+                BackColor = data.LabelBackColor,
+                Font = new Font(data.LabelFontName, data.LabelFontSize, data.LabelFontStyle),
+                Width = data.Width,
+                Height = data.LabelHeight
+            };
+
+            textBoxCustom = new TextBoxCustom
+                (
+                    Settings,
+                    PlacesWithTag,
+                    new Point(0, 0),
+                    data.TextBoxBackColor,
+                    new Font(data.TextBoxFontName, data.TextBoxFontSize, data.TextBoxFontStyle),
+                    data.TextBoxName,
+                    new Size(data.Width, data.TextBoxHeight),
+                    data.TextBoxText,
+                    isWotH
                 );
             textBoxCustom.TextBoxField.KeyDown += textBoxCustom_KeyDown_Quantity;
             textBoxCustom.TextBoxField.MouseClick += textBoxCustom_MouseClick;
@@ -224,6 +233,7 @@ namespace GSTHD
             NbMaxRows = data.NbMaxRows;
             KeycodesWithTag = keycodesWithTag;
             this.CounterImage = "dk64/blank.png";
+            isWotH = HintPanelType.Mixed;
 
             textBoxCustom = new TextBoxCustom
                 (
@@ -235,14 +245,13 @@ namespace GSTHD
                     data.DefaultTextBoxName,
                     new Size(data.Width, data.DefaultTextBoxHeight),
                     data.DefaultTextBoxText,
-                    true,
-                    true
+                    isWotH,
+                    kpt:KeycodesWithTag
                 );
             textBoxCustom.TextBoxField.KeyDown += textBoxCustom_KeyDown_Mixed;
             textBoxCustom.TextBoxField.MouseClick += textBoxCustom_MouseClick;
             this.Controls.Add(textBoxCustom.TextBoxField);
 
-            isWotH = 3;
             // drop subs into subs
             int badcount = 0;
             foreach (var sub in data.SubPanels)
@@ -251,6 +260,7 @@ namespace GSTHD
                 ListSubs.Add(sub);
                 badcount++;
             }
+            textBoxCustom.ListSubs = ListSubs;
         }
 
         public void UpdateFromSettings()
@@ -332,11 +342,7 @@ namespace GSTHD
                 {
                     if (textbox.Text != string.Empty)
                     {
-                        if (textbox.Lines.Length > 1)
-                        {
-                            AddQuantity(textbox.Lines[1], textbox.Lines[0]);
-                        }
-                        else AddQuantity(textbox.Text);
+                        AddQuantity(textbox.Lines[2], textbox.Lines[1]);
                     }
                 }
                 textbox.Text = string.Empty;
@@ -355,11 +361,7 @@ namespace GSTHD
                 {
                     if (textbox.Text != string.Empty)
                     {
-                        if (textbox.Lines.Length > 1)
-                        {
-                            AddWotH(textbox.Lines[1], textbox.Lines[0]);
-                        } 
-                        else AddWotH(textbox.Text);
+                        AddWotH(textbox.Lines[2], textbox.Lines[1]);
                     }
                 }
                 textbox.Text = string.Empty;
@@ -382,63 +384,56 @@ namespace GSTHD
                         // check for keycode; if no keycode, play the error noise and wipe the text
                         // if keycode, check all in ListSub for a match and record their type
                         // switch case the type, then add the respective AddWoth/Barren/Quantity
-                        if (textbox.Lines.Length > 1)
+                        
+                        if (textbox.Lines[0] == "" && textbox.Lines[1] == "")
                         {
-                            if (textbox.Lines[0] == "" && textbox.Lines[1] == "")
-                            {
-                                SystemSounds.Beep.Play();
-                                textbox.Text = "Missing all keycodes";
-                                return;
-                            }
-                            MixedSubPanels foundsub = null;
-                            var foundkeycode = "";
-                            var foundtext = "";
-                            foreach (var sub in ListSubs)
-                            {
-                                if (sub.Keycode == textbox.Lines[0])
-                                {
-                                    foundsub = sub;
-                                    if (textbox.Lines.Length == 2)
-                                    {
-                                        foundkeycode = String.Empty;
-                                        foundtext = textbox.Lines[1];
-                                    } else
-                                    {
-                                        foundkeycode = textbox.Lines[1];
-                                        foundtext = textbox.Lines[2];
-                                    }
-                                    break;
-                                }
-                            }
-
-                            if (foundsub == null)
-                            {
-                                SystemSounds.Beep.Play();
-                                textbox.Text = "Invalid/Missing Hint Keycode";
-                                return;
-                            }
-
-                            switch (foundsub.Type)
-                            {
-                                case "none":
-                                    textbox.Text = string.Empty;
-                                    return;
-                                case "WotH":
-                                    AddWotH(foundtext, foundkeycode, foundsub);
-                                    break;
-                                case "Barren":
-                                    AddBarren(foundtext, foundsub);
-                                    break;
-                                case "Quantity":
-                                    AddQuantity(foundtext, foundkeycode, foundsub);
-                                    break;
-                            }
-                        }
-                        else {
                             SystemSounds.Beep.Play();
-                            textbox.Text = "Insufficient Length (likely missing keycodes)";
+                            textbox.Text = "Missing all keycodes";
                             return;
                         }
+                        if (textbox.Lines[2] == "")
+                        {
+                            SystemSounds.Beep.Play();
+                            textbox.Text = "Missing hint text";
+                            return;
+                        }
+                        MixedSubPanels foundsub = null;
+                        var foundkeycode = "";
+                        var foundtext = "";
+                        foreach (var sub in ListSubs)
+                        {
+                            if (sub.Keycode == textbox.Lines[0])
+                            {
+                                foundsub = sub;
+                                foundkeycode = textbox.Lines[1];
+                                foundtext = textbox.Lines[2];
+                                break;
+                            }
+                        }
+
+                        if (foundsub == null)
+                        {
+                            SystemSounds.Beep.Play();
+                            textbox.Text = "Invalid/Missing Hint Keycode";
+                            return;
+                        }
+
+                        switch (foundsub.Type)
+                        {
+                            case "none":
+                                textbox.Text = string.Empty;
+                                return;
+                            case "WotH":
+                                AddWotH(foundtext, foundkeycode, foundsub);
+                                break;
+                            case "Barren":
+                                AddBarren(foundtext, foundsub);
+                                break;
+                            case "Quantity":
+                                AddQuantity(foundtext, foundkeycode, foundsub);
+                                break;
+                        }
+                       
                     }
                 }
                 textbox.Text = string.Empty;
@@ -494,7 +489,7 @@ namespace GSTHD
             {
                 var newlocation = (ListHints.Count <= 0) ? new Point(0, -LabelSettings.Height) : ListHints.Last().LabelPlace.Location;
                 WotH newWotH = null;
-                if (isWotH == 3)
+                if (isWotH == HintPanelType.Mixed)
                 {
                     Label tempLabel = new Label()
                     {
@@ -506,8 +501,8 @@ namespace GSTHD
                     };
                     
                     newWotH = new WotH(Settings, selectedPlace,
-                            (Sub.GossipStoneCount.HasValue ? Sub.GossipStoneCount.Value : Settings.DefaultWothGossipStoneCount), (Sub.GossipStoneImageCollection ?? Settings.DefaultGossipStoneImages), Sub.GossipStoneSpacing,
-                            (Sub.PathGoalCount.HasValue ? Sub.PathGoalCount.Value : Settings.DefaultPathGoalCount), (Sub.PathGoalImageCollection ?? Settings.DefaultPathGoalImages), Sub.PathGoalSpacing,
+                            (Sub.GossipStoneCount ?? Settings.DefaultWothGossipStoneCount), (Sub.GossipStoneImageCollection ?? Settings.DefaultGossipStoneImages), Sub.GossipStoneSpacing,
+                            (Sub.PathGoalCount ?? Settings.DefaultPathGoalCount), (Sub.PathGoalImageCollection ?? Settings.DefaultPathGoalImages), Sub.PathGoalSpacing,
                             newlocation, tempLabel, Sub.GossipStoneSize, Sub.GossipStoneBackColor, this.isScrollable, Sub.SizeMode, Sub.isBroadcastable, Sub.PathCycling, Sub.isMarkable);
                     newWotH.PlacedOrder = Sub.Order;
                 } else
@@ -564,7 +559,7 @@ namespace GSTHD
             if ((!ListHints.Any(x => x.Name == selectedPlace)) || Sub != null)
             {
                 Barren newBarren = null;
-                if (isWotH == 3)
+                if (isWotH == HintPanelType.Mixed)
                 {
                     Label tempLabel = new Label()
                     {
@@ -624,10 +619,10 @@ namespace GSTHD
                 selectedPlace = (codestring + " " + text).ToUpper().Trim().Replace(",", "");
             }
             // prevent dupes
-            if (!ListHints.Any(x => x.Name == selectedPlace))
+            if (!ListHints.Any(x => x.Name == selectedPlace) || isWotH == HintPanelType.Mixed)
             {
                 Quantity newQuan = null;
-                if (isWotH == 3)
+                if (isWotH == HintPanelType.Mixed)
                 {
                     Label tempLabel = new Label()
                     {
@@ -1026,8 +1021,8 @@ namespace GSTHD
             {
                 if (Hint is WotH woth)
                 {
-                    woth.RefreshLocation(GossipStoneCount, ListImage_WothItemsOption, GossipStoneSpacing,
-                            PathGoalCount, ListImage_GoalsOption, PathGoalSpacing,
+                    if (woth.PlacedOrder == -1) woth.RefreshLocation(GossipStoneCount, ListImage_WothItemsOption ?? Settings.DefaultGossipStoneImages, GossipStoneSpacing,
+                            PathGoalCount, ListImage_GoalsOption ?? Settings.DefaultPathGoalImages, PathGoalSpacing,
                             tempcount * LabelSettings.Size.Height, LabelSettings, GossipStoneSize, this.GossipStoneBackColor, this.isScrollable, this.SizeMode, this.isBroadcastable, this.PathCycling, this.isMarkable);
                     tempcount++;
                     foreach (var stone in woth.listGossipStone)
@@ -1037,12 +1032,12 @@ namespace GSTHD
                 }
                 else if (Hint is Barren barr)
                 {
-                    barr.RefreshLocation(tempcount * LabelSettings.Size.Height, LabelSettings);
+                    if (barr.PlacedOrder == -1) barr.RefreshLocation(tempcount * LabelSettings.Size.Height, LabelSettings);
                     tempcount++;
                 }
                 else if (Hint is Quantity quan)
                 {
-                    quan.RefreshLocation(CounterFontSize, CounterSpacing, CounterImage,
+                    if (quan.PlacedOrder == -1) quan.RefreshLocation(CounterFontSize, CounterSpacing, CounterImage,
                         subBoxSize, LabelSettings.BackColor,
                         tempcount * LabelSettings.Size.Height, LabelSettings, GossipStoneSize);
                     tempcount++;

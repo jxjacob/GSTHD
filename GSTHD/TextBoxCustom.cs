@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace GSTHD
 {
@@ -16,19 +17,22 @@ namespace GSTHD
         public TextBox TextBoxField;
         public ListBox SuggestionContainer;
         Dictionary<string, string> ListSuggestion;
+        public Dictionary<string, string> KeycodesWithTag;
         bool SuggestionContainerIsFocus = false;
         public string codestring = string.Empty;
         public string panelstring = string.Empty;
         private bool isPath = false;
-        private bool isMixed = false;
+        private HintPanelType hintPanelType;
+        public List<MixedSubPanels> ListSubs;
 
-        public TextBoxCustom(Settings _settings, Dictionary<string, string> listSuggestion, Point location, Color color, Font font, string name, Size size, string text, bool _isPath=false, bool _isMixed = false)
+        public TextBoxCustom(Settings _settings, Dictionary<string, string> listSuggestion, Point location, Color color, Font font, string name, Size size, string text, HintPanelType ptype, bool _isPath=false, Dictionary<string, string> kpt=null)
         {
             ListSuggestion = listSuggestion;
 
             settings = _settings;
             isPath = _isPath;
-            isMixed = _isMixed;
+            hintPanelType = ptype;
+            KeycodesWithTag = kpt;
 
             TextBoxField = new TextBox
             {
@@ -83,6 +87,131 @@ namespace GSTHD
             }
         }
 
+        private string ParseCodesAndText(string senttext)
+        {
+            panelstring = string.Empty;
+            codestring = string.Empty;
+            MixedSubPanels currentsub = null;
+            var reftext = senttext.Split(new char[] { ' ' });
+            if (hintPanelType == HintPanelType.Mixed)
+            {
+                foreach (var sub in ListSubs)
+                {
+                    if (sub.Keycode == reftext[0])
+                    {
+                        panelstring = reftext[0];
+                        currentsub = sub;
+                    }
+                }
+                if (panelstring == string.Empty)
+                {
+                    // not a valid code, just send it back tbh
+                    return senttext;
+                } else
+                {
+                    if (reftext.Length > 1)
+                    {
+                        // valid code, got what we're looking for, moving on
+                        reftext = reftext.Skip(1).ToArray();
+                    } else
+                    {
+                        // valid code, but no text yet so just keep the faith and send back nothing
+                        return "";
+                    }
+                }
+            }
+
+            if (reftext[0] == "") return "";
+
+            bool tempispath = (currentsub != null) ? (currentsub.PathGoalCount > 0 || currentsub.OuterPathID != null) : isPath;
+            bool tempisquan = (currentsub != null) ? (currentsub.CounterFontSize != 0) : (hintPanelType == HintPanelType.Quantity);
+
+            if (tempispath && settings.HintPathAutofill)
+            {
+                Dictionary<string, string> FoundKeycodes = new Dictionary<string, string> { };
+                // if theres a letter that isnt a code, bail
+                foreach (char x in reftext[0])
+                {
+                    if (KeycodesWithTag.ContainsKey(x.ToString()))
+                    {
+                        if (!FoundKeycodes.ContainsKey(x.ToString())) FoundKeycodes.Add(x.ToString(), KeycodesWithTag[x.ToString()]);
+                    }
+                    else if (!settings.HintPathAutofillAggressive)
+                    {
+                        FoundKeycodes.Clear();
+                        break;
+                    }
+                }
+
+                // if there is no lookup, then assume the code is a misinterpit and add it back
+                if (FoundKeycodes.Count > 0)
+                {
+                    codestring = reftext[0];
+                    reftext = reftext.Skip(1).ToArray();
+                }
+            } else if (tempisquan && settings.HintPathAutofill)
+            {
+                int foundin = 0;
+                try
+               {
+                    foundin = int.Parse(reftext[0]);
+                }
+                catch
+                {
+
+                }
+
+                if (foundin != 0)
+                {
+                    codestring = reftext[0];
+                    reftext = reftext.Skip(1).ToArray();
+                }
+            }
+
+
+            // recombine whats left and prepate to ship 'er
+            //string temptemp = string.Join(" ", reftext);
+            //Debug.WriteLine("tt="+temptemp);
+            return string.Join(" ", reftext);
+
+            // normal panels need to just return the input
+            // path panels + thesetting need to parse the first string for codes and seperate them if theyre valid
+
+            // mixed panels need to segment out the first piece for codes, and then act like one of the other ones while also keeping track of that first code
+            // and if that first code dont work then just ~~fucking crash who cares idk~~ send a different error code and skip the rest of the processing
+
+            // and then EVENTUALLY, needs to send back to the woth panel the subcode, keycodes, and plaintext
+            // unless theres an autosuggestion, then its that instead of the plaintext
+
+            // returns the text that should be used as reference for the suggestionbox
+            
+        }
+
+        private string AttachTexts(string inp)
+        {
+            string tempstring = string.Empty;
+            if (panelstring != string.Empty) tempstring = panelstring;
+            if (codestring != string.Empty)
+            {
+                if (tempstring != string.Empty)
+                {
+                    tempstring += " " + codestring;
+                } else
+                {
+                    tempstring = codestring;
+                }
+            }
+            if (tempstring == string.Empty)
+            {
+                tempstring = inp;
+            } else
+            {
+                tempstring += " " + inp;
+            }
+            return tempstring;
+        }
+
+
         private void TextBoxField_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
         {
             if (e.KeyCode == Keys.Tab)
@@ -100,22 +229,37 @@ namespace GSTHD
             if (e.KeyCode == Keys.Enter)
             {
                 var textbox = (TextBox)sender;
-                if ((isPath && !isMixed) || (!isPath && isMixed))
+
+                if (!SuggestionContainer.Items.Contains(textbox.Text) && SuggestionContainer.Items.Count > 0)
                 {
-                    // this little .Lines shuffle is so that the event handler can take the keycode and the main text seperately in the PanelWothBarren
-                    // which is the closest thing i have to multiple piece of data through a vanilla textbox
-                    if (!SuggestionContainer.Items.Contains(textbox.Text) && SuggestionContainer.Items.Count > 0) textbox.Lines = new string[] { codestring, SuggestionContainer.Items[0].ToString() };
-                    else textbox.Lines = textbox.Text.Split(new char[] { ' ' }, count: 2);
-                } else if (isPath && isMixed) {
-                    // split on 3
-                    // TODO: fix when codestring is empty to move the suggestion around to be a 2-line export
-                    if (!SuggestionContainer.Items.Contains(textbox.Text) && SuggestionContainer.Items.Count > 0) {
-                        textbox.Lines = new string[] { panelstring, codestring, SuggestionContainer.Items[0].ToString() };
+                    textbox.Lines = new string[3] { panelstring, codestring, SuggestionContainer.Items[0].ToString() };
+                } else
+                {
+                    if (panelstring != string.Empty && codestring != string.Empty)
+                    {
+                        string[] tempsplit = textbox.Text.Split(new char[] { ' ' }, count: 3);
+                        if (tempsplit.Length > 2)
+                        {
+                            textbox.Lines = new string[3] { panelstring, codestring, tempsplit[2] };
+                        }
+                        else
+                        {
+                            textbox.Lines = new string[3] { panelstring, codestring, "" };
+                        }
+                    } else if (codestring != string.Empty || panelstring != string.Empty)
+                    {
+                        string[] tempsplit = textbox.Text.Split(new char[] { ' ' }, count: 2);
+                        if (tempsplit.Length > 1)
+                        {
+                            textbox.Lines = new string[3] { panelstring, codestring, tempsplit[1] };
+                        } else
+                        {
+                            textbox.Lines = new string[3] { panelstring, codestring, "" };
+                        }
+                    } else
+                    {
+                        textbox.Lines = new string[3] { "", "", textbox.Text };
                     }
-                    else textbox.Lines = textbox.Text.Split(new char[] { ' ' }, count: 3);
-                } else if (!SuggestionContainer.Items.Contains(textbox.Text) && SuggestionContainer.Items.Count > 0)
-                {
-                    textbox.Text = SuggestionContainer.Items[0].ToString();
                 }
             }
         }
@@ -124,11 +268,15 @@ namespace GSTHD
         {
             if(e.KeyCode == Keys.Enter)
             {
-                var fulltext = TextBoxField.Text.Split(new char[] { ' ' }, count: 2);
-                if (fulltext.Length > 1)
+                var fulltext = TextBoxField.Text.Split(new char[] { ' ' }, count: 3);
+                if (settings.HintPathAutofill)
                 {
-                    TextBoxField.Text = fulltext[0] + " " + SuggestionContainer.SelectedItem.ToString();
-                } else TextBoxField.Text = SuggestionContainer.SelectedItem.ToString();
+                    TextBoxField.Text = AttachTexts(SuggestionContainer.SelectedItem.ToString());
+                }
+                else
+                {
+                    TextBoxField.Text = SuggestionContainer.SelectedItem.ToString();
+                }
                 TextBoxField.Focus();
                 SuggestionContainer.Hide();
                 SuggestionContainerIsFocus = false;
@@ -155,42 +303,12 @@ namespace GSTHD
                 var textbox = (TextBox)sender;
                 SuggestionContainer.Items.Clear();
 
-                string vartext = textbox.Text.ToLower();
-                if (((settings.HintPathAutofill && isPath) && !isMixed) || (!(settings.HintPathAutofill && isPath) && isMixed))
+                string vartext = ParseCodesAndText(textbox.Text.ToLower());
+                if (vartext == "")
                 {
-                    string[] sections = vartext.Trim().Split(new char[] { ' ' }, count:2);
-                    if (sections.Length > 1)
-                    {
-                        panelstring = string.Empty;
-                        codestring = sections[0];
-                        vartext = sections[1];
-                    } else
-                    {
-                        panelstring = string.Empty;
-                        codestring = string.Empty;
-                        vartext = sections[0];
-                    }
-                } else if (settings.HintPathAutofill && isPath && isMixed)
-                {
-                    string[] sections = vartext.Trim().Split(new char[] { ' ' }, count: 3);
-                    if (sections.Length > 2)
-                    {
-                        panelstring = sections[0];
-                        codestring = sections[1];
-                        vartext = sections[2];
-                    }
-                    else if(sections.Length > 1)
-                    {
-                        codestring = string.Empty;
-                        panelstring = sections[0];
-                        vartext = sections[1];
-                    } else
-                    {
-                        codestring = string.Empty;
-                        panelstring = string.Empty;
-                    }
+                    SuggestionContainer.Hide();
+                    return;
                 }
-
 
                 var listTagFiltered = ListSuggestion.Where(x => x.Value.Contains(vartext)).Select(y => y.Key);
                 SuggestionContainer.Items.AddRange(listTagFiltered.ToArray());
@@ -221,5 +339,6 @@ namespace GSTHD
             TextBoxField.Multiline = false;
             SetSuggestionsContainerLocation(panelLocation);
         }
+
     }
 }

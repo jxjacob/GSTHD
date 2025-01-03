@@ -513,7 +513,7 @@ namespace GSTHD
                             }
                             thejson.Add(x.Name, thestring);
                         } 
-                        else if (x.isWotH == 1)
+                        else if (x.isWotH == HintPanelType.Barren)
                         {
                             string thestring = "";
                             foreach (BarrenState y in x.GetBarrens())
@@ -526,7 +526,7 @@ namespace GSTHD
                             }
                             thejson.Add(x.Name, thestring);
                         } 
-                        else if (x.isWotH == 2)
+                        else if (x.isWotH == HintPanelType.Quantity)
                         {
                             string thestring = "";
                             foreach (QuantityState y in x.GetQuantities())
@@ -539,7 +539,7 @@ namespace GSTHD
                             }
                             thejson.Add(x.Name, thestring);
                         } 
-                        else if (x.isWotH == 3)
+                        else if (x.isWotH == HintPanelType.Mixed)
                         {
                             // TODO: this and the loadstate but for multipanels
                         }
@@ -703,9 +703,9 @@ namespace GSTHD
                     {
                         if (pa.isWotH == 0){
                             pa.SetWotH((string)x.Value);
-                        } else if (pa.isWotH == 1){
+                        } else if (pa.isWotH == HintPanelType.Barren){
                             pa.SetBarren((string)x.Value);
-                        } else if (pa.isWotH == 2){
+                        } else if (pa.isWotH == HintPanelType.Quantity){
                             pa.SetQuantities((string)x.Value);
                         }
                     }
