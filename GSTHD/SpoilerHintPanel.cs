@@ -286,30 +286,29 @@ namespace GSTHD
                     {
                         // slams are handled seperately, and arent in the startingItems list
                         howManySlams += 1;
-                        Debug.WriteLine("adding " + howManySlams + "th SLAM to sslamcount");
+                        Debug.WriteLine("adding " + howManySlams + "th SLAM to slamcount");
                     }
                 }
-            } else
-            {
-                // adds certian shopkeeps as starting items for seeds that dont have them in the pool, so they arent erroneously added to Isles upon tracking
-                if (loadedjson.ContainsKey("Item Pool"))
-                {
-                    var itempool = loadedjson.GetValue("Item Pool").ToObject<List<string>>();
-                    if (!itempool.Contains("Cranky")) startingItems.Add(250);
-                    if (!itempool.Contains("Funky")) startingItems.Add(251);
-                    if (!itempool.Contains("Candy")) startingItems.Add(252);
-                    if (!itempool.Contains("Snide")) startingItems.Add(253);
-                }
-                else if (randoVersion.StartsWith("3"))
-                {
-                    // preventing false positives with 3.x seeds
-                    startingItems.Add(250);
-                    startingItems.Add(251);
-                    startingItems.Add(252);
-                    startingItems.Add(253);
-                }
-
             }
+            // adds certian shopkeeps as starting items for seeds that dont have them in the pool, so they arent erroneously added to Isles upon tracking
+            if (loadedjson.ContainsKey("Item Pool"))
+            {
+                var itempool = loadedjson.GetValue("Item Pool").ToObject<List<string>>();
+                if (!itempool.Contains("Cranky")) startingItems.Add(250);
+                if (!itempool.Contains("Funky")) startingItems.Add(251);
+                if (!itempool.Contains("Candy")) startingItems.Add(252);
+                if (!itempool.Contains("Snide")) startingItems.Add(253);
+            }
+            else if (randoVersion.StartsWith("3"))
+            {
+                // preventing false positives with 3.x seeds
+                startingItems.Add(250);
+                startingItems.Add(251);
+                startingItems.Add(252);
+                startingItems.Add(253);
+            }
+
+            
 
             if (parsedStartingInfo.ContainsKey("starting_moves_woth_count"))
             {
