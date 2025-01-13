@@ -25,6 +25,7 @@ namespace GSTHD
         private Dictionary<string, int> pointspread;
         public List<SpoilerCell> cells = new List<SpoilerCell>();
         public List<int> startingItems = new List<int>();
+        public List<int> startingNotHintable = new List<int>();
         public List<int> foundATItems = new List<int>();
         public Dictionary<int, DK64_Item> DK64Items;
         public Dictionary<int, int> DK64Maps;
@@ -66,6 +67,7 @@ namespace GSTHD
 
         public int lastKnownMap = -1;
         public int howManySlams = 0;
+        private int startingWOTHS = -1;
 
         public bool ExtendFinalCell { get; set; } = false;
         public bool MinimalMode { get; set; } = false;
@@ -74,6 +76,7 @@ namespace GSTHD
 
         private bool isOnBroadcast = false;
         public bool isMarkable = true;
+        private bool hasStartingInLog = false;
 
         private static readonly Regex unspacer = new Regex(@"\s+");
 
@@ -267,7 +270,45 @@ namespace GSTHD
             // false 3.0 failsafe
             if (kroolOrder[0] > 6) randoVersion = "4.x";
 
+            if (parsedStartingInfo.ContainsKey("starting_moves"))
+            {
+                hasStartingInLog = true;
+                // gen items for the first time
+                DK64Items = DK64_Items.GenerateDK64Items();
+                List<string> tempstarting = parsedStartingInfo["starting_moves"].ToObject<List<string>>();
+                foreach (var move in tempstarting)
+                {
+                    var tempitem = DK64Items.FirstOrDefault(x => x.Value.name == move);
+                    if (tempitem.Key != 36)
+                    {
+                        startingItems.Add(tempitem.Key);
+                        Debug.WriteLine("adding " + tempitem.Value.name + " to starting moves");
+                    } else
+                    {
+                        // slams are handled seperately, and arent in the startingItems list
+                        howManySlams += 1;
+                        Debug.WriteLine("adding " + howManySlams + "th SLAM to slamcount");
+                    }
+                }
 
+                tempstarting = parsedStartingInfo["starting_moves_not_hintable"].ToObject<List<string>>();
+                foreach (var move in tempstarting)
+                {
+                    if (move == "Camera and Shockwave") continue;
+                    var tempitem = DK64Items.FirstOrDefault(x => x.Value.name == move);
+                    if (tempitem.Key != 36)
+                    {
+                        startingNotHintable.Add(tempitem.Key);
+                        Debug.WriteLine("adding " + tempitem.Value.name + " to UNHINTABLE starting moves");
+                    }
+                    //else
+                    //{
+                    //    // slams are handled seperately, and arent in the startingItems list
+                    //    howManySlams += 1;
+                    //    Debug.WriteLine("adding " + howManySlams + "th SLAM to slamcount");
+                    //}
+                }
+            }
             // adds certian shopkeeps as starting items for seeds that dont have them in the pool, so they arent erroneously added to Isles upon tracking
             if (loadedjson.ContainsKey("Item Pool"))
             {
@@ -286,6 +327,12 @@ namespace GSTHD
                 startingItems.Add(253);
             }
 
+            
+
+            if (parsedStartingInfo.ContainsKey("starting_moves_woth_count"))
+            {
+                startingWOTHS = (int)parsedStartingInfo["starting_moves_woth_count"];
+            }
 
             if (parsedStartingInfo.ContainsKey("level_order"))
             {
@@ -330,7 +377,7 @@ namespace GSTHD
 
         public void InitializeCells()
         {
-            DK64Items = DK64_Items.GenerateDK64Items();
+            if (DK64Items == null) DK64Items = DK64_Items.GenerateDK64Items();
             DK64Maps = DK64_Items.GenerateDK64Maps();
             cellWidth = ((Width - (RowPadding * System.Math.Max(numRows - 1, 1))) / ((numCols != 1) ? numRows : 1));
             cellHeight = ((Height - (ColPadding * System.Math.Max(numCols - 1, 1))) / ((numCols != 1) ? numCols : numRows));
@@ -383,9 +430,11 @@ namespace GSTHD
                         finalWidth = cellWidth * (numRows-xmod) + RowPadding*(numRows - xmod - 1);
                     }
 
+                    int passedstartingwoths = (int.Parse(level.Key) == 8) ? startingWOTHS : -1;
+
                     SpoilerCell tempcell = new SpoilerCell(Settings, finalWidth, cellHeight,
                         newX, newY,
-                        (int)parseddata["points"], (int)parseddata["woth_count"], newpotions,
+                        (int)parseddata["points"], (int)parseddata["woth_count"], passedstartingwoths, newpotions,
                         DataRowHeight, topRowPadding, WorldNumWidth, WorldNumHeight, WorldLabelWidth, PotionWidth, PotionHeight,
                         Name + "_" + Unspace((string)parseddata["level_name"]), (string)parseddata["level_name"],
                         int.Parse(level.Key), theNum,
@@ -500,8 +549,10 @@ namespace GSTHD
                 return;
             } else
             {
-                if (spoilerLoaded && !startingItems.Contains(dk_id) && dk_id >=0)
+                if (spoilerLoaded && dk_id >=0 && !startingNotHintable.Contains(dk_id))
                 {
+                    bool isStarting = false;
+                    int addedpoints = -1;
                     // i hate slams
                     if (dk_id == 36)
                     {
@@ -511,7 +562,15 @@ namespace GSTHD
                             howManySlams += howMany;
                         } else
                         {
-                            howMany = 0;
+                            if (hasStartingInLog)
+                            {
+                                isStarting = true;
+                                addedpoints = (pointsMode) ? 0 : -1;
+                            }
+                            else
+                            {
+                                howMany = 0;
+                            }
                         }
                     } else
                     {
@@ -520,7 +579,7 @@ namespace GSTHD
 
 
                     //Debug.WriteLine($"map: {currentMap} -- item: {dk_id}");
-                    bool isStarting = false;
+                    
                     try
                     {
                         lastKnownMap = DK64Maps[currentMap];
@@ -533,9 +592,21 @@ namespace GSTHD
                     } catch {
                         //Debug.WriteLine($"map: {currentMap} ISNT REAL");
                     }
+                    
 
                     DK64_Item dkitem = DK64Items[dk_id];
-                    int addedpoints = (pointsMode) ? pointspread[dkitem.itemType] : -1;
+
+                    if (startingItems.Contains(dk_id))
+                    {
+                        // exclude kongs/keys
+                        if (dk_id < 6 || (dk_id > 100 && dk_id < 110)) return;
+                        isStarting = true;
+                        if (hasStartingInLog) addedpoints = (pointsMode) ? 0 : -1;
+                    } else if (dk_id != 36 || !hasStartingInLog)
+                    {
+                        addedpoints = (pointsMode) ? pointspread[dkitem.itemType] : -1;
+                    }
+                    // so that the starting moves can be even visible
                     //Debug.WriteLine($"{addedpoints}");
 
                     if (lastKnownMap >= 0 && !foundATItems.Contains(dk_id) && howMany > 0)

@@ -166,7 +166,7 @@ namespace GSTHD
         public bool EnableSongTracking { get; set; } = false;
         public SongFileWriteOption WriteSongDataToFile { get; set; } = SongFileWriteOption.Disabled;
         public bool SubtractItems { get; set; } = true;
-        public bool HideStarting {  get; set; } = false;
+        public bool HideStarting {  get; set; } = true;
         public KnownColor LastWothColor { get; set; } = KnownColor.BlueViolet;
         public KnownColor SpoilerPointColour { get; set; } = KnownColor.White;
         public KnownColor SpoilerWOTHColour { get; set; } = KnownColor.ForestGreen;

@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("JXJacob")]
 [assembly: AssemblyProduct("GSTHD_DK64")]
-[assembly: AssemblyCopyright("Copyright © JXJacob, Hapax, Drekorig 2024")]
+[assembly: AssemblyCopyright("Copyright © JXJacob, Hapax, Drekorig 2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
