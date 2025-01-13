@@ -25,6 +25,7 @@ namespace GSTHD
         private Dictionary<string, int> pointspread;
         public List<SpoilerCell> cells = new List<SpoilerCell>();
         public List<int> startingItems = new List<int>();
+        public List<int> startingNotHintable = new List<int>();
         public List<int> foundATItems = new List<int>();
         public Dictionary<int, DK64_Item> DK64Items;
         public Dictionary<int, int> DK64Maps;
@@ -289,6 +290,24 @@ namespace GSTHD
                         Debug.WriteLine("adding " + howManySlams + "th SLAM to slamcount");
                     }
                 }
+
+                tempstarting = parsedStartingInfo["starting_moves_not_hintable"].ToObject<List<string>>();
+                foreach (var move in tempstarting)
+                {
+                    if (move == "Camera and Shockwave") continue;
+                    var tempitem = DK64Items.FirstOrDefault(x => x.Value.name == move);
+                    if (tempitem.Key != 36)
+                    {
+                        startingNotHintable.Add(tempitem.Key);
+                        Debug.WriteLine("adding " + tempitem.Value.name + " to UNHINTABLE starting moves");
+                    }
+                    //else
+                    //{
+                    //    // slams are handled seperately, and arent in the startingItems list
+                    //    howManySlams += 1;
+                    //    Debug.WriteLine("adding " + howManySlams + "th SLAM to slamcount");
+                    //}
+                }
             }
             // adds certian shopkeeps as starting items for seeds that dont have them in the pool, so they arent erroneously added to Isles upon tracking
             if (loadedjson.ContainsKey("Item Pool"))
@@ -530,7 +549,7 @@ namespace GSTHD
                 return;
             } else
             {
-                if (spoilerLoaded && dk_id >=0)
+                if (spoilerLoaded && dk_id >=0 && !startingNotHintable.Contains(dk_id))
                 {
                     bool isStarting = false;
                     int addedpoints = -1;

@@ -652,9 +652,8 @@ namespace GSTHD
         private void UpdateTrackerDoubleItem(DoubleItem theItem, TrackedGroup tg)
         {
             theItem.SetState(tg.runningvalue);
-            // honestly i'm not sure why the % arent the other way around but idc
-            if (tg.runningvalue % 2 != tg.currentValue % 2) AttemptSpoilerUpdate(tg.left_dk64_id, (tg.targetControl != null) ? tg.targetControl.isMarked : 0);
-            if (tg.runningvalue % 1 != tg.currentValue % 1) AttemptSpoilerUpdate(tg.right_dk64_id, (tg.targetControl != null) ? tg.targetControl.isMarked : 0);
+            if ((tg.runningvalue & 1) != (tg.currentValue & 1)) AttemptSpoilerUpdate(tg.left_dk64_id, (tg.targetControl != null) ? tg.targetControl.isMarked : 0);
+            if ((tg.runningvalue & 2) != (tg.currentValue & 2)) AttemptSpoilerUpdate(tg.right_dk64_id, (tg.targetControl != null) ? tg.targetControl.isMarked : 0);
         }
 
         private void UpdateTrackerMedallion(Medallion theItem, TrackedAddress ta, int theRead)
