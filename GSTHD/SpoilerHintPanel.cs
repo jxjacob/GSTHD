@@ -80,6 +80,7 @@ namespace GSTHD
         private static readonly Regex unspacer = new Regex(@"\s+");
 
         delegate void AddFromATCallback(int currentMap, int dk_id, int howMany, MarkedImageIndex marked);
+        delegate void AddFromDragCallback(int currentMap, int dk_id, MarkedImageIndex marked, bool isFaded);
 
         public SpoilerPanel(ObjectPanelSpoiler data, Settings settings, bool isOnBroadcast=false)
         {
@@ -522,11 +523,43 @@ namespace GSTHD
             }
         }
 
+
+        public void AddFromDrag(int currentMap, int dk_id, MarkedImageIndex marked, bool isFaded)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new AddFromDragCallback(AddFromDrag), new object[] { currentMap, dk_id, marked, isFaded });
+                return;
+            }
+            else
+            {
+                bool isStarting = false;
+                int addedpoints = -1;
+                bool allowit = true;
+                DK64_Item dkitem = DK64Items[dk_id];
+                if (startingItems.Contains(dk_id))
+                {
+                    if (currentMap != 8) allowit = false;
+                    isStarting = true;
+                    if (hasStartingInLog) addedpoints = (pointsMode) ? 0 : -1;
+                }
+                else
+                {
+                    addedpoints = (pointsMode) ? pointspread[dkitem.itemType] : -1;
+                }
+                if (allowit) { 
+                    Debug.WriteLine($"dragging a copy of {dk_id} to map {lastKnownMap}, valued at {addedpoints} points");
+                    cells[currentMap].AddNewItem(dkitem, addedpoints, isStarting, 1, MarkedIndex: marked, isFaded: isFaded); 
+                }
+            }
+
+        }
+
         public void AddFromAT(int currentMap, int dk_id, int howMany, MarkedImageIndex marked)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new AddFromATCallback(AddFromAT), new object[] { currentMap, dk_id, howMany, marked });
+                this.Invoke(new AddFromATCallback(AddFromAT), new object[] { currentMap, dk_id, howMany, marked});
                 return;
             } else
             {
@@ -563,12 +596,18 @@ namespace GSTHD
                     
                     try
                     {
-                        lastKnownMap = DK64Maps[currentMap];
-                        // special menu screen location
-                        if (lastKnownMap == -2)
+                        if (currentMap <= -790)
                         {
-                            lastKnownMap = 8;
-                            isStarting = true;
+                            lastKnownMap = currentMap + 800;
+                        } else
+                        {
+                            lastKnownMap = DK64Maps[currentMap];
+                            // special menu screen location
+                            if (lastKnownMap == -2)
+                            {
+                                lastKnownMap = 8;
+                                isStarting = true;
+                            }
                         }
                     } catch {
                         //Debug.WriteLine($"map: {currentMap} ISNT REAL");

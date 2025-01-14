@@ -361,11 +361,14 @@ namespace GSTHD
                 // ignore if its not a real item
                 if (dropContent.dk_id != -1)
                 {
+                    // get the parent panel to handle it (incase its a starting move and needs to be handled differently)
+                    ((SpoilerPanel)(this.Parent)).AddFromDrag(this.levelID, dropContent.dk_id, dropContent.isMarked, !dropContent.IsAutocheck);
+                    
                     // lookup the actual dk item
-                    DK64_Item item = DK64Items[dropContent.dk_id];
-                    int sentPoints = (noPotions) ? pointspread[item.itemType] : -2;
-                    //Debug.WriteLine($"{item}, {dropContent.IsAutocheck}");
-                    AddNewItem(item, sentPoints, false, 1, !dropContent.IsAutocheck, dropContent.isMarked);
+                    //DK64_Item item = DK64Items[dropContent.dk_id];
+                    //int sentPoints = (noPotions) ? pointspread[item.itemType] : -2;
+                    ////Debug.WriteLine($"{item}, {dropContent.IsAutocheck}");
+                    //AddNewItem(item, sentPoints, false, 1, !dropContent.IsAutocheck, dropContent.isMarked);
                 }
             } catch { }
 
