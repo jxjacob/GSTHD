@@ -541,7 +541,7 @@ namespace GSTHD
                         } 
                         else if (x.isWotH == HintPanelType.Mixed)
                         {
-                            // TODO: this and the loadstate but for multipanels
+                            thejson.Add(x.Name, x.GetAlls());
                         }
                     }
                 }
@@ -707,6 +707,8 @@ namespace GSTHD
                             pa.SetBarren((string)x.Value);
                         } else if (pa.isWotH == HintPanelType.Quantity){
                             pa.SetQuantities((string)x.Value);
+                        } else if (pa.isWotH == HintPanelType.Mixed){
+                            pa.SetAlls((string)x.Value);
                         }
                     }
                     else if (found is SpoilerPanel sp)
@@ -741,7 +743,6 @@ namespace GSTHD
 
         public void UpdateAll()
         {
-            //TODO: push all alternates
             foreach (Item x in this.Controls[0].Controls.OfType<Item>())
             {
                 x.UpdateImage();

@@ -167,9 +167,10 @@ namespace GSTHD
                 if (hasSlash) ItemCount.Text += " /";
                 if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
-                    ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).CollectedItems = CollectedItems;
-                    ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
-                    ((CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateCount();
+                    CollectedItem ci = (CollectedItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0];
+                    ci.CollectedItems = CollectedItems;
+                    ci.isMarked = isMarked;
+                    ci.UpdateCount();
                 }
                 UpdateImage();
             }

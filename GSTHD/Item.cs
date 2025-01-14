@@ -125,9 +125,10 @@ namespace GSTHD
                 {
                     try
                     {
-                        ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
-                        ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
-                        ((Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
+                        Item ite = (Item)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0];
+                        ite.ImageIndex = ImageIndex;
+                        ite.isMarked = isMarked;
+                        ite.UpdateImage();
                     } catch (IndexOutOfRangeException)
                     {
                         Debug.WriteLine($"Item {this.Name} could not be found on Broadcast, skipping...");
@@ -138,27 +139,29 @@ namespace GSTHD
                     //TODO: make this block cleaner
                     if (DoubleBroadcastSide == "left")
                     {
-                        ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).SetLeftMark(isMarked);
+                        DoubleItem di = (DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0];
+                        di.SetLeftMark(isMarked);
                         if (ImageIndex == 0)
                         {
-                            ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).DecrementLeftState();
+                            di.DecrementLeftState();
                         }
                         else
                         {
-                            ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).IncrementLeftState();
+                            di.IncrementLeftState();
                         }
 
                     }
                     else if (DoubleBroadcastSide == "right")
                     {
-                        ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).SetRightMark(isMarked);
+                        DoubleItem di = (DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0];
+                        di.SetRightMark(isMarked);
                         if (ImageIndex == 0)
                         {
-                            ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).DecrementRightState();
+                            di.DecrementRightState();
                         }
                         else
                         {
-                            ((DoubleItem)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(DoubleBroadcastName, true)[0]).IncrementRightState();
+                            di.IncrementRightState();
                         }
                     }
                 }

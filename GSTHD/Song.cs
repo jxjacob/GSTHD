@@ -144,9 +144,10 @@ namespace GSTHD
                 Image = Image.FromFile(@"Resources/" + HeldImageName);
                 if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
-                    ((SongMarker)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).HeldImageName = HeldImageName;
-                    ((SongMarker)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).HoldsImage = true;
-                    ((SongMarker)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
+                    SongMarker sm = (SongMarker)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0];
+                    sm.HeldImageName = HeldImageName;
+                    sm.HoldsImage = true;
+                    sm.UpdateImage();
                 }
             }
             else
@@ -156,9 +157,10 @@ namespace GSTHD
                 Image = Image.FromFile(@"Resources/" + ImageNames[ImageIndex]);
                 if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
-                    ((SongMarker)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).HoldsImage = false;
-                    ((SongMarker)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
-                    ((SongMarker)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
+                    SongMarker sm = (SongMarker)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0];
+                    sm.HoldsImage = false;
+                    sm.ImageIndex = ImageIndex;
+                    sm.UpdateImage();
                 }
             }
             if (IsHandleCreated) { Invalidate(); }
@@ -429,9 +431,10 @@ namespace GSTHD
             Image = Image.FromFile(@"Resources/" + ImageNames[ImageIndex]);
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {
-                ((Song)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).ImageIndex = ImageIndex;
-                ((Song)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).isMarked = isMarked;
-                ((Song)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).UpdateImage();
+                Song so = (Song)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0];
+                so.ImageIndex = ImageIndex;
+                so.isMarked = isMarked;
+                so.UpdateImage();
             }
             if (IsHandleCreated) { Invalidate(); }
         }

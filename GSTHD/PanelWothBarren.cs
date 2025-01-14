@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Markup;
 using System.Media;
+using System.Windows.Forms.VisualStyles;
 
 namespace GSTHD
 {
@@ -762,6 +763,67 @@ namespace GSTHD
             textBoxCustom.newLocation(new Point(0, ListHints.Count * LabelSettings.Height), this.Location);
         }
 
+        public string GetAlls()
+        {
+            // basically a getwoth/getbarn/getquan but attached the placedorder
+            string thestring = "";
+            foreach (var hint in ListHints)
+            {
+                if (thestring.Length > 0)
+                {
+                    thestring += "\n";
+                }
+
+                if (hint is WotH w)
+                {
+                    thestring += w.PlacedOrder + "," + w.SaveState().ToString();
+                }
+                if (hint is Barren b)
+                {
+                    thestring += b.PlacedOrder + "," + b.SaveState().ToString();
+                }
+                if (hint is Quantity q)
+                {
+                    thestring += q.PlacedOrder + "," + q.SaveState().ToString();
+                }
+            }
+
+
+
+
+            return thestring;
+        }
+
+        public void SetAlls(string thestring)
+        {
+            string[] sections = thestring.Split('\n');
+            foreach (string section in sections)
+            {
+                string[] pieces = section.Split(new char[] { ',' }, count:2);
+                //pieces[0] is the placedorder for the section
+                //pieces[1] is the text you dump into the respective function
+                MixedSubPanels foundsub = ListSubs[int.Parse(pieces[0])];
+
+
+                switch (foundsub.Type)
+                {
+                    case "none":
+                        return;
+                    case "WotH":
+                        SetWoth2(pieces[1], foundsub);
+                        break;
+                    case "Barren":
+                        SetBarren2(pieces[1], foundsub);
+                        break;
+                    case "Quantity":
+                        SetQuantities2(pieces[1], foundsub);
+                        break;
+                }
+
+
+            }
+        }
+
 
         public List<WotHState> GetWotHs()
         {
@@ -778,61 +840,65 @@ namespace GSTHD
             string[] sections = thestring.Split('\n');
             foreach (string section in sections)
             {
-                // break into name & colour         and           stones
-                string[] parts = section.Split('\t');
+                SetWoth2(section);
+            }
+        }
 
-                // name = firstpart[0]
-                // color = firstpart[1]
-                string[] firstPart = parts[0].Split(',');
+        private void SetWoth2(string section, MixedSubPanels sub = null)
+        {
+            // break into name & colour         and           stones
+            string[] parts = section.Split('\t');
 
-                // secondparts are explained below
-                string[] secondPart = parts[1].Split(',');
-                AddWotH(firstPart[0]);
+            // name = firstpart[0]
+            // color = firstpart[1]
+            string[] firstPart = parts[0].Split(',');
 
-                // find the woth we just made
-                //Control foundWotH = this.Controls.Find(firstPart[0], true)[0];
-                WotH thisWotH = (WotH)(ListHints.Where(x => x.Name == firstPart[0].Trim()).ToList()[0]);
+            // secondparts are explained below
+            string[] secondPart = parts[1].Split(',');
+            AddWotH(firstPart[0], Sub:sub);
 
-                thisWotH.SetColor(int.Parse(firstPart[1]));
+            // find the woth we just made
+            //Control foundWotH = this.Controls.Find(firstPart[0], true)[0];
+            WotH thisWotH = (WotH)(ListHints.Where(x => x.Name == firstPart[0].Trim()).ToList()[0]);
 
-                GossipStone foundStone = null;
-                bool storedHoldsImage = false;
-                List<string> storedHeldImageName = null;
-                int storedImageIndex = 0;
-                if (secondPart.Length > 4)
+            thisWotH.SetColor(int.Parse(firstPart[1]));
+
+            GossipStone foundStone = null;
+            bool storedHoldsImage = false;
+            List<string> storedHeldImageName = null;
+            int storedImageIndex = 0;
+            if (secondPart.Length > 4)
+            {
+                for (int i = 0; i < secondPart.Length; i++)
                 {
-                    for (int i = 0; i < secondPart.Length; i++)
+                    if (i % 5 == 0)
                     {
-                        if (i % 5 == 0)
-                        {
-                            // 0th is the name
-                            foundStone = (GossipStone)(this.Controls.Find(secondPart[i], true)[0]);
-                        }
-                        else if (i % 5 == 1)
-                        {
-                            // 1st is the bool
-                            storedHoldsImage = Boolean.Parse(secondPart[i]);
-                        }
-                        else if (i % 5 == 2)
-                        {
-                            // 2nd is the stored image
-                            string[] images = (secondPart[i]).Split('|');
-                            storedHeldImageName = images.ToList();
-                        }
-                        else if (i % 5 == 3)
-                        {
-                            // 3rd is the stateindex
-                            storedImageIndex = int.Parse(secondPart[i]);
-                        } else if (i % 5 == 4)
-                        {
-                            // 4th is 
-                            // also we have all 4 so go and set the state
-                            foundStone.SetState(new GossipStoneState() { HoldsImage = storedHoldsImage, HeldImages = storedHeldImageName, ImageIndex = storedImageIndex, isMarked = (MarkedImageIndex)int.Parse(secondPart[i]) });
-                        }
+                        // 0th is the name
+                        foundStone = (GossipStone)(this.Controls.Find(secondPart[i], true)[0]);
+                    }
+                    else if (i % 5 == 1)
+                    {
+                        // 1st is the bool
+                        storedHoldsImage = Boolean.Parse(secondPart[i]);
+                    }
+                    else if (i % 5 == 2)
+                    {
+                        // 2nd is the stored image
+                        string[] images = (secondPart[i]).Split('|');
+                        storedHeldImageName = images.ToList();
+                    }
+                    else if (i % 5 == 3)
+                    {
+                        // 3rd is the stateindex
+                        storedImageIndex = int.Parse(secondPart[i]);
+                    }
+                    else if (i % 5 == 4)
+                    {
+                        // 4th is 
+                        // also we have all 4 so go and set the state
+                        foundStone.SetState(new GossipStoneState() { HoldsImage = storedHoldsImage, HeldImages = storedHeldImageName, ImageIndex = storedImageIndex, isMarked = (MarkedImageIndex)int.Parse(secondPart[i]) });
                     }
                 }
-
-
             }
         }
 
@@ -852,20 +918,22 @@ namespace GSTHD
             string[] sections = thestring.Split('\n');
             foreach (string section in sections)
             {
-                // name = firstpart[0]
-                // color = firstpart[1]
-                string[] firstPart = section.Split(',');
-
-                AddBarren(firstPart[0]);
-
-                // find the woth we just made
-                Barren thisBarren = (Barren)(ListHints.Where(x => x.Name == firstPart[0]).ToList()[0]);
-
-                thisBarren.SetColor(int.Parse(firstPart[1]));
-
-
-
+                SetBarren2(section);
             }
+        }
+
+        private void SetBarren2(string section, MixedSubPanels sub=null)
+        {
+            // name = firstpart[0]
+            // color = firstpart[1]
+            string[] firstPart = section.Split(',');
+
+            AddBarren(firstPart[0], Sub:sub);
+
+            // find the woth we just made
+            Barren thisBarren = (Barren)(ListHints.Where(x => x.Name == firstPart[0]).ToList()[0]);
+
+            thisBarren.SetColor(int.Parse(firstPart[1]));
         }
 
         public List<QuantityState> GetQuantities()
@@ -883,23 +951,26 @@ namespace GSTHD
             string[] sections = thestring.Split('\n');
             foreach (string section in sections)
             {
-                // name = firstpart[0]
-                // color = firstpart[1]
-                string[] firstPart = section.Split(',');
-
-                AddQuantity(firstPart[0]);
-
-                // find the woth we just made
-                Quantity thisQuan = (Quantity)(ListHints.Where(x => x.Name == firstPart[0]).ToList()[0]);
-
-                thisQuan.SetColor(int.Parse(firstPart[1]));
-                thisQuan.leftCounterCI.SetState(int.Parse(firstPart[2]));
-                thisQuan.rightCounterCI.SetState(int.Parse(firstPart[3]));
-
+                SetQuantities2(section);
             }
         }
 
+        private void SetQuantities2(string section, MixedSubPanels sub=null)
+        {
+            // name = firstpart[0]
+            // color = firstpart[1]
+            string[] firstPart = section.Split(',');
 
+            AddQuantity(firstPart[0], Sub:sub);
+
+            // find the woth we just made
+            Quantity thisQuan = (Quantity)(ListHints.Where(x => x.Name == firstPart[0]).ToList()[0]);
+
+            thisQuan.SetColor(int.Parse(firstPart[1]));
+            thisQuan.leftCounterCI.SetState(int.Parse(firstPart[2]));
+            thisQuan.rightCounterCI.SetState(int.Parse(firstPart[3]));
+
+        }
 
 
         public void SetVisible(bool visible)

@@ -367,12 +367,13 @@ namespace GSTHD
             InitializeCells();
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {
-                ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).levelOrder = levelOrder;
-                ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).spoilerData = spoilerData;
-                ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).mainSettings = mainSettings;
-                ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).randoVersion = randoVersion;
-                ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).Settings = Settings;
-                ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).InitializeCells();
+                SpoilerPanel sp = (SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0];
+                sp.levelOrder = levelOrder;
+                sp.spoilerData = spoilerData;
+                sp.mainSettings = mainSettings;
+                sp.randoVersion = randoVersion;
+                sp.Settings = Settings;
+                sp.InitializeCells();
             }
         }
 
@@ -674,12 +675,13 @@ namespace GSTHD
         {
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null && spoilerLoaded)
             {
-                ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).levelOrder = levelOrder;
-                ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).spoilerData = spoilerData;
-                ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).mainSettings = mainSettings;
-                ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).randoVersion = randoVersion;
-                ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).Settings = Settings;
-                ((SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0]).InitializeCells();
+                SpoilerPanel sp = (SpoilerPanel)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0];
+                sp.levelOrder = levelOrder;
+                sp.spoilerData = spoilerData;
+                sp.mainSettings = mainSettings;
+                sp.randoVersion = randoVersion;
+                sp.Settings = Settings;
+                sp.InitializeCells();
                 foreach (SpoilerCell cell in cells)
                 {
                     cell.UpdateVisuals();
