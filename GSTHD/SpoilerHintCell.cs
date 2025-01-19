@@ -70,9 +70,12 @@ namespace GSTHD
 
         public int dk_id;
 
+        private Settings settings;
+
 
         public CellPictureBox(Settings settings, bool isOnBroadcast, bool isMarkable)
         {
+            this.settings = settings;
             this.isMarkable = isMarkable;
             ProgressBehaviour = new ProgressibleElementBehaviour<int>(this, settings);
             if (!isOnBroadcast) MouseDown += ProgressBehaviour.Mouse_ClickDown;
@@ -100,7 +103,7 @@ namespace GSTHD
 
         public void ToggleCheck()
         {
-            isMarked = (MarkedImageIndex)((int)isMarked++ % Enum.GetNames(typeof(MarkedImageIndex)).Length);
+            IncrementMarked(settings.EnabledMarks);
             hostCell.TellMarked(dk_id, isMarked);
             Invalidate();
         }
@@ -178,6 +181,7 @@ namespace GSTHD
 
         public bool ayoJetpac = false;
         public bool noPotions = false;
+        public bool startingisExcluded = false;
 
         public int topRowHeight;
         public int topRowPadding;
@@ -201,7 +205,7 @@ namespace GSTHD
         delegate void SetStateCallback(SpoilerCellState state);
 
 
-        public SpoilerCell(Settings settings, int width, int height, int x, int y, int points, int woths, int startingwotths, List<PotionTypes> potions, int topRowHeight, int topRowPadding, int WorldNumWidth, int WorldNumHeight, int WorldLabelWidth, int PotionWidth, int PotionHeight, string name, string levelname, int levelnum, int levelorder, string cellFontName, int cellFontSize, FontStyle cellFontStyle, int labelSpacing, int labelWidth, Color backColor, bool isMinimal, Dictionary<string, int> spread, Dictionary<int, DK64_Item> dkitems, bool isBroadcastable = false, bool isOnBroadcast = false, bool isMarkable = true)
+        public SpoilerCell(Settings settings, int width, int height, int x, int y, int points, int woths, int startingwotths, List<PotionTypes> potions, int topRowHeight, int topRowPadding, int WorldNumWidth, int WorldNumHeight, int WorldLabelWidth, int PotionWidth, int PotionHeight, string name, string levelname, int levelnum, int levelorder, string cellFontName, int cellFontSize, FontStyle cellFontStyle, int labelSpacing, int labelWidth, Color backColor, bool isMinimal, Dictionary<string, int> spread, Dictionary<int, DK64_Item> dkitems, bool isBroadcastable = false, bool isOnBroadcast = false, bool isMarkable = true, bool startingisExcluded = false)
         {
             // when getting created, get the spoiler numebrs from the parent panel
             Settings = settings;
@@ -230,6 +234,7 @@ namespace GSTHD
             this.pointspread = spread;
             this.DK64Items = dkitems;
             this.MinimalMode = isMinimal;
+            this.startingisExcluded = startingisExcluded;
 
             this.topRowHeight = topRowHeight;
             // final cell doesnt need padding for a key that doesnt exist
@@ -407,6 +412,7 @@ namespace GSTHD
         {
             for (int i = 0; i < displayList.Count; i++)
             {
+                if (starting && startingisExcluded) continue;
                 if (displayList[i].potionType == (int)item.potionType && displayList[i].item_id == -1)
                 {
                     // new move into existing potion
@@ -551,7 +557,7 @@ namespace GSTHD
             {
                 int pointVis = (pointLabel != null) ? 1 : 0;
                 wothLabel.Width = System.Math.Max(labelWidth, TextRenderer.MeasureText(wothLabel.Text, wothLabel.Font).Width);
-                wothLabel.Location = new Point(this.Size.Width - (labelSpacing) - pointVis*(pointWidth) - 1 - this.topRowPadding, -1);
+                wothLabel.Location = new Point(this.Size.Width - (System.Math.Max(labelSpacing, wothLabel.Width)) - pointVis*(pointWidth) - 1 - this.topRowPadding, -1);
             }
         }
 

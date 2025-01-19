@@ -441,7 +441,7 @@ namespace GSTHD
                         Name + "_" + Unspace((string)parseddata["level_name"]), (string)parseddata["level_name"],
                         int.Parse(level.Key), theNum,
                         CellFontName, CellFontSize, CellFontStyle, LabelSpacing, CellLabelWidth,
-                        CellBackColor, MinimalMode, pointspread, DK64Items, isBroadcastable, isOnBroadcast, isMarkable);
+                        CellBackColor, MinimalMode, pointspread, DK64Items, isBroadcastable, isOnBroadcast, isMarkable, startingisExcluded: hasStartingInLog);
                     cells.Add(tempcell);
 
                 }
