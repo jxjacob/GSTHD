@@ -160,6 +160,7 @@ namespace GSTHD
         public bool OverrideHeldImage { get; set; } = false;
         public bool StoneOverrideCheckMark { get; set; } = false;
         public bool CellOverrideCheckMark { get; set; } = false;
+        public bool CellCountWothMarks { get; set; } = false;
         public double GossipCycleTime { get; set; } = 1;
         public bool EnableAutosave { get; set; } = true;
         public bool DeleteOldAutosaves { get; set; } = true;

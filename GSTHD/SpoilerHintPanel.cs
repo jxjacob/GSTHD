@@ -372,6 +372,7 @@ namespace GSTHD
                 sp.spoilerData = spoilerData;
                 sp.mainSettings = mainSettings;
                 sp.randoVersion = randoVersion;
+                sp.hasStartingInLog = hasStartingInLog;
                 sp.Settings = Settings;
                 sp.InitializeCells();
             }

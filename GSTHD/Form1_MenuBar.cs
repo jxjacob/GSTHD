@@ -67,6 +67,7 @@ namespace GSTHD
             public ToolStripMenuItem SpoilerEmptyColor;
             public ToolStripMenuItem SpoilerKindaEmptyColor;
             public ToolStripMenuItem CellOverrideCheckMark;
+            public ToolStripMenuItem CellCountWothMarks;
 
             // Gossip Stone Stuff
             public ToolStripMenuItem OverrideHeldImage;
@@ -562,6 +563,12 @@ namespace GSTHD
                     };
                     spoilerSubMenu.DropDownItems.Add(Items.CellOverrideCheckMark);
 
+                    Items.CellCountWothMarks = new ToolStripMenuItem("Decrement WotH Count with Marks", null, new EventHandler(menuBar_ToggleOverrideCellCountMarks))
+                    {
+                        CheckOnClick = true,
+                    };
+                    spoilerSubMenu.DropDownItems.Add(Items.CellCountWothMarks);
+
                     // point colour
                     Items.SpoilerPointColor = new ToolStripMenuItem("Point Number Color", null, SpoilerPointColorOptions.Values.ToArray());
                     spoilerSubMenu.DropDownItems.Add(Items.SpoilerPointColor);
@@ -687,6 +694,7 @@ namespace GSTHD
 
             Items.OverrideHeldImage.Checked = Settings.OverrideHeldImage;
             Items.CellOverrideCheckMark.Checked = Settings.CellOverrideCheckMark;
+            Items.CellCountWothMarks.Checked = Settings.CellCountWothMarks;
             Items.StoneOverrideCheckMark.Checked = Settings.StoneOverrideCheckMark;
             Items.ForceGossipCycles.Checked = Settings.ForceGossipCycles;
 
@@ -1334,7 +1342,14 @@ namespace GSTHD
             Settings.Write();
             Form.UpdateLayoutFromSettings();
         }
-        
+
+        private void menuBar_ToggleOverrideCellCountMarks(object sender, EventArgs e)
+        {
+            Settings.CellCountWothMarks = Items.CellCountWothMarks.Checked;
+            Settings.Write();
+            Form.UpdateLayoutFromSettings();
+        }
+
         private void menuBar_ToggleIncrementWraparound(object sender, EventArgs e)
         {
             Settings.WraparoundItems = Items.IncrementWraparound.Checked;

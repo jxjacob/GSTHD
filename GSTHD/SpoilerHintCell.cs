@@ -69,6 +69,7 @@ namespace GSTHD
         public SpoilerCell hostCell;
 
         public int dk_id;
+        public int internal_id;
 
         private Settings settings;
 
@@ -104,7 +105,7 @@ namespace GSTHD
         public void ToggleCheck()
         {
             IncrementMarked(settings.EnabledMarks);
-            hostCell.TellMarked(dk_id, isMarked);
+            hostCell.TellMarked(internal_id, isMarked);
             Invalidate();
         }
 
@@ -115,13 +116,13 @@ namespace GSTHD
                 // restore fadedness
                 isFaded = false;
                 Invalidate();
-                hostCell.TellFaded(dk_id, isFaded);
+                hostCell.TellFaded(internal_id, isFaded);
             } else
             {
                 // make faded
                 isFaded = true;
                 Invalidate();
-                hostCell.TellFaded(dk_id, isFaded);
+                hostCell.TellFaded(internal_id, isFaded);
             }
         }
     }
@@ -133,6 +134,7 @@ namespace GSTHD
         public bool isStarting;
         public bool isFaded = false;
         public MarkedImageIndex isMarked = 0;
+        public int internal_id;
 
         public override string ToString()
         {
@@ -155,6 +157,7 @@ namespace GSTHD
         public List<PotionTypes> potionsList;
         public List<CellDisplay> displayList;
         public List<CellPictureBox> displayedPotions = new List<CellPictureBox>();
+        private int runningInternalCount = 0;
 
         private GuaranteedHint levelNumberImage;
         private Item unknownLevelNumberImage;
@@ -169,6 +172,8 @@ namespace GSTHD
         public int startingWOTHS = 0;
         private Color wothColour;
         private Label wothLabel;
+        public int markedWOTHS = 0;
+        public int markedStartingWOTHS = 0;
 
         private Color emptyColour;
         private Color kindaEmptyColour;
@@ -403,7 +408,8 @@ namespace GSTHD
             {
                 foreach (PotionTypes pot in potionsList)
                 {
-                    displayList.Add(new CellDisplay { potionType = (int)pot, isStarting = false, item_id = -1, isFaded = false });
+                    displayList.Add(new CellDisplay { potionType = (int)pot, isStarting = false, item_id = -1, isFaded = false, internal_id = runningInternalCount });
+                    runningInternalCount++;
                 }
             }
         }
@@ -429,7 +435,8 @@ namespace GSTHD
                     return false;
                 }
             }
-            displayList.Add(new CellDisplay { potionType = -1, isStarting = starting, item_id = item.item_id, isFaded = faded, isMarked = marked});
+            displayList.Add(new CellDisplay { potionType = -1, isStarting = starting, item_id = item.item_id, isFaded = faded, isMarked = marked, internal_id = runningInternalCount });
+            runningInternalCount++;
             return true;
         }
 
@@ -458,28 +465,52 @@ namespace GSTHD
             }
         }
 
-        public void TellFaded(int dk_id, bool isFaded)
+        public void TellFaded(int internal_id, bool isFaded)
         {
-            foreach (CellDisplay display in displayList)
-            {
-                if (display.item_id == dk_id && display.isFaded == !isFaded)
-                {
-                    display.isFaded = isFaded;
-                    UpdateVisuals();
-                    break;
-                }
-            }
+            displayList.Where(x => x.internal_id == internal_id).First().isFaded = isFaded;
+            UpdateVisuals();
+            //foreach (CellDisplay display in displayList)
+            //{
+            //    if (display.item_id == dk_id && display.isFaded == !isFaded)
+            //    {
+            //        display.isFaded = isFaded;
+            //        UpdateVisuals();
+            //        break;
+            //    }
+            //}
         }
 
-        public void TellMarked(int dk_id, MarkedImageIndex isMarked)
+        public void TellMarked(int internal_id, MarkedImageIndex isMarked)
         {
-            foreach (CellDisplay display in displayList)
-            {
-                if (display.item_id == dk_id && display.isMarked != isMarked)
+            displayList.Where(x => x.internal_id == internal_id).First().isMarked = isMarked;
+            UpdateVisuals();
+            //foreach (CellDisplay display in displayList)
+            //{
+            //    if (display.item_id == dk_id && display.isMarked != isMarked)
+            //    {
+            //        display.isMarked = isMarked;
+            //        UpdateVisuals();
+            //        break;
+            //    }
+            //}
+        }
+
+        public void CountMarks()
+        {
+            markedWOTHS = 0;
+            markedStartingWOTHS = 0;
+            if (!Settings.CellCountWothMarks) return;
+            foreach (CellDisplay display in displayList) 
+            { 
+                if (display.isMarked == MarkedImageIndex.mark_check)
                 {
-                    display.isMarked = isMarked;
-                    UpdateVisuals();
-                    break;
+                    if (display.isStarting)
+                    {
+                        markedStartingWOTHS++;
+                    } else
+                    {
+                        markedWOTHS++;
+                    }
                 }
             }
         }
@@ -507,12 +538,13 @@ namespace GSTHD
                 // also update WOTHS count, which dont decrement but do need to be fixed theres a crankyadd
                 if (totalWOTHS >= 0 || startingWOTHS != -1)
                 {
+                    CountMarks();
                     if (startingWOTHS != -1 && !Settings.HideStarting)
                     {
-                        wothLabel.Text = totalWOTHS.ToString() + "+" + startingWOTHS.ToString();
+                        wothLabel.Text = (totalWOTHS - markedWOTHS).ToString() + "+" + (startingWOTHS - markedStartingWOTHS).ToString();
                     } else
                     {
-                        wothLabel.Text = totalWOTHS.ToString();
+                        wothLabel.Text = (totalWOTHS - markedWOTHS).ToString();
                     }
                     wothLabel.ForeColor = wothColour;
                 }
@@ -645,6 +677,7 @@ namespace GSTHD
                             isFaded = pot.isFaded,
                             BackColor = this.BackColor,
                             isMarked = pot.isMarked,
+                            internal_id = pot.internal_id
                         };
 
                         //Debug.WriteLine($"{thingsdisplayed}:   x:{newX} y:{newY} w:{newPot.Width} h:{newPot.Height}");
