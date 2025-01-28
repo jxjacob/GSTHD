@@ -425,17 +425,17 @@ namespace GSTHD
                     displayList[i].item_id = item.item_id;
                     displayList[i].isStarting = starting;
                     displayList[i].isFaded = faded;
-                    displayList[i].isMarked = marked;
+                    if (marked != MarkedImageIndex.need_override) displayList[i].isMarked = marked;
                     return false;
                 } else if ((displayList[i].potionType == (int)item.potionType || displayList[i].potionType == -1) && displayList[i].item_id == item.item_id && displayList[i].isFaded && !faded)
                 {
                     // new move into existing faded slot (dupe preventing)
                     displayList[i].isFaded = false;
-                    displayList[i].isMarked = marked;
+                    if (marked != MarkedImageIndex.need_override) displayList[i].isMarked = marked;
                     return false;
                 }
             }
-            displayList.Add(new CellDisplay { potionType = -1, isStarting = starting, item_id = item.item_id, isFaded = faded, isMarked = marked, internal_id = runningInternalCount });
+            displayList.Add(new CellDisplay { potionType = -1, isStarting = starting, item_id = item.item_id, isFaded = faded, isMarked = (marked != MarkedImageIndex.need_override) ? marked : 0, internal_id = runningInternalCount });
             runningInternalCount++;
             return true;
         }
@@ -705,7 +705,7 @@ namespace GSTHD
             for (int i = 0; i < howMany; i++)
             {
                 if (!isFaded) foundItems.Add(dk_id.item_id);
-                bool result = AddToDisplayList(dk_id, isStarting, isFaded, (!Settings.CellOverrideCheckMark) ? MarkedIndex : 0 );
+                bool result = AddToDisplayList(dk_id, isStarting, isFaded, (!Settings.CellOverrideCheckMark) ? ((MarkedIndex > MarkedImageIndex.none) ? MarkedIndex : MarkedImageIndex.need_override) : MarkedImageIndex.need_override );
                 if (result && pointValue != -1) currentPoints += pointValue;
                 UpdateVisuals();
             }

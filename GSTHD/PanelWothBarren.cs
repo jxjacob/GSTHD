@@ -390,12 +390,14 @@ namespace GSTHD
                         {
                             SystemSounds.Beep.Play();
                             textbox.Text = "Missing all keycodes";
+                            textBoxCustom.isErrorMessage = true;
                             return;
                         }
                         if (textbox.Lines[2] == "")
                         {
                             SystemSounds.Beep.Play();
                             textbox.Text = "Missing hint text";
+                            textBoxCustom.isErrorMessage = true;
                             return;
                         }
                         MixedSubPanels foundsub = null;
@@ -416,6 +418,7 @@ namespace GSTHD
                         {
                             SystemSounds.Beep.Play();
                             textbox.Text = "Invalid/Missing Hint Keycode";
+                            textBoxCustom.isErrorMessage = true;
                             return;
                         }
 

@@ -17,7 +17,8 @@ namespace GSTHD
         mark_check,
         mark_x,
         mark_question,
-        mark_star
+        mark_star,
+        need_override
     }
 
     public class OrganicImage : Control
@@ -126,12 +127,21 @@ namespace GSTHD
 
 
                 // hide check if too dang small (if checkmark is over half of the visible image area)
-                if (isMarked > 0 && (8*8 < (results[2] * results[3]/2)))
+                if (isMarked > 0)
                 {
-                    markedImage = Image.FromFile($@"Resources/{isMarked}.png");
-                    e.Graphics.DrawImage(markedImage,
-                    new Rectangle(Width-8, 0, 8, 8),
-                        0, 0, markedImage.Width, markedImage.Height, GraphicsUnit.Pixel);
+                    if (8*8 < (Width * Height) / 2)
+                    {
+                        markedImage = Image.FromFile($@"Resources/{isMarked}.png");
+                        e.Graphics.DrawImage(markedImage,
+                        new Rectangle(Width - 8, 0, 8, 8),
+                            0, 0, markedImage.Width, markedImage.Height, GraphicsUnit.Pixel);
+                    } else if (6*6 < (Width * Height) / 2)
+                    {
+                        markedImage = Image.FromFile($@"Resources/{isMarked}.png");
+                        e.Graphics.DrawImage(markedImage,
+                        new Rectangle(Width - 6, 0, 6, 6),
+                            0, 0, markedImage.Width, markedImage.Height, GraphicsUnit.Pixel);
+                    }
                 }
             }
         }

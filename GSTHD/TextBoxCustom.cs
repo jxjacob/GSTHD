@@ -22,6 +22,7 @@ namespace GSTHD
         public string codestring = string.Empty;
         public string panelstring = string.Empty;
         private bool isPath = false;
+        public bool isErrorMessage = false;
         private HintPanelType hintPanelType;
         public List<MixedSubPanels> ListSubs;
 
@@ -214,7 +215,7 @@ namespace GSTHD
 
         private void TextBoxField_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
         {
-            if (e.KeyCode == Keys.Tab)
+            if (e.KeyCode == Keys.Tab && !isErrorMessage)
             {
                 e.IsInputKey = true;
                 if (SuggestionContainer.Items.Count > 0)
@@ -224,9 +225,7 @@ namespace GSTHD
                     SuggestionContainer.Hide();
                     SuggestionContainer.Items.Clear();
                 }
-            }
-
-            if (e.KeyCode == Keys.Enter)
+            } else if (e.KeyCode == Keys.Enter && !isErrorMessage)
             {
                 var textbox = (TextBox)sender;
 
@@ -261,6 +260,10 @@ namespace GSTHD
                         textbox.Lines = new string[3] { "", "", textbox.Text };
                     }
                 }
+            } else if (isErrorMessage)
+            {
+                ((TextBox)sender).Text = string.Empty;
+                isErrorMessage = false;
             }
         }
 

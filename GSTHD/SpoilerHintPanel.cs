@@ -292,7 +292,7 @@ namespace GSTHD
                     }
                 }
 
-                tempstarting = parsedStartingInfo["starting_moves_not_hintable"].ToObject<List<string>>();
+                //tempstarting = parsedStartingInfo["starting_moves_not_hintable"].ToObject<List<string>>();
                 foreach (var move in tempstarting)
                 {
                     if (move == "Camera and Shockwave") continue;
