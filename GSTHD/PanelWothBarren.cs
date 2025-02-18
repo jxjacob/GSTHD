@@ -173,6 +173,7 @@ namespace GSTHD
             this.CounterFontSize = data.CounterFontSize;
             this.CounterSpacing = data.CounterSpacing;
             this.GossipStoneSize = data.CounterSize;
+            this.isScrollable = data.IsScrollable;
             this.CounterImage = "dk64/blank.png";
             this.subBoxSize = data.SubTextBoxSize;
             this.isWotH = HintPanelType.Quantity;
@@ -219,6 +220,7 @@ namespace GSTHD
             this.Name = data.Name;
             this.Size = new Size(data.Width, data.Height);
             this.TabStop = false;
+            this.isScrollable = data.IsScrollable;
             if (data.IsScrollable)
                 this.MouseWheel += Panel_MouseWheel;
 

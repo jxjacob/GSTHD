@@ -475,7 +475,7 @@ namespace GSTHD
                 }
 
             }
-            else if (randoVersion.StartsWith("4"))
+            else if (int.Parse(randoVersion.Substring(0,1)) >= 4 )
             {
                 for (int i = 0; i < kroolOrder.Count; i++)
                 {
