@@ -95,22 +95,24 @@ namespace GSTHD
 
         private void Click_MouseMove(object sender, MouseEventArgs e)
         {
-            if (System.Math.Abs(DragStartPoint.X - Cursor.Position.X) >= Settings.MinDragThreshold
-                || System.Math.Abs(DragStartPoint.Y - Cursor.Position.Y) >= Settings.MinDragThreshold)
-            if (MouseDetermination.DetermineBasicMouseInput(e, Settings.IncrementActionButton) && isMouseDown)
+            if (System.Math.Abs(DragStartPoint.X - Cursor.Position.X) >= Settings.MinDragThreshold || System.Math.Abs(DragStartPoint.Y - Cursor.Position.Y) >= Settings.MinDragThreshold)
             {
-                // TODO change that bool to DragBehaviour.AutocheckDragDrop
-                var dropContent = new DragDropContent(false, ImageNames[4], left_id, isMarked);
-                SetState(LastState);
-                this.DoDragDrop(dropContent, DragDropEffects.Copy);
-                isMouseDown = false;
-            }
-            if (MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton) && isMouseDown)
-            {
-                var dropContent = new DragDropContent(false, ImageNames[5], right_id, isMarked);
-                SetState(LastState);
-                this.DoDragDrop(dropContent, DragDropEffects.Copy);
-                isMouseDown = false;
+                if (MouseDetermination.DetermineBasicMouseInput(e, Settings.IncrementActionButton) && isMouseDown)
+                {
+                    // TODO change that bool to DragBehaviour.AutocheckDragDrop
+                    var dropContent = new DragDropContent(false, ImageNames[4], left_id, isMarked);
+                    SetState(LastState);
+                    this.DoDragDrop(dropContent, DragDropEffects.Copy);
+                    isMouseDown = false;
+                }
+                if (MouseDetermination.DetermineBasicMouseInput(e, Settings.DecrementActionButton) && isMouseDown)
+                {
+                    var dropContent = new DragDropContent(false, ImageNames[5], right_id, isMarked);
+                    SetState(LastState);
+                    this.DoDragDrop(dropContent, DragDropEffects.Copy);
+                    isMouseDown = false;
+                }
+
             }
         }
 

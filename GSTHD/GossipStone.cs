@@ -384,7 +384,7 @@ namespace GSTHD
             var dropContent = new DragDropContent(false, HeldImages[CycleIndex], marked: isMarked);
             DoDragDrop(dropContent, DragDropEffects.Copy);
             HeldImages.Remove(dropContent.ImageName);
-            if (HeldImages.Count == 0) HoldsImage = false;
+            if (HeldImages.Count == 0) { HoldsImage = false; isMarked = MarkedImageIndex.none; }
             UpdateImage();
             SaveChanges();
         }
@@ -399,6 +399,7 @@ namespace GSTHD
             if (RemoveImage)
             {
                 HoldsImage = false;
+                isMarked = MarkedImageIndex.none;
                 HeldImages.Clear();
                 RemoveImage = false;
                 UpdateImage();
