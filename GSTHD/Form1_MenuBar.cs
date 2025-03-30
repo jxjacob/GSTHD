@@ -139,7 +139,7 @@ namespace GSTHD
         private readonly Dictionary<Settings.SelectEmulatorOption, string> SelectEmulatorNames = new Dictionary<Settings.SelectEmulatorOption, string>
         {
             { Settings.SelectEmulatorOption.Project64, "Project64 3.0.1" },
-            { Settings.SelectEmulatorOption.Project64_4, "Project64 4.0 (Dev)" },
+            { Settings.SelectEmulatorOption.Project64_4, "Project64 4.0.0 (Dev)" },
             { Settings.SelectEmulatorOption.Bizhawk, "Bizhawk-DK64" },
             { Settings.SelectEmulatorOption.RMG, "Rosalie's Mupen GUI" },
             { Settings.SelectEmulatorOption.simple64, "simple64" },
