@@ -97,7 +97,8 @@ namespace GSTHD
             if (form.CurrentLayout.App_Settings.AutotrackingGame != null)
             {
                 SetGameStateTargets(form.CurrentLayout.App_Settings.AutotrackingGame);
-
+                CalibrateTracks();
+                Debug.WriteLine("Autotracking22 at " + offset.ToString("X"));
                 Debug.WriteLine("Beginning timer with " + trackedAddresses.Count + " addresses and " + trackedGroups.Count + " groups");
                 //timer = new System.Threading.Timer(MainTracker, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
                 timer = new System.Timers.Timer(1000);
@@ -121,6 +122,7 @@ namespace GSTHD
             {
                 SetGameStateTargets(form.CurrentLayout.App_Settings.AutotrackingGame);
                 CalibrateTracks();
+                Debug.WriteLine("Autotracking " + emulator.ProcessName + " at " + offset64.ToString("X"));
                 Debug.WriteLine("Beginning timer with " + trackedAddresses.Count + " addresses and " + trackedGroups.Count + " groups");
                 //timer = new System.Threading.Timer(MainTracker, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
                 timer = new System.Timers.Timer(1000);

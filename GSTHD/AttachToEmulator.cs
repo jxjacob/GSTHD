@@ -94,6 +94,71 @@ namespace GSTHD
         }
 
 
+        public static Tuple<Process, uint> attachToProject64_4(Form1 baseForm)
+        {
+            Process target;
+            try
+            {
+                target = Process.GetProcessesByName("project64")[0];
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message + "\nCould not find process \"project64\" on your machine.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+
+            var gameInfo = getGameVerificationInfo(baseForm.CurrentLayout.App_Settings.AutotrackingGame);
+
+
+            bool hasseennonzero = false;
+            for (uint potOff = 0xFDD00000; potOff < 0xFE1FFFFF; potOff += 16)
+            {
+                int gamecheck;
+                try
+                {
+                    if (gameInfo.Item2 == 8)
+                    {
+                        uint addr = Memory.Int8AddrFix(gameInfo.Item1);
+                        gamecheck = Memory.ReadInt8(target.Handle, potOff + addr);
+                    }
+                    else if (gameInfo.Item2 == 16)
+                    {
+                        uint addr = Memory.Int16AddrFix(gameInfo.Item1);
+                        gamecheck = Memory.ReadInt16(target.Handle, potOff + addr);
+                    }
+                    else if (gameInfo.Item2 == 32)
+                    {
+                        gamecheck = Memory.ReadInt32(target.Handle, potOff + gameInfo.Item1);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Incorrect bytes set for verification.\nMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return null;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine("yeah bud shits fucked");
+                    MessageBox.Show(e.Message, "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
+                }
+
+                if (gamecheck != 0) hasseennonzero = true;
+                if ((gamecheck) == gameInfo.Item3)
+                {
+                    Debug.WriteLine($"verifyably pj64_4 at offset {potOff:X}");
+
+                    return Tuple.Create(target, potOff);
+                }
+
+            }
+            if (!hasseennonzero) MessageBox.Show("Could not read any data from Project64; and therefore something has probably gone horribly wrong.\nRe-install Project64, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //MessageBox.Show("Could not find the correct PJ64 offset\nJXJacob hasn't figured out how to solve this one so you might be out of luck.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return null;
+        }
+
+
+
         public static Tuple<Process, uint> attachToBizhawk(Form1 baseForm)
         {
             Process target = null;

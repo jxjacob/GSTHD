@@ -78,6 +78,7 @@ namespace GSTHD
         public enum SelectEmulatorOption
         {
             Project64,
+            Project64_4,
             Bizhawk,
             RMG,
             simple64,

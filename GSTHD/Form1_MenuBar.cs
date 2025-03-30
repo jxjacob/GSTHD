@@ -139,6 +139,7 @@ namespace GSTHD
         private readonly Dictionary<Settings.SelectEmulatorOption, string> SelectEmulatorNames = new Dictionary<Settings.SelectEmulatorOption, string>
         {
             { Settings.SelectEmulatorOption.Project64, "Project64 3.0.1" },
+            { Settings.SelectEmulatorOption.Project64_4, "Project64 4.0 (Dev)" },
             { Settings.SelectEmulatorOption.Bizhawk, "Bizhawk-DK64" },
             { Settings.SelectEmulatorOption.RMG, "Rosalie's Mupen GUI" },
             { Settings.SelectEmulatorOption.simple64, "simple64" },
@@ -1494,6 +1495,22 @@ namespace GSTHD
                             if (resultPJ.Item1 != null)
                             {
                                 Form.SetAutotracker(resultPJ.Item1, resultPJ.Item2);
+                                MessageBox.Show("Connection to PJ64 sucessful\nTracking will begin once you enter the main game mode (not the title screen or main menu)");
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("Could not connect to PJ64\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                        break;
+                    case "Project64_4":
+                        var resultPJ4 = AttachToEmulators.attachToProject64_4(Form);
+                        if (resultPJ4 != null)
+                        {
+                            if (resultPJ4.Item1 != null)
+                            {
+                                Form.SetAutotracker(resultPJ4.Item1, resultPJ4.Item2);
                                 MessageBox.Show("Connection to PJ64 sucessful\nTracking will begin once you enter the main game mode (not the title screen or main menu)");
                             }
                         }
