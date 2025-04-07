@@ -144,10 +144,14 @@ namespace GSTHD
                 Image = Image.FromFile(@"Resources/" + HeldImageName);
                 if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
-                    SongMarker sm = (SongMarker)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0];
-                    sm.HeldImageName = HeldImageName;
-                    sm.HoldsImage = true;
-                    sm.UpdateImage();
+                    var sm = Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true);
+                    if (sm.Length > 0)
+                    {
+                        SongMarker smm = (SongMarker)sm[0];
+                        smm.HeldImageName = HeldImageName;
+                        smm.HoldsImage = true;
+                        smm.UpdateImage();
+                    }
                 }
             }
             else
@@ -157,10 +161,14 @@ namespace GSTHD
                 Image = Image.FromFile(@"Resources/" + ImageNames[ImageIndex]);
                 if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
                 {
-                    SongMarker sm = (SongMarker)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0];
-                    sm.HoldsImage = false;
-                    sm.ImageIndex = ImageIndex;
-                    sm.UpdateImage();
+                    var sm = Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true);
+                    if (sm.Length > 0)
+                    {
+                        SongMarker smm = (SongMarker)sm[0];
+                        smm.HoldsImage = false;
+                        smm.ImageIndex = ImageIndex;
+                        smm.UpdateImage();
+                    }
                 }
             }
             if (IsHandleCreated) { Invalidate(); }
@@ -431,10 +439,19 @@ namespace GSTHD
             Image = Image.FromFile(@"Resources/" + ImageNames[ImageIndex]);
             if (isBroadcastable && Application.OpenForms["GSTHD_DK64 Broadcast View"] != null)
             {
-                Song so = (Song)Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0];
-                so.ImageIndex = ImageIndex;
-                so.isMarked = isMarked;
-                so.UpdateImage();
+                var so = Application.OpenForms["GSTHD_DK64 Broadcast View"].Controls.Find(this.Name, true)[0];
+                if (so is Song soo)
+                {
+                    soo.ImageIndex = ImageIndex;
+                    soo.isMarked = isMarked;
+                    soo.UpdateImage();
+                }
+                else if (so is Item soi)
+                {
+                    soi.ImageIndex = ImageIndex;
+                    soi.isMarked = isMarked;
+                    soi.UpdateImage();
+                }
             }
             if (IsHandleCreated) { Invalidate(); }
         }
