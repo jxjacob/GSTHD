@@ -94,7 +94,7 @@ namespace GSTHD
             this.AllowDrop = true;
             this.isScrollable = isScrollable;
             this.canCycle = CanCycle;
-            this.isBroadcastable = isBroadcastable;
+            this.isBroadcastable = !isOnBroadcast && isBroadcastable;
             
 
 

@@ -975,7 +975,7 @@ namespace GSTHD
                     Settings.ActivePlaces = filedia.FileName.ToString();
                 }
                 Settings.Write();
-                Form.LoadSettings();
+                Form.LoadPlaces();
             }
         }
 

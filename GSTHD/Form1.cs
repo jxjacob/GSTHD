@@ -131,6 +131,23 @@ namespace GSTHD
         {
             Settings = Settings.Read();
 
+            LoadPlaces();
+
+            ListSometimesHintsSuggestions.Clear();
+            JObject json_hints = JObject.Parse(File.ReadAllText(@"" + Settings.ActiveSometimesHints));
+            foreach (var categorie in json_hints)
+            {
+                foreach (var hint in categorie.Value)
+                {
+                    ListSometimesHintsSuggestions.Add(hint.ToString());
+                }
+            }
+
+            
+        }
+
+        public void LoadPlaces()
+        {
             ListKeycodesWithTag.Clear();
             ListPlacesWithTag.Clear();
             currentlyCycling.Clear();
@@ -148,7 +165,8 @@ namespace GSTHD
                     ListKeycodesWithTag.Add(property.Key, property.Value.ToString());
                 }
 
-            } else
+            }
+            else
             {
                 // legacy format
                 foreach (var property in json_places)
@@ -157,18 +175,6 @@ namespace GSTHD
                 }
 
             }
-
-            ListSometimesHintsSuggestions.Clear();
-            JObject json_hints = JObject.Parse(File.ReadAllText(@"" + Settings.ActiveSometimesHints));
-            foreach (var categorie in json_hints)
-            {
-                foreach (var hint in categorie.Value)
-                {
-                    ListSometimesHintsSuggestions.Add(hint.ToString());
-                }
-            }
-
-            
         }
 
         private void SetMenuBar()

@@ -39,7 +39,7 @@ namespace GSTHD
             this.Location = new Point(data.X, data.Y);
             this.TabStop = false;
             this.AllowDrop = false;
-            this.isBroadcastable = data.isBroadcastable;
+            this.isBroadcastable = !isOnBroadcast && data.isBroadcastable;
 
             if (!isOnBroadcast)
             {

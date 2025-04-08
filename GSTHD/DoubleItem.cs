@@ -65,7 +65,7 @@ namespace GSTHD
                 
             }
 
-            this.isBroadcastable = data.isBroadcastable;
+            this.isBroadcastable = !isBroadcast && data.isBroadcastable;
             this.AutoName = data.AutoName;
             this.Location = new Point(data.X, data.Y);
             this.TabStop = false;

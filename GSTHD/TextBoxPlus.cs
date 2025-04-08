@@ -29,7 +29,7 @@ namespace GSTHD
             BorderStyle = data.BorderStyle;
             Padding = new Padding(5, 10, 5, 5);
             Margin = new Padding(5, 10, 5, 5);
-            isBroadcastable = data.isBroadcastable;
+            isBroadcastable = !isOnBroadcast && data.isBroadcastable;
             TextAlign = data.TextAlignment;
             // for reasons unknown to man and machine, height=19 doesnt actually work with autosize=false
             // i WILL find who is responsible for this bug and lobotomize them
