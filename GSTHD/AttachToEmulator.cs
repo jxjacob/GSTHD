@@ -44,12 +44,15 @@ namespace GSTHD
 
             var gameInfo = getGameVerificationInfo(baseForm.CurrentLayout.App_Settings.AutotrackingGame);
 
-
+            progresswindow pw = new progresswindow("Connecting to Project64...\nAttempting to find the correct memory offset...", 0x4FFFFF);
+            pw.Show();
+            pw.Refresh();
             bool hasseennonzero = false;
             // note to self, if you ever need Nax support, the offset is around 0x40500000
             // and i really wish i knew why
             for (uint potOff = 0xDFD00000; potOff < 0xE01FFFFF; potOff += 16)
             {
+                pw.incBar();
                 int gamecheck;
                 try
                 {
@@ -69,12 +72,14 @@ namespace GSTHD
                     }
                     else
                     {
+                        pw.Close();
                         MessageBox.Show("Incorrect bytes set for verification.\nMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return null;
                     }
                 }
                 catch (Exception e)
                 {
+                    pw.Close();
                     Debug.WriteLine("yeah bud shits fucked");
                     MessageBox.Show(e.Message, "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return null;
@@ -83,11 +88,13 @@ namespace GSTHD
                 if (gamecheck != 0) hasseennonzero = true;
                 if (gamecheck == gameInfo.Item3)
                 {
+                    pw.Close();
                     Debug.WriteLine($"verifyably pj64 at offset {potOff}");
                     return Tuple.Create(target, potOff);
                 }
 
             }
+            pw.Close();
             if (!hasseennonzero) MessageBox.Show("Could not read any data from Project64; and therefore something has probably gone horribly wrong.\nRe-install Project64, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             //MessageBox.Show("Could not find the correct PJ64 offset\nJXJacob hasn't figured out how to solve this one so you might be out of luck.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
@@ -109,10 +116,13 @@ namespace GSTHD
 
             var gameInfo = getGameVerificationInfo(baseForm.CurrentLayout.App_Settings.AutotrackingGame);
 
-
+            progresswindow pw = new progresswindow("Connecting to Project64...\nAttempting to find the correct memory offset...", 0x4FFFFF);
+            pw.Show();
+            pw.Refresh();
             bool hasseennonzero = false;
             for (uint potOff = 0xFDD00000; potOff < 0xFE1FFFFF; potOff += 16)
             {
+                pw.incBar();
                 int gamecheck;
                 try
                 {
@@ -132,12 +142,14 @@ namespace GSTHD
                     }
                     else
                     {
+                        pw.Close();
                         MessageBox.Show("Incorrect bytes set for verification.\nMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return null;
                     }
                 }
                 catch (Exception e)
                 {
+                    pw.Close();
                     Debug.WriteLine("yeah bud shits fucked");
                     MessageBox.Show(e.Message, "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return null;
@@ -146,12 +158,14 @@ namespace GSTHD
                 if (gamecheck != 0) hasseennonzero = true;
                 if ((gamecheck) == gameInfo.Item3)
                 {
+                    pw.Close();
                     Debug.WriteLine($"verifyably pj64_4 at offset {potOff:X}");
 
                     return Tuple.Create(target, potOff);
                 }
 
             }
+            pw.Close();
             if (!hasseennonzero) MessageBox.Show("Could not read any data from Project64; and therefore something has probably gone horribly wrong.\nRe-install Project64, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             //MessageBox.Show("Could not find the correct PJ64 offset\nJXJacob hasn't figured out how to solve this one so you might be out of luck.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
@@ -197,7 +211,7 @@ namespace GSTHD
             {
                 Debug.WriteLine("found dll at " + addressDLL);
             }
-            
+
 
             //Dim attemptOffset As Int64 = 0
             //for (int i = 0; i < 2; i++){
@@ -213,10 +227,14 @@ namespace GSTHD
             //            return null;
             //    }
 
+            progresswindow pw = new progresswindow("Connecting to Bizhawk-DK64...\nAttempting to find the correct memory offset...", 0x5658DF - 0x5A000);
+            pw.Show();
+            pw.Refresh();
             bool hasseennonzero = false;
             //i'm too lazy to find common addresses, so i'm just gonna do a light bruteforce
             for (uint potOff = 0x5A000; potOff < 0x5658DF; potOff += 16)
             {
+                pw.incBar();
                 romAddrStart = potOff;
 
 
@@ -240,12 +258,14 @@ namespace GSTHD
                     }
                     else
                     {
+                        pw.Close();
                         MessageBox.Show("Incorrect bytes set for verification.\nMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return null;
                     }
                 }
                 catch (Exception e)
                 {
+                    pw.Close();
                     Debug.WriteLine("yeah bud shits fucked");
                     MessageBox.Show(e.Message, "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return null;
@@ -254,12 +274,13 @@ namespace GSTHD
                 if (gamecheck != 0) hasseennonzero = true;
                 if (gamecheck == gameInfo.Item3)
                 {
-                    
+                    pw.Close();
                     Debug.WriteLine("verifyably bizhawk");
                     return Tuple.Create(target, (uint)(addressDLL + romAddrStart));
                 }
 
             }
+            pw.Close();
             if (!hasseennonzero)
             {
                 if (Environment.Is64BitProcess)
@@ -309,9 +330,13 @@ namespace GSTHD
             }
             Debug.WriteLine("found dll at 0x" + addressDLL.ToString("X"));
 
+            progresswindow pw = new progresswindow("Connecting to RMG...\nAttempting to find the correct memory offset...", 0x2FC15D8 - 0x29C15D8);
+            pw.Show();
+            pw.Refresh();
             bool hasseennonzero = false;
             for (uint potOff = 0x29C15D8; potOff < 0x2FC15D8; potOff += 16)
             {
+                pw.incBar();
                 ulong romAddrStart = addressDLL + potOff;
 
 
@@ -326,6 +351,7 @@ namespace GSTHD
                     if (testValue != 0) hasseennonzero = true;
                     if ((testValue & 0xff) == gameInfo.Item3)
                     {
+                        pw.Close();
                         return Tuple.Create(target, (readAddress + 0x80000000));
 
                     }
@@ -337,6 +363,7 @@ namespace GSTHD
                     if (testValue != 0) hasseennonzero = true;
                     if ((testValue & 0xffff) == gameInfo.Item3)
                     {
+                        pw.Close();
                         return Tuple.Create(target, (readAddress + 0x80000000));
 
                     }
@@ -348,12 +375,14 @@ namespace GSTHD
                     if (testValue != 0) hasseennonzero = true;
                     if ((testValue & 0xffffffff) == gameInfo.Item3)
                     {
+                        pw.Close();
                         return Tuple.Create(target, (readAddress + 0x80000000));
 
                     }
                 }
                 else
                 {
+                    pw.Close();
                     MessageBox.Show("Incorrect bytes set for verification.\nMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return null;
                 }
@@ -363,6 +392,7 @@ namespace GSTHD
 
             }
 
+            pw.Close();
             if (!hasseennonzero) MessageBox.Show("Could not read any data from RMG; and therefore something has probably gone horribly wrong.\nRe-install RMG, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
         }
@@ -403,9 +433,13 @@ namespace GSTHD
             }
             Debug.WriteLine("found dll at 0x" + addressDLL.ToString("X"));
 
+            progresswindow pw = new progresswindow("Connecting to simple64...\nAttempting to find the correct memory offset...", 0x29C95D8 - 0x1380000);
+            pw.Show();
+            pw.Refresh();
             bool hasseennonzero = false;
             for (uint potOff = 0x1380000; potOff < 0x29C95D8; potOff += 16)
             {
+                pw.incBar();
                 // this is honest to christ a bruteforce. with biz and RMG i had a reference for getting them to work, this was a fuckin guess
                 //     ToT had an option for muper64plus (which simple64 is based on), but this is a near-completely different approach
                 ulong romAddrStart = addressDLL + potOff;
@@ -422,6 +456,7 @@ namespace GSTHD
                     if (testValue != 0) hasseennonzero = true;
                     if ((testValue & 0xff) == gameInfo.Item3)
                     {
+                        pw.Close();
                         return Tuple.Create(target, (readAddress));
 
                     }
@@ -433,6 +468,7 @@ namespace GSTHD
                     if (testValue != 0) hasseennonzero = true;
                     if ((testValue & 0xffff) == gameInfo.Item3)
                     {
+                        pw.Close();
                         return Tuple.Create(target, (readAddress));
 
                     }
@@ -444,12 +480,14 @@ namespace GSTHD
                     if (testValue != 0) hasseennonzero = true;
                     if ((testValue & 0xffffffff) == gameInfo.Item3)
                     {
+                        pw.Close();
                         return Tuple.Create(target, (readAddress));
 
                     }
                 }
                 else
                 {
+                    pw.Close();
                     MessageBox.Show("Incorrect bytes set for verification.\nMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return null;
                 }
@@ -458,6 +496,7 @@ namespace GSTHD
 
 
             }
+            pw.Close();
             if (!hasseennonzero) MessageBox.Show("Could not read any data from simple64; and therefore something has probably gone horribly wrong.\nRe-install simple64, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
         }
@@ -504,9 +543,14 @@ namespace GSTHD
             }
             Debug.WriteLine("found dll at 0x" + addressDLL.ToString("X"));
 
+
+            progresswindow pw = new progresswindow("Connecting to Parallel Launcher...\nAttempting to find the correct memory offset...", 0xD56000 - 0x845000);
+            pw.Show();
+            pw.Refresh();
             bool hasseennonzero = false;
             for (uint potOff = 0x845000; potOff < 0xD56000; potOff += 16)
             {
+                pw.incBar();
                 ulong romAddrStart = addressDLL + potOff;
 
 
@@ -528,6 +572,7 @@ namespace GSTHD
                     if (testValue != 0) hasseennonzero = true;
                     if ((testValue & 0xff) == gameInfo.Item3)
                     {
+                        pw.Close();
                         return Tuple.Create(target, readAddress);
 
                     }
@@ -539,6 +584,7 @@ namespace GSTHD
                     if (testValue != 0) hasseennonzero = true;
                     if ((testValue & 0xffff) == gameInfo.Item3)
                     {
+                        pw.Close();
                         return Tuple.Create(target, readAddress);
 
                     }
@@ -551,18 +597,20 @@ namespace GSTHD
                     if (testValue != 0) hasseennonzero = true;
                     if ((testValue & 0xffffffff) == gameInfo.Item3)
                     {
+                        pw.Close();
                         return Tuple.Create(target, readAddress);
 
                     }
                 }
                 else
                 {
+                    pw.Close();
                     MessageBox.Show("Incorrect bytes set for verification.\nMust be either 8, 16, or 32", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return null;
                 }
 
             }
-
+            pw.Close();
             if (!hasseennonzero) MessageBox.Show("Could not read any data from Parallel Launcher; and therefore something has probably gone horribly wrong.\nRe-install Parallel Launcher, and if the problem persists afterwards, contact JXJacob directly for further help.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
         }
@@ -637,6 +685,7 @@ namespace GSTHD
                     if (testValue != 0) hasseennonzero = true;
                     if ((testValue & 0xff) == gameInfo.Item3)
                     {
+                        pw.Close();
                         return Tuple.Create(target, readAddress);
 
                     }
@@ -648,6 +697,7 @@ namespace GSTHD
                     if (testValue != 0) hasseennonzero = true;
                     if ((testValue & 0xffff) == gameInfo.Item3)
                     {
+                        pw.Close();
                         return Tuple.Create(target, readAddress);
 
                     }

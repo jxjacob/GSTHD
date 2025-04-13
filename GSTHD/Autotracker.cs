@@ -810,6 +810,8 @@ namespace GSTHD
                         if (requiredversion > internalRandoVersion) continue;
                     }
                     temp.name = parts[0];
+                    temp.group = parts[7];
+                    // for 5.0, probably do a check where if temp.name or temp.group is already found as a TA or TG, then just drop it
                     temp.address = (uint)Convert.ToInt32(parts[1], 16);
                     temp.numBytes = int.Parse(parts[2]);
                     if (parts[3] != "")
@@ -837,7 +839,6 @@ namespace GSTHD
                         temp.offset = 0;
                     }
                     temp.type = parts[6];
-                    temp.group = parts[7];
                     //Debug.WriteLine(temp.name + " :: " + temp.bitmask);
                     if (parts[8] != "")
                     {

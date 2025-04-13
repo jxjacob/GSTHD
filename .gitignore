@@ -5,4 +5,8 @@
 /GSTHD/todo.txt
 GSTHD/.vs/GSTHD.csproj.dtbcache.json
 
-packages/
+/packages/
+*.pfx
+/packages
+/packages
+/packages/Autoupdater.NET.Official.1.9.1
