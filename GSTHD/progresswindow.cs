@@ -24,9 +24,9 @@ namespace GSTHD
 
         }
 
-        public void incBar()
+        public void incBar(uint val = 1)
         {
-            connectProgress.Value += 1;
+            if (connectProgress.Value + (int)val < connectProgress.Maximum) connectProgress.Value += (int)val;
         }
 
     }

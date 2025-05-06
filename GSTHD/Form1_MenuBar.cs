@@ -1489,7 +1489,7 @@ namespace GSTHD
                 switch (Settings.SelectEmulator.ToString())
                 {
                     case "Project64":
-                        var resultPJ = AttachToEmulators.attachToProject64(Form);
+                        var resultPJ = AttachToEmulators.attachToEmulator(Form, SelectEmulatorOption.Project64);
                         if (resultPJ != null)
                         {
                             if (resultPJ.Item1 != null)
@@ -1505,7 +1505,7 @@ namespace GSTHD
                         }
                         break;
                     case "Project64_4":
-                        var resultPJ4 = AttachToEmulators.attachToProject64_4(Form);
+                        var resultPJ4 = AttachToEmulators.attachToEmulator(Form, SelectEmulatorOption.Project64_4);
                         if (resultPJ4 != null)
                         {
                             if (resultPJ4.Item1 != null)
@@ -1521,7 +1521,7 @@ namespace GSTHD
                         }
                         break;
                     case "Bizhawk":
-                        var resultBH = AttachToEmulators.attachToBizhawk(Form);
+                        var resultBH = AttachToEmulators.attachToEmulator(Form, SelectEmulatorOption.Bizhawk);
                         if (resultBH != null)
                         {
                             if (resultBH.Item1 != null)
@@ -1537,7 +1537,7 @@ namespace GSTHD
                         }
                         break;
                     case "RMG":
-                        var resultRMG = AttachToEmulators.attachToRMG(Form);
+                        var resultRMG = AttachToEmulators.attachToEmulator(Form, SelectEmulatorOption.RMG);
                         if (resultRMG != null)
                         {
                             if (resultRMG.Item1 != null)
@@ -1553,7 +1553,7 @@ namespace GSTHD
                         }
                         break;
                     case "simple64":
-                        var results64 = AttachToEmulators.attachToSimple64(Form);
+                        var results64 = AttachToEmulators.attachToEmulator(Form, SelectEmulatorOption.simple64);
                         if (results64 != null)
                         {
                             if (results64.Item1 != null)
@@ -1569,7 +1569,8 @@ namespace GSTHD
                         }
                         break;
                     case "parallel":
-                        var resultpar = AttachToEmulators.attachToParallel(Form);
+                        //var resultpar = AttachToEmulators.attachToParallel(Form);
+                        var resultpar = AttachToEmulators.attachToEmulator(Form, SelectEmulatorOption.parallel);
                         if (resultpar != null)
                         {
                             if (resultpar.Item1 != null)
@@ -1585,7 +1586,7 @@ namespace GSTHD
                         }
                         break;
                     case "retroarch":
-                        var resultret = AttachToEmulators.attachToRetroarch(Form);
+                        var resultret = AttachToEmulators.attachToEmulator(Form, SelectEmulatorOption.retroarch);
                         if (resultret != null)
                         {
                             if (resultret.Item1 != null)
