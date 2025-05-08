@@ -617,6 +617,7 @@ namespace GSTHD
                                     BackColor = item.BackColor,
                                     OuterPathID = (item.OuterPathID != null) ? $"{namenum}{item.OuterPathID}" : null,
                                     isMarkable = item.isMarkable,
+                                    LinkedItem = item.LinkedItem
                                 };
                                 panelLayout.Controls.Add(new Item(gs, settings, isOnBroadcast));
                                 namenum++;
@@ -1966,6 +1967,7 @@ namespace GSTHD
         public int RightDK64_ID { get; set; } = -1;
         public string AutoName { get; set; } = null;
         public string OuterPathID { get; set; } = null;
+        public string LinkedItem {  get; set; } = null;
         public bool CanCycle { get; set; } = false;
         public string DragImage { get; set; } = null;
         public Color BackColor { get; set; } = Color.Transparent;
@@ -1986,6 +1988,7 @@ namespace GSTHD
         public string ActiveTinySongImage { get; set; }
         public bool isBroadcastable { get; set; } = false;
         public string AutoName { get; set; } = null;
+        public string LinkedItem { get; set; } = null;
         public bool isMarkable { get; set; } = true;
     }
 
@@ -2040,6 +2043,7 @@ namespace GSTHD
         public string AutoName { get; set; } = null;
         public string OuterPathID { get; set; } = null;
         public bool isDraggable { get; set; } = true;
+        public string LinkedItem { get; set; } = null;
         public bool CanCycle { get; set; } = false;
         public BorderStyle BorderStyle { get; set; } = BorderStyle.FixedSingle;
         public bool isMarkable { get; set; } = true;

@@ -32,6 +32,8 @@ namespace GSTHD
         public string DoubleBroadcastName { get; set; }
         public bool isDraggable { get; set; }
 
+        public string LinkedItem { get; set; } = null;
+
         public string OuterPathID { get; set; }
 
         public string AutoName { get; set; } = null;
@@ -60,6 +62,7 @@ namespace GSTHD
             this.DK64_ID = data.DK64_ID;
             this.OuterPathID = data.OuterPathID;
             this.isMarkable = data.isMarkable;
+            LinkedItem = data.LinkedItem;
 
             this.DefaultIndex = data.DefaultIndex;
             ImageIndex = DefaultIndex;
@@ -113,7 +116,7 @@ namespace GSTHD
             }
         }
 
-        public void UpdateImage()
+        public void UpdateImage(bool isRemote = false)
         {
             if (Image != null) Image.Dispose();
             Image = null;
@@ -166,6 +169,18 @@ namespace GSTHD
                     }
                 }
 
+            }
+            if ((LinkedItem != null && LinkedItem != "") && isRemote == false)
+            {
+                GSTForms f = (GSTForms)this.FindForm();
+                if (f != null)
+                {
+                    Item ite = (Item)f.Controls.Find(LinkedItem, true)[0];
+                    ite.ImageIndex = ImageIndex;
+                    ite.isMarked = isMarked;
+                    ite.UpdateImage(true);
+
+                }
             }
             if (IsHandleCreated) { Invalidate(); }
         }

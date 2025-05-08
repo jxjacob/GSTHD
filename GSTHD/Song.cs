@@ -301,6 +301,7 @@ namespace GSTHD
         public bool isBroadcastable { get; set; }
         private bool isOnBroadcast;
         public string AutoName { get; set; } = null;
+        public string LinkedItem { get; set; } = null;
 
         private int ImageIndex = 0;
 
@@ -335,6 +336,7 @@ namespace GSTHD
             TabStop = false;
             AllowDrop = true;
             isMarkable = data.isMarkable;
+            LinkedItem = data.LinkedItem;
 
             if (ImageNames.Length > 0)
             {
@@ -432,7 +434,7 @@ namespace GSTHD
             
         }
 
-        public void UpdateImage()
+        public void UpdateImage(bool isRemote=false)
         {
             if (Image != null) Image.Dispose();
             Image = null;
@@ -444,13 +446,25 @@ namespace GSTHD
                 {
                     soo.ImageIndex = ImageIndex;
                     soo.isMarked = isMarked;
-                    soo.UpdateImage();
+                    soo.UpdateImage(true);
                 }
                 else if (so is Item soi)
                 {
                     soi.ImageIndex = ImageIndex;
                     soi.isMarked = isMarked;
-                    soi.UpdateImage();
+                    soi.UpdateImage(true);
+                }
+            }
+            if (LinkedItem != null && LinkedItem != "" && isRemote == false)
+            {
+                GSTForms f = (GSTForms)this.FindForm();
+                if (f != null)
+                {
+                    Song ite = (Song)f.Controls.Find(LinkedItem, true)[0];
+                    ite.ImageIndex = ImageIndex;
+                    ite.isMarked = isMarked;
+                    ite.UpdateImage(true);
+
                 }
             }
             if (IsHandleCreated) { Invalidate(); }
