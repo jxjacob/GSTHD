@@ -595,6 +595,7 @@ namespace GSTHD
                         {
                             howMany -= howManySlams;
                             howManySlams += howMany;
+                            addedpoints = (pointsMode) ? pointspread[DK64Items[36].itemType] : -1;
                         } else
                         {
                             if (hasStartingInLog)
