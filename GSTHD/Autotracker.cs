@@ -45,6 +45,13 @@ namespace GSTHD
         public int right_dk64_id = -1;
         public OrganicImage targetControl;
     }
+
+    public class AlreadyRead
+    {
+        public int value;
+        public uint address;
+        public int bits;
+    }
     public class Autotracker : UpdatableFromSettings
     {
         private Process emulator;
@@ -54,6 +61,7 @@ namespace GSTHD
 
         private List<TrackedAddress> trackedAddresses = new List<TrackedAddress>();
         private List<TrackedGroup> trackedGroups = new List<TrackedGroup>();
+        private List<AlreadyRead> alreadyReads = new List<AlreadyRead>();
 
         private uint desiredGameAddr;
         private int desiredGameBytes;
@@ -385,6 +393,7 @@ namespace GSTHD
         private void MainTracker(object state, ElapsedEventArgs e)
         {
             FlushGroups();
+            alreadyReads.Clear();
             if (LZTracking) UpdateCurrentMap();
             if (SongTracking && form.Settings.EnableSongTracking) UpdateNowPlaying();
             foreach (var ta in trackedAddresses)
@@ -482,16 +491,28 @@ namespace GSTHD
 
         public int GoRead(uint addr, int numOfBits)
         {
+            // save on reading from memory if we've already read that this cycle (really only matters with console)
+            AlreadyRead result = alreadyReads.Find(x => x.address.Equals(addr) && x.bits.Equals(numOfBits));
+            if (result != null)
+            {
+                return result.value;
+            }
             if (!is64)
             {
                 switch (numOfBits)
                 {
                     case 8:
-                        return Memory.ReadInt8(emuHandle, offset + Memory.Int8AddrFix(addr));
+                        var value8 = Memory.ReadInt8(emuHandle, offset + Memory.Int8AddrFix(addr));
+                        alreadyReads.Add(new AlreadyRead { value = value8, address = addr, bits = numOfBits });
+                        return value8;
                     case 16:
-                        return Memory.ReadInt16(emuHandle, offset + Memory.Int16AddrFix(addr));
+                        var value16 = Memory.ReadInt16(emuHandle, offset + Memory.Int16AddrFix(addr));
+                        alreadyReads.Add(new AlreadyRead { value = value16, address = addr, bits = numOfBits });
+                        return value16;
                     case 32:
-                        return Memory.ReadInt32(emuHandle, offset + addr);
+                        var value32 = Memory.ReadInt32(emuHandle, offset + addr);
+                        alreadyReads.Add(new AlreadyRead { value = value32, address = addr, bits = numOfBits });
+                        return value32;
                     default:
                         Debug.WriteLine("could not define how many bits to read");
                         return 0;
@@ -501,11 +522,17 @@ namespace GSTHD
                 switch (numOfBits)
                 {
                     case 8:
-                        return Memory.ReadInt8(emuHandle, offset64 + Memory.Int8AddrFix(addr));
+                        var value8 = Memory.ReadInt8(emuHandle, offset64 + Memory.Int8AddrFix(addr));
+                        alreadyReads.Add(new AlreadyRead { value = value8, address = addr, bits = numOfBits });
+                        return value8;
                     case 16:
-                        return Memory.ReadInt16(emuHandle, offset64 + Memory.Int16AddrFix(addr));
+                        var value16 = Memory.ReadInt16(emuHandle, offset64 + Memory.Int16AddrFix(addr));
+                        alreadyReads.Add(new AlreadyRead { value = value16, address = addr, bits = numOfBits });
+                        return value16;
                     case 32:
-                        return Memory.ReadInt32(emuHandle, offset64 + addr);
+                        var value32 = Memory.ReadInt32(emuHandle, offset64 + addr);
+                        alreadyReads.Add(new AlreadyRead { value = value32, address = addr, bits = numOfBits });
+                        return value32;
                     default:
                         Debug.WriteLine("could not define how many bits to read");
                         return 0;
