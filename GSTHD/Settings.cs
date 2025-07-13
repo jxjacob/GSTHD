@@ -207,6 +207,12 @@ namespace GSTHD
             }
         }
 
+        public string GetLayoutName()
+        {
+            string[] parts = ActiveLayout.Split('\\');
+            return parts[parts.Length - 1].Substring(0, parts[parts.Length - 1].Length - 5);
+        }
+
         public void AddAltSetting(string groupname, string settingname, bool check)
         {
             if (!AlternateSettings.Where(x => x.LayoutName == ActiveLayout).Any())
