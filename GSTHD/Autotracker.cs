@@ -21,6 +21,7 @@ namespace GSTHD
     {
         public string name;
         public uint address;
+        public uint pointerAddress = 0;
         public int numBytes;
         public int currentValue = 0;
         public uint targetValue;
@@ -32,6 +33,8 @@ namespace GSTHD
         public int dk64_id = -1;
         public bool enabled = false;
         public bool locked = false;
+        public int version = 0;
+        public bool usesPointer = false;
     }
     public class TrackedGroup
     {
@@ -44,6 +47,7 @@ namespace GSTHD
         public int left_dk64_id = -1;
         public int right_dk64_id = -1;
         public OrganicImage targetControl;
+        public int version = 0;
     }
 
     public class AlreadyRead
@@ -82,6 +86,9 @@ namespace GSTHD
         private uint currentMapTimerAddr;
         private string currentSongGame;
         private string currentSongTitle;
+
+        private uint globalMovePointerAddr;
+        private int globalMovePointerBytes;
 
         private System.Timers.Timer timer;
         private Form1 form;
@@ -415,7 +422,7 @@ namespace GSTHD
                             {
                                 if (!ta.locked)
                                 {
-                                    if ((GoRead(ta.address, ta.numBytes) & ta.bitmask) == ta.bitmask)
+                                    if ((GoRead(ta.address, ta.numBytes, ta.usesPointer) & ta.bitmask) == ta.bitmask)
                                     {
                                         if (result.isDouble)
                                         {
@@ -457,7 +464,7 @@ namespace GSTHD
                             {
                                 if (!ta.locked)
                                 {
-                                    ta.currentValue = GoRead(ta.address, ta.numBytes);
+                                    ta.currentValue = GoRead(ta.address, ta.numBytes, ta.usesPointer);
                                 }
                                 result.runningvalue += ta.currentValue;
                             }
@@ -470,7 +477,7 @@ namespace GSTHD
                         }
                     } else
                     {
-                        if (!ta.locked) UTSingle(ta, GoRead(ta.address, ta.numBytes));
+                        if (!ta.locked) UTSingle(ta, GoRead(ta.address, ta.numBytes, ta.usesPointer));
                     }
                 }
                 else
@@ -489,13 +496,17 @@ namespace GSTHD
             }
         }
 
-        public int GoRead(uint addr, int numOfBits)
+        public int GoRead(uint addr, int numOfBits, bool usesPointer = false)
         {
             // save on reading from memory if we've already read that this cycle (really only matters with console)
             AlreadyRead result = alreadyReads.Find(x => x.address.Equals(addr) && x.bits.Equals(numOfBits));
             if (result != null)
             {
                 return result.value;
+            }
+            if (usesPointer)
+            {
+                addr += globalMovePointerAddr;
             }
             if (!is64)
             {
@@ -820,6 +831,12 @@ namespace GSTHD
                     Debug.WriteLine($"rando v{internalRandoVersion}");
                     continue;
                 }
+                else if (parts[0] == "game_global_move_pointer")
+                {
+                    // used for pointer-ed items
+                    globalMovePointerAddr = (uint)GoRead((uint)Convert.ToInt32(parts[1], 16), int.Parse(parts[2])) - 0x80000000;
+                    continue;
+                }
 
                 // if a system variable is made that isnt one fo the 3 above, its wrong and gets ignored
                 if (parts[6] == "system") continue;
@@ -829,16 +846,36 @@ namespace GSTHD
                 {
                     TrackedAddress temp = new TrackedAddress();
                     // doing this part first to prevent groups from getting the wrong numbers
+                    int requiredversion = 0;
                     if (parts[9] != "")
                     {
                         // prevent new address from being tracked on older versions
-                        int requiredversion = int.Parse(parts[9]);
+                        requiredversion = int.Parse(parts[9]);
                         //Debug.WriteLine($"{temp.name} - {requiredversion} - {internalRandoVersion}");
                         if (requiredversion > internalRandoVersion) continue;
                     }
+                    temp.version = requiredversion;
                     temp.name = parts[0];
                     temp.group = parts[7];
                     // for 5.0, probably do a check where if temp.name or temp.group is already found as a TA or TG, then just drop it
+                    TrackedAddress ar = trackedAddresses.Find(x => x.name.Equals(temp.name));
+                    if (ar != null)
+                    {
+                        if (ar.version > requiredversion)
+                        {
+                            Debug.WriteLine("Item " + temp.name + " is being discarded because its version " + requiredversion + " is less than the required " + ar.version);
+                            continue;
+                        }
+                    }
+                    TrackedGroup gr = trackedGroups.Find(x => x.name.Equals(temp.group));
+                    if (gr != null)
+                    {
+                        if (gr.version > requiredversion)
+                        {
+                            Debug.WriteLine("Item " + temp.name + " of group " + temp.group + " is being discarded because its version " + requiredversion + " is less than the required " + gr.version);
+                            continue;
+                        }
+                    }
                     temp.address = (uint)Convert.ToInt32(parts[1], 16);
                     temp.numBytes = int.Parse(parts[2]);
                     if (parts[3] != "")
@@ -875,21 +912,26 @@ namespace GSTHD
                         temp.dk64_id = -1;
                     }
 
+                    temp.usesPointer = (parts[10] != "");
+
+
                     if (temp.group != "")
                     {
                         if (!foundGroups.Contains(temp.group))
                         {
-                            bool isD = (temp.type == "doubleitem_l" || temp.type == "doubleitem_r") ;
+                            bool isD = (temp.type == "doubleitem_l" || temp.type == "doubleitem_r");
                             foundGroups.Add(temp.group);
                             if (isD)
                             {
-                                if (temp.type == "doubleitem_l") trackedGroups.Add(new TrackedGroup() { name = temp.group, countMax = 1, isDouble = true, left_dk64_id = temp.dk64_id });
-                                if (temp.type == "doubleitem_r") trackedGroups.Add(new TrackedGroup() { name = temp.group, countMax = 1, isDouble = true, right_dk64_id = temp.dk64_id });
-                            } else
-                            {
-                                trackedGroups.Add(new TrackedGroup() { name = temp.group, countMax = 1 });
+                                if (temp.type == "doubleitem_l") trackedGroups.Add(new TrackedGroup() { name = temp.group, countMax = 1, isDouble = true, left_dk64_id = temp.dk64_id, version = requiredversion });
+                                if (temp.type == "doubleitem_r") trackedGroups.Add(new TrackedGroup() { name = temp.group, countMax = 1, isDouble = true, right_dk64_id = temp.dk64_id, version = requiredversion });
                             }
-                        } else
+                            else
+                            {
+                                trackedGroups.Add(new TrackedGroup() { name = temp.group, countMax = 1, version = requiredversion });
+                            }
+                        }
+                        else
                         {
                             TrackedGroup result = trackedGroups.Find(x => x.name.Equals(temp.group));
                             result.countMax++;

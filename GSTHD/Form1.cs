@@ -481,7 +481,7 @@ namespace GSTHD
                 {
                     MedallionState state = x.GetState();
                     string conv = state.ToString();
-                    if (conv != "0,0,0")
+                    if (conv != $"{x.DefaultDungeonIndex},0,0")
                     {
                         thejson.Add(x.Name, conv);
                     }

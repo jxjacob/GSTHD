@@ -29,7 +29,7 @@ namespace GSTHD
         private bool Wraparound;
         private int ImageIndex = 0;
 
-        private int DefaultDungeonIndex;
+        public int DefaultDungeonIndex;
         private int DungeonIndex;
 
         public Label SelectedDungeon;
