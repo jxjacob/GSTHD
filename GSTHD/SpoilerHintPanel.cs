@@ -280,6 +280,8 @@ namespace GSTHD
                 foreach (var move in tempstarting)
                 {
                     var tempitem = DK64Items.FirstOrDefault(x => x.Value.name == move);
+                    // kongs shouldn't be present in this section, so an ID of 0 here means a failed lookup, which we'll skip to not bug things out further
+                    if (tempitem.Key == 0) continue;
                     if (tempitem.Key != 36)
                     {
                         startingItems.Add(tempitem.Key);

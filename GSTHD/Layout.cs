@@ -319,12 +319,18 @@ namespace GSTHD
                 }
 
                 //Debug.WriteLine(App_Settings.BroadcastFile);
-                if (App_Settings.BroadcastFile != String.Empty && !isOnBroadcast)
+                if (App_Settings.BroadcastFile != String.Empty && App_Settings.BroadcastFile != null && !isOnBroadcast)
                 {
                     settings.ActiveLayoutBroadcastFile = App_Settings.BroadcastFile;
                 } else
                 {
                     if (!isOnBroadcast) settings.ActiveLayoutBroadcastFile = null;
+                }
+
+                if (App_Settings.PlacesFile != String.Empty && App_Settings.PlacesFile != null && !isOnBroadcast)
+                {
+                    settings.ActivePlaces = App_Settings.PlacesFile;
+                    ((Form1)form).LoadPlaces();
                 }
 
                 if (settings.EnabledMarks == null)
@@ -2354,6 +2360,7 @@ namespace GSTHD
         public bool EnableBroadcast { get; set; } = false;
         public string BroadcastFile { get; set; } = null;
         public string AutotrackingGame { get; set; } = null;
+        public string PlacesFile { get; set; } = null;
     }
 
     public class SubAltSettings
