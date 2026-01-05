@@ -38,6 +38,12 @@ namespace GSTHD
         public string AutoName { get; set; } = null;
         public string AutoSubName { get; set; } = null;
 
+        #if DEBUG
+                public bool MinimumCap = false;
+        #else
+                public bool MinimumCap = true;
+        #endif
+
         delegate void SetStateCallback(CollectedItemState state);
         delegate void UpdateCountCallback();
 
@@ -200,6 +206,7 @@ namespace GSTHD
             } else
             {
                 CollectedItems = state.CollectedItems;
+                if (MinimumCap && CollectedItems < 0) CollectedItems = 0;
                 isMarked = state.isMarked;
                 UpdateCount();
                 DragBehaviour.SaveChanges();

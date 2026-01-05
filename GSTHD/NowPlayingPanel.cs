@@ -11,9 +11,9 @@ namespace GSTHD
 {
     class NowPlayingPanel : Panel, IAlternatableObject
     {
-        private Label displayedSongGame;
+        private LabelOneTimeThing displayedSongGame;
 
-        private Label displayedSongTitle;
+        private LabelOneTimeThing displayedSongTitle;
 
         private bool isBroadcastable = false;
 
@@ -29,7 +29,7 @@ namespace GSTHD
             this.BackColor = data.BackColor;
 
 
-            displayedSongTitle = new Label()
+            displayedSongTitle = new LabelOneTimeThing()
             {
                 Name = Guid.NewGuid().ToString(),
                 Text = "Please Autotrack a DK64R 4.0+ Seed".ToUpper(),
@@ -44,7 +44,7 @@ namespace GSTHD
             };
             Controls.Add(displayedSongTitle);
 
-            displayedSongGame = new Label()
+            displayedSongGame = new LabelOneTimeThing()
             {
                 Name = Guid.NewGuid().ToString(),
                 Text = "To begin song tracking:".ToUpper(),
@@ -65,9 +65,6 @@ namespace GSTHD
             isBroadcastable = data.isBroadcastable && !isOnBroadcast;
 
         }
-
-
-
 
 
         public void SetNames(string Game, string Title)

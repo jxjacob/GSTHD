@@ -34,7 +34,7 @@ namespace GSTHD
         public bool enabled = false;
         public bool locked = false;
         public int version = 0;
-        public bool usesPointer = false;
+        public int usesPointer = 0;
     }
     public class TrackedGroup
     {
@@ -87,8 +87,9 @@ namespace GSTHD
         private string currentSongGame;
         private string currentSongTitle;
 
-        private uint globalMovePointerAddr;
-        private int globalMovePointerBytes;
+        private List<uint> globalPointers = new List<uint>();
+        private List<uint> globalPointerBaseAddr = new List<uint>();
+        private List<int> globalPointerBaseBytes = new List<int>();
 
         private System.Timers.Timer timer;
         private Form1 form;
@@ -97,6 +98,7 @@ namespace GSTHD
         private bool is64 = false;
         private bool LZTracking = false;
         private bool SongTracking = false;
+        private bool PointerTracking = false;
 
         private int internalRandoVersion = 0;
 
@@ -385,6 +387,16 @@ namespace GSTHD
             }
         }
 
+        private void UpdatePointers()
+        {
+            
+                for (int i = 0; i < globalPointers.Count; i++)
+                {
+                    globalPointers[i] = (uint)GoRead(globalPointerBaseAddr[i], globalPointerBaseBytes[i]) - 0x80000000;
+                    //Debug.WriteLine($"updating point {i} to {globalPointers[i]}");
+                }
+        }
+
         private void WriteSongData(string game, string title)
         {
             if (form.Settings.WriteSongDataToFile == Settings.SongFileWriteOption.Multi)
@@ -397,12 +409,18 @@ namespace GSTHD
             }
         }
 
+        private bool LockCalc(TrackedAddress inp)
+        {
+            return (inp.usesPointer > 0) ? false : inp.locked;
+        }
+
         private void MainTracker(object state, ElapsedEventArgs e)
         {
             FlushGroups();
             alreadyReads.Clear();
             if (LZTracking) UpdateCurrentMap();
             if (SongTracking && form.Settings.EnableSongTracking) UpdateNowPlaying();
+            if (PointerTracking) UpdatePointers();
             foreach (var ta in trackedAddresses)
             {
                 if (VerifyGameState())
@@ -420,7 +438,7 @@ namespace GSTHD
                             //Debug.WriteLine(" ");
                             if (ta.bitmask!= 0)
                             {
-                                if (!ta.locked)
+                                if (!LockCalc(ta))
                                 {
                                     if ((GoRead(ta.address, ta.numBytes, ta.usesPointer) & ta.bitmask) == ta.bitmask)
                                     {
@@ -462,7 +480,7 @@ namespace GSTHD
                                 
                             } else
                             {
-                                if (!ta.locked)
+                                if (!LockCalc(ta))
                                 {
                                     ta.currentValue = GoRead(ta.address, ta.numBytes, ta.usesPointer);
                                 }
@@ -477,7 +495,7 @@ namespace GSTHD
                         }
                     } else
                     {
-                        if (!ta.locked) UTSingle(ta, GoRead(ta.address, ta.numBytes, ta.usesPointer));
+                        if (!LockCalc(ta)) UTSingle(ta, GoRead(ta.address, ta.numBytes, ta.usesPointer));
                     }
                 }
                 else
@@ -496,7 +514,7 @@ namespace GSTHD
             }
         }
 
-        public int GoRead(uint addr, int numOfBits, bool usesPointer = false)
+        public int GoRead(uint addr, int numOfBits, int usesPointer = 0)
         {
             // save on reading from memory if we've already read that this cycle (really only matters with console)
             AlreadyRead result = alreadyReads.Find(x => x.address.Equals(addr) && x.bits.Equals(numOfBits));
@@ -504,9 +522,9 @@ namespace GSTHD
             {
                 return result.value;
             }
-            if (usesPointer)
+            if (usesPointer > 0)
             {
-                addr += globalMovePointerAddr;
+                addr += globalPointers[usesPointer -1];
             }
             if (!is64)
             {
@@ -831,14 +849,16 @@ namespace GSTHD
                     Debug.WriteLine($"rando v{internalRandoVersion}");
                     continue;
                 }
-                else if (parts[0] == "game_global_move_pointer")
+                else if (parts[0].StartsWith("game_global_move_pointer"))
                 {
                     // used for pointer-ed items
-                    globalMovePointerAddr = (uint)GoRead((uint)Convert.ToInt32(parts[1], 16), int.Parse(parts[2])) - 0x80000000;
+                    globalPointers.Add((uint)GoRead((uint)Convert.ToInt32(parts[1], 16), int.Parse(parts[2])) - 0x80000000);
+                    globalPointerBaseAddr.Add((uint)Convert.ToInt32(parts[1], 16));
+                    globalPointerBaseBytes.Add(int.Parse(parts[2]));
                     continue;
                 }
 
-                // if a system variable is made that isnt one fo the 3 above, its wrong and gets ignored
+                // if a system variable is made that isnt one fo the 7 above, its wrong and gets ignored
                 if (parts[6] == "system") continue;
 
                 // dont add to thing if theres no address set (for me slowly adding things)
@@ -912,7 +932,20 @@ namespace GSTHD
                         temp.dk64_id = -1;
                     }
 
-                    temp.usesPointer = (parts[10] != "");
+                    if (parts[10] != "")
+                    {
+                        if (parts[10] == "TRUE")
+                        {
+                            temp.usesPointer = 1;
+                        } else
+                        {
+                            temp.usesPointer = int.Parse(parts[10]);
+                        }
+                        PointerTracking = true;
+                    } else
+                    {
+                        temp.usesPointer = 0;
+                    }
 
 
                     if (temp.group != "")

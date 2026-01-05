@@ -1,6 +1,7 @@
 /GSTHD/obj
 /GSTHD/bin
 /.vs
+/.idea
 
 /GSTHD/todo.txt
 GSTHD/.vs/GSTHD.csproj.dtbcache.json

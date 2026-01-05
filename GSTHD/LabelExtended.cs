@@ -8,6 +8,15 @@ using System.Windows.Forms;
 
 namespace GSTHD
 {
+    public class LabelOneTimeThing : Label
+    {
+        // overload class JUST for song display
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            var flags = TextFormatFlags.NoPrefix;
+            TextRenderer.DrawText(e.Graphics, Text, Font, ClientRectangle, ForeColor, flags);
+        }
+    }
     public class LabelExtended : Label, IAlternatableObject
     {
         protected override void OnPaint(PaintEventArgs e)

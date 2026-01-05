@@ -180,6 +180,7 @@ namespace GSTHD
                 {
                     // use this previously read address to find the game verification data
                     var testValue = Memory.ReadInt32(target.Handle, (readAddress + EmuInfo.ExtraOffset + gameInfo.Item1));
+                    //Debug.WriteLine($"{testValue.ToString("X")} -- {(readAddress + EmuInfo.ExtraOffset + gameInfo.Item1).ToString("X")}");
                     if (testValue != 0) hasseennonzero = true;
                     if (testValue == gameInfo.Item3)
                     {
