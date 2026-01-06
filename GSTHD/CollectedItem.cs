@@ -206,7 +206,7 @@ namespace GSTHD
             } else
             {
                 CollectedItems = state.CollectedItems;
-                if (MinimumCap && CollectedItems < 0) CollectedItems = 0;
+                if (MinimumCap && CollectedItems < CountMin) CollectedItems = CountMin;
                 isMarked = state.isMarked;
                 UpdateCount();
                 DragBehaviour.SaveChanges();
