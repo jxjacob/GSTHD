@@ -77,6 +77,7 @@ namespace GSTHD
         private bool isOnBroadcast = false;
         public bool isMarkable = true;
         private bool hasStartingInLog = false;
+        private bool stupidStartingSlam = false;
 
         private static readonly Regex unspacer = new Regex(@"\s+");
 
@@ -306,12 +307,12 @@ namespace GSTHD
                             startingNotHintable.Add(tempitem.Key);
                             Debug.WriteLine("adding " + tempitem.Value.name + " to UNHINTABLE starting moves");
                         }
-                        //else
-                        //{
-                        //    // slams are handled seperately, and arent in the startingItems list
-                        //    howManySlams += 1;
-                        //    Debug.WriteLine("adding " + howManySlams + "th SLAM to slamcount");
-                        //}
+                        else
+                        {
+                            // slams are handled seperately, and arent in the startingNotHintable list
+                            stupidStartingSlam = true;
+                            Debug.WriteLine("adding starting slam to UNHINTABLE starting moves");
+                        }
                     }
                 } catch (Exception)
                 {
@@ -610,6 +611,7 @@ namespace GSTHD
                             {
                                 isStarting = true;
                                 addedpoints = (pointsMode) ? 0 : -1;
+                                if (stupidStartingSlam) howMany -= 1;
                             }
                             else
                             {
