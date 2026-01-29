@@ -50,6 +50,7 @@ namespace GSTHD
             { Settings.SelectEmulatorOption.RMG, new EmulatorInfo(Settings.SelectEmulatorOption.RMG, "Rosalie's Mupen GUI", "rmg" , true, "mupen64plus.dll", true, 0x29C15D8, 0x2FC15D8, extraOffset:0x80000000) },
             { Settings.SelectEmulatorOption.simple64, new EmulatorInfo(Settings.SelectEmulatorOption.simple64, "simple64", "simple64-gui", true, "libmupen64plus.dll", true, 0x1380000, 0x29C95D8) },
             { Settings.SelectEmulatorOption.parallel, new EmulatorInfo(Settings.SelectEmulatorOption.parallel, "Parallel Launcher", "retroarch", true, "parallel_n64_next_libretro.dll", true, 0x845000, 0xD56000) },
+            { Settings.SelectEmulatorOption.parallel903, new EmulatorInfo(Settings.SelectEmulatorOption.parallel, "Parallel Launcher", "retroarch", true, "parallel_n64_next_libretro.dll", true, 0x1400000, 0x1800000) },
             { Settings.SelectEmulatorOption.retroarch, new EmulatorInfo(Settings.SelectEmulatorOption.retroarch, "RetroArch", "retroarch", true, "mupen64plus_next_libretro.dll", true, 0, 0xFFFFFF, step:4) }
         };
 

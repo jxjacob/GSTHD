@@ -144,6 +144,7 @@ namespace GSTHD
             { Settings.SelectEmulatorOption.RMG, "Rosalie's Mupen GUI" },
             { Settings.SelectEmulatorOption.simple64, "simple64" },
             { Settings.SelectEmulatorOption.parallel, "Parallel Launcher" },
+            { Settings.SelectEmulatorOption.parallel903, "Parallel Launcher (9.0.3+)"},
             { Settings.SelectEmulatorOption.retroarch, "RetroArch" }
         };
 
@@ -1576,6 +1577,23 @@ namespace GSTHD
                             if (resultpar.Item1 != null)
                             {
                                 Form.SetAutotracker(resultpar.Item1, resultpar.Item2);
+                                MessageBox.Show("Connection to Parallel Launcher sucessful\nTracking will begin once you enter the main game mode (not the title screen or main menu)");
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("Could not connect to Parallel Launcher\nMake sure the game you want to track is loaded in the emulator before connecting.", "GSTHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                        break;
+                    case "parallel903":
+                        //var resultpar = AttachToEmulators.attachToParallel(Form);
+                        var resultpar903 = AttachToEmulators.attachToEmulator(Form, SelectEmulatorOption.parallel903);
+                        if (resultpar903 != null)
+                        {
+                            if (resultpar903.Item1 != null)
+                            {
+                                Form.SetAutotracker(resultpar903.Item1, resultpar903.Item2);
                                 MessageBox.Show("Connection to Parallel Launcher sucessful\nTracking will begin once you enter the main game mode (not the title screen or main menu)");
                             }
                         }

@@ -83,7 +83,8 @@ namespace GSTHD
             RMG,
             simple64,
             parallel,
-            retroarch
+            retroarch,
+            parallel903
         }
 
         [JsonConverter(typeof(StringEnumConverter))]
