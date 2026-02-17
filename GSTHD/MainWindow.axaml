@@ -2,8 +2,17 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:gsthd="clr-namespace:GSTHD"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="GSTHD.MainWindow"
-        Title="GSTHD">
-    Welcome to Avalonia!
+        Title="GSTHD"
+        Width="400"
+        Height="400"
+        Icon="/Resources/Gossip_Stone_64x64.ico"
+        Loaded="LoadAll">
+        <DockPanel>
+                <gsthd:GSTMenuBar Name="MenuBar" DockPanel.Dock="Top">
+                </gsthd:GSTMenuBar>
+                <Panel Name="Layout" Background="BlueViolet"></Panel>
+        </DockPanel>
 </Window>

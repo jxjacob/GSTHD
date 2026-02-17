@@ -5,6 +5,8 @@
         <Nullable>enable</Nullable>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <AssemblyVersion>0.9.0.0</AssemblyVersion>
+        <AssemblyTitle>GSTHD: DK64 Edition</AssemblyTitle>
     </PropertyGroup>
 
     <ItemGroup>
@@ -17,5 +19,7 @@
             <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+        <AvaloniaResource Include="Resources\**" />
     </ItemGroup>
 </Project>

@@ -8,3 +8,4 @@ GSTHD/.vs/GSTHD.csproj.dtbcache.json
 
 /packages/
 *.pfx
+*.user
