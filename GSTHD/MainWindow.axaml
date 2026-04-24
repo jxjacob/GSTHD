@@ -13,6 +13,6 @@
         <DockPanel>
                 <gsthd:GSTMenuBar Name="MenuBar" DockPanel.Dock="Top">
                 </gsthd:GSTMenuBar>
-                <Panel Name="Layout" Background="BlueViolet"></Panel>
+                <Canvas Name="Layout" DockPanel.Dock="Bottom" VerticalAlignment="Top" HorizontalAlignment="Left"></Canvas>
         </DockPanel>
 </Window>

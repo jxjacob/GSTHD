@@ -2,13 +2,12 @@
 using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using Avalonia.Input;
 
 namespace GSTHD
 {
@@ -17,9 +16,11 @@ namespace GSTHD
         public string LayoutName { get; set; }
         public Dictionary<string, string> Changes { get; set; } = new Dictionary<string, string>();
     }
-    public class Settings
+    public partial class Settings
     {
         private const string SettingsFileName = @"settings.json";
+
+        public readonly DataFormat<string> GSTCustomFormat = DataFormat.CreateStringApplicationFormat("gsthd-dragitem");
 
         [JsonConverter(typeof(StringEnumConverter))]
         public enum SongMarkerBehaviourOption
@@ -174,24 +175,20 @@ namespace GSTHD
         public KnownColor SpoilerEmptyColour { get; set; } = KnownColor.Teal;
         public KnownColor SpoilerKindaEmptyColour { get; set; } = KnownColor.GreenYellow;
         public List<AltSettings> AlternateSettings { get; set; } = [];
-
-        // TODO: uncomment this once I import Medalions
-        // public MedallionLabel DefaultDungeonNames { get; set; } = new MedallionLabel()
-        // {
-        //     TextCollection = new string[] { "????", "FREE", "DEKU", "DC", "JABU", "FOREST", "FIRE", "WATER", "SHADOW", "SPIRIT" },
-        //     DefaultValue = 0,
-        //     Wraparound = true,
-        //     FontName = "Consolas",
-        //     FontSize = 8,
-        //     FontStyle = FontStyle.Bold,
-        // };
+        
+        public MedallionLabel DefaultDungeonNames { get; set; } = new MedallionLabel()
+        {
+            TextCollection = ["????", "FREE", "DEKU", "DC", "JABU", "FOREST", "FIRE", "WATER", "SHADOW", "SPIRIT"],
+            DefaultValue = 0,
+            Wraparound = true,
+            FontName = "Consolas",
+            FontSize = 8,
+            FontStyle = FontStyle.Bold,
+        };
 
         public static SongMarkerBehaviourOption GetSongMarkerBehaviour(string value)
         {
-            if (string.IsNullOrEmpty(value))
-                return DefaultSongMarkerBehaviour;
-
-            return (SongMarkerBehaviourOption) Enum.Parse(typeof(SongMarkerBehaviourOption), value);
+            return string.IsNullOrEmpty(value) ? DefaultSongMarkerBehaviour : Enum.Parse<SongMarkerBehaviourOption>(value);
         }
 
         public static Settings Read()
@@ -208,8 +205,41 @@ namespace GSTHD
 
         public string GetLayoutName()
         {
-            string[] parts = ActiveLayout.Split('\\');
+            string[] parts;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                parts = ActiveLayout.Split('/');
+            }
+            else
+            {
+                parts = ActiveLayout.Split('\\');
+            }
             return parts[^1][..^5];
+        }
+
+        public void PathReformat()
+        {
+            // convert filepaths for windows to linux and vice versa
+            ActiveLayout = SinglePathReformat(ActiveLayout);
+            ActiveLayoutBroadcastFile = SinglePathReformat(ActiveLayoutBroadcastFile);
+            ActivePlaces = SinglePathReformat(ActivePlaces);
+            ActiveSometimesHints = SinglePathReformat(ActiveSometimesHints);
+            foreach (var item in AlternateSettings)
+            {
+                item.LayoutName = SinglePathReformat(item.LayoutName);
+            }
+        }
+
+        public static string SinglePathReformat(string input)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return WindowsPathRegex().Replace(input, "/");
+            }
+            else
+            {
+                return LinuxPathRegex().Replace(input, "\\");
+            }
         }
 
         public void AddAltSetting(string groupname, string settingname, bool check)
@@ -218,6 +248,7 @@ namespace GSTHD
             {
                 // there isnt a setting for this layout yet, go add it
                 AlternateSettings.Add(new AltSettings { LayoutName = ActiveLayout });
+                
             }
             var words = Regex.Split((groupname != null) ? groupname : "", @"_\:_").ToList();
             if (words.Count == 1) words.Add("");
@@ -266,10 +297,22 @@ namespace GSTHD
             Write();
         }
 
+        public string GetLastUsed(string groupname)
+        {
+            AltSettings thealt = AlternateSettings.First(x => x.LayoutName == ActiveLayout);
+            return thealt.Changes.TryGetValue(groupname, out string? value) ? value : string.Empty;
+        }
+
         public void Write()
         {
             var str = JsonConvert.SerializeObject(this, Formatting.Indented);
             File.WriteAllText(SettingsFileName, str);
         }
+
+        [GeneratedRegex(@"\\")]
+        private static partial Regex WindowsPathRegex();
+        
+        [GeneratedRegex(@"/")]
+        private static partial Regex LinuxPathRegex();
     }
 }
